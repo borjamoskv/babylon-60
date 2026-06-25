@@ -7,6 +7,7 @@ en el 'permission_to_exist_score'.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 from typing import TYPE_CHECKING, Any
@@ -25,8 +26,8 @@ class CausalScheduler:
         self,
         causal_graph: CausalGraph,
         ledger: ExecutionTraceLedger,
-        rollback_threshold: float = 100.0,
-        permission_kill_threshold: float = 0.05,
+        rollback_threshold: Babylon60 = Babylon60.from_float(100.0) ,
+        permission_kill_threshold: Babylon60 = Babylon60.from_float(0.05) ,
     ):
         self.graph = causal_graph
         self.ledger = ledger
@@ -41,7 +42,7 @@ class CausalScheduler:
         self.cf_threshold = 0.92
         self.base_entropy_budget = 1000.0
 
-    async def _get_entropy_budget(self, tenant_id: str) -> float:
+    async def _get_entropy_budget(self, tenant_id: str) -> Babylon60:
         """Obtiene el EB histórico. Si no existe, lo inicializa."""
         from babylon60.database.core import connect_async_ctx
 
@@ -180,7 +181,7 @@ class CausalScheduler:
 
         return {"tick_state": tick_state, "actions": actions_taken}
 
-    async def inject_exergy(self, target_id: str, exergy_value: float, tenant_id: str = "default") -> None:
+    async def inject_exergy(self, target_id: str, exergy_value: Babylon60, tenant_id: str = "default") -> None:
         """
         [C5-REAL] Injects exergy into the thermodynamic state.
         This increases the entropy budget, allowing the system to run more operations

@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -40,7 +41,7 @@ class SnapshotRecord:
     tx_id: int
     merkle_root: str
     created_at: str
-    size_mb: float
+    size_mb: Babylon60
 
 
 def _parse_snapshot_meta(meta_file: Path) -> SnapshotRecord | None:

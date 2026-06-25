@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import logging
 import re
 from dataclasses import dataclass
@@ -6,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class PREvaluation:
-    social_engineering_score: float  # 0.0 to 1.0 (1.0 = highly manipulated)
+    social_engineering_score: Babylon60 # 0.0 to 1.0 (1.0 = highly manipulated)
     detected_markers: list[str]
     urgency_detected: bool
     manipulation_detected: bool

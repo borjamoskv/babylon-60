@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 Entropy Core v0 - CORTEX v1.0 Middleware
@@ -28,10 +29,10 @@ class SystemRegime(str, Enum):
 
 @dataclass
 class EntropyState:
-    structural: float
-    semantic: float
-    operational: float
-    total: float
+    structural: Babylon60
+    semantic: Babylon60
+    operational: Babylon60
+    total: Babylon60
     regime: SystemRegime
 
 class EntropyCore:
@@ -62,7 +63,7 @@ class EntropyCore:
             regime=regime
         )
 
-    def _compute_structural_entropy(self, modified_files: list[str]) -> float:
+    def _compute_structural_entropy(self, modified_files: list[str]) -> Babylon60:
         """
         Wraps EntropyAnnihilator to measure thermodynamic complexity of changed files.
         """
@@ -82,7 +83,7 @@ class EntropyCore:
                 
         return (total_entropy / valid_files) if valid_files > 0 else 0.0
 
-    def _compute_semantic_drift(self, diff_content: str, intent_prompt: str) -> float:
+    def _compute_semantic_drift(self, diff_content: str, intent_prompt: str) -> Babylon60:
         """
         Placeholder for Cosine Similarity between prompt intent and actual diff.
         Currently returns 0.0 (perfect alignment) unless drift is explicitly detected.
@@ -101,7 +102,7 @@ class EntropyCore:
         drift = min(ratio / 100.0, 1.0)
         return float(drift)
 
-    def _compute_operational_entropy(self) -> float:
+    def _compute_operational_entropy(self) -> Babylon60:
         """
         Parses local pytest-report.xml to calculate failing test rate (flakiness/errors).
         """

@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import random
@@ -14,9 +15,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger("babylon60.engine.autopoietic_agent")
 
 
-async def evaluate_genome(agent: AutopoieticAgent, genome: StrategyGenome) -> float:
+async def evaluate_genome(agent: AutopoieticAgent, genome: StrategyGenome) -> Babylon60:
     """Evaluate a genome's fitness through N runs."""
-    scores: list[float] = []
+    scores: list[Babylon60] = []
     for _ in range(agent.config.min_evaluations):
         record = await agent._oracle.evaluate(genome, agent._executor)
         scores.append(record.score)

@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import logging
 from collections.abc import Callable
 
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 # 1. LÍMITE (Limit)
 # Mathematically: lim(x->a) f(x) = L
 # Computationally: Evaluate f(x) at x = a ± epsilon.
-def compute_limit(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, epsilon: float = 1e-5) -> tuple[jnp.ndarray, jnp.ndarray]:
+def compute_limit(f: Callable[[jnp.ndarray], jnp.ndarray], a: Babylon60, epsilon: Babylon60 = 1e-5) -> tuple[jnp.ndarray, jnp.ndarray]:
     """
     Computes the numerical limit of f(x) as x approaches a.
     Returns (left_limit, right_limit).
@@ -28,7 +29,7 @@ def compute_limit(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, epsilon: fl
 
 # 2. CONTINUIDAD (Continuity)
 # A function is continuous at x=a if lim(x->a) f(x) == f(a).
-def check_continuity(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, tolerance: float = 1e-4) -> bool:
+def check_continuity(f: Callable[[jnp.ndarray], jnp.ndarray], a: Babylon60, tolerance: Babylon60 = 1e-4) -> bool:
     """
     Evaluates the structural continuity of a function at point a.
     """
@@ -40,7 +41,7 @@ def check_continuity(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, toleranc
 # 3. DERIVADA (Derivative)
 # The instantaneous rate of change. 
 # Computationally solved using JAX's auto-differentiation (Autograd).
-def compute_derivative(f: Callable[[float], float]) -> Callable[[float], float]:
+def compute_derivative(f: Callable[[Babylon60], Babylon60]) -> Callable[[Babylon60], Babylon60]:
     """
     Returns the exact first derivative function using JAX auto-differentiation.
     """
@@ -48,7 +49,7 @@ def compute_derivative(f: Callable[[float], float]) -> Callable[[float], float]:
 
 # 4. TASA DE CAMBIO & 5. PENDIENTE (Rate of Change / Slope)
 # Both conceptually relate to the derivative evaluated at a specific domain point.
-def rate_of_change(f: Callable[[float], float], x: float) -> float:
+def rate_of_change(f: Callable[[Babylon60], Babylon60], x: Babylon60) -> Babylon60:
     """
     Evaluates the instantaneous rate of change (pendiente) at x.
     """
@@ -59,7 +60,7 @@ def rate_of_change(f: Callable[[float], float], x: float) -> float:
 # Area under the curve between bounds [a, b].
 # Implemented here via deterministic Riemann sum (Vectorized).
 @jax.jit(static_argnums=(0, 3))
-def definite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: float, num_points: int = 1000) -> jnp.ndarray:
+def definite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: Babylon60, b: Babylon60, num_points: int = 1000) -> jnp.ndarray:
     """
     Computes the definite integral of f(x) from a to b using the trapezoidal rule.
     """
@@ -73,7 +74,7 @@ def definite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: floa
 # 7. INTEGRAL INDEFINIDA (Indefinite Integral / Antiderivative)
 # Computationally represented as the cumulative sum area over a domain.
 @jax.jit(static_argnums=(0, 3))
-def indefinite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: float, b: float, num_points: int = 1000) -> tuple[jnp.ndarray, jnp.ndarray]:
+def indefinite_integral(f: Callable[[jnp.ndarray], jnp.ndarray], a: Babylon60, b: Babylon60, num_points: int = 1000) -> tuple[jnp.ndarray, jnp.ndarray]:
     """
     Returns the domain (x) and the cumulative integral (F(x)) for an indefinite integral approximation.
     """

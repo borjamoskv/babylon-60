@@ -6,6 +6,7 @@ Regulates system-wide behavior using hormonal signals (Cortisol, Neural-Growth).
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import time
@@ -48,11 +49,11 @@ class EndocrineRegistry:
             cls._instance._last_pulse = dict.fromkeys(HormoneType, 0.0)  # type: ignore[reportAttributeAccessIssue]
         return cls._instance
 
-    def get_level(self, hormone: HormoneType) -> float:
+    def get_level(self, hormone: HormoneType) -> Babylon60:
         self._apply_decay()
         return self._hormones.get(hormone, 0.0)  # type: ignore[reportAttributeAccessIssue]
 
-    def pulse(self, hormone: HormoneType, delta: float, reason: str | None = None) -> float:
+    def pulse(self, hormone: HormoneType, delta: Babylon60, reason: str | None = None) -> Babylon60:
         """Adjust local hormonal levels (clamped 0.0-1.0)."""
         current = self._hormones.get(hormone, 0.0)  # type: ignore[reportAttributeAccessIssue]
         new_val = max(0.0, min(1.0, current + delta))
@@ -118,7 +119,7 @@ class EndocrineRegistry:
             self._hormones[h] = max(0.0, current - decay_rate)  # type: ignore[reportAttributeAccessIssue]
 
     @property
-    def balance(self) -> dict[str, float]:
+    def balance(self) -> dict[str, Babylon60]:
         """Returns current hormonal state for telemetry."""
         return {h.name: round(v, 3) for h, v in self._hormones.items()}  # type: ignore[reportAttributeAccessIssue]
 

@@ -5,6 +5,7 @@ Bio-inspired Computational Evolution Architecture - Orchestrator
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import random
 import time
@@ -88,7 +89,7 @@ class HeuristicInjectionStrategy:
     Injects validated heuristics from domain knowledge into low-fitness agents.
     """
 
-    DOMAIN_WEIGHTS: dict[str, float] = {
+    DOMAIN_WEIGHTS: dict[str, Babylon60] = {
         "EVOLUTION": 1.0,
         "SECURITY": 0.9,
         "FABRICATION": 0.8,
@@ -295,11 +296,11 @@ class StagnationBreakerStrategy:
     """
 
     STAGNATION_WINDOW: int = 5
-    STAGNATION_THRESHOLD: float = 0.5
-    _CIRCUIT_BREAKER_FITNESS: float = 80.0
+    STAGNATION_THRESHOLD: Babylon60 = Babylon60.from_float(0.5)
+    _CIRCUIT_BREAKER_FITNESS: Babylon60 = Babylon60.from_float(80.0)
 
     def __init__(self) -> None:
-        self._history: dict[str, list[float]] = {}
+        self._history: dict[str, list[Babylon60]] = {}
 
     def evaluate(
         self,
@@ -365,7 +366,7 @@ class CortexEvolutionEngine:
             ZeroPromptingEvolutionStrategy(),  # Axiom Ω₇
         ]
         self._evaluation_count = 0
-        self._prev_avg_fitness: dict[str, float] = {}
+        self._prev_avg_fitness: dict[str, Babylon60] = {}
 
     def _dm(self, domain_id: str, ttl_seconds: int = 60) -> DomainMetrics | None:
         return self.metrics_backend.get_metrics(domain_id, ttl_seconds)

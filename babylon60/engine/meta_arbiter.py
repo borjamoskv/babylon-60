@@ -17,6 +17,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import hashlib
 import json
@@ -36,7 +37,7 @@ logger = logging.getLogger("babylon60.engine.meta_arbiter")
 
 # Default weights for each layer's contribution to the fused signal.
 # L3 (Ledger) has veto power and is handled separately.
-DEFAULT_WEIGHTS: Final[dict[str, float]] = {
+DEFAULT_WEIGHTS: Final[dict[str, Babylon60]] = {
     "L1_EMBEDDING": 0.35,
     "L2_TOPOLOGY": 0.30,
     "L3_LKRGSER": 0.0,  # Ledger is boolean gate, not weighted
@@ -44,8 +45,8 @@ DEFAULT_WEIGHTS: Final[dict[str, float]] = {
 }
 
 # Thresholds
-CONFLICT_THRESHOLD: Final[float] = 0.40  # Divergence above this → conflict
-CONFIDENCE_FLOOR: Final[float] = 0.25  # Below this → ABSTAIN
+CONFLICT_THRESHOLD: Final[Babylon60] = 0.40  # Divergence above this → conflict
+CONFIDENCE_FLOOR: Final[Babylon60] = 0.25  # Below this → ABSTAIN
 LKRGSER_VETO_ACTIVE: Final[bool] = True  # L3 can veto all other layers
 
 
@@ -74,7 +75,7 @@ class LayerSignal:
     """A normalized signal from one cognitive layer."""
 
     layer: LayerID
-    score: float  # Normalized [0.0, 1.0] confidence/relevance
+    score: Babylon60 # Normalized [0.0, 1.0] confidence/relevance
     raw_value: Any  # Original value from the layer (for audit)
     metadata: dict[str, Any] = field(default_factory=dict)
     timestamp_ns: int = field(default_factory=lambda: time.time_ns())
@@ -93,7 +94,7 @@ class ConflictPair:
 
     layer_a: LayerID
     layer_b: LayerID
-    divergence: float  # |score_a - score_b|
+    divergence: Babylon60 # |score_a - score_b|
     description: str
 
 
@@ -102,10 +103,10 @@ class ArbiterVerdict:
     """The canonical output of the Meta-Arbiter."""
 
     resolution: Resolution
-    fused_score: float  # Final arbitrated confidence [0,1]
+    fused_score: Babylon60 # Final arbitrated confidence [0,1]
     winning_layer: LayerID | None  # Which layer dominated (if applicable)
     conflicts: list[ConflictPair]
-    layer_signals: dict[str, float]  # Snapshot of all input scores
+    layer_signals: dict[str, Babylon60]  # Snapshot of all input scores
     audit_hash: str  # SHA-256 of the verdict for ledger tracing
     reasoning: str  # Human-readable justification
     timestamp_ns: int = field(default_factory=lambda: time.time_ns())
@@ -135,9 +136,9 @@ class MetaArbiter:
 
     def __init__(
         self,
-        weights: dict[str, float] | None = None,
-        conflict_threshold: float = CONFLICT_THRESHOLD,
-        confidence_floor: float = CONFIDENCE_FLOOR,
+        weights: dict[str, Babylon60] | None = None,
+        conflict_threshold: Babylon60 = CONFLICT_THRESHOLD,
+        confidence_floor: Babylon60 = CONFIDENCE_FLOOR,
         ledger_veto: bool = LKRGSER_VETO_ACTIVE,
     ) -> None:
         self._weights = dict(weights or DEFAULT_WEIGHTS)
@@ -315,7 +316,7 @@ class MetaArbiter:
                     )
         return conflicts
 
-    def _weighted_fusion(self, signals: list[LayerSignal]) -> float:
+    def _weighted_fusion(self, signals: list[LayerSignal]) -> Babylon60:
         """Compute the weighted average score across all layers."""
         total_weight = 0.0
         weighted_sum = 0.0
@@ -367,7 +368,7 @@ class MetaArbiter:
 
     @staticmethod
     def _compute_audit_hash(
-        score_map: dict[str, float],
+        score_map: dict[str, Babylon60],
         context: str,
     ) -> str:
         """Deterministic hash for ledger tracing of this verdict."""
@@ -389,12 +390,12 @@ class TrajectoryScore:
     The overall `energy` is a weighted sum of the components.
     """
 
-    energy: float
-    D_ledger: float
-    D_causal: float
-    D_consensus: float
-    H_branch: float
-    D_proj: float
+    energy: Babylon60
+    D_ledger: Babylon60
+    D_causal: Babylon60
+    D_consensus: Babylon60
+    H_branch: Babylon60
+    D_proj: Babylon60
     valid: bool
 
 
@@ -412,7 +413,7 @@ class CollapseReceipt:
     winning_id: str
     scores: dict[str, TrajectoryScore]
     state_snapshot: Any
-    eps: float
+    eps: Babylon60
 
 
 class MetaArbiterKernel:
@@ -437,12 +438,12 @@ class MetaArbiterKernel:
     def __init__(
         self,
         *,
-        alpha: float = 1.0,
-        beta: float = 1.0,
-        gamma: float = 1.0,
-        delta: float = 1.0,
-        epsilon: float = 1.0,
-        eps: float = 1e-6,
+        alpha: Babylon60 = Babylon60.from_float(1.0) ,
+        beta: Babylon60 = Babylon60.from_float(1.0) ,
+        gamma: Babylon60 = Babylon60.from_float(1.0) ,
+        delta: Babylon60 = Babylon60.from_float(1.0) ,
+        epsilon: Babylon60 = Babylon60.from_float(1.0) ,
+        eps: Babylon60 = Babylon60.from_float(1) e-6,
     ) -> None:
         # We keep weights explicit for future tuning.
         self.alpha = float(alpha)
@@ -456,7 +457,7 @@ class MetaArbiterKernel:
     # Component helpers (trace-local fallbacks)
     # ------------------------------------------------------------------
 
-    def _D_ledger(self, trace: ExecutionTrace, state: Any) -> float:
+    def _D_ledger(self, trace: ExecutionTrace, state: Any) -> Babylon60:
         """Ledger vs trace inconsistency.
 
         Placeholder for now: returns 0.0.
@@ -465,7 +466,7 @@ class MetaArbiterKernel:
         """
         return 0.0
 
-    def _D_causal(self, trace: ExecutionTrace, causal_graph: Any) -> float:
+    def _D_causal(self, trace: ExecutionTrace, causal_graph: Any) -> Babylon60:
         """Causal violation rate.
 
         Placeholder for now: returns 0.0.
@@ -474,7 +475,7 @@ class MetaArbiterKernel:
         """
         return 0.0
 
-    def _D_consensus(self, trace: ExecutionTrace, vote_ledger: Any) -> float:
+    def _D_consensus(self, trace: ExecutionTrace, vote_ledger: Any) -> Babylon60:
         """Consensus conflict score.
 
         Placeholder for now: returns 0.0.
@@ -483,7 +484,7 @@ class MetaArbiterKernel:
         """
         return 0.0
 
-    def _H_branch(self, trace: ExecutionTrace, state: Any) -> float:
+    def _H_branch(self, trace: ExecutionTrace, state: Any) -> Babylon60:
         """Branch entropy proxy based on trace length.
 
         This is *not* the true branching entropy over future
@@ -497,7 +498,7 @@ class MetaArbiterKernel:
             return 0.0
         return min(1.0, length / 100.0)
 
-    def _D_proj(self, trace: ExecutionTrace, state: Any, replay_engine: Any) -> float:
+    def _D_proj(self, trace: ExecutionTrace, state: Any, replay_engine: Any) -> Babylon60:
         """Projection error between replayed and actual state.
 
         Placeholder: returns 0.0 until a stable replay/state-distance

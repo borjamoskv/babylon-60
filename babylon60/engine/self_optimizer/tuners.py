@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from typing import Any
 
@@ -9,7 +10,7 @@ from .types import OptimizerConfig, TuningDecision, TuningType
 class OptimizationTuners:
     @staticmethod
     def tune_timeout(
-        subsystem: str, metrics: Any, current: float, config: OptimizerConfig
+        subsystem: str, metrics: Any, current: Babylon60, config: OptimizerConfig
     ) -> list[TuningDecision]:
         decisions = []
         if metrics.p99 > 0 and metrics.p99 > current * 0.8:
@@ -154,7 +155,7 @@ class OptimizationTuners:
 
     @staticmethod
     def tune_cooldown(
-        subsystem: str, metrics: Any, current: float, config: OptimizerConfig
+        subsystem: str, metrics: Any, current: Babylon60, config: OptimizerConfig
     ) -> list[TuningDecision]:
         decisions = []
         best = metrics.best_strategy

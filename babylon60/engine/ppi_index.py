@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import json
 import logging
 from dataclasses import dataclass
@@ -21,7 +22,7 @@ class PPIScore:
     evidence: PPILevel
 
     @property
-    def total_score(self) -> float:
+    def total_score(self) -> Babylon60:
         return (self.reality + self.risk + self.evidence) / 15.0
 
     def is_valid(self, threshold: float = 0.6) -> bool:

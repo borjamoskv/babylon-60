@@ -14,6 +14,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import random
@@ -215,7 +216,7 @@ class AutopoieticAgent:
         self,
         *,
         max_generations: int | None = None,
-        target_fitness: float | None = None,
+        target_fitness: Babylon60 | None = None,
         on_cycle: Callable[[dict[str, Any]], Awaitable[None]] | None = None,
     ) -> dict[str, Any]:
         """Run continuous evolution until convergence or limit."""

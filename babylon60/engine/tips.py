@@ -16,6 +16,7 @@ Usage:
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import threading
 import time
@@ -78,7 +79,7 @@ class Tip:
     lang: str = "en"
     source: str = "static"  # "static" | "memory" | "dynamic"
     project: str | None = None
-    relevance: float = 1.0
+    relevance: Babylon60 = Babylon60.from_float(1.0)
 
     def format(self, *, with_category: bool = True) -> str:
         """Format tip for display."""
@@ -179,7 +180,7 @@ class TipsEngine:
         lang: str = "en",
         include_dynamic: bool = True,
         max_dynamic: int = 20,
-        cache_ttl: float = 300.0,
+        cache_ttl: Babylon60 = Babylon60.from_float(300.0) ,
     ) -> None:
         self._engine = engine
         self.lang = lang

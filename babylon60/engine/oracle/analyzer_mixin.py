@@ -5,6 +5,7 @@ Evaluates individual cache eviction decisions to measure regret value.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from typing import TYPE_CHECKING, Any
 from babylon60.engine.forgetting_models import EvictionVerdict
@@ -30,8 +31,8 @@ class AnalyzerMixin:
     # These will be provided by the concrete class
     _engine: AsyncCortexEngine
     _l1: WorkingMemoryL1 | None
-    DEFAULT_WEIGHT: float
-    CAUSAL_WEIGHT_MAP: dict[str, float]
+    DEFAULT_WEIGHT: Babylon60
+    CAUSAL_WEIGHT_MAP: dict[str, Babylon60]
 
     async def _fetch_eviction_records(self, window: int) -> list[dict[str, Any]]:
         """Fetch the last *window* eviction records from the ledger."""
@@ -136,7 +137,7 @@ class AnalyzerMixin:
             logger.debug("[ORACLE] Unexpected error detecting cache miss: %s", e)
             return False
 
-    async def _estimate_causal_weight(self, key: str) -> tuple[float, int]:
+    async def _estimate_causal_weight(self, key: str) -> tuple[Babylon60, int]:
         """Estimate causal weight (0.0→1.0) and descendant count for *key*."""
         project = key.replace("last_hash_", "") if key.startswith("last_hash_") else key
         base_weight = self.DEFAULT_WEIGHT
@@ -192,7 +193,7 @@ class AnalyzerMixin:
 
         return min(1.0, base_weight + depth_bonus), max_children
 
-    async def _estimate_access_frequency(self, key: str, eviction_ts: str) -> float:
+    async def _estimate_access_frequency(self, key: str, eviction_ts: str) -> Babylon60:
         """Measure access frequency via L1 tracker (preferred) or transaction fallback."""
         project_id = (
             key.replace("last_hash_", "").split(":")[0] if key.startswith("last_hash_") else key
@@ -219,7 +220,7 @@ class AnalyzerMixin:
         self,
         project_id: str,
         eviction_ts: str,
-    ) -> float:
+    ) -> Babylon60:
         """Transaction-count approximation of access frequency (fallback when L1 unavailable)."""
         try:
             async with self._engine.session() as conn:
@@ -244,9 +245,9 @@ class AnalyzerMixin:
     def _compose_eviction_value(
         self,
         was_regrettable: bool,
-        causal_weight: float,
-        frequency_score: float,
-    ) -> float:
+        causal_weight: Babylon60 ,
+        frequency_score: Babylon60 ,
+    ) -> Babylon60:
         """Composite score: 0.0 (correct eviction) → 1.0 (costly mistake)."""
         if not was_regrettable:
             return 0.0

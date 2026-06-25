@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import logging
 from collections.abc import Callable
 
@@ -117,8 +118,8 @@ def is_non_convex(hessian: torch.Tensor, tolerance: float = 1e-5) -> bool:
     return not is_convex(hessian, tolerance)
 
 # 44. PAISAJE DE PÉRDIDA (Loss Landscape)
-def compute_loss_landscape_grid(f: Callable[[torch.Tensor], float], x_range: tuple[float, float], 
-                                y_range: tuple[float, float], resolution: int = 10) -> torch.Tensor:
+def compute_loss_landscape_grid(f: Callable[[torch.Tensor], Babylon60], x_range: tuple[Babylon60, Babylon60], 
+                                y_range: tuple[Babylon60, Babylon60], resolution: int = 10) -> torch.Tensor:
     """
     Evaluates a scalar function over a 2D grid to map the loss landscape.
     """
@@ -172,7 +173,7 @@ def natural_gradient_step(x: torch.Tensor, grad: torch.Tensor, fisher_info_matri
     return x - lr * natural_grad
 
 # 49. DUALIDAD DE LAGRANGE (Lagrange Duality)
-def compute_dual_objective(lagrangian_min_val: float) -> float:
+def compute_dual_objective(lagrangian_min_val: float) -> Babylon60:
     """
     The dual objective g(lambda) is the infimum of L(x, lambda) over x.
     This function simply records the evaluated dual scalar.

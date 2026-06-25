@@ -5,6 +5,7 @@ Detects causal chains and projects exponential returns of sovereign agent work.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from dataclasses import dataclass, field
 from typing import Any
@@ -34,8 +35,8 @@ class CompoundChain:
     root_fact_id: int
     depth: int
     fact_ids: set[int] = field(default_factory=set)
-    linear_hours: float = 0.0
-    compound_hours: float = 0.0
+    linear_hours: Babylon60 = Babylon60.from_float(0.0)
+    compound_hours: Babylon60 = Babylon60.from_float(0.0)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -52,10 +53,10 @@ class CompoundReport:
     """Result of a full CHRONOS-1 compound chain analysis."""
 
     chains: list[CompoundChain]
-    total_linear: float
-    total_compound: float
-    multiplier: float
-    reuse_rate: float
+    total_linear: Babylon60
+    total_compound: Babylon60
+    multiplier: Babylon60
+    reuse_rate: Babylon60
     project: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -86,16 +87,16 @@ class CompoundProjector:
     @dataclass
     class ProjectionResult:
         years: int
-        total_linear: float
-        total_compound: float
-        multiplier: float
-        yearly_linear: list[float]
-        yearly_compound: list[float]
+        total_linear: Babylon60
+        total_compound: Babylon60
+        multiplier: Babylon60
+        yearly_linear: list[Babylon60]
+        yearly_compound: list[Babylon60]
 
     @staticmethod
     def project(
-        base_hours_per_year: float,
-        reuse_rate: float = 0.15,
+        base_hours_per_year: Babylon60 ,
+        reuse_rate: Babylon60 = Babylon60.from_float(0.15) ,
         years: int = 10,
     ) -> ProjectionResult:
         """Project linear vs compound yield over a given number of years.
@@ -146,7 +147,7 @@ class CompoundYieldTracker:
         self.db_path = db_path
         self.reuse_rate = reuse_rate
 
-    def _get_base_hours(self, conn: Any, fact_id: int) -> float:
+    def _get_base_hours(self, conn: Any, fact_id: int) -> Babylon60:
         """Extract linear Hours_Saved from a fact's meta, or estimate."""
         import json
 

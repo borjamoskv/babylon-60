@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from babylon60.engine.endocrine import ENDOCRINE, HormoneType
+from babylon60.math.babylon import Babylon60
 from babylon60.engine.exergy_optimizer import ExergyOptimizer
 from babylon60.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 
@@ -40,7 +41,7 @@ class ExergyMaximizerAgent:
         # Cálculo O(1) de la Exergía
         exergy_score = ExergyOptimizer.calculate_node_exergy(
             telemetry,
-            latency_ms=telemetry.latency_ms,
+            latency_ms=Babylon60.from_float(telemetry.latency_ms),
             max_capacity=telemetry.max_capacity,  # pyright: ignore[reportArgumentType]
         )
 

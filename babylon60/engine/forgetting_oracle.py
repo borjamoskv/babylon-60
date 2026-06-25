@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import asyncio
 import logging
@@ -204,7 +205,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             evidence_tip="NO_EVICTIONS",
         )
 
-    def calculate_semantic_gravity(self, fact_id: int) -> float:
+    def calculate_semantic_gravity(self, fact_id: int) -> Babylon60:
         """Calculate thermodynamic decay based on Ebbinghaus curve (Masa-Energía)."""
         try:
             fact = getattr(self._engine, "get_fact_sync", lambda x: None)(fact_id)

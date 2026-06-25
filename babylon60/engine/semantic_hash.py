@@ -17,6 +17,7 @@ Edge-compatible: Falls back to CPU. Fingerprint comparison is O(D) where D=384.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import hashlib
 import logging
@@ -51,7 +52,7 @@ class SemanticFingerprint:
     def __init__(
         self,
         hash: str,
-        embedding: list[float],
+        embedding: list[Babylon60],
         dimension: int,
         text_preview: str = "",
     ) -> None:
@@ -102,12 +103,12 @@ class SemanticFingerprint:
         return cls(hash=hash_value, embedding=embedding, dimension=dimension)
 
 
-def _quantize_embedding(embedding: list[float]) -> list[float]:
+def _quantize_embedding(embedding: list[Babylon60]) -> list[Babylon60]:
     """Quantize embedding to fixed decimal precision for deterministic hashing."""
     return [round(v, _QUANTIZE_DECIMALS) for v in embedding]
 
 
-def _hash_quantized(quantized: list[float]) -> str:
+def _hash_quantized(quantized: list[Babylon60]) -> str:
     """SHA-256 hash of a quantized embedding vector.
 
     Uses a compact binary representation (struct pack) instead of JSON
@@ -157,7 +158,7 @@ def semantic_fingerprint(
     )
 
 
-def cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
+def cosine_similarity(vec_a: list[Babylon60], vec_b: list[Babylon60]) -> Babylon60:
     """Compute cosine similarity between two vectors.
 
     O(D) where D is the embedding dimension (384).
@@ -179,7 +180,7 @@ def cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
     return dot / (norm_a * norm_b)
 
 
-def semantic_distance(fp_a: SemanticFingerprint, fp_b: SemanticFingerprint) -> float:
+def semantic_distance(fp_a: SemanticFingerprint, fp_b: SemanticFingerprint) -> Babylon60:
     """Compute semantic distance between two fingerprints.
 
     Returns 1.0 - cosine_similarity. Range [0.0, 2.0].
@@ -191,7 +192,7 @@ def semantic_distance(fp_a: SemanticFingerprint, fp_b: SemanticFingerprint) -> f
 def is_semantically_equivalent(
     fp_a: SemanticFingerprint,
     fp_b: SemanticFingerprint,
-    threshold: float = 0.98,
+    threshold: Babylon60 = Babylon60.from_float(0.98) ,
 ) -> bool:
     """Check if two fingerprints are semantically equivalent.
 

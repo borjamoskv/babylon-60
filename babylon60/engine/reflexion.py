@@ -18,6 +18,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import time
@@ -73,7 +74,7 @@ class Reflection:
     tree_targets: list[str]
     diagnosis: str  # structured analysis of root cause
     proposed_fix: str  # what the rewrite should change
-    latency_ms: float
+    latency_ms: Babylon60
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -97,7 +98,7 @@ class ReflexionOutcome:
     result: Any = None
     iterations_used: int = 0
     reflections: list[Reflection] = field(default_factory=list)
-    total_latency_ms: float = 0.0
+    total_latency_ms: Babylon60 = Babylon60.from_float(0.0)
     final_tree: AgentOp | None = None
 
     @property
@@ -110,10 +111,10 @@ class ReflexionConfig:
     """Guardrails for the reflexion loop."""
 
     max_iterations: int = 3
-    timeout_ms: float = 30_000.0  # 30s total budget
+    timeout_ms: Babylon60 = Babylon60.from_float(30) _000.0  # 30s total budget
     enable_tree_rewrite: bool = True
     persist_reflections: bool = True
-    backoff_factor: float = 1.5  # exponential backoff between retries
+    backoff_factor: Babylon60 = Babylon60.from_float(1.5) # exponential backoff between retries
 
 
 # ─── Diagnosis Strategies ─────────────────────────────────────────

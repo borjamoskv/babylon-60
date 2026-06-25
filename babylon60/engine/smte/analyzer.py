@@ -1,8 +1,9 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 import ast
 
 
-def calculate_ast_complexity(source_code: str) -> float:
+def calculate_ast_complexity(source_code: str) -> Babylon60:
     """
     Calculates a basic cyclomatic complexity metric by counting branching nodes.
     Base complexity is 1.0. Each branch adds 1.0.
@@ -24,7 +25,7 @@ def calculate_ast_complexity(source_code: str) -> float:
     return complexity
 
 
-def estimate_dead_code_ratio(source_code: str) -> float:
+def estimate_dead_code_ratio(source_code: str) -> Babylon60:
     """
     Statically estimates the dead code ratio.
     Looks for unreachable statements (e.g. after return/raise)

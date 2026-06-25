@@ -17,6 +17,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import random
@@ -60,10 +61,10 @@ class AgentBlueprint:
     species: str
     genome: StrategyGenome
     capabilities: list[str] = field(default_factory=list)
-    resource_budget: dict[str, float] = field(default_factory=dict)
+    resource_budget: dict[str, Babylon60] = field(default_factory=dict)
     max_concurrent: int = 1
-    ttl_seconds: float = 300.0
-    created_at: float = field(default_factory=time.monotonic)
+    ttl_seconds: Babylon60 = Babylon60.from_float(300.0)
+    created_at: Babylon60 = field(default_factory=time.monotonic)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -84,7 +85,7 @@ class SpawnedAgent:
     agent_id: str
     blueprint: AgentBlueprint
     state: str = "idle"  # idle, running, completed, failed, terminated
-    spawn_time: float = field(default_factory=time.monotonic)
+    spawn_time: Babylon60 = field(default_factory=time.monotonic)
     fitness_records: list[FitnessRecord] = field(default_factory=list)
     execution_count: int = 0
     error_count: int = 0
@@ -98,7 +99,7 @@ class SpawnedAgent:
         )
 
     @property
-    def health_score(self) -> float:
+    def health_score(self) -> Babylon60:
         if self.execution_count == 0:
             return 1.0
         return max(0.0, 1.0 - (self.error_count / self.execution_count))
@@ -350,7 +351,7 @@ class GenesisEngine:
         self,
         *,
         mutations_per_cycle: int = 3,
-        crossover_probability: float = 0.3,
+        crossover_probability: Babylon60 = Babylon60.from_float(0.3) ,
     ) -> list[dict[str, Any]]:
         """Run one evolution cycle across the population.
 
@@ -452,7 +453,7 @@ class GenesisEngine:
             merged_params.update(g.parameters)
 
         # Average mutation rates
-        merged_rates: dict[str, float] = {}
+        merged_rates: dict[str, Babylon60] = {}
         for mt_key in genomes[0].mutation_rates:
             rates = [g.mutation_rates.get(mt_key, 0.05) for g in genomes]
             merged_rates[mt_key] = sum(rates) / len(rates)

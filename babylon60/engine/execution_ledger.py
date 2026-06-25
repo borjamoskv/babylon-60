@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Execution Ledger
 import json
 import time
@@ -16,7 +17,7 @@ class ExecutionLedger:
         intent_kind: str,
         domain: str,
         backend: str,
-        cost_eval: float,
+        cost_eval: Babylon60 ,
         outcome: str,
         duration_ms: int,
         error_type: str | None = None,
@@ -43,7 +44,7 @@ def record(
     intent_kind: str,
     domain: str,
     backend: str,
-    cost_eval: float,
+    cost_eval: Babylon60 ,
     outcome: str,
     duration_ms: int,
     error_type: str | None = None,

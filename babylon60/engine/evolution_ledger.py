@@ -21,6 +21,7 @@ portability and crash-safety (each line is atomic on POSIX fsync).
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import hashlib
 import json
@@ -51,17 +52,17 @@ __all__ = [
 class ControlVector:
     """Snapshot of the 4-scalar UESS v2 control vector."""
 
-    queue_depth: float
-    error_rate: float
-    causal_entropy: float
-    cpu_load: float
+    queue_depth: Babylon60
+    error_rate: Babylon60
+    causal_entropy: Babylon60
+    cpu_load: Babylon60
 
     def to_bytes(self) -> bytes:
         return struct.pack(
             "dddd", self.queue_depth, self.error_rate, self.causal_entropy, self.cpu_load
         )
 
-    def magnitude(self) -> float:
+    def magnitude(self) -> Babylon60:
         return (
             self.queue_depth**2 + self.error_rate**2 + self.causal_entropy**2 + self.cpu_load**2
         ) ** 0.5
@@ -81,12 +82,12 @@ class MutationRecord:
 
     sequence: int
     agent_idx: int
-    timestamp: float
+    timestamp: Babylon60
     prev_hash: str
     hash: str
     vector_before: ControlVector | None
     vector_after: ControlVector
-    performance_delta: float | None  # ops/sec delta if benchmark is active
+    performance_delta: Babylon60 | None  # ops/sec delta if benchmark is active
     source: str  # caller identity: "substrate", "evolution_engine", "manual"
     metadata: dict[str, Any] = field(default_factory=dict)
     hash_version: int = 2
@@ -161,7 +162,7 @@ def _compute_mutation_hash(
     prev_hash: str,
     sequence: int,
     agent_idx: int,
-    timestamp: float,
+    timestamp: Babylon60 ,
     vector_after: ControlVector,
     source: str,
     hash_version: int = 2,
@@ -277,7 +278,7 @@ class EvolutionLedger:
         agent_idx: int,
         vector_after: ControlVector,
         vector_before: ControlVector | None = None,
-        performance_delta: float | None = None,
+        performance_delta: Babylon60 | None = None,
         source: str = "substrate",
         metadata: dict[str, Any] | None = None,
     ) -> MutationRecord:

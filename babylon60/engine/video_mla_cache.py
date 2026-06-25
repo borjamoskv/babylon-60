@@ -4,6 +4,7 @@ Implements algorithms inspired by arXiv:2605.30351v1 for memory-efficient video 
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import hashlib
 import logging
@@ -16,7 +17,7 @@ logger = logging.getLogger("babylon60.exergy.video")
 class LatentKVPair:
     key_hash: str
     compressed_value: bytes
-    compression_ratio: float
+    compression_ratio: Babylon60
 
 
 class VideoMLACache:
@@ -62,7 +63,7 @@ class VideoMLACache:
         logger.warning("Cache miss for frame %d KV pair.", frame_idx)
         return None
 
-    def get_cache_stats(self) -> dict[str, float]:
+    def get_cache_stats(self) -> dict[str, Babylon60]:
         """
         Returns memory exergy metrics for the current cache state.
         """

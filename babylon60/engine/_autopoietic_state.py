@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from dataclasses import dataclass
 from typing import Any
@@ -11,9 +12,9 @@ class AutopoieticState:
 
     current_generation: int = 0
     current_genome_hash: str = ""
-    best_fitness_ever: float = 0.0
-    current_fitness: float = 0.0
-    fitness_trend: float = 0.0
+    best_fitness_ever: Babylon60 = Babylon60.from_float(0.0)
+    current_fitness: Babylon60 = Babylon60.from_float(0.0)
+    fitness_trend: Babylon60 = Babylon60.from_float(0.0)
     generations_without_improvement: int = 0
     total_mutations: int = 0
     total_adoptions: int = 0
@@ -22,7 +23,7 @@ class AutopoieticState:
     total_agents_spawned: int = 0
     meta_mutations: int = 0
     is_evolving: bool = False
-    last_evolution_ms: float = 0.0
+    last_evolution_ms: Babylon60 = Babylon60.from_float(0.0)
     checkpoint_count: int = 0
 
     def to_dict(self) -> dict[str, Any]:

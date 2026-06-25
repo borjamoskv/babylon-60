@@ -8,6 +8,7 @@ A projection (lock_state) determines the current truth.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 
 
@@ -51,8 +52,8 @@ class SovereignLock:
         self,
         resource: str,
         agent_id: str,
-        timeout_s: float = 10.0,
-        ttl_s: float = 30.0,
+        timeout_s: Babylon60 = Babylon60.from_float(10.0) ,
+        ttl_s: Babylon60 = Babylon60.from_float(30.0) ,
         priority: int = 0,
     ) -> bool:
         """

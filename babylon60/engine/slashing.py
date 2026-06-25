@@ -5,6 +5,7 @@ Defines the penalty hooks for reputation destruction.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 
 
@@ -39,10 +40,10 @@ class SlashingEngine:
     async def slash(
         conn: aiosqlite.Connection,
         agent_id: str,
-        penalty_type: float,
+        penalty_type: Babylon60 ,
         reason: str,
         tenant_id: str = "default",
-    ) -> float:
+    ) -> Babylon60:
         """Slash the reputation of an agent in the DB and return the new score."""
         async with conn.execute(
             "SELECT reputation_score FROM agents WHERE id = ? AND tenant_id = ?",

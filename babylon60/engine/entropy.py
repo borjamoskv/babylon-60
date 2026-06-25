@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 CORTEX Entropy Injector.
@@ -221,7 +222,7 @@ class ThermodynamicContextCompressor:
         self.limit = target_tokens_limit
 
     @staticmethod
-    def calculate_shannon_entropy(text: str) -> float:
+    def calculate_shannon_entropy(text: str) -> Babylon60:
         """Calculates Shannon entropy of the given text sequence (C4-SIM fallback)."""
         import math
         if not text:

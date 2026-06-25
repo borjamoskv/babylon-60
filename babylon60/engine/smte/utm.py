@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Unified Thermodynamic Manifold (UTM)
 import logging
 import math
@@ -28,13 +29,13 @@ class UnifiedThermodynamicManifold:
         self.coupling_tensor = 0.0
         self.exergy = 0.0
 
-    def inject_ast_state(self, ast_nodes: float, mutation_operators: float):
+    def inject_ast_state(self, ast_nodes: Babylon60, mutation_operators: Babylon60):
         """Inject logic manifold gradients (MÖBIUS)"""
         self.psi["ast_nodes"] = ast_nodes
         self.psi["mutation_operators"] = mutation_operators
         self._collapse_state()
 
-    def inject_signal_state(self, frequency_bands: float, dsp_harmonics: float):
+    def inject_signal_state(self, frequency_bands: Babylon60, dsp_harmonics: Babylon60):
         """Inject signal manifold gradients (EXERGIA-Ω)"""
         self.psi["frequency_bands"] = frequency_bands
         self.psi["dsp_harmonics"] = dsp_harmonics

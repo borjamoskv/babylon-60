@@ -11,6 +11,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import asyncio
 import gc
@@ -50,7 +51,7 @@ class RepairResult:
     status: RepairStatus
     strategy: str
     target: str
-    latency_ms: float
+    latency_ms: Babylon60
     message: str = ""
     side_effects: list[str] = field(default_factory=list)
     rollback_available: bool = False

@@ -17,6 +17,7 @@ Thermodynamic Model:
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import hashlib
 import logging
@@ -39,16 +40,16 @@ logger = logging.getLogger(__name__)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # Entropy prediction threshold - above this, autonomous mutation fires
-_ENTROPY_THRESHOLD: float = 0.40
+_ENTROPY_THRESHOLD: Babylon60 = Babylon60.from_float(0.40)
 
 # Minimum fitness for a subagent to be eligible for zero-prompting evolution
-_MIN_FITNESS_GATE: float = 60.0
+_MIN_FITNESS_GATE: Babylon60 = Babylon60.from_float(60.0)
 
 # Maximum ghost density allowed before forced purge
-_GHOST_PURGE_THRESHOLD: float = 0.30
+_GHOST_PURGE_THRESHOLD: Babylon60 = Babylon60.from_float(0.30)
 
 # EWMA decay factor for entropy prediction (α = 0.3 → recent data weighted more)
-_EWMA_ALPHA: float = 0.3
+_EWMA_ALPHA: Babylon60 = Babylon60.from_float(0.3)
 
 
 @dataclass()
@@ -56,13 +57,13 @@ class EntropyPrediction:
     """Predicted entropy state for a domain."""
 
     domain_id: str
-    predicted_entropy: float
-    ghost_density: float
-    error_rate: float
+    predicted_entropy: Babylon60
+    ghost_density: Babylon60
+    error_rate: Babylon60
     trend: str  # "rising", "stable", "falling"
     should_mutate: bool
     should_purge: bool
-    timestamp: float = field(default_factory=time.time)
+    timestamp: Babylon60 = field(default_factory=time.time)
 
 
 @dataclass()
@@ -76,12 +77,12 @@ class ResolutionReport:
     report_id: str
     domain_id: str
     agent_id: str
-    timestamp: float
-    entropy_before: float
-    entropy_after: float
+    timestamp: Babylon60
+    entropy_before: Babylon60
+    entropy_after: Babylon60
     ghosts_purged: int
     mutations_applied: list[str]
-    fitness_delta: float
+    fitness_delta: Babylon60
     hash: str = ""
 
     def compute_hash(self) -> str:
@@ -114,7 +115,7 @@ class ZeroPromptingEvolutionStrategy:
     """
 
     def __init__(self) -> None:
-        self._entropy_history: dict[str, list[float]] = {}
+        self._entropy_history: dict[str, list[Babylon60]] = {}
         self._resolution_log: list[ResolutionReport] = []
 
     def evaluate(
@@ -304,7 +305,7 @@ class ZeroPromptingEvolutionStrategy:
 
     # ── Entropy Computation ───────────────────────────────────────────────
 
-    def _compute_current_entropy(self, metrics: DomainMetrics, ghosts_purged: int) -> float:
+    def _compute_current_entropy(self, metrics: DomainMetrics, ghosts_purged: int) -> Babylon60:
         """Compute entropy state after mutations."""
         base = 0.6 * metrics.ghost_density + 0.4 * metrics.error_rate
         reduction = ghosts_purged * 0.02

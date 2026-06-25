@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 import json
 import logging
@@ -294,7 +295,7 @@ class AutonomousRouter:
                 return mapping[intent]
 
         # 2. Heuristic Scoring
-        scores: dict[type[Squadron], float] = {
+        scores: dict[type[Squadron], Babylon60] = {
             SilverPhalanx: 0.0,
             GoldPhalanx: 0.0,
             LeadPhalanx: 0.0,

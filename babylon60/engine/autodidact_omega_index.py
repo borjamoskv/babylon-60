@@ -15,6 +15,7 @@ El resultado es el `UnifiedPrimitiveNode`: un nodo ejecutable con:
   - base60_constant: int    (derivado del hash de la topología)
 """
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import re
@@ -218,7 +219,7 @@ class AutodidactOmegaIndex:
             if kw in n.name.lower() or kw in n.description.lower() or kw in n.kernel_constant.lower()
         ]
 
-    def coverage_report(self) -> dict[str, int | float]:
+    def coverage_report(self) -> dict[str, int | Babylon60]:
         exergy_count = sum(1 for n in self.index.values() if n.algebraic_topology)
         c5_count     = sum(1 for n in self.index.values() if n.c5_real_id)
         unified      = sum(1 for n in self.index.values() if n.algebraic_topology and n.c5_real_id)

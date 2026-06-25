@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural
@@ -43,7 +44,7 @@ class StructuralAtom:
     id: str
     source_path: Path
     ast_node: ast.AST
-    complexity_score: float
+    complexity_score: Babylon60
     dependencies: set[str]
     dependents: set[str]
     semantic_signature: str
@@ -63,7 +64,7 @@ class PhoenixState:
     status: PhaseStatus
     atoms: dict[str, StructuralAtom]
     artifacts: dict[str, Any]
-    metrics: dict[str, float]
+    metrics: dict[str, Babylon60]
     rollback_snapshot: dict | None = None
 
     def transition_to(self, new_phase: AtomicPhase) -> "PhoenixState":
@@ -174,7 +175,7 @@ class AnalysisEngine(BaseEngine):
             or (isinstance(child, ast.Attribute) and isinstance(child.ctx, ast.Load))
         }
 
-    def _calculate_complexity(self, node: ast.AST) -> float:
+    def _calculate_complexity(self, node: ast.AST) -> Babylon60:
         """Calculates approximate cyclomatic complexity (McCabe)."""
         return 1.0 + sum(
             len(child.values) - 1.0 if isinstance(child, ast.BoolOp) else 1.0

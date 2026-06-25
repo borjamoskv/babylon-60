@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import asyncio
 import logging
@@ -25,7 +26,7 @@ class SelfOptimizer:
         self._tuned_params: dict[str, dict[str, Any]] = {}
         self._strategy_rankings: dict[str, list[str]] = {}
         self._events: deque[OptimizationEvent] = deque(maxlen=self.config.max_event_history)
-        self._baselines: dict[str, dict[str, float]] = {}
+        self._baselines: dict[str, dict[str, Babylon60]] = {}
         self._total_cycles = 0
         self._total_tunings_applied = 0
         self._total_reverts = 0
@@ -143,7 +144,7 @@ class SelfOptimizer:
                     # Placeholder for valid TuningDecision returns
         return reverts
 
-    def get_tuned_timeout(self, subsystem: str, default: float = 5000.0) -> float:
+    def get_tuned_timeout(self, subsystem: str, default: float = 5000.0) -> Babylon60:
         return self._tuned_params.get(subsystem, {}).get("timeout_ms", default)
 
     def get_tuned_batch_size(self, subsystem: str, default: int = 100) -> int:
@@ -152,7 +153,7 @@ class SelfOptimizer:
     def get_tuned_breaker_threshold(self, subsystem: str, default: int = 5) -> int:
         return self._tuned_params.get(subsystem, {}).get("breaker_threshold", default)
 
-    def get_tuned_cooldown(self, subsystem: str, default: float = 5.0) -> float:
+    def get_tuned_cooldown(self, subsystem: str, default: float = 5.0) -> Babylon60:
         return self._tuned_params.get(subsystem, {}).get("cooldown_s", default)
 
     def get_strategy_ranking(self, subsystem: str) -> list[str]:

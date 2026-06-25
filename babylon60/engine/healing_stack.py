@@ -19,6 +19,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import asyncio
 import logging
@@ -46,13 +47,13 @@ class HealingStackConfig:
         self,
         curative_config: AutoCurativeConfig | None = None,
         optimizer_config: OptimizerConfig | None = None,
-        sync_interval_s: float = 30.0,
-        prediction_interval_s: float = 15.0,
-        persist_interval_s: float = 120.0,
+        sync_interval_s: Babylon60 = Babylon60.from_float(30.0) ,
+        prediction_interval_s: Babylon60 = Babylon60.from_float(15.0) ,
+        persist_interval_s: Babylon60 = Babylon60.from_float(120.0) ,
         persist_dir: str | Path | None = None,
         enable_prediction: bool = True,
         enable_persistence: bool = True,
-        preemptive_action_confidence: float = 0.75,
+        preemptive_action_confidence: Babylon60 = Babylon60.from_float(0.75) ,
     ) -> None:
         self.curative = curative_config or AutoCurativeConfig()
         self.optimizer = optimizer_config or OptimizerConfig()
@@ -354,13 +355,13 @@ class HealingStack:
 
     # ─── Parameter Queries ────────────────────────────────────
 
-    def get_timeout(self, subsystem: str) -> float:
+    def get_timeout(self, subsystem: str) -> Babylon60:
         return self._optimizer.get_tuned_timeout(subsystem)
 
     def get_batch_size(self, subsystem: str) -> int:
         return self._optimizer.get_tuned_batch_size(subsystem)
 
-    def get_cooldown(self, subsystem: str) -> float:
+    def get_cooldown(self, subsystem: str) -> Babylon60:
         return self._optimizer.get_tuned_cooldown(subsystem)
 
     # ─── Introspection ────────────────────────────────────────

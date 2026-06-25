@@ -9,6 +9,7 @@ Derivation: Ω₅ (Antifragile by Default) - failures trigger degraded mode, not
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import time
@@ -64,7 +65,7 @@ class CircuitBreaker:
         self,
         name: str,
         failure_threshold: int = 5,
-        recovery_timeout: float = 30.0,
+        recovery_timeout: Babylon60 = Babylon60.from_float(30.0) ,
     ) -> None:
         self._name = name
         self._state = CircuitState.CLOSED

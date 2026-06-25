@@ -7,6 +7,7 @@ based on antigravity_routing_policy.yaml.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 from dataclasses import dataclass
@@ -206,7 +207,7 @@ class BackendConfig:
     name: str
     state_config: dict[str, Any]
 
-    def total_cost(self, domain: str) -> float:
+    def total_cost(self, domain: str) -> Babylon60:
         max_tokens = self.state_config.get("max_tokens", 4096)
         # Empirical exergy cost proxy (USD per 1k tokens)
         return float(max_tokens) / 1000.0 * 0.01

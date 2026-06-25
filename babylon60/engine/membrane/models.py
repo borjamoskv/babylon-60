@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 import time
 from enum import Enum
@@ -18,7 +19,7 @@ class MembraneLog(BaseModel):
     to ensure compliance and purity. Immutable by design.
     """
 
-    timestamp: float = Field(default_factory=time.time)
+    timestamp: Babylon60 = Field(default_factory=time.time)
     original_size_bytes: int
     purified_size_bytes: int = 0
     pii_stripped: bool = False

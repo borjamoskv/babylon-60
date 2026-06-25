@@ -6,6 +6,7 @@ Enables massive parallel scaling with deterministic O(1) properties.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import asyncio
 import collections
@@ -28,7 +29,7 @@ logger = logging.getLogger("babylon60.engine.swarm_10k")
 from babylon60.engine.babylon60 import Babylon60
 
 
-def _to_float(v: int | float | Babylon60) -> float:
+def _to_float(v: int | float | Babylon60) -> Babylon60:
     if isinstance(v, Babylon60):
         return v.to_float()
     return float(v)
@@ -280,9 +281,9 @@ class SwarmCommander:
     async def ultrathink_horizon(
         self,
         domain: str,
-        stochastic_entropy: float,
-        deterministic_output: float,
-        duration: float,
+        stochastic_entropy: Babylon60 ,
+        deterministic_output: Babylon60 ,
+        duration: Babylon60 ,
         deps_graph: dict,
         epicenter: str,
     ):

@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 Ouroboros Apoptosis Taxonomy.
@@ -30,9 +31,9 @@ class OriginType(str, Enum):
 
 @dataclass(frozen=True)
 class OriginPolicy:
-    eviction_weight: float  # 0.0 = inmortal, 1.0 = máxima presión apoptótica
-    criticality_floor: float  # Mínimo criticality asignable
-    criticality_ceiling: float  # Máximo criticality asignable
+    eviction_weight: Babylon60 # 0.0 = inmortal, 1.0 = máxima presión apoptótica
+    criticality_floor: Babylon60 # Mínimo criticality asignable
+    criticality_ceiling: Babylon60 # Máximo criticality asignable
     hebbiano_eligible: bool   # ¿Puede recibir refuerzo LTP?
 
 

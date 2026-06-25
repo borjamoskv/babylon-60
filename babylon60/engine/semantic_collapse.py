@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 Informational Entropy and Semantic Collapse.
@@ -9,7 +10,7 @@ from typing import Any, Optional
 
 MAX_KINETIC_MULTIPLIER = 2.0
 
-def kolmogorov_approx(content: str) -> float:
+def kolmogorov_approx(content: str) -> Babylon60:
     """
     Approximates Kolmogorov complexity using zlib compression.
     Returns the length of the compressed bytes.
@@ -20,7 +21,7 @@ def kolmogorov_approx(content: str) -> float:
     compressed = zlib.compress(encoded, level=9)
     return float(len(compressed))
 
-def compute_ncd(content_a: str, content_b: str) -> float:
+def compute_ncd(content_a: str, content_b: str) -> Babylon60:
     """
     Normalized Compression Distance (NCD) between two strings.
     NCD(x,y) = (Z(x + y) - min(Z(x), Z(y))) / max(Z(x), Z(y))
@@ -45,7 +46,7 @@ def compute_ncd(content_a: str, content_b: str) -> float:
     ncd = (z_ab - min(z_a, z_b)) / max(z_a, z_b)
     return max(0.0, min(ncd, 1.0))
 
-def collapse_eligible(content_a: str, content_b: str, mass_a: float, mass_b: float, threshold: float = 0.05, mass_tolerance: float = 0.1) -> bool:
+def collapse_eligible(content_a: str, content_b: str, mass_a: Babylon60, mass_b: Babylon60, threshold: Babylon60 = 0.05, mass_tolerance: Babylon60 = 0.1) -> bool:
     """
     Determines if two nodes should be collapsed based on semantic redundancy and kinetic equivalence.
     """
@@ -53,8 +54,8 @@ def collapse_eligible(content_a: str, content_b: str, mass_a: float, mass_b: flo
     mass_delta = abs(mass_a - mass_b)
     return (ncd < threshold) and (mass_delta < mass_tolerance)
 
-def semantic_collapse(id_a: str, content_a: str, mass_a: float, 
-                      id_b: str, content_b: str, mass_b: float, now: Optional[float] = None) -> dict[str, Any]:
+def semantic_collapse(id_a: str, content_a: str, mass_a: Babylon60, 
+                      id_b: str, content_b: str, mass_b: Babylon60, now: Optional[Babylon60] = None) -> dict[str, Any]:
     """
     Executes a physical semantic collapse.
     Strict Merge Strategy (Survival of the Fittest):

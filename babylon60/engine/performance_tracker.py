@@ -15,6 +15,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import math
@@ -42,16 +43,16 @@ class StrategyEffectiveness:
     strategy: str
     total_attempts: int = 0
     successes: int = 0
-    total_latency_ms: float = 0.0
-    min_latency_ms: float = float("inf")
-    max_latency_ms: float = 0.0
+    total_latency_ms: Babylon60 = Babylon60.from_float(0.0)
+    min_latency_ms: Babylon60 = float("inf")
+    max_latency_ms: Babylon60 = Babylon60.from_float(0.0)
 
     @property
-    def success_rate(self) -> float:
+    def success_rate(self) -> Babylon60:
         return self.successes / max(1, self.total_attempts)
 
     @property
-    def avg_latency_ms(self) -> float:
+    def avg_latency_ms(self) -> Babylon60:
         return self.total_latency_ms / max(1, self.total_attempts)
 
     def record(self, success: bool, latency_ms: float) -> None:
@@ -81,15 +82,15 @@ class SubsystemMetrics:
     """Aggregated metrics for a single subsystem."""
 
     subsystem: str
-    _latencies: deque[float] = field(default_factory=lambda: deque(maxlen=1000))
-    _errors: deque[float] = field(default_factory=lambda: deque(maxlen=1000))
-    _successes: deque[float] = field(default_factory=lambda: deque(maxlen=1000))
+    _latencies: deque[Babylon60] = field(default_factory=lambda: deque(maxlen=1000))
+    _errors: deque[Babylon60] = field(default_factory=lambda: deque(maxlen=1000))
+    _successes: deque[Babylon60] = field(default_factory=lambda: deque(maxlen=1000))
     total_executions: int = 0
     total_errors: int = 0
     total_successes: int = 0
     strategies: dict[str, StrategyEffectiveness] = field(default_factory=dict)
 
-    def record_execution(self, latency_ms: float, success: bool) -> None:
+    def record_execution(self, latency_ms: Babylon60, success: bool) -> None:
         """Record an execution event."""
         now = time.monotonic()
         self._latencies.append(latency_ms)
@@ -108,10 +109,10 @@ class SubsystemMetrics:
         self.strategies[strategy].record(success, latency_ms)
 
     @property
-    def error_rate(self) -> float:
+    def error_rate(self) -> Babylon60:
         return self.total_errors / max(1, self.total_executions)
 
-    def percentile(self, p: float) -> float:
+    def percentile(self, p: float) -> Babylon60:
         """Calculate latency percentile (0-100)."""
         if not self._latencies:
             return 0.0
@@ -121,25 +122,25 @@ class SubsystemMetrics:
         return sorted_lats[idx]
 
     @property
-    def p50(self) -> float:
+    def p50(self) -> Babylon60:
         return self.percentile(50)
 
     @property
-    def p90(self) -> float:
+    def p90(self) -> Babylon60:
         return self.percentile(90)
 
     @property
-    def p99(self) -> float:
+    def p99(self) -> Babylon60:
         return self.percentile(99)
 
     @property
-    def mean_latency(self) -> float:
+    def mean_latency(self) -> Babylon60:
         if not self._latencies:
             return 0.0
         return sum(self._latencies) / len(self._latencies)
 
     @property
-    def stddev_latency(self) -> float:
+    def stddev_latency(self) -> Babylon60:
         if len(self._latencies) < 2:
             return 0.0
         mean = self.mean_latency
@@ -176,11 +177,11 @@ class SubsystemMetrics:
 class PerformanceSnapshot:
     """Point-in-time snapshot of all system performance."""
 
-    timestamp: float
+    timestamp: Babylon60
     subsystems: dict[str, dict[str, Any]]
-    global_error_rate: float
-    global_mean_latency_ms: float
-    global_p99_ms: float
+    global_error_rate: Babylon60
+    global_mean_latency_ms: Babylon60
+    global_p99_ms: Babylon60
     optimization_opportunities: list[dict[str, Any]]
 
     def to_dict(self) -> dict[str, Any]:
@@ -214,7 +215,7 @@ class PerformanceTracker:
             self._subsystems[subsystem] = SubsystemMetrics(subsystem=subsystem)
         return self._subsystems[subsystem]
 
-    def record_execution(self, subsystem: str, latency_ms: float, success: bool) -> None:
+    def record_execution(self, subsystem: str, latency_ms: Babylon60, success: bool) -> None:
         """Record an execution event for a subsystem."""
         self._get_or_create(subsystem).record_execution(latency_ms, success)
 
@@ -223,7 +224,7 @@ class PerformanceTracker:
         subsystem: str,
         strategy: str,
         success: bool,
-        latency_ms: float,
+        latency_ms: Babylon60 ,
     ) -> None:
         """Record a repair attempt for a subsystem."""
         self._get_or_create(subsystem).record_repair(strategy, success, latency_ms)

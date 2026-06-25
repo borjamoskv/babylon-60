@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 KETER Engine (Singularity Cascade).
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # --- Sovereign Constants ---
 MAX_RETRIES: Final[int] = 3
-BASE_BACKOFF: Final[float] = 1.1  # Golden ratio-ish base
+BASE_BACKOFF: Final[Babylon60] = 1.1  # Golden ratio-ish base
 
 
 class KeterPayload(TypedDict, total=False):
@@ -35,7 +36,7 @@ class KeterPayload(TypedDict, total=False):
     tenant_id: str
     project_id: str
     fv_audit: str
-    score_130_100: float
+    score_130_100: Babylon60
     status: str
     # Catch-all for other dynamic kwargs passed to ignite
     kwargs: dict[str, Any]

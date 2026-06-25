@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import logging
 from collections.abc import Callable
 
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # GOAT-MATH-011: GRADIENTE VECTORIAL (Vector Gradient)
 # Represents the direction of maximum change. ∇f
-def compute_gradient(f: Callable[[jnp.ndarray], float]) -> Callable[[jnp.ndarray], jnp.ndarray]:
+def compute_gradient(f: Callable[[jnp.ndarray], Babylon60]) -> Callable[[jnp.ndarray], jnp.ndarray]:
     """
     Returns a function that computes the exact analytical gradient of a scalar function.
     """
@@ -32,7 +33,7 @@ def compute_jacobian(f: Callable[[jnp.ndarray], jnp.ndarray]) -> Callable[[jnp.n
 
 # GOAT-MATH-013: MATRIZ HESSIANA (Hessian Matrix)
 # Second-order partial derivatives of a scalar function. Curvature of the error space.
-def compute_hessian(f: Callable[[jnp.ndarray], float]) -> Callable[[jnp.ndarray], jnp.ndarray]:
+def compute_hessian(f: Callable[[jnp.ndarray], Babylon60]) -> Callable[[jnp.ndarray], jnp.ndarray]:
     """
     Returns a function that computes the exact Hessian matrix.
     """
@@ -56,7 +57,7 @@ def chain_rule_vjp(f: Callable, g: Callable, x: jnp.ndarray, cotangent: jnp.ndar
 
 # GOAT-MATH-015: DERIVADA DIRECCIONAL (Directional Derivative)
 # ∇_v f = ∇f · v (The rate of change of f in the direction of vector v)
-def directional_derivative(f: Callable[[jnp.ndarray], float], x: jnp.ndarray, v: jnp.ndarray) -> float:
+def directional_derivative(f: Callable[[jnp.ndarray], Babylon60], x: jnp.ndarray, v: jnp.ndarray) -> Babylon60:
     """
     Computes the directional derivative of f at x in the direction v.
     (v is automatically normalized within the function).
@@ -67,7 +68,7 @@ def directional_derivative(f: Callable[[jnp.ndarray], float], x: jnp.ndarray, v:
 
 # GOAT-MATH-016: OPERADOR LAPLACIANO (Laplacian Operator)
 # ∇²f = tr(Hessian(f)) = Sum of unmixed second partial derivatives.
-def compute_laplacian(f: Callable[[jnp.ndarray], float], x: jnp.ndarray) -> float:
+def compute_laplacian(f: Callable[[jnp.ndarray], Babylon60], x: jnp.ndarray) -> Babylon60:
     """
     Computes the Laplacian of a scalar field f at point x.
     """
@@ -84,7 +85,7 @@ def auto_diff_jvp(f: Callable[[jnp.ndarray], jnp.ndarray], x: jnp.ndarray, v: jn
 
 # GOAT-MATH-018: SERIE TAYLOR MULTIVARIABLE (Multivariable Taylor Series)
 # Approximating f(x) locally: f(x) ~ f(a) + ∇f(a)^T (x-a) + 1/2 (x-a)^T H(a) (x-a)
-def taylor_approximation_2nd_order(f: Callable[[jnp.ndarray], float], a: jnp.ndarray, x: jnp.ndarray) -> float:
+def taylor_approximation_2nd_order(f: Callable[[jnp.ndarray], Babylon60], a: jnp.ndarray, x: jnp.ndarray) -> Babylon60:
     """
     Computes the second-order Taylor polynomial approximation of f near point a, evaluated at x.
     """
@@ -101,8 +102,8 @@ def taylor_approximation_2nd_order(f: Callable[[jnp.ndarray], float], a: jnp.nda
 # ∫_C F · dr : Integral of a vector field F along curve C parametrized by r(t).
 @jax.jit(static_argnames=['F', 'r', 'num_points'])
 def line_integral(F: Callable[[jnp.ndarray], jnp.ndarray], 
-                  r: Callable[[float], jnp.ndarray], 
-                  t0: float, t1: float, num_points: int = 1000) -> float:
+                  r: Callable[[Babylon60], jnp.ndarray], 
+                  t0: Babylon60 , t1: float, num_points: int = 1000) -> float:
     """
     Numerically computes the line integral of vector field F along parametric curve r(t).
     """
@@ -137,7 +138,7 @@ if __name__ == "__main__":
     logger.info(">> MOSKV-1 APEX: INITIALIZING C5-REAL VECTOR CALCULUS PRIMITIVES <<\n")
 
     # [011, 013, 016, 018] Scalar Field f(x, y) = x^2 + 3y^2 + xy
-    def f_scalar(v: jnp.ndarray) -> float:
+    def f_scalar(v: jnp.ndarray) -> Babylon60:
         x, y = v[0], v[1]
         return x**2 + 3.0*y**2 + x*y
     

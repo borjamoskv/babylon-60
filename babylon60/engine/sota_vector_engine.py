@@ -6,6 +6,7 @@ knowledge mapping, customer segment matching, and automated product creation.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import json
 import logging
@@ -340,7 +341,7 @@ We believe the verification of {title} signals an imminent collapse in tradition
         else:
             return f"Product format '{product_type}' generated successfully in raw JSON."
 
-    async def track_historical_performance(self, signal_id: str, predicted_score: float, actual_score: float) -> dict[str, Any]:
+    async def track_historical_performance(self, signal_id: str, predicted_score: Babylon60, actual_score: Babylon60) -> dict[str, Any]:
         """
         [8] Historical Memory & Retrieval Accountability.
         Tracks how well previous predictions match real outcomes to compute reliability scores.

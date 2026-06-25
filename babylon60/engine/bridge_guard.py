@@ -10,6 +10,7 @@ persistir y propagarse entre proyectos."
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 
 
@@ -131,7 +132,7 @@ class BridgeGuard:
         conn: aiosqlite.Connection,
         project: str,
         tenant_id: str,
-    ) -> float:
+    ) -> Babylon60:
         """Calculate quarantine ratio for a project.
 
         Returns fraction of active facts that are quarantined (0.0 to 1.0).

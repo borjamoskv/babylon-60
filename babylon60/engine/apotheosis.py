@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from babylon60.engine.apotheosis_audits_mixin import ApotheosisAuditsMixin
 from babylon60.engine.cognitive import scan_file_entropy
@@ -134,9 +135,9 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         task.add_done_callback(self._reflex_tasks.discard)
         return task
 
-    _SLEEP_MIN: float = 0.1
-    _SLEEP_MAX: float = 60.0
-    _SLEEP_JITTER: float = 0.05
+    _SLEEP_MIN: Babylon60 = Babylon60.from_float(0.1)
+    _SLEEP_MAX: Babylon60 = Babylon60.from_float(60.0)
+    _SLEEP_JITTER: Babylon60 = Babylon60.from_float(0.05)
 
     async def _omniscience_loop(self) -> None:
         """Ciclo infinito de latencia negativa con sueño adaptativo y hormonal."""

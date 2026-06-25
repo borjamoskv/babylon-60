@@ -6,6 +6,7 @@ Monitoring agent mental health, drift, and mode collapse.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 from dataclasses import dataclass, field
@@ -31,8 +32,8 @@ class PsychologicalProfile:
 
     agent_id: str
     state: MentalState = MentalState.STABLE
-    entropy_score: float = 0.0
-    alignment_score: float = 100.0
+    entropy_score: Babylon60 = Babylon60.from_float(0.0)
+    alignment_score: Babylon60 = Babylon60.from_float(100.0)
     trauma_log: list[str] = field(default_factory=list)
 
 

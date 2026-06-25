@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import hashlib
 import time
 from dataclasses import dataclass
@@ -12,7 +13,7 @@ class EpistemicDelta:
     fact_id: str
     action: str  # "ASSERT" o "INVERT"
     content: str
-    timestamp: float
+    timestamp: Babylon60
     causal_parent: Optional[str] = None
 
 

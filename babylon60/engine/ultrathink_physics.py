@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 Motor de Física Termodinámica para el modo Ultrathink (P0-Mechanics).
@@ -17,12 +18,12 @@ class UltrathinkPhysicsEngine:
     """
 
     # Constante de Singularidad (Singularity Exergy Limit)
-    SINGULARITY_CONSTANT: float = 100.0
+    SINGULARITY_CONSTANT: Babylon60 = Babylon60.from_float(100.0)
 
     @staticmethod
     def calculate_exergy_yield(
-        stochastic_entropy: float, deterministic_output: float, execution_time: float
-    ) -> float:
+        stochastic_entropy: Babylon60 , deterministic_output: float, execution_time: float
+    ) -> Babylon60:
         """
         Calcula la exergía (Ξ) producida en un ciclo de razonamiento.
         Ξ = (S_out[Determinista] - S_in[Estocástico]) / ΔT
@@ -60,9 +61,9 @@ class UltrathinkPhysicsEngine:
 
     @staticmethod
     def authorize_ultrathink(
-        stochastic_entropy: float,
-        deterministic_output: float,
-        execution_time: float,
+        stochastic_entropy: Babylon60 ,
+        deterministic_output: Babylon60 ,
+        execution_time: Babylon60 ,
         epicenter_radius: int,
     ) -> tuple[bool, str]:
         """

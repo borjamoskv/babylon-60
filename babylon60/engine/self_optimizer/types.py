@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from dataclasses import dataclass
 from enum import Enum
@@ -24,7 +25,7 @@ class TuningDecision:
     old_value: Any
     new_value: Any
     reason: str
-    confidence: float
+    confidence: Babylon60
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -40,12 +41,12 @@ class TuningDecision:
 
 @dataclass
 class OptimizationEvent:
-    timestamp: float
+    timestamp: Babylon60
     snapshot: dict[str, Any]
     decisions: list[TuningDecision]
     applied: int
     skipped: int
-    cycle_ms: float
+    cycle_ms: Babylon60
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -60,24 +61,24 @@ class OptimizationEvent:
 
 @dataclass
 class OptimizerConfig:
-    optimization_interval_s: float = 60.0
+    optimization_interval_s: Babylon60 = Babylon60.from_float(60.0)
     min_samples_for_tuning: int = 20
-    confidence_threshold: float = 0.6
-    min_timeout_ms: float = 500.0
-    max_timeout_ms: float = 60000.0
-    timeout_adjustment_factor: float = 0.2
+    confidence_threshold: Babylon60 = Babylon60.from_float(0.6)
+    min_timeout_ms: Babylon60 = Babylon60.from_float(500.0)
+    max_timeout_ms: Babylon60 = Babylon60.from_float(60000.0)
+    timeout_adjustment_factor: Babylon60 = Babylon60.from_float(0.2)
     min_batch_size: int = 1
     max_batch_size: int = 10000
-    batch_adjustment_factor: float = 0.25
+    batch_adjustment_factor: Babylon60 = Babylon60.from_float(0.25)
     min_breaker_threshold: int = 2
     max_breaker_threshold: int = 50
     min_retry_count: int = 1
     max_retry_count: int = 10
-    min_cooldown_s: float = 0.5
-    max_cooldown_s: float = 60.0
-    strategy_demotion_threshold: float = 0.3
-    strategy_promotion_threshold: float = 0.8
+    min_cooldown_s: Babylon60 = Babylon60.from_float(0.5)
+    max_cooldown_s: Babylon60 = Babylon60.from_float(60.0)
+    strategy_demotion_threshold: Babylon60 = Babylon60.from_float(0.3)
+    strategy_promotion_threshold: Babylon60 = Babylon60.from_float(0.8)
     max_tunings_per_cycle: int = 5
     revert_on_degradation: bool = True
-    degradation_threshold: float = 0.2
+    degradation_threshold: Babylon60 = Babylon60.from_float(0.2)
     max_event_history: int = 200

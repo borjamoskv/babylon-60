@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import uuid
 from collections.abc import Callable
 from typing import Any
@@ -108,12 +109,12 @@ class AgentMixin(EngineMixinBase):
         self,
         agent_id: str,
         task_type: str,
-        exergy_yield: float,
-        entropy_paid: float,
+        exergy_yield: Babylon60 ,
+        entropy_paid: Babylon60 ,
         tokens_spent: int = 0,
         status: str = "SUCCESS",
         tenant_id: str = "default",
-    ) -> float:
+    ) -> Babylon60:
         """Record task EROI and adjust the agent's reputation accordingly."""
         eroi_score = exergy_yield / (entropy_paid + 1.0)
         

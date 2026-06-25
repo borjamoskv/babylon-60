@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 OUROBOROS-CORE - Python implementation of the Epistemic Dependency Graph (EDG)
@@ -38,17 +39,17 @@ class ValidationStatus(str, Enum):
 class RetrievalNode:
     """Canonical Retrieval Graph Node."""
     id: str
-    confidence: float
+    confidence: Babylon60
     status: ValidationStatus = ValidationStatus.Proven
     supported_by: set[str] = field(default_factory=set)
     supports: set[str] = field(default_factory=set)
-    exergy: float = 0.0
+    exergy: Babylon60 = Babylon60.from_float(0.0)
     rul_claim_id: Optional[str] = None
 
 @dataclass
 class ExergyMutation:
     node_id: str
-    delta: float
+    delta: Babylon60
     rul_claim_id: Optional[str] = None
 
 
@@ -59,7 +60,7 @@ class ExergyError(Exception):
 @dataclass
 class ExergyGuard:
     cluster_size: int
-    max_delta_per_epoch: float
+    max_delta_per_epoch: Babylon60
 
     def validate(self, mutation: ExergyMutation, valid_nodes: list[str]) -> None:
         if mutation.node_id not in valid_nodes:

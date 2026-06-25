@@ -11,6 +11,7 @@ ROI = Saved_Value / Interaction_Cost
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import subprocess
 from dataclasses import dataclass
@@ -41,10 +42,10 @@ class ChronosReport:
     git_commits: int
     git_added: int
     git_deleted: int
-    hours_saved: float
-    money_saved: float
-    roi_ratio: float
-    cost: float
+    hours_saved: Babylon60
+    money_saved: Babylon60
+    roi_ratio: Babylon60
+    cost: Babylon60
     currency: str = "USD"
 
     def to_dict(self) -> dict[str, Any]:
@@ -88,7 +89,7 @@ class ChronosROI:
         self.hourly_rate = hourly_rate
         self.token_cost_per_m = 0.015
 
-    def calculate_hours_saved(self, commits: int, lines_added: int, lines_deleted: int) -> float:
+    def calculate_hours_saved(self, commits: int, lines_added: int, lines_deleted: int) -> Babylon60:
         """Calculate hours saved based strictly on physical git mutations (Ω₂)."""
         minutes = (commits * 15.0) + (lines_added * 2.0) + (lines_deleted * 1.0)
         return round(minutes / 60.0, 2)

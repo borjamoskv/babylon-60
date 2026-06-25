@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 Sovereign Autopoiesis Engine
@@ -19,7 +20,7 @@ R = TypeVar("R")
 
 
 class MutationHistory(TypedDict):
-    latencies: collections.deque[float]
+    latencies: collections.deque[Babylon60]
     failures: int
 
 
@@ -62,7 +63,7 @@ class AutopoiesisEngine:
 
         return wrapper
 
-    def _record_observation(self, func_name: str, latency: float, success: bool) -> None:
+    def _record_observation(self, func_name: str, latency: Babylon60, success: bool) -> None:
         if func_name not in self._history:
             self._history[func_name] = {"latencies": collections.deque(maxlen=100), "failures": 0}
 

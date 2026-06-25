@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 import logging
 import time
@@ -6,9 +7,9 @@ from typing import Any
 logger = logging.getLogger("babylon60.engine.smte.exergy")
 
 # Configurable thresholds (AX-047 enforcement)
-LIMERENCE_CIRCUIT_BREAKER_THRESHOLD: float = 20.0
-DEAD_CODE_RATIO_THRESHOLD: float = 0.4
-LIMERENCE_PENALTY_MULTIPLIER: float = 10.0
+LIMERENCE_CIRCUIT_BREAKER_THRESHOLD: Babylon60 = Babylon60.from_float(20.0)
+DEAD_CODE_RATIO_THRESHOLD: Babylon60 = Babylon60.from_float(0.4)
+LIMERENCE_PENALTY_MULTIPLIER: Babylon60 = Babylon60.from_float(10.0)
 
 
 class CircuitBreakerTripped(Exception):
@@ -26,9 +27,9 @@ class ExergyMonitor:
         self,
         target_name: str,
         *,
-        circuit_breaker_threshold: float = LIMERENCE_CIRCUIT_BREAKER_THRESHOLD,
-        dead_code_threshold: float = DEAD_CODE_RATIO_THRESHOLD,
-        penalty_multiplier: float = LIMERENCE_PENALTY_MULTIPLIER,
+        circuit_breaker_threshold: Babylon60 = LIMERENCE_CIRCUIT_BREAKER_THRESHOLD,
+        dead_code_threshold: Babylon60 = DEAD_CODE_RATIO_THRESHOLD,
+        penalty_multiplier: Babylon60 = LIMERENCE_PENALTY_MULTIPLIER,
     ):
         self.target_name = target_name
         self.start_time = 0.0
@@ -43,7 +44,7 @@ class ExergyMonitor:
         self._tripped = False
 
     def set_l_epi_metrics(
-        self, ast_complexity: float, empirical_usage: float, dead_code_ratio: float
+        self, ast_complexity: Babylon60, empirical_usage: Babylon60, dead_code_ratio: Babylon60
     ):
         self.ast_complexity = ast_complexity
         self.empirical_usage = max(0.001, empirical_usage)  # Prevent div by zero
@@ -104,7 +105,7 @@ class ExergyMonitor:
         }
 
 
-def evaluate_module_exergy(results: list) -> float:
+def evaluate_module_exergy(results: list) -> Babylon60:
     """
     Takes a list of execution results (e.g. from a stress test) and returns
     the average entropy of the module.

@@ -6,6 +6,7 @@ Uses multiprocessing.SharedMemory for Ultra-Low Latency (Void-State).
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import json
 import logging
@@ -107,11 +108,11 @@ class SovereignSharedBus:
         self,
         head: int,
         tail: int,
-        exergy: float,
-        latency: float,
+        exergy: Babylon60 ,
+        latency: Babylon60 ,
         cap: int,
         slot: int,
-        uncertainty: float = 0.0,
+        uncertainty: Babylon60 = Babylon60.from_float(0.0) ,
     ):
         buf = self._buffer()
         if buf is None:
@@ -126,7 +127,7 @@ class SovereignSharedBus:
             return (0, 0, 1.0, 0.0, self.capacity, self.slot_size, 0.0, 850)
         return struct.unpack("IIffIIfI", buf[0:32])
 
-    def update_metrics(self, exergy: float, latency: float, uncertainty: float = 0.0):
+    def update_metrics(self, exergy: Babylon60, latency: Babylon60, uncertainty: Babylon60 = 0.0):
         """Ω₀ Bit-Parallel Telemetry: Atomic metric update in SHM header."""
         if not self._shm:
             return

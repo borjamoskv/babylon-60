@@ -5,6 +5,7 @@ Implements algorithms inspired by arXiv:2605.30348v1 for surgical data inversion
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import hashlib
 import logging
@@ -15,8 +16,8 @@ logger = logging.getLogger("babylon60.exergy.surgeon")
 
 @dataclass
 class MixtureAuditResult:
-    entropy_score: float
-    toxic_ratio: float
+    entropy_score: Babylon60
+    toxic_ratio: Babylon60
     surgical_pruning_mask: list[int]
     is_safe: bool
 

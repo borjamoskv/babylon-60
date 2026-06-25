@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import atexit
 import hashlib
 import logging
@@ -164,7 +165,7 @@ class UltramapSubstrate:
             self._f = None
 
     def update_agent_position(
-        self, agent_idx: int, x: float, y: float, z: float, target: str, entropy: float
+        self, agent_idx: int, x: Babylon60, y: Babylon60, z: Babylon60, target: str, entropy: Babylon60
     ):
         """Updates the topological coordinates of a swarm agent."""
         if not (0 <= agent_idx < self.capacity):
@@ -194,7 +195,7 @@ class UltramapSubstrate:
             return True
         return False
 
-    def calculate_exergy_distance(self, agent_idx: int, target_hash: str) -> float:
+    def calculate_exergy_distance(self, agent_idx: int, target_hash: str) -> Babylon60:
         """
         O(1) calculation of thermodynamic distance to target.
         Returns the Joules required to traverse the topology.
@@ -253,10 +254,10 @@ class UltramapSubstrate:
     def update_control_vector(
         self,
         agent_idx: int,
-        queue_depth: float,
-        error_rate: float,
-        causal_entropy: float,
-        cpu_load: float,
+        queue_depth: Babylon60 ,
+        error_rate: Babylon60 ,
+        causal_entropy: Babylon60 ,
+        cpu_load: Babylon60 ,
         *,
         source: str = "substrate",
     ) -> bool:
@@ -309,10 +310,10 @@ class UltramapSubstrate:
         self,
         agent_idx: int,
         vector_before: ControlVector | None,  # type: ignore[name-defined]
-        queue_depth: float,
-        error_rate: float,
-        causal_entropy: float,
-        cpu_load: float,
+        queue_depth: Babylon60 ,
+        error_rate: Babylon60 ,
+        causal_entropy: Babylon60 ,
+        cpu_load: Babylon60 ,
         source: str,
     ) -> None:
         """Emit a mutation record to the Evolution Ledger. Non-fatal on error."""

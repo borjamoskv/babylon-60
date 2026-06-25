@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import time
 from collections import deque
@@ -216,7 +217,7 @@ class AsyncCausalGraph:
         parent_id: int | None = None,
         signal_id: int | None = None,
         edge_type: str = "triggered_by",
-        confidence: float = 1.0,
+        confidence: Babylon60 = Babylon60.from_float(1.0) ,
         agent_id: str | None = None,
         project: str | None = None,
         tenant_id: str = "default",

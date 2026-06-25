@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 Vector C: Distributed Ledger Bridge (Redpanda).
@@ -57,7 +58,7 @@ class DistributedEvolutionLedger(EvolutionLedger):
         agent_idx: int,
         vector_after: ControlVector,
         vector_before: ControlVector | None = None,
-        performance_delta: float | None = None,
+        performance_delta: Babylon60 | None = None,
         source: str = "substrate",
         metadata: dict[str, Any] | None = None,
     ) -> MutationRecord:

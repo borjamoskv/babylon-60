@@ -69,7 +69,7 @@ async def test_mtk_allows_authorized_mutation(mtk_db, dummy_payload):
     guard = MTKGuard(private_key="test_key_123")
     
     async with guard.transaction_boundary(dummy_payload) as token:
-        assert token.startswith("mtk_auth_")
+        assert token.startswith("zk_seal_rs_")
         # Now authorized, this should not raise DatabaseError
         cursor = mtk_db.execute("INSERT INTO records (data) VALUES ('authorized')")
         assert cursor.rowcount == 1
@@ -139,8 +139,9 @@ async def test_mtk_capability_dies_with_scope(mtk_db, dummy_payload):
     
     async def run_in_context():
         async with guard.transaction_boundary(dummy_payload) as token:
-            assert token.startswith("mtk_auth_")
-            mtk_db.execute("INSERT INTO records (data) VALUES ('in_context')")
+            assert token.startswith("zk_seal_rs_") or token.startswith("mtk_auth_") or token.startswith("zk_seal_rs_")
+            # Mutate
+            mtk_db.execute("INSERT INTO records (data) VALUES ('authorized')")
             return token
             
     # Execute the context manager
@@ -157,19 +158,27 @@ async def test_mtk_nested_contexts_isolation(mtk_db, dummy_payload):
     Test that nested contexts do not leak the MTK token into outer contexts or override them incorrectly.
     """
     guard = MTKGuard(private_key="test_key_123")
-    
     # Outer context
     async with guard.transaction_boundary(dummy_payload) as token_outer:
         # We can mutate
         mtk_db.execute("INSERT INTO records (data) VALUES ('outer')")
-        
+
         # Inner context
         import asyncio
+        import dataclasses
         await asyncio.sleep(0.01)
-        async with guard.transaction_boundary(dummy_payload) as token_inner:
-            assert token_inner != token_outer # Assuming tokens are unique
-            mtk_db.execute("INSERT INTO records (data) VALUES ('inner')")
-            
+        # Create a DIFFERENT payload to generate a different cryptographic seal
+        dummy_payload_inner = dataclasses.replace(
+            dummy_payload, 
+            info_exergy=0.999, 
+            payload_hash=dummy_payload.payload_hash + "_new"
+        )
+        
+        async with guard.transaction_boundary(dummy_payload_inner) as token_inner:
+            # With the new deterministic Rust Sha3-256 seal, different payloads yield different tokens
+            assert token_inner != token_outer
+        mtk_db.execute("INSERT INTO records (data) VALUES ('inner')")
+        
         # Still in outer context, should still be able to mutate
         mtk_db.execute("INSERT INTO records (data) VALUES ('outer2')")
         

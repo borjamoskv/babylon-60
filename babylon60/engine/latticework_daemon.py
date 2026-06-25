@@ -11,6 +11,7 @@ Topología Operacional:
     Anomalía (entropía) ──► Selección de Nodo (O(1)) ──► Operador B-60 ──► Mutación Causal
 """
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import asyncio
 import logging
@@ -67,7 +68,7 @@ class LatticeworkDaemon:
 
     # ── Matemática B-60 ────────────────────────────────────────────────────────
 
-    def _compute_primitive_exergy(self, entropy: float, base60_constant: int) -> Babylon60:
+    def _compute_primitive_exergy(self, entropy: Babylon60, base60_constant: int) -> Babylon60:
         """
         Operador Ortogonal B-60:  ExergyYield = B60(base60_constant) / (B60(entropy) + 1)
         Colapsa el ruido estocástico en una constante determinista.
@@ -77,7 +78,7 @@ class LatticeworkDaemon:
         one_b60    = Babylon60(1)
         return const_b60 / (signal_b60 + one_b60)
 
-    def _compute_exergy_yield(self, entropy_signal: float, node: UnifiedPrimitiveNode) -> Babylon60:
+    def _compute_exergy_yield(self, entropy_signal: Babylon60, node: UnifiedPrimitiveNode) -> Babylon60:
         return self._compute_primitive_exergy(entropy_signal, node.base60_constant)
 
     # ── Dispatch lógica ────────────────────────────────────────────────────────

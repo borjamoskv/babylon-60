@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import ast
 import logging
 
@@ -74,7 +75,7 @@ class StrictASTValidator(ast.NodeVisitor):
             return True
         if isinstance(annotation, ast.Constant) and annotation.value == "float":
             return True
-        # Check inside subscripts like Optional[float], list[float]
+        # Check inside subscripts like Optional[Babylon60], list[Babylon60]
         if isinstance(annotation, ast.Subscript):
             return self._annotation_contains_float(annotation.slice)
         if isinstance(annotation, ast.Tuple):

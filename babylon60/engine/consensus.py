@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from typing import Any
 import aiosqlite
@@ -23,7 +24,7 @@ class ConsensusMixin(EngineMixinBase):
 
     async def _resolve_agent_rep(
         self, conn: aiosqlite.Connection, target_agent_id: str, tenant_id: str = "default"
-    ) -> float:
+    ) -> Babylon60:
         """Resolve agent reputation, auto-registering if necessary."""
         async with conn.execute(
             "SELECT reputation_score FROM agents WHERE id = ? AND tenant_id = ?",
@@ -52,7 +53,7 @@ class ConsensusMixin(EngineMixinBase):
 
     async def _update_vote_score(
         self, conn: aiosqlite.Connection, fact_id: int, tenant_id: str = "default"
-    ) -> float:
+    ) -> Babylon60:
         """Recalculate the consensus score for a given fact."""
         async with conn.execute(
             "SELECT v.vote, v.vote_weight, a.reputation_score "
@@ -72,7 +73,7 @@ class ConsensusMixin(EngineMixinBase):
 
     async def vote_v2(
         self, fact_id: int, agent: str, value: int, signature: str | None = None
-    ) -> float:
+    ) -> Babylon60:
         """Vote with immutable ledger logging and reputation-weighted consensus."""
         if value not in (-1, 0, 1):
             raise ValueError("Vote must be -1, 0, or 1")
@@ -144,7 +145,7 @@ class ConsensusMixin(EngineMixinBase):
         fact_id: int,
         agent: str,
         value: int,
-        rep: float,
+        rep: Babylon60 ,
         tenant_id: str = "default",
     ) -> None:
         """Helper to store or delete a vote in the consensus table."""
@@ -186,10 +187,10 @@ class ConsensusMixin(EngineMixinBase):
         self,
         agent_id: str,
         fact_id: int,
-        penalty_type: float,
+        penalty_type: Babylon60 ,
         reason: str,
         tenant_id: str = "default",
-    ) -> float:
+    ) -> Babylon60:
         """Slash an agent's reputation for consensus deviation."""
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             new_rep = await SlashingEngine.slash(conn, agent_id, penalty_type, reason, tenant_id)

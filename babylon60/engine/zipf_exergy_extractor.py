@@ -5,6 +5,7 @@ Aísla las 100 primitivas estructurales de máxima exergía en cualquier dominio
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import collections
 import logging
@@ -20,7 +21,7 @@ class ExergyNode:
     """Nodo Estructural C5-REAL (Primitiva)."""
     term: str
     frequency: int
-    zipf_weight: float
+    zipf_weight: Babylon60
     is_structural: bool
     wierzbicka_mapping: str | None = None
 

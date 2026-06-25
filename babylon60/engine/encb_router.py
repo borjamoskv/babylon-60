@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 ENCB Router Spec v1 - Retrieval Routing DSL
@@ -47,7 +48,7 @@ class RiskLevel(Enum):
 class ModelCapabilities:
     reasoning_depth: int
     tool_use: bool
-    stochasticity: float
+    stochasticity: Babylon60
     latency_ms: int
 
 

@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -26,10 +27,10 @@ class EvictionVerdict:
     eviction_id: int
     reason: str
     was_regrettable: bool
-    causal_weight: float  # 0.0→1.0 (type + depth bonus)
+    causal_weight: Babylon60 # 0.0→1.0 (type + depth bonus)
     causal_depth: int  # descendant count (0 = leaf)
-    access_frequency_score: float  # 0.0→1.0
-    eviction_value: float  # composite cost score
+    access_frequency_score: Babylon60 # 0.0→1.0
+    eviction_value: Babylon60 # composite cost score
     details: dict[str, Any] = field(default_factory=dict)
 
 
@@ -37,17 +38,17 @@ class EvictionVerdict:
 class OracleReport:
     """Informe completo de una sesión de auditoría del Oracle."""
 
-    audited_at: float
+    audited_at: Babylon60
     window_size: int
     verdicts: list[EvictionVerdict]
-    regret_rate: float
-    avg_eviction_value: float
+    regret_rate: Babylon60
+    avg_eviction_value: Babylon60
     recommendation: PolicyRecommendation
-    suggested_ttl_delta: float  # +N segundos o -N segundos
+    suggested_ttl_delta: Babylon60 # +N segundos o -N segundos
     suggested_capacity_delta: int  # +N items o -N items
     evidence_chain_valid: bool
     evidence_tip: str
-    system_load_factor: float = 1.0  # OS-level pressure factor (sysload)
+    system_load_factor: Babylon60 = Babylon60.from_float(1.0) # OS-level pressure factor (sysload)
 
     def to_dict(self) -> dict[str, Any]:
         regrettable = [v for v in self.verdicts if v.was_regrettable]

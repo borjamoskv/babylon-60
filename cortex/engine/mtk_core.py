@@ -148,7 +148,7 @@ class MTKGuard:
         token = self._generate_ephemeral_token(payload)
         
         # Step 3: Open Physical DB Boundary
-        tokens = set_ephemeral_token(token)
+        tokens = set_ephemeral_token(token, payload.payload_hash)
         
         try:
             yield token

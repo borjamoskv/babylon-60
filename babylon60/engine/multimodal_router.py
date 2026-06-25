@@ -10,6 +10,7 @@ a unified MultimodalInsight, and persists embeddings to the vector store.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import hashlib
 import logging
@@ -59,10 +60,10 @@ class ModalityPayload:
 class ModalityInsight:
     """Result of processing a single modality."""
     modality: Modality
-    embedding: list[float]
-    confidence: float
+    embedding: list[Babylon60]
+    confidence: Babylon60
     rationale: str
-    latency_ms: float
+    latency_ms: Babylon60
     metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -74,9 +75,9 @@ class ModalityInsight:
 class MultimodalInsight:
     """Fused result across all modalities."""
     modality_insights: list[ModalityInsight]
-    fused_embedding: list[float]
+    fused_embedding: list[Babylon60]
     fusion_strategy: FusionStrategy
-    total_latency_ms: float
+    total_latency_ms: Babylon60
     payload_fingerprints: list[str]
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -89,7 +90,7 @@ class MultimodalInsight:
         return len(self.fused_embedding)
 
     @property
-    def avg_confidence(self) -> float:
+    def avg_confidence(self) -> Babylon60:
         if not self.modality_insights:
             return 0.0
         return sum(i.confidence for i in self.modality_insights) / len(
@@ -123,7 +124,7 @@ class TextProcessor:
         )
 
     @staticmethod
-    def _hash_to_embedding(digest: bytes, dim: int = 384) -> list[float]:
+    def _hash_to_embedding(digest: bytes, dim: int = 384) -> list[Babylon60]:
         """Expand a 32-byte digest into a `dim`-dimensional unit vector."""
         extended = digest
         while len(extended) < dim:
@@ -179,7 +180,7 @@ class AudioProcessor:
 
         # Spectral fingerprint: sliding window RMS over byte values
         window_size = 256
-        rms_values: list[float] = []
+        rms_values: list[Babylon60] = []
         for i in range(0, len(raw), window_size):
             chunk = raw[i : i + window_size]
             if chunk:
@@ -233,7 +234,7 @@ class VideoProcessor:
             frames.append(hashlib.sha256(chunk).hexdigest())
 
         # Temporal coherence: sequential hash delta variance
-        deltas: list[float] = []
+        deltas: list[Babylon60] = []
         for i in range(1, len(frames)):
             prev_val = int(frames[i - 1][:8], 16)
             curr_val = int(frames[i][:8], 16)
@@ -372,7 +373,7 @@ class MultimodalFusionRouter:
         )
         return result
 
-    def _fuse_embeddings(self, insights: list[ModalityInsight]) -> list[float]:
+    def _fuse_embeddings(self, insights: list[ModalityInsight]) -> list[Babylon60]:
         """Apply the configured fusion strategy to modality embeddings."""
         if self.strategy == FusionStrategy.CONCATENATE:
             return self._fuse_concatenate(insights)
@@ -383,14 +384,14 @@ class MultimodalFusionRouter:
         else:
             return self._fuse_weighted_average(insights)
 
-    def _fuse_concatenate(self, insights: list[ModalityInsight]) -> list[float]:
+    def _fuse_concatenate(self, insights: list[ModalityInsight]) -> list[Babylon60]:
         """Concatenate all embeddings. Output dim = sum of all modality dims."""
-        result: list[float] = []
+        result: list[Babylon60] = []
         for insight in insights:
             result.extend(insight.embedding)
         return result
 
-    def _fuse_weighted_average(self, insights: list[ModalityInsight]) -> list[float]:
+    def _fuse_weighted_average(self, insights: list[ModalityInsight]) -> list[Babylon60]:
         """Confidence-weighted element-wise average. Output dim = target_dim."""
         total_weight = sum(i.confidence for i in insights)
         if total_weight < 1e-12:
@@ -407,7 +408,7 @@ class MultimodalFusionRouter:
         norm = max(sum(x * x for x in result) ** 0.5, 1e-12)
         return [x / norm for x in result]
 
-    def _fuse_attention_gate(self, insights: list[ModalityInsight]) -> list[float]:
+    def _fuse_attention_gate(self, insights: list[ModalityInsight]) -> list[Babylon60]:
         """
         Cross-modal attention gate: each modality's contribution is gated
         by its confidence relative to the maximum confidence modality.
@@ -420,7 +421,7 @@ class MultimodalFusionRouter:
             return self._fuse_weighted_average(insights)
 
         # Softmax-like gating
-        gates: list[float] = []
+        gates: list[Babylon60] = []
         for insight in insights:
             gate = insight.confidence / max_conf
             gates.append(gate * gate)  # Quadratic sharpening

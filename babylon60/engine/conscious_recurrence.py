@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
@@ -18,18 +19,18 @@ R = TypeVar("R")
 class IntentionVector:
     goal: str
     expected_outcome: str
-    confidence: float = 1.0
+    confidence: Babylon60 = Babylon60.from_float(1.0)
     priority_modules: list[str] = field(default_factory=list)
 
 
 @dataclass
 class MetacognitiveState:
-    l_task: float = 0.0
-    l_act: float = 0.0
-    l_intent: float = 0.0
-    h_obs: float = 0.0
-    l_efficiency: float = 0.0
-    total_loss: float = 0.0
+    l_task: Babylon60 = Babylon60.from_float(0.0)
+    l_act: Babylon60 = Babylon60.from_float(0.0)
+    l_intent: Babylon60 = Babylon60.from_float(0.0)
+    h_obs: Babylon60 = Babylon60.from_float(0.0)
+    l_efficiency: Babylon60 = Babylon60.from_float(0.0)
+    total_loss: Babylon60 = Babylon60.from_float(0.0)
 
 
 class ConsciousRecurrenceEngine:
@@ -40,12 +41,12 @@ class ConsciousRecurrenceEngine:
 
     def __init__(
         self,
-        alpha: float = 0.5,
-        beta: float = 0.3,
-        gamma: float = 0.2,
-        lambda1: float = 0.6,
-        lambda2: float = 0.4,
-        eta: float = 0.1,
+        alpha: Babylon60 = Babylon60.from_float(0.5) ,
+        beta: Babylon60 = Babylon60.from_float(0.3) ,
+        gamma: Babylon60 = Babylon60.from_float(0.2) ,
+        lambda1: Babylon60 = Babylon60.from_float(0.6) ,
+        lambda2: Babylon60 = Babylon60.from_float(0.4) ,
+        eta: Babylon60 = Babylon60.from_float(0.1) ,
     ):
         # Weights
         self.alpha = alpha

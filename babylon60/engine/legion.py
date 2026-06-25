@@ -5,6 +5,7 @@ Implementing Phase 6: Adverse Swarm Intelligence for Code Immunity.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import asyncio
 import logging
@@ -271,7 +272,7 @@ class SiegeResult:
     final_code: str
     cycles: int
     vulnerabilities: list[str] = field(default_factory=list)
-    performance_drop: float = 0.0
+    performance_drop: Babylon60 = Babylon60.from_float(0.0)
 
 
 _INITIAL_INTENT_MAP = {

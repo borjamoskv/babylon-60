@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import time
 from dataclasses import dataclass, field
@@ -13,13 +14,13 @@ class DomainMetrics:
     """
 
     domain_id: str
-    health_score: float = 1.0
-    error_rate: float = 0.0
-    ghost_density: float = 0.0
-    fact_density: float = 0.0
-    bridge_score: float = 0.0
-    fitness_delta: float = 0.0
-    timestamp: float = field(default_factory=time.time)
+    health_score: Babylon60 = Babylon60.from_float(1.0)
+    error_rate: Babylon60 = Babylon60.from_float(0.0)
+    ghost_density: Babylon60 = Babylon60.from_float(0.0)
+    fact_density: Babylon60 = Babylon60.from_float(0.0)
+    bridge_score: Babylon60 = Babylon60.from_float(0.0)
+    fitness_delta: Babylon60 = Babylon60.from_float(0.0)
+    timestamp: Babylon60 = field(default_factory=time.time)
 
     def is_stale(self, ttl_seconds: int = 60) -> bool:
         return (time.monotonic() - self.timestamp) > ttl_seconds
@@ -30,11 +31,11 @@ class Mutation:
     """Genotype representation passed to execution environment."""
 
     mutation_id: str
-    parameters: dict[str, float] = field(default_factory=dict)
+    parameters: dict[str, Babylon60] = field(default_factory=dict)
     generation: int = 0
-    fitness: float = 0.0
+    fitness: Babylon60 = Babylon60.from_float(0.0)
     history_log: list[str] = field(default_factory=list)
-    entropy_resistance: float = 1.0
+    entropy_resistance: Babylon60 = Babylon60.from_float(1.0)
 
     def record_change(self, change_desc: str) -> None:
         self.history_log.append(f"{time.monotonic()}: {change_desc}")
@@ -47,7 +48,7 @@ class SubAgent:
     agent_id: str
     mutation: Mutation
     domain_id: str
-    fitness: float = 0.0
+    fitness: Babylon60 = Babylon60.from_float(0.0)
     generation: int = 0
     is_active: bool = True
 
@@ -64,7 +65,7 @@ class SovereignAgent:
     sovereign_id: str
     domain_id: str
     subagents: list[SubAgent] = field(default_factory=list)
-    creation_timestamp: float = field(default_factory=time.time)
+    creation_timestamp: Babylon60 = field(default_factory=time.time)
 
     def get_best_subagent(self) -> SubAgent | None:
         if not self.subagents:
@@ -76,7 +77,7 @@ class SovereignAgent:
             return None
         return min(self.subagents, key=lambda s: s.fitness)
 
-    def get_fitness_variance(self) -> float:
+    def get_fitness_variance(self) -> Babylon60:
         if len(self.subagents) < 2:
             return 0.0
         mn = sum(s.fitness for s in self.subagents) / len(self.subagents)

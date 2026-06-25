@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 ALEPH-Ω (Axiomatic Leap Engine).
@@ -19,7 +20,7 @@ logger = logging.getLogger("babylon60.engine.aleph_omega")
 class AlephLeapResult(TypedDict):
     status: str
     solution: str
-    entropy_applied: float
+    entropy_applied: Babylon60
     paradigm_shift: str
 
 

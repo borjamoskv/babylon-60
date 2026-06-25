@@ -19,22 +19,21 @@ _PRIVATE_KEY = "CORTEX_LOCAL_KEY_12345" # In production, read from ENV or Keyrin
 class MTKError(Exception):
     pass
 
-def mint_ephemeral_token(payload: str) -> str:
+def mint_ephemeral_token(payload: str, kernel_key: str = None) -> str:
     """
-    Generates an ephemeral token from the cryptographic hash of the ClosurePayload.
+    Generates an ephemeral token from the cryptographic hash of the ClosurePayload,
+    delegating to the Rust C5-REAL core.
     """
-    now = str(time.time())
-    raw = f"{payload}:{_PRIVATE_KEY}:{now}".encode()
-    token = hashlib.sha256(raw).hexdigest()
-    return f"mtk_auth_{token}"
+    import cortex_rs
+    return cortex_rs.mint_ephemeral_token(payload, kernel_key)
 
-from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+from cortex.engine.mtk_sqlite_authorizer import mtk_active_token, mtk_payload_hash
 
-
-def set_ephemeral_token(token: str) -> tuple:
+def set_ephemeral_token(token: str, payload_hash: str = "") -> tuple:
     t1 = mtk_ephemeral_token.set(token)
     t2 = mtk_active_token.set(token)
-    return (t1, t2)
+    t3 = mtk_payload_hash.set(payload_hash)
+    return (t1, t2, t3)
 
 def clear_ephemeral_token() -> None:
     pass
@@ -42,6 +41,7 @@ def clear_ephemeral_token() -> None:
 def restore_ephemeral_token(tokens: tuple) -> None:
     mtk_ephemeral_token.reset(tokens[0])
     mtk_active_token.reset(tokens[1])
+    mtk_payload_hash.reset(tokens[2])
 
 def mtk_authorizer_callback(action: int, arg1: str, arg2: str, dbname: str, source: str) -> int:
     """

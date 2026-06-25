@@ -5,6 +5,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import copy
 import hashlib
@@ -29,12 +30,12 @@ logger = logging.getLogger("babylon60.engine.genome")
 class FitnessRecord:
     """Single fitness measurement from an evaluation run."""
 
-    score: float
-    latency_ms: float
+    score: Babylon60
+    latency_ms: Babylon60
     success: bool
-    error_rate: float
-    throughput: float  # ops/sec
-    timestamp: float = field(default_factory=time.monotonic)
+    error_rate: Babylon60
+    throughput: Babylon60 # ops/sec
+    timestamp: Babylon60 = field(default_factory=time.monotonic)
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -62,19 +63,19 @@ class Lineage:
     children_spawned: int = 0
 
     @property
-    def avg_fitness(self) -> float:
+    def avg_fitness(self) -> Babylon60:
         if not self.fitness_history:
             return 0.0
         return sum(r.score for r in self.fitness_history) / len(self.fitness_history)
 
     @property
-    def best_fitness(self) -> float:
+    def best_fitness(self) -> Babylon60:
         if not self.fitness_history:
             return 0.0
         return max(r.score for r in self.fitness_history)
 
     @property
-    def fitness_trend(self) -> float:
+    def fitness_trend(self) -> Babylon60:
         """Slope of fitness over recent history. Positive = improving."""
         if len(self.fitness_history) < 3:
             return 0.0
@@ -125,13 +126,13 @@ class StrategyGenome:
         name: str = "unnamed",
         dispatch_tree: AgentOp | None = None,
         parameters: dict[str, Any] | None = None,
-        mutation_rates: dict[str, float] | None = None,
+        mutation_rates: dict[str, Babylon60] | None = None,
         constraints: list[str] | None = None,
     ) -> None:
         self.name = name
         self.dispatch_tree: AgentOp = dispatch_tree or noop()
         self.parameters: dict[str, Any] = parameters or {}
-        self.mutation_rates: dict[str, float] = mutation_rates or {
+        self.mutation_rates: dict[str, Babylon60] = mutation_rates or {
             MutationType.CAUSAL_PATCH: 0.20,
             MutationType.PARAMETER_DRIFT: 0.30,
             MutationType.SUBTREE_SWAP: 0.10,

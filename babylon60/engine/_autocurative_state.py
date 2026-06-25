@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from dataclasses import dataclass
 from enum import Enum
@@ -29,11 +30,11 @@ class HealingEvent:
     error_signature: str
     anomaly_class: str
     subsystem: str
-    severity: float
+    severity: Babylon60
     repair_strategy: str
     repair_result: RepairResult | None
     diagnosis_time_ns: int
-    total_cycle_ms: float
+    total_cycle_ms: Babylon60
     iteration: int
 
     def to_dict(self) -> dict[str, Any]:
@@ -57,13 +58,13 @@ class AgentHealth:
     """Overall health state of the Auto-Curative Agent."""
 
     status: str  # "healthy" | "degraded" | "critical" | "healing"
-    uptime_s: float
+    uptime_s: Babylon60
     total_errors_detected: int
     total_repairs_attempted: int
     total_repairs_succeeded: int
     active_circuit_breakers: dict[str, str]
-    cortisol_level: float
-    health_score: float
+    cortisol_level: Babylon60
+    health_score: Babylon60
     recent_events: list[dict[str, Any]]
 
     def to_dict(self) -> dict[str, Any]:

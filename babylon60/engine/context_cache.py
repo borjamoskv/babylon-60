@@ -26,6 +26,7 @@ AGI-ready: Supports multi-agent cache sharing.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import time
@@ -65,8 +66,8 @@ class CacheEntry:
     provider: str  # "gemini" | "openai" | "vllm" | "tgi"
     model: str  # e.g., "gemini-2.0-flash"
     token_count: int  # Number of tokens in the cached prefix
-    created_at: float  # Unix timestamp
-    last_accessed: float  # For LRU eviction
+    created_at: Babylon60 # Unix timestamp
+    last_accessed: Babylon60 # For LRU eviction
     ttl_seconds: int = 3600  # Default 1 hour
     provider_handle: str = ""  # Provider-specific cache ID/reference
     agent_id: str = ""  # Which agent created this cache
@@ -80,7 +81,7 @@ class CacheEntry:
         return time.monotonic() > (self.created_at + self.ttl_seconds)
 
     @property
-    def age_seconds(self) -> float:
+    def age_seconds(self) -> Babylon60:
         return time.monotonic() - self.created_at
 
 
@@ -94,7 +95,7 @@ class CacheStats:
     total_tokens_cached: int = 0
     by_provider: dict[str, int] = field(default_factory=dict)
     by_project: dict[str, int] = field(default_factory=dict)
-    hit_rate: float = 0.0
+    hit_rate: Babylon60 = Babylon60.from_float(0.0)
     evictions: int = 0
 
 
@@ -191,10 +192,10 @@ class ContextCacheManager:
         project: str,
         provider: str,
         model: str,
-        raw_tensor: list[float],
+        raw_tensor: list[Babylon60],
         agent_id: str = "",
         parent_cache_id: str | None = None,
-        layer_depth_ratio: float = 0.0,
+        layer_depth_ratio: Babylon60 = Babylon60.from_float(0.0) ,
         ttl_seconds: int | None = None,
         tags: list[str] | None = None,
     ) -> CacheEntry:

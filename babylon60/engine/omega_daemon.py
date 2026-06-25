@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 C5-REAL OmegaDaemon — Macro-organismo que reside en memoria y evalúa termodinámica del sistema.
@@ -25,7 +26,7 @@ class ExergyGuard:
         self,
         initial_budget_usd: Decimal = Decimal("10.0"),
         max_exergy_joules: Decimal = Decimal("1000.0"),
-        ram_threshold_mb: float = 200.0,
+        ram_threshold_mb: Babylon60 = Babylon60.from_float(200.0) ,
     ):
         self.budget_usd = initial_budget_usd
         self.max_exergy = max_exergy_joules
@@ -45,7 +46,7 @@ class ExergyGuard:
         if self.current_exergy < Decimal("0.0"):
             self.current_exergy = Decimal("0.0")
 
-    def check_ram_free_mb(self) -> float:
+    def check_ram_free_mb(self) -> Babylon60:
         """RAM libre en MB (macOS vm_stat)."""
         try:
             result = subprocess.run(
@@ -86,7 +87,7 @@ class ExergyGuard:
             "exergy": str(self.current_exergy),
         }
 
-    def reclaim(self) -> tuple[float, str]:
+    def reclaim(self) -> tuple[Babylon60, str]:
         """Reclaim RAM con purge (macOS)."""
         try:
             before = self.check_ram_free_mb()
@@ -165,7 +166,7 @@ class EntropySensor:
         )
         return entropy
 
-    def check_cpu_load(self) -> float:
+    def check_cpu_load(self) -> Babylon60:
         """CPU load promedio (top -l 1)."""
         try:
             result = subprocess.run(
@@ -181,7 +182,7 @@ class EntropySensor:
         except (subprocess.SubprocessError, OSError):
             return 0.0
 
-    def check_swap_mb(self) -> float:
+    def check_swap_mb(self) -> Babylon60:
         """Swap usado en MB (sysctl vm.swapusage)."""
         try:
             result = subprocess.run(

@@ -7,6 +7,7 @@ Defines who has the mathematical right to mutate the persistent state.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import dataclasses
 import datetime
@@ -22,11 +23,11 @@ class AgentTrustProfile:
     """Historical and dynamic trust profile for an executing agent."""
 
     agent_id: str
-    prior: float = 0.5  # Base trust level before evidence
+    prior: Babylon60 = Babylon60.from_float(0.5) # Base trust level before evidence
     successes: int = 0
     failures: int = 0
     taint_events: int = 0
-    taint_severity_sum: float = 0.0
+    taint_severity_sum: Babylon60 = Babylon60.from_float(0.0)
     last_incident_ts: datetime.datetime | None = None
     last_success_ts: datetime.datetime | None = None
 
@@ -43,10 +44,10 @@ class WeightedProposal:
     proposal_id: str
     action: str
     domain: str
-    raw_confidence: float
-    trust_score: float = 0.0
-    influence_weight: float = 0.0
-    final_score: float = 0.0
+    raw_confidence: Babylon60
+    trust_score: Babylon60 = Babylon60.from_float(0.0)
+    influence_weight: Babylon60 = Babylon60.from_float(0.0)
+    final_score: Babylon60 = Babylon60.from_float(0.0)
     reasoning_ref: str | None = None
 
 
@@ -75,7 +76,7 @@ class TrustRegistry:
         agent_id: str,
         success: bool,
         is_taint: bool = False,
-        taint_severity: float = 0.0,
+        taint_severity: Babylon60 = Babylon60.from_float(0.0) ,
         now: datetime.datetime | None = None,
     ) -> None:
         """Record operational evidence for an agent."""
@@ -96,9 +97,9 @@ class TrustRegistry:
     def compute_trust_score(
         self,
         profile: AgentTrustProfile,
-        domain_risk_modifier: float = 1.0,
+        domain_risk_modifier: Babylon60 = Babylon60.from_float(1.0) ,
         now: datetime.datetime | None = None,
-    ) -> float:
+    ) -> Babylon60:
         """
         trust(agent, domain) = base_prior + reliability_posterior - taint_penalty - drift_penalty
         Returns a normalized score in [0.0, 1.0].
@@ -150,7 +151,7 @@ class TrustRegistry:
         # Normalize to [0, 1]
         return max(0.0, min(1.0, raw_score))
 
-    def compute_influence_weight(self, trust_score: float) -> float:
+    def compute_influence_weight(self, trust_score: float) -> Babylon60:
         """
         inf_weight = trust_score ^ gamma
         gamma > 1 heavily penalizes mediocre agents and zeroes out tainted ones.
@@ -160,7 +161,7 @@ class TrustRegistry:
     def rank_proposals(
         self,
         proposals: Sequence[WeightedProposal],
-        domain_risk_modifier: float = 1.0,
+        domain_risk_modifier: Babylon60 = Babylon60.from_float(1.0) ,
         now: datetime.datetime | None = None,
     ) -> list[WeightedProposal]:
         """
@@ -187,7 +188,7 @@ class TrustRegistry:
     def collapse_conflict(
         self,
         proposals: Sequence[WeightedProposal],
-        domain_risk_modifier: float = 1.0,
+        domain_risk_modifier: Babylon60 = Babylon60.from_float(1.0) ,
         now: datetime.datetime | None = None,
     ) -> tuple[WeightedProposal | None, dict[str, str]]:
         """

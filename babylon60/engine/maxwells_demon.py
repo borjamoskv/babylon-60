@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import math
 import re
 
@@ -21,14 +22,14 @@ class MaxwellsDemon:
             r"\{[\s\S]*\}",     # JSON o Dicts
         ]
 
-    def _calculate_shannon_entropy(self, text: str) -> float:
+    def _calculate_shannon_entropy(self, text: str) -> Babylon60:
         """Calcula la entropía teórica de Shannon (ruido) en un string."""
         if not text:
             return 0.0
         prob_dict = {c: text.count(c) / len(text) for c in set(text)}
         return -sum(p * math.log2(p) for p in prob_dict.values())
 
-    def filter_context(self, input_text: str) -> tuple[str, float]:
+    def filter_context(self, input_text: str) -> tuple[str, Babylon60]:
         """
         Ingesta un flujo de texto estocástico y lo colapsa en un estado de alta exergía.
         Devuelve el texto filtrado y el porcentaje de masa térmica (tokens) purgada.

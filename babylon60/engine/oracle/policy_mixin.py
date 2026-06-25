@@ -5,6 +5,7 @@ Adjusts the cache eviction parameters dynamically in response to regret rates.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 from typing import Any
@@ -19,7 +20,7 @@ class PolicyMixin:
 
     _cache: Any
 
-    def _calc_regret_rate(self, verdicts: list[EvictionVerdict]) -> float:
+    def _calc_regret_rate(self, verdicts: list[EvictionVerdict]) -> Babylon60:
         """Fraction of verdicts that were regrettable."""
         if not verdicts:
             return 0.0
@@ -28,7 +29,7 @@ class PolicyMixin:
     def _derive_recommendation(
         self,
         verdicts: list[EvictionVerdict],
-        regret_rate: float,
+        regret_rate: Babylon60 ,
     ) -> PolicyRecommendation:
         """Derive policy recommendation from verdicts."""
         if regret_rate <= 0.05:
@@ -54,9 +55,9 @@ class PolicyMixin:
 
     def _calc_policy_deltas(
         self,
-        regret_rate: float,
+        regret_rate: Babylon60 ,
         verdicts: list[EvictionVerdict],
-    ) -> tuple[float, int]:
+    ) -> tuple[Babylon60, int]:
         """Calculate TTL and capacity adjustment deltas proportional to error rate."""
         if regret_rate <= 0.05:
             return 0.0, 0

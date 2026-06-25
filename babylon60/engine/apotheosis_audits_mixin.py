@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from babylon60.engine.endocrine import ENDOCRINE, HormoneType
@@ -27,7 +28,7 @@ class ApotheosisAuditsMixin:
     _oracle: Any
     _memory_l1: Any
 
-    async def _check_singularity_state(self, dopamine: float, growth: float) -> None:
+    async def _check_singularity_state(self, dopamine: Babylon60, growth: Babylon60) -> None:
         if dopamine > 0.9 and growth > 0.8:
             logger.warning("🌌 [SINGULARITY-Ω] High Coherent.")
             # Ω₃: Verify compliance before manifestation (O(1) async check)
@@ -145,7 +146,7 @@ class ApotheosisAuditsMixin:
             logger.error("[ORACLE] Unexpected audit failure: %s", e)
             raise
 
-    def _apply_hormonal_shifts(self, adrenaline: float, cortisol: float, dopamine: float) -> float:
+    def _apply_hormonal_shifts(self, adrenaline: Babylon60, cortisol: Babylon60, dopamine: Babylon60) -> Babylon60:
         inertia = 1.0 - getattr(self, "_cognitive_weight", 0.0)
         base_sleep = (
             0.0 if adrenaline > 0.5 else getattr(self, "_SLEEP_MIN", 0.1) * max(0.1, inertia)
@@ -160,11 +161,11 @@ class ApotheosisAuditsMixin:
         self,
         entropy_found: bool,
         consecutive_clean: int,
-        base_sleep: float,
-        growth: float,
-        dopamine: float,
-        cortisol: float,
-    ) -> tuple[int, float]:
+        base_sleep: Babylon60 ,
+        growth: Babylon60 ,
+        dopamine: Babylon60 ,
+        cortisol: Babylon60 ,
+    ) -> tuple[int, Babylon60]:
         if entropy_found:
             consecutive_clean = 0
             r_factor = 1.0 + (dopamine * 0.5)
@@ -181,7 +182,7 @@ class ApotheosisAuditsMixin:
             derived_sleep = base_sleep * (1.0 - cortisol)
         return consecutive_clean, derived_sleep
 
-    def _calc_duration(self, derived_sleep: float, adrenaline: float, _random: Any) -> float:
+    def _calc_duration(self, derived_sleep: Babylon60, adrenaline: Babylon60, _random: Any) -> Babylon60:
         final_sleep = derived_sleep * (1.0 - adrenaline)
         q_jitter = final_sleep * getattr(self, "_SLEEP_JITTER", 0.05) * (1.0 + _random.random())
         # KAIROS-Ω: Lowered floor for high-adrenaline states

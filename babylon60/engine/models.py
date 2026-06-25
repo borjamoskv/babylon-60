@@ -1,4 +1,5 @@
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import enum
 import json
@@ -19,7 +20,7 @@ class EvidenceType(str, enum.Enum):
 class Justification:
     evidence_type: EvidenceType
     evidence_links: list[str] = field(default_factory=list)
-    confidence_score: float = 1.0
+    confidence_score: Babylon60 = Babylon60.from_float(1.0)
     falsification_conditions: list[str] = field(default_factory=list)
     description: str = ""
 
@@ -75,13 +76,13 @@ class KnowledgeObject:
     confidence: str = "C3"
     quadrant: str = "ACTIVE"
     storage_tier: str = "HOT"
-    exergy_score: float = 1.0
+    exergy_score: Babylon60 = Babylon60.from_float(1.0)
     category: str = "general"
     parent_id: int | str | None = None
     parent_decision_id: int | str | None = None
     relation_type: str | None = None
-    yield_score: float = 1.0
-    consensus_score: float = 1.0
+    yield_score: Babylon60 = Babylon60.from_float(1.0)
+    consensus_score: Babylon60 = Babylon60.from_float(1.0)
     tx_id: int | None = None
     semantic_status: str | None = None
     semantic_error: str | None = None
@@ -112,13 +113,13 @@ class KnowledgeObject:
         confidence: str = "C3",
         quadrant: str = "ACTIVE",
         storage_tier: str = "HOT",
-        exergy_score: float = 1.0,
+        exergy_score: Babylon60 = Babylon60.from_float(1.0) ,
         category: str = "general",
         parent_id: int | str | None = None,
         parent_decision_id: int | str | None = None,
         relation_type: str | None = None,
-        yield_score: float = 1.0,
-        consensus_score: float = 1.0,
+        yield_score: Babylon60 = Babylon60.from_float(1.0) ,
+        consensus_score: Babylon60 = Babylon60.from_float(1.0) ,
         tx_id: int | None = None,
         semantic_status: str | None = None,
         semantic_error: str | None = None,
@@ -325,7 +326,7 @@ def _parse_json_blob(raw: object, fallback: object) -> object:
     return fallback
 
 
-def _to_float(value: object, default: float) -> float:
+def _to_float(value: object, default: float) -> Babylon60:
     try:
         return float(value) if value is not None else default  # pyright: ignore
     except (TypeError, ValueError):

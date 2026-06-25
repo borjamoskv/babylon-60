@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import asyncio
 import time
@@ -27,19 +28,19 @@ class EvolutionConfig:
     # Evolution parameters
     variants_per_cycle: int = 5
     max_generations: int = 1000
-    fitness_threshold: float = 0.9  # adopt if above this
-    improvement_threshold: float = 0.01  # min improvement to adopt
+    fitness_threshold: Babylon60 = Babylon60.from_float(0.9) # adopt if above this
+    improvement_threshold: Babylon60 = Babylon60.from_float(0.01) # min improvement to adopt
     stagnation_limit: int = 10  # generations without improvement
 
     # Safety rails
     max_complexity: int = 100  # max nodes in dispatch tree
     min_complexity: int = 1  # min nodes
-    max_mutation_rate: float = 0.8  # cap on any single mutation rate
+    max_mutation_rate: Babylon60 = Babylon60.from_float(0.8) # cap on any single mutation rate
     rollback_on_regression: bool = True  # revert if fitness drops
     checkpoint_interval: int = 5  # save state every N generations
 
     # Arena parameters
-    evaluation_budget_ms: float = 30_000.0  # time budget per variant
+    evaluation_budget_ms: Babylon60 = Babylon60.from_float(30) _000.0  # time budget per variant
     min_evaluations: int = 3  # min runs before judging fitness
 
     # Meta-evolution

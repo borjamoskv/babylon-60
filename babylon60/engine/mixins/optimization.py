@@ -4,6 +4,7 @@
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from babylon60.utils.canonical import canonical_json, compute_tx_hash, now_iso
 from babylon60.utils.result import Err, Ok, Result
@@ -45,7 +46,7 @@ class SovereignTLRUCache:
         ttl: int = 300,
         on_evict: Any | None = None,
     ):
-        self.cache: dict[str, tuple[Any, float]] = {}
+        self.cache: dict[str, tuple[Any, Babylon60]] = {}
         self.capacity = capacity
         self.ttl = ttl
         self.order: deque[str] = deque()

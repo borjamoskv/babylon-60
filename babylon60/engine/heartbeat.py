@@ -10,6 +10,7 @@ Derivation: Ω₅ (Antifragile) - idle periods STRENGTHEN the system.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import asyncio
 import logging
@@ -28,8 +29,8 @@ logger = logging.getLogger("babylon60.heartbeat")
 
 # ─── Defaults ──────────────────────────────────────────────────────────
 
-_DEFAULT_IDLE_THRESHOLD_S: float = 600.0  # 10 minutes idle → trigger sleep
-_DEFAULT_SLEEP_COOLDOWN_S: float = 3600.0  # 1 hour minimum between sleep cycles
+_DEFAULT_IDLE_THRESHOLD_S: Babylon60 = Babylon60.from_float(600.0) # 10 minutes idle → trigger sleep
+_DEFAULT_SLEEP_COOLDOWN_S: Babylon60 = Babylon60.from_float(3600.0) # 1 hour minimum between sleep cycles
 
 
 class HeartbeatEmitter:
@@ -60,8 +61,8 @@ class HeartbeatEmitter:
         project: str,
         *,
         sleep: SleepOrchestrator | None = None,
-        idle_threshold_s: float = _DEFAULT_IDLE_THRESHOLD_S,
-        sleep_cooldown_s: float = _DEFAULT_SLEEP_COOLDOWN_S,
+        idle_threshold_s: Babylon60 = _DEFAULT_IDLE_THRESHOLD_S,
+        sleep_cooldown_s: Babylon60 = _DEFAULT_SLEEP_COOLDOWN_S,
     ):
         self._nexus = nexus
         self._engine = engine

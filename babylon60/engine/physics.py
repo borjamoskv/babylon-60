@@ -9,6 +9,7 @@ solar cycles, and zero-latency assumptions.
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from dataclasses import dataclass
 
@@ -17,13 +18,13 @@ from dataclasses import dataclass
 class PhysicsContext:
     """Contexto físico parametrizado para operación multi-planetaria."""
 
-    gravity: float = 9.8  # m/s² - Earth default
-    day_seconds: float = 86400  # seconds - Earth default
-    year_days: float = 365.25  # days - Earth default
-    light_delay_ms: float = 0.0  # one-way light delay to nearest relay
-    radiation_flux: float = 1.0  # normalized solar radiation (Earth = 1.0)
-    magnetic_shielding: float = 1.0  # magnetosphere factor (Earth = 1.0)
-    atm_pressure_kpa: float = 101.3  # atmospheric pressure
+    gravity: Babylon60 = Babylon60.from_float(9.8) # m/s² - Earth default
+    day_seconds: Babylon60 = Babylon60.from_float(86400) # seconds - Earth default
+    year_days: Babylon60 = Babylon60.from_float(365.25) # days - Earth default
+    light_delay_ms: Babylon60 = Babylon60.from_float(0.0) # one-way light delay to nearest relay
+    radiation_flux: Babylon60 = Babylon60.from_float(1.0) # normalized solar radiation (Earth = 1.0)
+    magnetic_shielding: Babylon60 = Babylon60.from_float(1.0) # magnetosphere factor (Earth = 1.0)
+    atm_pressure_kpa: Babylon60 = Babylon60.from_float(101.3) # atmospheric pressure
 
 
 # Presets Axiomáticos

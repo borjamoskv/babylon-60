@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -79,7 +80,7 @@ class LedgerEvent:
     event_id: str
     parent_ids: list[str]
     status: ValidationStatus
-    trust_score: float
+    trust_score: Babylon60
     created_at: str
     last_revalidated_at: str | None = None
     tainted: bool = False
@@ -92,17 +93,17 @@ class BeliefObject:
     id: str
     proposition_key: str
     payload: dict[str, Any]
-    confidence_score: float
+    confidence_score: Babylon60
     state: BeliefState
     cortex_taint: str
     parent_id: str | None = None
     
     # Mathematical Closure (Plano Creencia)
-    decay_rate: float = 0.0001
+    decay_rate: Babylon60 = Babylon60.from_float(0.0001)
     last_asserted_at: str | None = None
-    risk_contam: float = 0.0
+    risk_contam: Babylon60 = Babylon60.from_float(0.0)
     
-    def current_weight(self, current_time_iso: str) -> float:
+    def current_weight(self, current_time_iso: str) -> Babylon60:
         """Calcula el peso actual basado en el decaimiento de Ebbinghaus."""
         from datetime import datetime
         if not self.last_asserted_at:

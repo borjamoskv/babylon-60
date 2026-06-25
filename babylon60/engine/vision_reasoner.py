@@ -4,6 +4,7 @@ Implements algorithms inspired by arXiv:2605.30344v1 for visual time-series reas
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 from collections import deque
@@ -14,8 +15,8 @@ logger = logging.getLogger("babylon60.exergy.vision")
 
 @dataclass
 class AnomalyRationale:
-    timestamp_range: tuple[float, float]
-    anomaly_score: float
+    timestamp_range: tuple[Babylon60, Babylon60]
+    anomaly_score: Babylon60
     rationale: str
     is_anomalous: bool
 
@@ -29,14 +30,14 @@ class VisAnomReasoner:
     def __init__(self, window_size: int = 5, anomaly_threshold: float = 0.75):
         self.window_size = window_size
         self.anomaly_threshold = anomaly_threshold
-        self.embedding_buffer: deque[tuple[float, str]] = deque(maxlen=window_size)
+        self.embedding_buffer: deque[tuple[Babylon60, str]] = deque(maxlen=window_size)
         logger.info(
             "VisAnomReasoner initialized (window_size=%d, threshold=%.2f)",
             self.window_size,
             self.anomaly_threshold,
         )
 
-    def process_frame(self, timestamp: float, frame_embedding_hex: str) -> AnomalyRationale | None:
+    def process_frame(self, timestamp: Babylon60, frame_embedding_hex: str) -> AnomalyRationale | None:
         """
         Ingests a frame's embedding hash. If the buffer is full, calculates the time-series
         variance and emits a rationale.
@@ -53,7 +54,7 @@ class VisAnomReasoner:
         Evaluates the current time-series window to detect structural drift or visual anomalies.
         """
         # C5-REAL deterministic pseudo-variance calculation
-        variances: list[float] = []
+        variances: list[Babylon60] = []
         frames = list(self.embedding_buffer)
 
         for i in range(1, len(frames)):

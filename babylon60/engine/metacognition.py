@@ -6,6 +6,7 @@ Axiom Ω₃: Byzantine Default - Nothing is trusted by default, including consen
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 from typing import Any
 
@@ -19,7 +20,7 @@ class DoubtAlert(BaseModel):
 
     type: str  # "COHERENCE_TRAP" | "EPISTEMIC_DIVERGENCE" | "REPUTATION_SKEW"
     node_id: str
-    severity: float  # 0.0 to 1.0
+    severity: Babylon60 # 0.0 to 1.0
     reason: str
     suggested_action: str
 
@@ -73,7 +74,7 @@ class DoubtCircuit:
 
         return alerts
 
-    def _calculate_semantic_variance(self, target_node: Any, neighbors: list[Any]) -> float:
+    def _calculate_semantic_variance(self, target_node: Any, neighbors: list[Any]) -> Babylon60:
         """
         Calculates the variance of embeddings in a local semantic neighborhood.
         Lower variance indicates higher consensus but potentially a coherence trap.

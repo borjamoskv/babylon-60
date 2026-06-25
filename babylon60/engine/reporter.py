@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import sys
 import time
 from dataclasses import asdict, dataclass
@@ -33,9 +34,9 @@ class ManifoldStatus:
     causality: dict[str, Any]
     efficiency: dict[str, Any]
     signals: dict[str, Any]
-    architecture_integrity: float
+    architecture_integrity: Babylon60
     active_ghosts: int
-    db_size_mb: float
+    db_size_mb: Babylon60
     total_facts: int
 
 

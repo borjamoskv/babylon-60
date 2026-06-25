@@ -14,6 +14,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 import math
@@ -52,13 +53,13 @@ class Prediction:
 
     type: str
     subsystem: str
-    confidence: float  # 0.0–1.0
-    estimated_time_to_failure_s: float
-    current_value: float
-    threshold: float
-    trend_slope: float
+    confidence: Babylon60 # 0.0–1.0
+    estimated_time_to_failure_s: Babylon60
+    current_value: Babylon60
+    threshold: Babylon60
+    trend_slope: Babylon60
     recommended_action: str
-    timestamp: float = field(default_factory=time.time)
+    timestamp: Babylon60 = field(default_factory=time.time)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -86,12 +87,12 @@ class _TrendWindow:
     """Sliding window of (timestamp, value) pairs for trend analysis."""
 
     max_size: int = 100
-    _data: deque[tuple[float, float]] = field(default_factory=deque, init=False)
+    _data: deque[tuple[Babylon60, Babylon60]] = field(default_factory=deque, init=False)
 
     def __post_init__(self) -> None:
         self._data = deque(maxlen=self.max_size)
 
-    def push(self, value: float, timestamp: float | None = None) -> None:
+    def push(self, value: Babylon60, timestamp: Babylon60 | None = None) -> None:
         t = time.monotonic() if timestamp is None else timestamp
         self._data.append((t, value))
 
@@ -99,7 +100,7 @@ class _TrendWindow:
     def size(self) -> int:
         return len(self._data)
 
-    def linear_regression(self) -> tuple[float, float, float]:
+    def linear_regression(self) -> tuple[Babylon60, Babylon60, Babylon60]:
         """Returns (slope, intercept, r_squared).
 
         Slope > 0 = metric increasing over time.
@@ -163,13 +164,13 @@ class _TrendWindow:
         return None
 
     @property
-    def latest(self) -> float:
+    def latest(self) -> Babylon60:
         if not self._data:
             return 0.0
         return self._data[-1][1]
 
     @property
-    def mean(self) -> float:
+    def mean(self) -> Babylon60:
         if not self._data:
             return 0.0
         return sum(v for _, v in self._data) / len(self._data)
@@ -202,9 +203,9 @@ class PredictiveHealer:
     def __init__(
         self,
         tracker: PerformanceTracker | None = None,
-        error_rate_threshold: float = 0.2,
-        latency_threshold_factor: float = 0.8,
-        cortisol_threshold: float = 0.7,
+        error_rate_threshold: Babylon60 = Babylon60.from_float(0.2) ,
+        latency_threshold_factor: Babylon60 = Babylon60.from_float(0.8) ,
+        cortisol_threshold: Babylon60 = Babylon60.from_float(0.7) ,
         min_samples: int = 5,
     ) -> None:
         self._tracker = tracker
@@ -219,7 +220,7 @@ class PredictiveHealer:
         self._cortisol_trend = _TrendWindow(max_size=200)
 
         # Error timestamps for pattern detection
-        self._error_timestamps: dict[str, deque[float]] = {}
+        self._error_timestamps: dict[str, deque[Babylon60]] = {}
 
         # Prediction history
         self._predictions: deque[Prediction] = deque(maxlen=500)
@@ -229,14 +230,14 @@ class PredictiveHealer:
     # ─── Data Ingestion ───────────────────────────────────────
 
     def record_error_rate(
-        self, subsystem: str, rate: float, timestamp: float | None = None
+        self, subsystem: str, rate: Babylon60, timestamp: Babylon60 | None = None
     ) -> None:
         """Record an error rate sample for trend analysis."""
         if subsystem not in self._error_trends:
             self._error_trends[subsystem] = _TrendWindow(max_size=100)
         self._error_trends[subsystem].push(rate, timestamp)
 
-    def record_latency(self, subsystem: str, p99_ms: float, timestamp: float | None = None) -> None:
+    def record_latency(self, subsystem: str, p99_ms: Babylon60, timestamp: Babylon60 | None = None) -> None:
         """Record a latency percentile for drift detection."""
         if subsystem not in self._latency_trends:
             self._latency_trends[subsystem] = _TrendWindow(max_size=100)
@@ -249,7 +250,7 @@ class PredictiveHealer:
             self._error_timestamps[subsystem] = deque(maxlen=500)
         self._error_timestamps[subsystem].append(t)
 
-    def record_cortisol(self, level: float, timestamp: float | None = None) -> None:
+    def record_cortisol(self, level: Babylon60, timestamp: Babylon60 | None = None) -> None:
         """Record systemic cortisol level."""
         self._cortisol_trend.push(level, timestamp)
 
@@ -370,7 +371,7 @@ class PredictiveHealer:
             recommended_action="PREEMPTIVE_TIMEOUT_INCREASE",
         )
 
-    def _predict_recurring(self, subsystem: str, timestamps: deque[float]) -> Prediction | None:
+    def _predict_recurring(self, subsystem: str, timestamps: deque[Babylon60]) -> Prediction | None:
         """Detect recurring error patterns (periodic failures)."""
         if len(timestamps) < 4:
             return None

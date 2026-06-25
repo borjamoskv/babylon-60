@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import logging
 import time
 from typing import Any
@@ -43,14 +44,14 @@ class APIKeyManager:
         """, (api_key, tenant_id, tier, bucket_size))
         self.conn.commit()
 
-    def _get_bucket_size(self, tier: str) -> float:
+    def _get_bucket_size(self, tier: str) -> Babylon60:
         if tier == "DEVELOPER":
             return 10.0
         elif tier == "PRO":
             return 1000.0
         return 10000.0
 
-    def _get_refill_rate(self, tier: str) -> float:
+    def _get_refill_rate(self, tier: str) -> Babylon60:
         if tier == "DEVELOPER":
             return TierRateLimits.DEVELOPER
         elif tier == "PRO":

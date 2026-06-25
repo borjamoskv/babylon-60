@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import hashlib
@@ -16,7 +17,7 @@ class VectorialDownsampling:
     def __init__(self, tenant_id: str):
         self.tenant_id = tenant_id
 
-    async def execute_monte_carlo_nodes(self, intent_vector: dict[str, float]) -> dict[str, Any]:
+    async def execute_monte_carlo_nodes(self, intent_vector: dict[str, Babylon60]) -> dict[str, Any]:
         """
         Simulates 3 structural voices in the vector space.
         Voice A: Exploration (High variance, low constraints)

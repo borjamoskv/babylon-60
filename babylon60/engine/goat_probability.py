@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 import logging
 
 import torch
@@ -63,7 +64,7 @@ def markov_chain_step(state: torch.Tensor, transition_matrix: torch.Tensor) -> t
     return state @ transition_matrix
 
 # 25. MCMC - MONTE CARLO MARKOV CHAIN (Metropolis-Hastings)
-def metropolis_hastings_step(current_x: float, target_pdf, proposal_std: float = 1.0) -> float:
+def metropolis_hastings_step(current_x: Babylon60, target_pdf, proposal_std: Babylon60 = 1.0) -> Babylon60:
     """
     Performs a single step of the Metropolis-Hastings algorithm.
     """

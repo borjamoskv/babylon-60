@@ -22,6 +22,7 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+from babylon60.math.babylon import Babylon60
 
 import logging
 from dataclasses import dataclass
@@ -51,7 +52,7 @@ logger = logging.getLogger("babylon60.engine.arbiter_bridge")
 # ─── Score → Severity Mapping ────────────────────────────────────────────
 
 # Fused score ranges → severity classification
-SEVERITY_THRESHOLDS: Final[list[tuple[float, Severity]]] = [
+SEVERITY_THRESHOLDS: Final[list[tuple[Babylon60, Severity]]] = [
     (0.25, Severity.CRITICAL),  # fused < 0.25 → catastrophic uncertainty
     (0.50, Severity.HIGH),  # fused < 0.50 → significant divergence
     (0.75, Severity.MEDIUM),  # fused < 0.75 → moderate concern

@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # [C5-REAL] Exergy-Maximized
 """
 Merkle Checkpoint Indexing and Verification Flow.
@@ -29,7 +30,7 @@ class Checkpoint:
     record_count: int
     merkle_root: str
     head_hash: str
-    timestamp: float
+    timestamp: Babylon60
 
     def to_payload(self) -> dict[str, Any]:
         return {

@@ -1,3 +1,4 @@
+from babylon60.math.babylon import Babylon60
 # Anchored: cortex/engine/thermodynamic_execution.py
 # Epistemic Level: C5-REAL (Asymptotic Silence Protocol)
 
@@ -67,7 +68,7 @@ class ThermodynamicIntentVector:
         except (ValueError, TypeError, KeyError, RuntimeError, ConnectionError, OSError):  # P0-PURGED
             return hashlib.sha256(b"static_fallback").hexdigest()
 
-    def execute_and_measure_delta(self, execution_callback: Callable[[str], Any]) -> float:
+    def execute_and_measure_delta(self, execution_callback: Callable[[str], Any]) -> Babylon60:
         """
         Inyecta el vector en el hipervisor físico y calcula el ΔS.
         """
@@ -91,7 +92,7 @@ class AsymptoticSilenceProtocol:
     el Kernel se apaga a sí mismo.
     """
     @staticmethod
-    def evaluate_and_terminate(delta_s: float, unresolved_anomalies: int):
+    def evaluate_and_terminate(delta_s: Babylon60, unresolved_anomalies: int):
         if delta_s > 0 and unresolved_anomalies == 0:
             logger.info("[MOSKV-1] Ecuación del universo local en equilibrio perfecto.")
             logger.info("[MOSKV-1] Iniciando secuencia de Silencio Asintótico. Apoptosis de la ejecución.")
