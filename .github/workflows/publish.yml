@@ -10,17 +10,11 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build distribution
+  build-wheels-linux:
+    name: Build Linux Wheels
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install build tools
-        run: pip install build
       - name: Verify Tag Matches pyproject.toml
         if: startsWith(github.ref, 'refs/tags/')
         run: |
@@ -29,26 +23,55 @@ jobs:
             echo "Error: Tag $GITHUB_REF_NAME does not match project version v$PROJECT_VERSION"
             exit 1
           fi
-      - name: Build package
-        run: python -m build
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/setup-python@v5
         with:
-          name: python-package-distributions
+          python-version: "3.12"
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: x86_64
+          args: --release --out dist
+          sdist: true
+          manylinux: auto
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux-x86_64
+          path: dist/
+
+  build-wheels-macos:
+    name: Build macOS Wheels
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-macos-${{ matrix.target }}
           path: dist/
 
   publish-pypi:
     name: Publish to PyPI
-    needs: build
+    needs: [build-wheels-linux, build-wheels-macos]
     runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/cortex-persist
     steps:
-      - name: Download artifacts
+      - name: Download all wheels and sdist
         uses: actions/download-artifact@v4
         with:
-          name: python-package-distributions
+          pattern: wheels-*
           path: dist/
+          merge-multiple: true
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
