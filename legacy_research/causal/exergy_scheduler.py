@@ -30,35 +30,65 @@ class ExergyScheduler:
         self._genesis_b60 = int(time.time() * 60)
         self.active_jobs: dict[str, Any] = {}
 
-    def _calculate_entropy(self, payload: str | bytes) -> int:
+    def _calculate_blast_radius(self, payload: str) -> int:
         """
-        Fast heuristic entropy calculation to determine routing lane.
-        Zero float64. Base-60 integer scoring.
+        Determines the structural blast radius by counting distinct module/component
+        references in the payload. 
+        Zero Anergia: simple keyword counting as a proxy for causal graph traversal.
         """
-        length = len(payload)
-        if length > 500_000:
-            return 80 # High entropy
-        elif length > 100_000:
-            return 50
-        return 10
+        payload_lower = payload.lower()
+        modules = ['engine', 'audit', 'guards', 'ledger', 'causal', 'crypto', 'memory', 'cli', 'api']
+        return sum(1 for module in modules if module in payload_lower)
+
+    def _assess_risk_level(self, payload: str) -> str:
+        """
+        Scans for P0 indicators or anomaly signatures.
+        """
+        payload_lower = payload.lower()
+        if any(kw in payload_lower for kw in ['p0', 'merkle', 'corruption', 'corrupción', 'breach', 'singularity', 'irreversible']):
+            return "P0"
+        if any(kw in payload_lower for kw in ['tradeoff', 'compensaciones', 'architecture', 'arquitectura', 'diseño']):
+            return "HIGH"
+        if any(kw in payload_lower for kw in ['api', 'unknown', 'desconocida', 'sota', 'survey', 'investigar', 'research']):
+            return "UNKNOWN"
+        return "LOW"
 
     def route_query(self, query_id: str, payload: str | bytes, is_anomaly: bool = False) -> ExergyLane:
         """
-        Structural routing of queries to the maximum-yield lane.
+        Structural routing of queries to the maximum-yield thermodynamic lane.
+        Selecciona la 'pista termodinámica' según riesgo y radio de explosión causal.
         """
-        entropy_score = self._calculate_entropy(payload)
+        if isinstance(payload, bytes):
+            payload_str = payload.decode('utf-8', errors='ignore')
+        else:
+            payload_str = payload
 
-        if is_anomaly:
-            logger.warning(f"[{self.tenant_id}] P0 Anomaly detected. Routing to ULTRA_THINK.")
+        # Calculate structural metrics
+        blast_radius = self._calculate_blast_radius(payload_str)
+        risk_level = self._assess_risk_level(payload_str)
+        length = len(payload_str)
+
+        # 1. UltraThink (Exergía Máxima)
+        if is_anomaly or risk_level == "P0" or (risk_level == "HIGH" and blast_radius >= 3):
+            logger.warning(f"[{self.tenant_id}] P0 Singularity / High Blast Radius ({blast_radius}). Routing to ULTRA_THINK.")
             return ExergyLane.ULTRA_THINK
-        
-        if entropy_score >= 80:
-            logger.info(f"[{self.tenant_id}] Context Abyss Mining activated. Routing to CONTEXT_ABYSS.")
-            return ExergyLane.CONTEXT_ABYSS
             
-        if entropy_score >= 50:
+        # 2. Context Abyss (Volume Override)
+        if length > 80_000:
+            logger.info(f"[{self.tenant_id}] Context Abyss Mining activated due to payload volume. Routing to CONTEXT_ABYSS.")
+            return ExergyLane.CONTEXT_ABYSS
+
+        # 3. Deep Research (Exergía Crítica)
+        if risk_level == "UNKNOWN":
+            logger.info(f"[{self.tenant_id}] Epistemological unknown territory detected. Routing to DEEP_RESEARCH.")
             return ExergyLane.DEEP_RESEARCH
 
+        # 4. Deep Think (Alta Exergía)
+        if risk_level == "HIGH" and blast_radius < 3:
+            logger.info(f"[{self.tenant_id}] Architecture/Tradeoff resolution detected. Routing to DEEP_THINK.")
+            return ExergyLane.DEEP_THINK
+
+        # 5. Standard Inference (Flujo Rutinario)
         return ExergyLane.STANDARD
 
     async def execute_in_lane(self, lane: ExergyLane, query_id: str, payload: Any) -> dict[str, Any]:
