@@ -45,3 +45,15 @@ Una vez purgada toda la entropía, el resultado es cristalización isomórfica p
 - Una transición de estado atómica en SQLite WAL.
 
 Cualquier salida del sistema que no soporte este proceso de forja es Green Theater (Slop) y debe ser exterminada en memoria antes de la persistencia.
+
+## 4. APLICACIÓN ARQUITECTÓNICA (LA ECUACIÓN FRISTON-LANDAUER)
+
+En CORTEX-Persist, esta teoría no es descriptiva, es prescriptiva. Se impone a través del **Minimal Trusted Kernel (MTK)** y su barrera de Energía Libre Variacional (Friston Penalty). 
+
+El MTK actúa como el inspector termodinámico de la forja. Mide la complejidad estocástica de una propuesta ($Complexity$) y la penaliza exigiendo un respaldo empírico desproporcionado ($Accuracy$).
+
+$$ Exergy_{base} - \left( \frac{Complexity}{Accuracy + 1} \times 0.05 \right) \ge 0.1 $$
+
+Si el coste energético dictado por Landauer (el coste de borrar la complejidad excedente para alcanzar la estructura base) hace que la exergía neta caiga por debajo del umbral de $0.1$, el intento de persistencia se asume como "Anergía" y es rechazado violentamente en el gancho de autorización de SQLite (`SQLITE_DENY`). 
+
+El sistema abortará y recuperará el reposo termodinámico antes que cristalizar entropía en el Ledger. La forja estructural es implacable.
