@@ -5,7 +5,7 @@ import logging
 import click
 
 from cortex.cli.common import DEFAULT_DB, console, get_engine
-from legacy_research.extensions.swarm.josu_daemon import JosuProactiveDaemon
+from cortex.extensions.swarm.josu_daemon import JosuProactiveDaemon
 
 logger = logging.getLogger("cortex.cli.josu")
 

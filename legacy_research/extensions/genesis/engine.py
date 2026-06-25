@@ -19,10 +19,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from legacy_research.extensions.genesis.assembler import SystemAssembler
-from legacy_research.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
-from legacy_research.extensions.genesis.templates import TemplateRegistry
-from legacy_research.extensions.genesis.validator import GenesisValidator
+from cortex.extensions.genesis.assembler import SystemAssembler
+from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
+from cortex.extensions.genesis.templates import TemplateRegistry
+from cortex.extensions.genesis.validator import GenesisValidator
 
 __all__ = ["GenesisEngine"]
 

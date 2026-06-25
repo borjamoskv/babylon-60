@@ -22,7 +22,7 @@ sys.setrecursionlimit(100000)
 # Engine imports – these are part of the CORTEX-Persist codebase
 from cortex.engine._genome_mutator import GenomeMutator
 from cortex.engine._genome_types import MutationType, StrategyGenome
-from legacy_research.isa.builder import dispatch, noop, seq
+from cortex.isa.builder import dispatch, noop, seq
 
 # ---------------------------------------------------------------------
 # Helper functions

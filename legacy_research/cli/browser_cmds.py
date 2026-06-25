@@ -4,7 +4,7 @@ import asyncio
 import click
 from rich.console import Console
 
-from legacy_research.extensions.browser.agent import SovereignBrowserAgent
+from cortex.extensions.browser.agent import SovereignBrowserAgent
 
 console = Console()
 
@@ -33,7 +33,7 @@ def surf(url: str, objective: str, headless: bool, provider: str, model: str):
     if model:
         kwargs["model"] = model
 
-    from legacy_research.extensions.llm.provider import LLMProvider
+    from cortex.extensions.llm.provider import LLMProvider
 
     llm = LLMProvider(**kwargs)
 

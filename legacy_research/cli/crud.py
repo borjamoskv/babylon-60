@@ -13,7 +13,7 @@ from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_fact_not_found
-from legacy_research.extensions.sync import export_to_json
+from cortex.extensions.sync import export_to_json
 
 __all__ = ["delete", "edit", "list_facts"]
 
@@ -118,7 +118,7 @@ def list_facts(project, fact_type, limit, tenant_id, db) -> None:
             table.add_column("Contenido", width=60)
             table.add_column("Tags", style="dim", width=15)
 
-            from legacy_research.crypto import get_default_encrypter
+            from cortex.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
             from cryptography.exceptions import InvalidTag

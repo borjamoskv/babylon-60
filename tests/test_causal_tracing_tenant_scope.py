@@ -8,7 +8,7 @@ import aiosqlite
 
 import pytest
 
-from legacy_research.memory.episodic import CausalTracer
+from cortex.memory.episodic import CausalTracer
 
 
 

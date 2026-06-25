@@ -46,7 +46,7 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from legacy_research.config import DB_PATH
+from cortex.config import DB_PATH
 from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger(__name__)
@@ -135,7 +135,7 @@ class BillingIntegrityGateway:
             plan = session.get("metadata", {}).get("plan", "pro")
 
             if api_state.auth_manager:
-                from legacy_research.routes.stripe import PLAN_CONFIG
+                from cortex.routes.stripe import PLAN_CONFIG
 
                 plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])
                 await api_state.auth_manager.create_key(
@@ -150,7 +150,7 @@ class BillingIntegrityGateway:
             subscription = payload["data"]["object"]
             customer_id = subscription.get("customer", "")
 
-            from legacy_research.routes.stripe import _get_stripe
+            from cortex.routes.stripe import _get_stripe
             stripe_obj = _get_stripe()
             customer = stripe_obj.Customer.retrieve(customer_id)
             email = customer.get("email", "") # type: ignore

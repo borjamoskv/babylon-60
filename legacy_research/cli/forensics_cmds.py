@@ -10,7 +10,7 @@ from typing import Any
 import click
 
 from cortex.cli.common import DEFAULT_DB, cli
-from legacy_research.forensics.evidence_bundle import (
+from cortex.forensics.evidence_bundle import (
     build_evidence_manifest,
     commit_evidence_manifest,
     dump_evidence_manifest,

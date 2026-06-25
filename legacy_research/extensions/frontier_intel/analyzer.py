@@ -12,8 +12,8 @@ from typing import Any
 
 import yaml
 
-from legacy_research.extensions.llm.manager import LLMManager
-from legacy_research.extensions.scraper.engine import ScraperEngine
+from cortex.extensions.llm.manager import LLMManager
+from cortex.extensions.scraper.engine import ScraperEngine
 
 logger = logging.getLogger("cortex.extensions.frontier_intel.analyzer")
 

@@ -7,12 +7,12 @@ import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from legacy_research.compaction.utils import content_hash, similarity
+from cortex.compaction.utils import content_hash, similarity
 
 __all__ = ["execute_dedup", "find_duplicates"]
 
 if TYPE_CHECKING:
-    from legacy_research.compaction.compactor import CompactionResult
+    from cortex.compaction.compactor import CompactionResult
     from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compaction.dedup")
@@ -133,7 +133,7 @@ async def _merge_duplicate_group(
     if not canonical_fact:
         return
 
-    from legacy_research.compaction.utils import merge_error_contents
+    from cortex.compaction.utils import merge_error_contents
 
     all_contents = [fact_map[fid].content for fid in group if fid in fact_map]
 

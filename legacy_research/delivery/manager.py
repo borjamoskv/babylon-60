@@ -12,7 +12,7 @@ import logging
 import os
 from typing import Any
 
-from legacy_research.pipeline import DeliveryTarget, DeliveryType
+from cortex.pipeline import DeliveryTarget, DeliveryType
 
 logger = logging.getLogger("cortex.delivery")
 
@@ -85,7 +85,7 @@ class DeliveryManager:
             return False
 
         try:
-            from legacy_research.guards.url_guard import is_safe_url
+            from cortex.guards.url_guard import is_safe_url
 
             if not is_safe_url(target.url):
                 logger.error("[DELIVERY] WEBHOOK target URL blocked by URLGuard: %s", target.url)

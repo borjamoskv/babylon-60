@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from cortex.api.core import app
 from cortex.api.deps import get_async_engine
-from legacy_research.auth.deps import require_auth, require_permission
+from cortex.auth.deps import require_auth, require_permission
 
 # Mock AuthResult for dependency override
 mock_auth = MagicMock()

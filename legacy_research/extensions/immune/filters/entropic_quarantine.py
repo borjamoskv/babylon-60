@@ -25,7 +25,7 @@ import math
 from collections import Counter
 from typing import Any
 
-from legacy_research.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
+from cortex.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
 
 __all__ = ["EntropicQuarantineFilter"]
 

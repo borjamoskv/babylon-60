@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.table import Table
 
 from cortex.cli.common import cli
-from legacy_research.verification.verifier import SovereignVerifier
+from cortex.verification.verifier import SovereignVerifier
 
 console = Console()
 

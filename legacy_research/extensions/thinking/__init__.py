@@ -6,16 +6,16 @@ N modelos piensan en paralelo, sus respuestas se fusionan
 para producir una respuesta superior a cualquier modelo individual.
 """
 
-from legacy_research.extensions.thinking.fusion import (
+from cortex.extensions.thinking.fusion import (
     FusedThought,
     FusionStrategy,
     ModelResponse,
     ThinkingHistory,
     ThoughtFusion,
 )
-from legacy_research.extensions.thinking.orchestra import ThoughtOrchestra
-from legacy_research.extensions.thinking.pool import ThinkingRecord
-from legacy_research.extensions.thinking.presets import OrchestraConfig, ThinkingMode
+from cortex.extensions.thinking.orchestra import ThoughtOrchestra
+from cortex.extensions.thinking.pool import ThinkingRecord
+from cortex.extensions.thinking.presets import OrchestraConfig, ThinkingMode
 
 __all__ = [
     "FusedThought",

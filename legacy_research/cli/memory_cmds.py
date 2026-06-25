@@ -137,7 +137,7 @@ def store(
         if ai_time is not None and complexity is not None:
             import dataclasses
 
-            from legacy_research.extensions.timing.chronos import ChronosEngine
+            from cortex.extensions.timing.chronos import ChronosEngine
 
             metrics = ChronosEngine.analyze(ai_time, complexity)
             meta["chronos"] = dataclasses.asdict(metrics)
@@ -276,7 +276,7 @@ def search(query, project, top, scope, db, retrieval) -> None:
                 )
         else:
             # Federated search across partitioned databases
-            from legacy_research.search.federation import federated_search_sync
+            from cortex.search.federation import federated_search_sync
 
             with console.status(
                 f"[noir.violet]Federated search (scope={scope})...[/]",
@@ -319,7 +319,7 @@ def search(query, project, top, scope, db, retrieval) -> None:
 
         # Retrieval analysis overlay
         if retrieval:
-            from legacy_research.memory.void_detector import RetrievalVoidDetector
+            from cortex.memory.void_detector import RetrievalVoidDetector
 
             detector = RetrievalVoidDetector()
             candidates = [

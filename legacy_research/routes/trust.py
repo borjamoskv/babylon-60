@@ -8,10 +8,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from cortex.api.deps import get_async_engine
-from legacy_research.auth import AuthResult, require_permission
+from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.engine.storage_guard import GuardViolation, StorageGuard
-from legacy_research.types.models import StoreRequest
+from cortex.types.models import StoreRequest
 
 router = APIRouter(tags=["trust"])
 logger = logging.getLogger("uvicorn.error")

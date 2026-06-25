@@ -51,7 +51,7 @@ class ApisOmegaAgent:
         if self._engine is not None:
             return
         from cortex.cli import get_engine  # pyright: ignore
-        from legacy_research.config import DEFAULT_DB_PATH
+        from cortex.config import DEFAULT_DB_PATH
 
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
         self._engine = get_engine(db_val)
@@ -60,7 +60,7 @@ class ApisOmegaAgent:
         if self._agent_def is not None:
             return
         try:
-            from legacy_research.extensions.agents.registry import get_agent
+            from cortex.extensions.agents.registry import get_agent
 
             self._agent_def = get_agent("apis_omega")
         except Exception as exc:

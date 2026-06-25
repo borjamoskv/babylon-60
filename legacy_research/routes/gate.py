@@ -7,14 +7,14 @@ REST endpoints for remote operator approval of L3 actions.
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from legacy_research.auth import require_permission
-from legacy_research.extensions.gate import (
+from cortex.auth import require_permission
+from cortex.extensions.gate import (
     GateError,
     GateExpired,
     GateInvalidSignature,
     get_gate,
 )
-from legacy_research.types.models import (
+from cortex.types.models import (
     GateActionResponse,
     GateApprovalRequest,
     GateStatusResponse,

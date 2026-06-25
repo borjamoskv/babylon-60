@@ -7,7 +7,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
-from legacy_research.compaction.compactor import (
+from cortex.compaction.compactor import (
     CompactionStrategy,
     compact,
     compact_session,
@@ -228,7 +228,7 @@ def gc_cmd(batch_size, force, db) -> None:
     execution to off-peak hours by default to protect database IOPS.
     """
     from cortex.cli.common import _run_async
-    from legacy_research.compaction.gc import GarbageCollector
+    from cortex.compaction.gc import GarbageCollector
 
     engine = get_engine(db)
     gc = GarbageCollector(engine)  # type: ignore[reportArgumentType]

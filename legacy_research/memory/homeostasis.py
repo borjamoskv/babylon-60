@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from legacy_research.memory.engrams import CortexSemanticEngram
+from cortex.memory.engrams import CortexSemanticEngram
 
 logger = logging.getLogger("cortex.memory.homeostasis")
 

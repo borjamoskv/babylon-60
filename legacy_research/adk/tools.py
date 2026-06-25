@@ -188,7 +188,7 @@ def adk_ledger_verify() -> dict[str, Any]:
     Returns:
         A dict with verification results.
     """
-    from legacy_research.ledger import ImmutableLedger
+    from cortex.ledger import ImmutableLedger
 
     try:
         with _sovereign_engine() as engine:

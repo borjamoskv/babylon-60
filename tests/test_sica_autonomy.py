@@ -18,17 +18,17 @@ from pathlib import Path
 
 import pytest
 
-from legacy_research.sica.autonomy import (
+from cortex.sica.autonomy import (
     AdaptiveRetry,
     AutonomousTick,
     MetaMetaController,
     SpeculativeFork,
     TraceSynthesizer,
 )
-from legacy_research.sica.constitution import Constitution
-from legacy_research.sica.meta_level import FailureClass, MetaAction, MetaJudgment, MetaLevel
-from legacy_research.sica.object_level import ExecutionStep, ExecutionTrace, ObjectLevel, StepOutcome
-from legacy_research.sica.persistence import (
+from cortex.sica.constitution import Constitution
+from cortex.sica.meta_level import FailureClass, MetaAction, MetaJudgment, MetaLevel
+from cortex.sica.object_level import ExecutionStep, ExecutionTrace, ObjectLevel, StepOutcome
+from cortex.sica.persistence import (
     genome_from_json,
     genome_to_json,
     list_generations,
@@ -36,7 +36,7 @@ from legacy_research.sica.persistence import (
     load_or_default,
     save_genome,
 )
-from legacy_research.sica.strategy import Heuristic, SearchStrategy, StrategyGenome, default_genome
+from cortex.sica.strategy import Heuristic, SearchStrategy, StrategyGenome, default_genome
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -323,7 +323,7 @@ class TestAdaptiveRetry:
         assert ar.compute_budget(j) == 3
 
     def test_zero_retries_on_constitutional_abort(self):
-        from legacy_research.sica.constitution import ConstitutionalVerdict
+        from cortex.sica.constitution import ConstitutionalVerdict
 
         ar = AdaptiveRetry(base_budget=3)
         j = MetaJudgment(trace_id="test")

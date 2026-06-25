@@ -26,9 +26,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from starlette.concurrency import run_in_threadpool
 
 import cortex.api.state as api_state
-from legacy_research.auth import AuthResult, require_permission
-from legacy_research.types.models import HeartbeatRequest, TimeSummaryResponse
-from legacy_research.utils.i18n import get_trans
+from cortex.auth import AuthResult, require_permission
+from cortex.types.models import HeartbeatRequest, TimeSummaryResponse
+from cortex.utils.i18n import get_trans
 
 __all__ = [
     "get_time_history",

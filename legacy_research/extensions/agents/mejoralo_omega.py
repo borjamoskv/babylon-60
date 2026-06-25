@@ -17,11 +17,11 @@ import time
 from pathlib import Path
 from typing import Any
 
-from legacy_research.extensions.mejoralo.constants import (
+from cortex.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_TARGET_SCORE,
     STAGNATION_LIMIT,
 )
-from legacy_research.extensions.mejoralo.models import ScanResult
+from cortex.extensions.mejoralo.models import ScanResult
 
 logger = logging.getLogger("cortex.extensions.agents.mejoralo_omega")
 
@@ -69,8 +69,8 @@ class MejoraloOmegaAgent:
             return
 
         from cortex.cli import get_engine  # pyright: ignore
-        from legacy_research.config import DEFAULT_DB_PATH
-        from legacy_research.extensions.mejoralo.engine import MejoraloEngine
+        from cortex.config import DEFAULT_DB_PATH
+        from cortex.extensions.mejoralo.engine import MejoraloEngine
 
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
         self._engine = get_engine(db_val)
@@ -81,7 +81,7 @@ class MejoraloOmegaAgent:
         if self._agent_def is not None:
             return
         try:
-            from legacy_research.extensions.agents.registry import get_agent
+            from cortex.extensions.agents.registry import get_agent
 
             self._agent_def = get_agent("mejoralo_omega")
             if self._agent_def:

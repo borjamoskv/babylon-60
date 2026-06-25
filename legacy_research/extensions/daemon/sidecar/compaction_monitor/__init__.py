@@ -8,7 +8,7 @@ Exports:
 - ``MemorySnapshot`` - cross-platform memory stats snapshot.
 """
 
-from legacy_research.extensions.daemon.sidecar.compaction_monitor.monitor import (
+from cortex.extensions.daemon.sidecar.compaction_monitor.monitor import (
     AsyncCompactionMonitor,  # backward-compat alias
     MemoryPressureAlert,
     MemoryPressureMonitor,

@@ -14,7 +14,7 @@ This module exists to make it ARCHITECTURALLY IMPOSSIBLE to create
 an unprotected SQLite connection that could cause lock cascade hangs.
 
 Usage (sync):
-    from legacy_research.db import connect
+    from cortex.db import connect
     conn = connect("/path/to/db")
 
 Usage (read-only pool):
@@ -24,7 +24,7 @@ Usage (writer - disables auto WAL checkpoint):
     conn = connect_writer("/path/to/db")
 
 Usage (async):
-    from legacy_research.db import connect_async, apply_pragmas_async
+    from cortex.db import connect_async, apply_pragmas_async
     conn = await connect_async("/path/to/db")
 """
 
@@ -116,7 +116,7 @@ except ImportError:  # pragma: no cover - sqlite-vec is a base dependency in rel
 # Python 3.12 deprecates the default datetime adapter. We register our own to prevent DeprecationWarning.
 import datetime
 
-from legacy_research.utils.errors import DBLockError
+from cortex.utils.errors import DBLockError
 
 sqlite3.register_adapter(datetime.datetime, lambda val: val.isoformat())
 sqlite3.register_adapter(datetime.date, lambda val: val.isoformat())

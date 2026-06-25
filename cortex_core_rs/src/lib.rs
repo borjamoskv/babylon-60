@@ -26,6 +26,7 @@ fn cortex_core_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // Add Shim bindings
     m.add_function(wrap_pyfunction!(shim::verify_ephemeral_token, m)?)?;
+    m.add_function(wrap_pyfunction!(shim::mint_ephemeral_token, m)?)?;
     m.add_function(wrap_pyfunction!(shim::ingest_reality_claim, m)?)?;
     m.add_function(wrap_pyfunction!(shim::validate_metric_json, m)?)?;
     m.add_function(wrap_pyfunction!(shim::validate_exergy_mutation, m)?)?;
@@ -35,6 +36,8 @@ fn cortex_core_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(shim::calculate_entropy_b60, m)?)?;
     m.add_function(wrap_pyfunction!(shim::compute_friston_penalty, m)?)?;
     m.add_class::<shim::ExergyRouter>()?;
+    m.add_class::<shim::RetrievalNode>()?;
+    m.add_class::<shim::RetrievalGraph>()?;
     
     Ok(())
 }

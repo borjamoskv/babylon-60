@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from cortex.engine import CortexEngine
 
 if TYPE_CHECKING:
-    from legacy_research.mcp.server import _MCPContext
+    from cortex.mcp.server import _MCPContext
 
 logger = logging.getLogger("cortex.mcp.server")
 
@@ -129,7 +129,7 @@ def _register_handoff_tool(mcp, ctx: _MCPContext) -> None:
         async with ctx.pool.acquire() as conn:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
-            from legacy_research.extensions.agents.handoff import generate_handoff
+            from cortex.extensions.agents.handoff import generate_handoff
 
             handoff = await generate_handoff(engine)
         lines = [
@@ -176,7 +176,7 @@ def _register_embed_tool(mcp, ctx: _MCPContext) -> None:
             return "❌ text cannot be empty"
         try:
             from legacy_research import config
-            from legacy_research.embeddings.api_embedder import APIEmbedder
+            from cortex.embeddings.api_embedder import APIEmbedder
 
             if config.EMBEDDINGS_MODE != "api":
                 return "❌ Embedding via MCP requires API mode. Set CORTEX_EMBEDDINGS=api"
@@ -211,7 +211,7 @@ def _register_embed_status_tool(mcp, ctx: _MCPContext) -> None:
         """Show the current embedding provider configuration."""
         try:
             from legacy_research import config
-            from legacy_research.embeddings.api_embedder import get_provider_configs
+            from cortex.embeddings.api_embedder import get_provider_configs
 
             configs = get_provider_configs()
             active = config.EMBEDDINGS_PROVIDER

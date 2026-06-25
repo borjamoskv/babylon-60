@@ -10,7 +10,7 @@ from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 from cortex.cli.errors import err_db_not_found, handle_cli_error
-from legacy_research.utils import hygiene
+from cortex.utils import hygiene
 
 
 @cli.command()

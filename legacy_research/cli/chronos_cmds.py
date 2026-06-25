@@ -9,8 +9,8 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from legacy_research.config import DEFAULT_DB_PATH
-from legacy_research.extensions.timing.chronos import ChronosEngine
+from cortex.config import DEFAULT_DB_PATH
+from cortex.extensions.timing.chronos import ChronosEngine
 
 __all__ = ["analyze", "chronos_cmds", "compound", "projection"]
 

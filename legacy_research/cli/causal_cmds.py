@@ -199,7 +199,7 @@ def history(project, as_of, db) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def dedupe(project: str, threshold: float, simulate: bool, db: str) -> None:
     """Run Memory Archaeology to deduplicate and crystallize facts."""
-    from legacy_research.memory.memory_archaeology import MemoryArchaeologist
+    from cortex.memory.memory_archaeology import MemoryArchaeologist
 
     engine = get_engine(db)
     try:

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from legacy_research.embeddings.local import LocalEmbedder
+from cortex.embeddings.local import LocalEmbedder
 
 __all__ = ["EmbeddingManager"]
 
@@ -51,7 +51,7 @@ class EmbeddingManager:
             from legacy_research import config
 
             try:
-                from legacy_research.embeddings.api_embedder import APIEmbedder
+                from cortex.embeddings.api_embedder import APIEmbedder
             except Exception as exc:
                 raise RuntimeError(f"API embeddings unavailable: {exc}") from exc
 

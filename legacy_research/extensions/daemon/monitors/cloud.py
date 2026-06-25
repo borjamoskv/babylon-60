@@ -24,7 +24,7 @@ import time
 from typing import Any
 
 from legacy_research import config
-from legacy_research.extensions.daemon.models import CloudSyncAlert
+from cortex.extensions.daemon.models import CloudSyncAlert
 from cortex.storage.turso import TursoBackend
 
 logger = logging.getLogger("moskv-daemon")

@@ -122,7 +122,7 @@ async def lifespan(app: FastAPI):
     app.state.swarm_manager = get_swarm_manager()
 
     # 3. Global Auth Registration
-    import cortex.auth
+    import cortex.auth.manager
 
     cortex.auth.manager._auth_manager = auth_manager  # type: ignore[reportAttributeAccessIssue]
 

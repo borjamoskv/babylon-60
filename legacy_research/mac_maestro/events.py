@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from legacy_research.ledger.models import (
+from cortex.ledger.models import (
     ActionResult,
     ActionTarget,
     IntentPayload,

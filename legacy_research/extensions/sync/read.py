@@ -23,7 +23,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 from typing import TYPE_CHECKING
 
-from legacy_research.extensions.sync.common import (
+from cortex.extensions.sync.common import (
     MEMORY_DIR,
     SyncResult,
     calculate_fact_diff,
@@ -32,8 +32,8 @@ from legacy_research.extensions.sync.common import (
     load_sync_state,
     save_sync_state,
 )
-from legacy_research.extensions.sync.system import sync_system
-from legacy_research.memory.temporal import now_iso
+from cortex.extensions.sync.system import sync_system
+from cortex.memory.temporal import now_iso
 
 __all__ = ["sync_memory"]
 

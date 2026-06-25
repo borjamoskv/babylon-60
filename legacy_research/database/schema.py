@@ -417,7 +417,7 @@ ALL_SCHEMA = _CORE_SCHEMA + EXTENSION_SCHEMA + C5_REAL_SCHEMA
 def get_all_schema() -> list[str]:
     """Return ALL_SCHEMA + AUTH_SCHEMA (avoids circular import)."""
     try:
-        from legacy_research.auth import AUTH_SCHEMA
+        from cortex.auth import AUTH_SCHEMA
 
         return ALL_SCHEMA + [AUTH_SCHEMA]
     except ImportError:

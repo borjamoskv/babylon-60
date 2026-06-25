@@ -7,10 +7,10 @@ Extracted from heal.py to maintain thermodynamic LOC limits.
 import logging
 from typing import TYPE_CHECKING, Optional
 
-from legacy_research.extensions.mejoralo.constants import TAINT_TAG
+from cortex.extensions.mejoralo.constants import TAINT_TAG
 
 if TYPE_CHECKING:
-    from legacy_research.extensions.mejoralo.engine import MejoraloEngine
+    from cortex.extensions.mejoralo.engine import MejoraloEngine
 
 logger = logging.getLogger("cortex.extensions.mejoralo.taint")
 

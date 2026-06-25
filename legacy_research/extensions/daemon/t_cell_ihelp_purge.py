@@ -62,7 +62,7 @@ class IHelpPurgeDaemon:
             "exergy_metrics": {"bytes_saved": waste_bytes, "tokens_saved": tokens_saved},
         }
 
-        # In a full run, this invokes `from legacy_research.audit.ledger import emit_rejection`
+        # In a full run, this invokes `from cortex.audit.ledger import emit_rejection`
         return audit_trail
 
 

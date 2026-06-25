@@ -248,7 +248,7 @@ class ToolboxWatchdog:
                 return
 
             # HTTP health probe
-            from legacy_research.mcp.toolbox_bridge import (
+            from cortex.mcp.toolbox_bridge import (
                 toolbox_health_check,
             )
 

@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from legacy_research.guards._seals_cache import GlobalSourceCache, arun_cmd, printer
+from cortex.guards._seals_cache import GlobalSourceCache, arun_cmd, printer
 
 GateResult = tuple[bool, str]
 

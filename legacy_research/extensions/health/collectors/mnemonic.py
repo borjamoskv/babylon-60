@@ -22,7 +22,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 import time
 from pathlib import Path
 
-from legacy_research.extensions.health.models import HealthThresholds, MetricSnapshot
+from cortex.extensions.health.models import HealthThresholds, MetricSnapshot
 
 
 class EntropyCollector:

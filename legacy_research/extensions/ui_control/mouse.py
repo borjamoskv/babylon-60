@@ -8,7 +8,7 @@ try:
 except ImportError:
     CG = None
 
-from legacy_research.extensions.ui_control.models import InteractionResult, Point
+from cortex.extensions.ui_control.models import InteractionResult, Point
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine

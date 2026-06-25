@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.extensions.sync")
 
-from legacy_research.core.paths import (
+from cortex.core.paths import (
     AGENT_DIR,
     CORTEX_DIR,
     MEMORY_DIR,

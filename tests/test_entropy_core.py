@@ -6,7 +6,7 @@ Tests for CORTEX v1.0 Entropy Core
 import pytest
 from pathlib import Path
 from cortex.engine.entropy_core import EntropyCore, EntropyState, SystemRegime
-from legacy_research.guards.entropy_guard import EntropyGuardEngine, GuardAction
+from cortex.guards.entropy_guard import EntropyGuardEngine, GuardAction
 from cortex.engine.decision_engine import DecisionEngine
 
 @pytest.fixture

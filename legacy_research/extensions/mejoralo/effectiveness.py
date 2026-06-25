@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from cortex.engine import CortexEngine
-from legacy_research.extensions.mejoralo.ledger import get_history
+from cortex.extensions.mejoralo.ledger import get_history
 
 __all__ = ["EffectivenessTracker", "TrendReport"]
 

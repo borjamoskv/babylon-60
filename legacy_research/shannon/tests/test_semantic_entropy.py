@@ -1,6 +1,6 @@
 import pytest
 
-from legacy_research.shannon.semantic_entropy import SemanticEntropyScorer
+from cortex.shannon.semantic_entropy import SemanticEntropyScorer
 
 
 @pytest.fixture

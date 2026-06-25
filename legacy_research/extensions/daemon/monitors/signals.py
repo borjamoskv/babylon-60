@@ -33,7 +33,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from typing import Any
 
 from cortex.database.core import connect as db_connect
-from legacy_research.extensions.daemon.models import SignalAlert
+from cortex.extensions.daemon.models import SignalAlert
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -52,8 +52,8 @@ class SignalMonitor:
             return
 
         try:
-            from legacy_research.extensions.signals.bus import SignalBus
-            from legacy_research.extensions.signals.reactor import SignalReactor
+            from cortex.extensions.signals.bus import SignalBus
+            from cortex.extensions.signals.reactor import SignalReactor
 
             # Standard sqlite3 connection for the bus
             self._bus_conn = db_connect(self.db_path)

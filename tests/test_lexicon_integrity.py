@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from legacy_research.types.lexicon_schema import (
+from cortex.types.lexicon_schema import (
     LexiconPrimitive, LexiconLedger, LexiconLayer, ConfidenceLevel
 )
 

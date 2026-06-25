@@ -1,5 +1,5 @@
 import pytest
-from legacy_research.guards.perplexity_guard import PerplexityGuard
+from cortex.guards.perplexity_guard import PerplexityGuard
 
 def test_perplexity_guard_passes_valid_text():
     guard = PerplexityGuard(threshold=15.0)

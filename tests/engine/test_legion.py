@@ -180,7 +180,7 @@ async def test_legion_omega_engine_thermal_stagnation():
 @pytest.mark.asyncio
 async def test_squadron_crystallize_cross_system_invariance():
     """Validates that Squadron crystallization runs Cross-System verifier when context exists."""
-    from legacy_research.shannon.env.trace import EpisodeTrace, StepTrace
+    from cortex.shannon.env.trace import EpisodeTrace, StepTrace
     from cortex.engine.evolution_ledger import ControlVector, MutationRecord
 
     # 1. Create a matching Shannon trace
@@ -195,7 +195,7 @@ async def test_squadron_crystallize_cross_system_invariance():
             timestamp=1718000000.0,
         ),
     ]
-    from legacy_research.shannon.env.trace import compute_trace_checksum
+    from cortex.shannon.env.trace import compute_trace_checksum
 
     checksum = compute_trace_checksum("genesis-v1", "000000", steps)
     trace = EpisodeTrace(

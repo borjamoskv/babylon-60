@@ -19,7 +19,7 @@ __all__ = ["CORTEX_CONTEXT_TEMPLATE", "create_cortex_pipe", "run_with_cortex_con
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine as AsyncCortexEngine
-    from legacy_research.extensions.langbase.client import LangbaseClient
+    from cortex.extensions.langbase.client import LangbaseClient
 
 logger = logging.getLogger("cortex.extensions.langbase.pipe")
 

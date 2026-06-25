@@ -85,7 +85,7 @@ class MissionOrchestrator:
 
         # 3. Execute via SovereignGate (L3 interception)
         try:
-            from legacy_research.extensions.gate import ActionLevel, get_gate
+            from cortex.extensions.gate import ActionLevel, get_gate
 
             logger.info("Executing swarm mission: %s", " ".join(cmd))
 

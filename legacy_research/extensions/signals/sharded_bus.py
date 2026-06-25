@@ -45,9 +45,9 @@ _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
 from legacy_research import config
-from legacy_research.extensions.signals.bus import _CREATE_INDEXES, _CREATE_TABLE, _build_query
-from legacy_research.extensions.signals.models import Signal, signal_from_row
-from legacy_research.guards.url_guard import SafeTransport
+from cortex.extensions.signals.bus import _CREATE_INDEXES, _CREATE_TABLE, _build_query
+from cortex.extensions.signals.models import Signal, signal_from_row
+from cortex.guards.url_guard import SafeTransport
 
 logger = logging.getLogger("cortex.extensions.signals.sharded_bus")
 

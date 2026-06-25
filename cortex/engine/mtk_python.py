@@ -28,11 +28,20 @@ def mint_ephemeral_token(payload: str) -> str:
     token = hashlib.sha256(raw).hexdigest()
     return f"mtk_auth_{token}"
 
-def set_ephemeral_token(token: str) -> None:
-    mtk_ephemeral_token.set(token)
+from cortex.engine.mtk_sqlite_authorizer import mtk_active_token
+
+
+def set_ephemeral_token(token: str) -> tuple:
+    t1 = mtk_ephemeral_token.set(token)
+    t2 = mtk_active_token.set(token)
+    return (t1, t2)
 
 def clear_ephemeral_token() -> None:
-    mtk_ephemeral_token.set(None)
+    pass
+
+def restore_ephemeral_token(tokens: tuple) -> None:
+    mtk_ephemeral_token.reset(tokens[0])
+    mtk_active_token.reset(tokens[1])
 
 def mtk_authorizer_callback(action: int, arg1: str, arg2: str, dbname: str, source: str) -> int:
     """

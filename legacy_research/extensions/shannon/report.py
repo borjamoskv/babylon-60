@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from legacy_research.extensions.shannon.analyzer import (
+from cortex.extensions.shannon.analyzer import (
     dead_weight,
     exergy_score,
     max_entropy,
@@ -20,8 +20,8 @@ from legacy_research.extensions.shannon.analyzer import (
     redundancy,
     shannon_entropy,
 )
-from legacy_research.extensions.shannon.exergy import compute_exergy_report
-from legacy_research.extensions.shannon.scanner import MemoryScanner
+from cortex.extensions.shannon.exergy import compute_exergy_report
+from cortex.extensions.shannon.scanner import MemoryScanner
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine

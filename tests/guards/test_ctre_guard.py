@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 from unittest.mock import MagicMock
-from legacy_research.guards.ctre_guard import CTREGuard, CTRECollisionError, HAS_RUST_CTRE
+from cortex.guards.ctre_guard import CTREGuard, CTRECollisionError, HAS_RUST_CTRE
 from cortex.engine.store_validation import run_store_validation_logic
 from cortex.engine.store_mixin import StoreMixin
 

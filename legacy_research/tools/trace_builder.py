@@ -16,7 +16,7 @@ from __future__ import annotations
 import time
 import uuid
 
-from legacy_research.tools.trace_adapter import ExecutionTrace, TraceEvent
+from cortex.tools.trace_adapter import ExecutionTrace, TraceEvent
 
 
 class TraceBuilder:

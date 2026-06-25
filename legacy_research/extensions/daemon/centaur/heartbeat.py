@@ -15,10 +15,10 @@ from cortex.database.core import connect_async_ctx
 from cortex.engine.auth import ByzantineAuthLayer
 from cortex.engine.decalcifier import SovereignDecalcifier
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from legacy_research.extensions.daemon.actuators import PhysicalActuator
-from legacy_research.extensions.daemon.centaur.queue import EntropicQueue
-from legacy_research.extensions.swarm.centauro_engine import CentauroEngine, Formation
-from legacy_research.extensions.ui.pulmones import SystemRespiration
+from cortex.extensions.daemon.actuators import PhysicalActuator
+from cortex.extensions.daemon.centaur.queue import EntropicQueue
+from cortex.extensions.swarm.centauro_engine import CentauroEngine, Formation
+from cortex.extensions.ui.pulmones import SystemRespiration
 
 logger = logging.getLogger("moskv-daemon.centaur.heartbeat")
 
@@ -69,7 +69,7 @@ class HeartbeatDaemon:
                     cortisol,
                 )
 
-                from legacy_research.extensions.daemon.models import CORTEX_DB
+                from cortex.extensions.daemon.models import CORTEX_DB
 
                 async with connect_async_ctx(CORTEX_DB) as conn:  # pyright: ignore
                     await decalcifier.decalcify_cycle(conn)

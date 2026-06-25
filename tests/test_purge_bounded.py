@@ -13,7 +13,7 @@ async def engine(tmp_path: Path, monkeypatch):
     # Mock Frontier-compliant configuration to satisfy Rule 1.3
     monkeypatch.setenv("CORTEX_LLM_PROVIDER", "gemini")
     monkeypatch.setenv("CORTEX_LLM_MODEL", "gemini-3.1-pro-preview")
-    from legacy_research import config
+    from cortex import config
 
     config.reload()
 

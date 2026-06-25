@@ -6,7 +6,7 @@ import sqlite3
 import time
 from pathlib import Path
 from unittest.mock import patch
-from legacy_research.extensions.swarm.budget import SwarmBudgetManager, HARD_LIMIT_USD, get_budget_manager
+from cortex.extensions.swarm.budget import SwarmBudgetManager, HARD_LIMIT_USD, get_budget_manager
 
 
 
@@ -91,7 +91,7 @@ def test_list_missions(budget_manager):
 
 
 def test_get_budget_manager():
-    import legacy_research.extensions.swarm.budget
+    import cortex.extensions.swarm.budget
 
     # Reset singleton for test
     cortex.extensions.swarm.budget._instance = None
@@ -104,7 +104,7 @@ def test_get_budget_manager():
 
 def test_sqlite_errors(budget_manager):
     # Mock db_connect to raise sqlite3.Error
-    with patch("legacy_research.extensions.swarm.budget.db_connect") as mock_connect:
+    with patch("cortex.extensions.swarm.budget.db_connect") as mock_connect:
         # We need the context manager to raise the error when entered
         mock_context = mock_connect.return_value
         mock_context.__enter__.side_effect = sqlite3.Error("Mocked DB error")

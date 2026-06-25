@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from legacy_research.extensions.sync.common import SyncResult, calculate_fact_diff, get_existing_contents
+from cortex.extensions.sync.common import SyncResult, calculate_fact_diff, get_existing_contents
 
 __all__ = ["sync_system"]
 

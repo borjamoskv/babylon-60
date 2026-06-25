@@ -14,8 +14,8 @@ from contextlib import asynccontextmanager
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
 from cortex.engine.mtk_python import (
-    clear_ephemeral_token,
     mint_ephemeral_token,
+    restore_ephemeral_token,
     set_ephemeral_token,
 )
 from cortex.types.evidence import ClosurePayload
@@ -148,10 +148,10 @@ class MTKGuard:
         token = self._generate_ephemeral_token(payload)
         
         # Step 3: Open Physical DB Boundary
-        set_ephemeral_token(token)
+        tokens = set_ephemeral_token(token)
         
         try:
             yield token
         finally:
             # Step 5: Destroy the physical capability
-            clear_ephemeral_token()
+            restore_ephemeral_token(tokens)

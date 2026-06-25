@@ -22,7 +22,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 from pathlib import Path
 
-from legacy_research.extensions.health.models import MetricSnapshot
+from cortex.extensions.health.models import MetricSnapshot
 
 logger = logging.getLogger("cortex.extensions.health.ledger")
 

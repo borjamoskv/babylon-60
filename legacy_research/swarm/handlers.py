@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from legacy_research.swarm.runtime import SubagentRequest
+from cortex.swarm.runtime import SubagentRequest
 
 
 class MemoryHandler:

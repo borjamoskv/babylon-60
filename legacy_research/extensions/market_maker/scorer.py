@@ -11,7 +11,7 @@ import logging
 import random
 from decimal import Decimal
 
-from legacy_research.extensions.market_maker.models import Opportunity, TrendSignal, Verdict
+from cortex.extensions.market_maker.models import Opportunity, TrendSignal, Verdict
 
 log = logging.getLogger(__name__)
 

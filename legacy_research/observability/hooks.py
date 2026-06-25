@@ -13,7 +13,7 @@ class _HookResult:
     PROCEED: Any = None
 HookResult = _HookResult
 
-from legacy_research.observability.telemetry import telemetry
+from cortex.observability.telemetry import telemetry
 
 _timers = {}
 

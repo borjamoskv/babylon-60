@@ -6,7 +6,7 @@ Stress test for the I10 Consensus Gateway (Hybrid Cascade / Semantic Collision H
 import asyncio
 import pytest
 
-from legacy_research.guards.i10_consensus import (
+from cortex.guards.i10_consensus import (
     I10ConsensusGuard,
     TriadOutputs,
     RetrievalConsensusError

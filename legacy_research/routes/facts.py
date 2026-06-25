@@ -25,10 +25,10 @@ from pydantic import BaseModel, Field
 from starlette.requests import Request
 
 from cortex.api.deps import get_async_engine
-from legacy_research.auth import AuthResult, require_permission
+from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.engine.storage_guard import GuardViolation
-from legacy_research.types.models import (
+from cortex.types.models import (
     FactResponse,
     StoreRequest,
     StoreResponse,
@@ -36,7 +36,7 @@ from legacy_research.types.models import (
     VoteResponse,
     VoteV2Request,
 )
-from legacy_research.utils.i18n import get_trans
+from cortex.utils.i18n import get_trans
 
 """
 Facts Router.

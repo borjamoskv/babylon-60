@@ -5,7 +5,7 @@
 import asyncio
 import logging
 
-from legacy_research.extensions.daemon.utils import run_osascript
+from cortex.extensions.daemon.utils import run_osascript
 
 logger = logging.getLogger("cortex.extensions.daemon.loops.audio")
 

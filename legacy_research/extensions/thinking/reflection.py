@@ -263,7 +263,7 @@ def _semantic_arm(  # nosec B608 - parameterized query
 ) -> list[dict]:
     """Semantic vector search arm."""
     try:
-        from legacy_research.embeddings import LocalEmbedder
+        from cortex.embeddings import LocalEmbedder
 
         embedding = LocalEmbedder().embed(query)
     except (ImportError, RuntimeError, OSError, ValueError):

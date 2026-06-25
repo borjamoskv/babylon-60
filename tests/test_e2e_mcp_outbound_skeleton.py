@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from legacy_research.pipeline import (
+from cortex.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from legacy_research.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from legacy_research.pipeline.orchestrator import CortexOrchestrator
-from legacy_research.pipeline._orchestrator_exceptions import (
+from cortex.pipeline.orchestrator import CortexOrchestrator
+from cortex.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from legacy_research.router.router import AgentRouter, AgentCapability
-from legacy_research.context.assembler import ContextAssembler
-from legacy_research.delivery.manager import DeliveryManager
+from cortex.router.router import AgentRouter, AgentCapability
+from cortex.context.assembler import ContextAssembler
+from cortex.delivery.manager import DeliveryManager
 
 
 # ── MCP Outbound Skeleton Tests ──
@@ -35,7 +35,7 @@ class TestMCPOutbound:
 
     def test_client_initialization(self):
         """Client initializes with empty tool list."""
-        from legacy_research.pipeline.mcp_outbound import MCPOutboundClient
+        from cortex.pipeline.mcp_outbound import MCPOutboundClient
 
         client = MCPOutboundClient()
         assert client.available_tools == []
@@ -45,7 +45,7 @@ class TestMCPOutbound:
         """Calling unknown tool returns error dict."""
         import asyncio
 
-        from legacy_research.pipeline.mcp_outbound import MCPOutboundClient
+        from cortex.pipeline.mcp_outbound import MCPOutboundClient
 
         client = MCPOutboundClient()
         result = asyncio.run(client.call_tool("nonexistent", {}))
@@ -54,7 +54,7 @@ class TestMCPOutbound:
 
     def test_tool_spec_dataclass(self):
         """MCPToolSpec holds tool metadata correctly."""
-        from legacy_research.pipeline.mcp_outbound import MCPToolSpec
+        from cortex.pipeline.mcp_outbound import MCPToolSpec
 
         spec = MCPToolSpec(
             name="web_search",
@@ -67,7 +67,7 @@ class TestMCPOutbound:
 
     def test_tool_schema_formatting(self):
         """Tool schemas format correctly for prompt injection."""
-        from legacy_research.pipeline.mcp_outbound import MCPOutboundClient, MCPToolSpec
+        from cortex.pipeline.mcp_outbound import MCPOutboundClient, MCPToolSpec
 
         client = MCPOutboundClient()
         client._tools = [

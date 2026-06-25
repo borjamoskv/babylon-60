@@ -55,7 +55,7 @@ _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
 from cortex.database.schema import get_all_schema
-from legacy_research.migrations.registry import MIGRATIONS
+from cortex.migrations.registry import MIGRATIONS
 
 __all__ = [
     "ensure_migration_table",

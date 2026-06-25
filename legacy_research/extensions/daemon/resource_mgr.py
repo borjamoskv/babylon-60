@@ -3,81 +3,81 @@ import logging
 from pathlib import Path
 
 try:
-    from legacy_research.extensions.daemon.centaur.engine import CentauroEngine
-    from legacy_research.extensions.daemon.centaur.entropic_queue import EntropicQueue
+    from cortex.extensions.daemon.centaur.engine import CentauroEngine
+    from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue
 
-    from legacy_research.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
+    from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
 
     _CENTAUR_AVAILABLE = True
 except ImportError:
     _CENTAUR_AVAILABLE = False
 
 try:
-    from legacy_research.extensions.daemon.frontier import FrontierDaemon
+    from cortex.extensions.daemon.frontier import FrontierDaemon
 
     _FRONTIER_AVAILABLE = True
 except ImportError:
     _FRONTIER_AVAILABLE = False
 
 try:
-    from legacy_research.extensions.daemon.zero_prompting import ZeroPromptingDaemon
+    from cortex.extensions.daemon.zero_prompting import ZeroPromptingDaemon
 
     _ZERO_PROMPTING_AVAILABLE = True
 except ImportError:
     _ZERO_PROMPTING_AVAILABLE = False
 
 try:
-    from legacy_research.extensions.daemon.retrieval_breaker import RetrievalBreakerDaemon
+    from cortex.extensions.daemon.retrieval_breaker import RetrievalBreakerDaemon
 
     _EPISTEMIC_BREAKER_AVAILABLE = True
 except ImportError:
     _EPISTEMIC_BREAKER_AVAILABLE = False
 
 try:
-    from legacy_research.extensions.daemon.hot_state import HotStateDB
+    from cortex.extensions.daemon.hot_state import HotStateDB
 
     _HOT_STATE_AVAILABLE = True
 except ImportError:
     _HOT_STATE_AVAILABLE = False
 
 try:
-    from legacy_research.extensions.daemon.scheduler import SovereignScheduler
+    from cortex.extensions.daemon.scheduler import SovereignScheduler
 
     _SCHEDULER_AVAILABLE = True
 except ImportError:
     _SCHEDULER_AVAILABLE = False
 
 try:
-    from legacy_research.extensions.daemon.watchers import WatchdogHub
+    from cortex.extensions.daemon.watchers import WatchdogHub
 
     _WATCHDOG_HUB_AVAILABLE = True
 except ImportError:
     _WATCHDOG_HUB_AVAILABLE = False
 
 try:
-    from legacy_research.extensions.daemon.api import HumanCallbackAPI
+    from cortex.extensions.daemon.api import HumanCallbackAPI
 
     _API_AVAILABLE = True
 except ImportError:
     _API_AVAILABLE = False
 
 try:
-    from legacy_research.extensions.daemon.entropic_wake import EntropicWakeDaemon
+    from cortex.extensions.daemon.entropic_wake import EntropicWakeDaemon
 
     _ENTROPIC_WAKE_AVAILABLE = True
 except ImportError:
     _ENTROPIC_WAKE_AVAILABLE = False
 
 try:
-    from legacy_research.extensions.daemon.primitive_synthesis import PrimitiveSynthesisDaemon
+    from cortex.extensions.daemon.primitive_synthesis import PrimitiveSynthesisDaemon
 
     _PRIMITIVE_SYNTHESIS_AVAILABLE = True
 except ImportError:
     _PRIMITIVE_SYNTHESIS_AVAILABLE = False
 
 
-from legacy_research.extensions.daemon.models import CORTEX_DB, CORTEX_DIR
-from legacy_research.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
+from cortex.extensions.daemon.models import CORTEX_DB, CORTEX_DIR
+from cortex.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
 
 from typing import TYPE_CHECKING, Any
 
@@ -165,7 +165,7 @@ class ResourceMgrMixin:
         # 2. Event Bus (reuse existing or create)
         self._event_bus = None
         try:
-            from legacy_research.events.bus import DistributedEventBus
+            from cortex.events.bus import DistributedEventBus
 
             self._event_bus = DistributedEventBus()
             logger.info("📡 DistributedEventBus ENABLED")
@@ -299,7 +299,7 @@ class ResourceMgrMixin:
             # -------------------------------
 
             from cortex.database.core import connect
-            from legacy_research.extensions.timing import TimingTracker
+            from cortex.extensions.timing import TimingTracker
 
             self.timing_conn = connect(file_config.get("db_path", str(CORTEX_DB)))
             self.tracker = TimingTracker(self.timing_conn)

@@ -7,7 +7,7 @@ Optimized for Claude, GPT-4o, Gemini, and local models (Llama 3+).
 
 Usage::
 
-    from legacy_research.extensions.agents.system_prompt import SYSTEM_PROMPT
+    from cortex.extensions.agents.system_prompt import SYSTEM_PROMPT
 
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},

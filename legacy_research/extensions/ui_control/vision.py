@@ -17,7 +17,7 @@ except ImportError:
     ImageIO = None
     kUTTypePNG = None
 
-from legacy_research.extensions.ui_control.models import InteractionResult
+from cortex.extensions.ui_control.models import InteractionResult
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine

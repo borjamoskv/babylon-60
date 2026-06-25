@@ -21,7 +21,7 @@ from cortex.engine.reflexion import (
     ReflexionVerdict,
     TreeRewriter,
 )
-from legacy_research.isa.builder import (
+from cortex.isa.builder import (
     dispatch,
     seq,
     par,

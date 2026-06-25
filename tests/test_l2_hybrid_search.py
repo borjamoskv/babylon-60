@@ -6,7 +6,7 @@ All tests exercise pure/static functions - no DB, no sqlite-vec required.
 
 from __future__ import annotations
 
-from legacy_research.memory.l2_hybrid_search import (
+from cortex.memory.l2_hybrid_search import (
     L2HybridSearch,
     L2SearchResult,
     _sanitize_fts_query,

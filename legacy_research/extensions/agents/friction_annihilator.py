@@ -29,7 +29,7 @@ class FrictionAnnihilatorAgent:
         if self._engine is not None:
             return
         from cortex.cli import get_engine  # pyright: ignore[reportAttributeAccessIssue]
-        from legacy_research.config import DEFAULT_DB_PATH
+        from cortex.config import DEFAULT_DB_PATH
 
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
         self._engine = get_engine(db_val)

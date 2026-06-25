@@ -11,7 +11,7 @@ import logging
 from dataclasses import dataclass
 from typing import Literal
 
-from legacy_research.router.policy import RetrievalPolicyNetwork, SignalVector
+from cortex.router.policy import RetrievalPolicyNetwork, SignalVector
 
 logger = logging.getLogger("cortex.router.causal")
 

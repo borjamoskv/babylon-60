@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from legacy_research.extensions.notifications.events import CortexEvent
+from cortex.extensions.notifications.events import CortexEvent
 
 
 class BaseAdapter(ABC):

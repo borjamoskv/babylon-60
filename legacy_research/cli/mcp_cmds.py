@@ -29,7 +29,7 @@ def mcp_cmds() -> None:
 def aether_mcp(host: str, port: int, transport: str) -> None:
     """Boot the MOSKV-Aether Sovereign MCP Server."""
     try:
-        from legacy_research.mcp.aether_server import run_aether_mcp
+        from cortex.mcp.aether_server import run_aether_mcp
     except ImportError:
         console.print("[red]❌ Error: MCP SDK not installed. Run: pip install 'mcp'[/red]")
         return
@@ -51,8 +51,8 @@ def aether_mcp(host: str, port: int, transport: str) -> None:
 )
 def trust_mcp(host: str, port: int, transport: str) -> None:
     """Boot the standard CORTEX Trust MCP Server."""
-    from legacy_research.mcp.server import run_server
-    from legacy_research.mcp.utils import MCPServerConfig
+    from cortex.mcp.server import run_server
+    from cortex.mcp.utils import MCPServerConfig
 
     cfg = MCPServerConfig(host=host, port=port, transport=transport)  # type: ignore
     run_server(cfg)
@@ -64,9 +64,9 @@ def sovereign_mcp() -> None:
     import json
     import sys
 
+    from cortex.extensions.policy.jis_auditor import JISAuditor
+    from cortex.memory.vsa import VSAPipelineBridge
     from cortex_rs import McpSovereignHost  # type: ignore
-    from legacy_research.extensions.policy.jis_auditor import JISAuditor
-    from legacy_research.memory.vsa import VSAPipelineBridge
 
     sys.stderr.write("🚀 Booting CORTEX Sovereign MCP Server (Rust-native, Transport: stdio)...\n")
     sys.stderr.flush()

@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from legacy_research.extensions.ui_control.models import (
+from cortex.extensions.ui_control.models import (
     AppleScriptExecutionError,
     AppNotRunningError,
     UIElementNotFoundError,

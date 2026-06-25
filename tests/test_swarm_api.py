@@ -5,7 +5,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from cortex.api.core import app
-from legacy_research.auth.deps import require_auth, require_permission
+from cortex.auth.deps import require_auth, require_permission
 
 # Mock AuthResult
 mock_auth = MagicMock()
@@ -33,7 +33,7 @@ async def client():
 
 
 @pytest.mark.asyncio
-@patch("legacy_research.extensions.swarm.manager.isolated_worktree")
+@patch("cortex.extensions.swarm.manager.isolated_worktree")
 async def test_swarm_worktree_lifecycle_api(mock_iso, client):
     # Mock context manager
     mock_ctx = AsyncMock()

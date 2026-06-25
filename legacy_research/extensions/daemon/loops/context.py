@@ -7,7 +7,7 @@ import logging
 import re
 import time
 
-from legacy_research.extensions.daemon.utils import run_osascript
+from cortex.extensions.daemon.utils import run_osascript
 
 logger = logging.getLogger("cortex.extensions.daemon.loops.context")
 

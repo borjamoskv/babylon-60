@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from legacy_research.utils.errors import CortexError
-from legacy_research.guards.virgo import VirgoValidationError, ContextPoisoningError
+from cortex.utils.errors import CortexError
+from cortex.guards.virgo import VirgoValidationError, ContextPoisoningError
 
 # Mark all tests in this module as slow due to CortexEngine.init_db()
 pytestmark = pytest.mark.slow

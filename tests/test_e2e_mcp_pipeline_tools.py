@@ -7,7 +7,7 @@ Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persi
 import pytest
 import time
 
-from legacy_research.pipeline import (
+from cortex.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -17,14 +17,14 @@ from legacy_research.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from legacy_research.pipeline.orchestrator import CortexOrchestrator
-from legacy_research.pipeline._orchestrator_exceptions import (
+from cortex.pipeline.orchestrator import CortexOrchestrator
+from cortex.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )
-from legacy_research.router.router import AgentRouter, AgentCapability
-from legacy_research.context.assembler import ContextAssembler
-from legacy_research.delivery.manager import DeliveryManager
+from cortex.router.router import AgentRouter, AgentCapability
+from cortex.context.assembler import ContextAssembler
+from cortex.delivery.manager import DeliveryManager
 
 
 # ── MCP Pipeline Tools Tests ──
@@ -34,7 +34,7 @@ class TestMCPPipelineTools:
     """Test MCP pipeline tool serialization."""
 
     def test_result_to_dict_single_agent(self):
-        from legacy_research.mcp.pipeline_tools import _result_to_dict
+        from cortex.mcp.pipeline_tools import _result_to_dict
 
         result = PipelineResult(
             mission_id="m-test",
@@ -49,7 +49,7 @@ class TestMCPPipelineTools:
         assert d["status"] == "success"
 
     def test_result_to_dict_multi_agent(self):
-        from legacy_research.mcp.pipeline_tools import _result_to_dict
+        from cortex.mcp.pipeline_tools import _result_to_dict
 
         result = PipelineResult(
             mission_id="m-multi",
@@ -68,7 +68,7 @@ class TestMCPPipelineTools:
         assert "[a2]" in d["content"]
 
     def test_result_to_dict_error(self):
-        from legacy_research.mcp.pipeline_tools import _result_to_dict
+        from cortex.mcp.pipeline_tools import _result_to_dict
 
         result = PipelineResult(
             mission_id="m-err",

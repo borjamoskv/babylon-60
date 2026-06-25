@@ -8,8 +8,8 @@ Ensures generation, execution proof signing, and Byzantine rejection of hallucin
 
 import pytest
 
-from legacy_research.crypto.keys import ZKSwarmIdentity
-from legacy_research.guards.zk_guard import VoidStateSecurityError, ZKSwarmGuard
+from cortex.crypto.keys import ZKSwarmIdentity
+from cortex.guards.zk_guard import VoidStateSecurityError, ZKSwarmGuard
 
 
 @pytest.fixture

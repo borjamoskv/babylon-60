@@ -3,6 +3,9 @@
 Prueba Empírica del Apoptosis Daemon (LEY 10).
 """
 
+import logging
+logger = logging.getLogger(__name__)
+
 import asyncio
 import os
 import sys
@@ -19,7 +22,7 @@ from cortex.storage.sqlite_adapter import SQLiteAdapter
 
 
 async def run_test():
-    print("[TEST] Inicializando entorno para Apoptosis Daemon...")
+    logger.info("[TEST] Inicializando entorno para Apoptosis Daemon...")
     
     # 1. Base de datos en memoria
     conn = await aiosqlite.connect(":memory:")
@@ -82,10 +85,10 @@ async def run_test():
     
     # 4. Iniciar Apoptosis Daemon
     daemon = ApoptosisDaemon(mtk_guard, db)
-    print("[TEST] Ejecutando Barrido Apoptótico...")
+    logger.info("[TEST] Ejecutando Barrido Apoptótico...")
     purged = await daemon._sweep_stale_nodes()
     
-    print(f"[TEST] Nodos purgados: {purged}")
+    logger.info(f"[TEST] Nodos purgados: {purged}")
     assert purged == 1, f"Se esperaba 1 nodo purgado, se purgaron {purged}"
     
     # 5. Verificación física post-poda
@@ -93,7 +96,7 @@ async def run_test():
     assert len(rows_post) == 1, f"Debería quedar 1 nodo, quedan {len(rows_post)}"
     assert rows_post[0]["content"] == "FRESH_NODE", "El nodo restante debe ser el nodo fresco."
     
-    print("[SUCCESS] Apoptosis Daemon superó la validación causal. El nodo stale fue aniquilado físicamente respetando la LEY 10 (Weaponized Forgetting).")
+    logger.info("[SUCCESS] Apoptosis Daemon superó la validación causal. El nodo stale fue aniquilado físicamente respetando la LEY 10 (Weaponized Forgetting).")
     
     await db.close()
 

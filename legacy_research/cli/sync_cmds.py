@@ -11,12 +11,7 @@ from rich.panel import Panel
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.slow_tip import tip_on_slow
-from legacy_research.extensions.sync import (
-    export_obsidian,
-    export_snapshot,
-    export_to_json,
-    sync_memory,
-)
+from cortex.extensions.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
 
 __all__ = [
     "export",
@@ -107,7 +102,7 @@ def export(db, out, fmt, project, min_confidence, types) -> None:
                 )
                 console.print(f"[green]✓[/] Snapshot exportado a [cyan]{out_path}[/]")
             else:
-                from legacy_research.utils.export import export_facts
+                from cortex.utils.export import export_facts
 
                 # Fetch facts through the new engine method
                 facts = await engine.get_all_active_facts(project=project, fact_types=fact_types)

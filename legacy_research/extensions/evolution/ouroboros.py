@@ -8,7 +8,7 @@ import sys
 import time
 from typing import Any, Optional
 
-from legacy_research.guards.z3_anvil import SovereignAnvil
+from cortex.guards.z3_anvil import SovereignAnvil
 
 logger = logging.getLogger("cortex.evolution.ouroboros")
 

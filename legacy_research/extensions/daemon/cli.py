@@ -25,7 +25,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from legacy_research import __version__ # type: ignore
-from legacy_research.extensions.daemon import (
+from cortex.extensions.daemon import (
     BUNDLE_ID,
     DEFAULT_COOLDOWN,
     DEFAULT_INTERVAL,
@@ -33,7 +33,7 @@ from legacy_research.extensions.daemon import (
     DEFAULT_STALE_HOURS,
     MoskvDaemon,
 )
-from legacy_research.extensions.platform.sys import get_service_dir, is_linux, is_macos, is_windows
+from cortex.extensions.platform.sys import get_service_dir, is_linux, is_macos, is_windows
 
 __all__ = [
     "PLIST_SOURCE",
@@ -231,7 +231,7 @@ def status(as_json: bool) -> None:
 
         # Enrich with telemetry if available
         try:
-            from legacy_research.telemetry import collector  # type: ignore[reportAttributeAccessIssue]
+            from cortex.telemetry import collector  # type: ignore[reportAttributeAccessIssue]
 
             last["telemetry"] = {
                 "spans_total": len(collector),
@@ -283,7 +283,7 @@ def version() -> None:
 @cli.command()
 def install() -> None:
     """Install daemon as a system service (launchd / systemd / Task Scheduler)."""
-    from legacy_research.extensions.daemon.platform import (
+    from cortex.extensions.daemon.platform import (
         install_linux,
         install_macos,
         install_windows,
@@ -303,7 +303,7 @@ def install() -> None:
 @cli.command()
 def uninstall() -> None:
     """Remove daemon system service."""
-    from legacy_research.extensions.daemon.platform import (
+    from cortex.extensions.daemon.platform import (
         uninstall_linux,
         uninstall_macos,
         uninstall_windows,

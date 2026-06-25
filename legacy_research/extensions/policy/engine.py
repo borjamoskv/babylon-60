@@ -16,7 +16,7 @@ import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from legacy_research.extensions.policy.models import (
+from cortex.extensions.policy.models import (
     ACTION_TYPE_MAP,
     REWARD_MAP,
     ActionItem,

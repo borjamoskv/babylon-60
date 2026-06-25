@@ -26,7 +26,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from legacy_research.auth import AuthResult, require_permission
+from cortex.auth import AuthResult, require_permission
 
 __all__ = [
     "GraphData",
@@ -66,7 +66,7 @@ def get_hive_graph(
     Get the knowledge graph for 3D visualization.
     Nodes are facts, links are semantic similarities.
     """
-    from legacy_research.config import DB_PATH
+    from cortex.config import DB_PATH
     from cortex.database.core import connect
 
     conn = connect(DB_PATH, row_factory=sqlite3.Row)

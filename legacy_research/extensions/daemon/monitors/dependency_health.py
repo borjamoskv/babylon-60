@@ -68,7 +68,7 @@ class SQLiteHealthCheck(HealthCheck):
 
     def __init__(self, db_path: str | None = None):
         super().__init__(name="sqlite")
-        from legacy_research.config import DEFAULT_DB_PATH
+        from cortex.config import DEFAULT_DB_PATH
 
         self.db_path = db_path or str(DEFAULT_DB_PATH)
 
@@ -168,7 +168,7 @@ class EmbeddingModelHealthCheck(HealthCheck):
 
     def check(self) -> DependencyAlert | None:
         try:
-            from legacy_research.embeddings.manager import EmbeddingManager
+            from cortex.embeddings.manager import EmbeddingManager
 
             provider = EmbeddingManager(engine=None)
             # Quick sanity check

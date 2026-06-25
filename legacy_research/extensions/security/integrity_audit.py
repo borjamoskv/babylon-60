@@ -306,7 +306,7 @@ class IntegrityAuditor:
         failures: list[TamperedFact] = []
 
         try:
-            from legacy_research.extensions.security.signatures import (
+            from cortex.extensions.security.signatures import (
                 SignatureVerificationError,
                 get_default_signer,
             )

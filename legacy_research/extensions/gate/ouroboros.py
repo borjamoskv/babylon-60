@@ -100,7 +100,7 @@ class OuroborosGate:
         # 350/100: Sensory Feedback
         import asyncio
 
-        from legacy_research.routes.notch_ws import notify_notch_pruning
+        from cortex.routes.notch_ws import notify_notch_pruning
 
         asyncio.create_task(notify_notch_pruning())
 

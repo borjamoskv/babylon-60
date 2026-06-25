@@ -142,7 +142,7 @@ class TestFase1NucleoOperativo:
     # APEX-009: Causalidad Base-60 Intransigente — BABYLON-60
     def test_apex_009_cortex_module_exists(self):
         """DESTROY: Prove BABYLON-60 is a concept, not code."""
-        mod = importlib.import_module("cortex.engine.cortex")
+        mod = importlib.import_module("cortex.engine.babylon60")
         has_class_or_func = any(
             callable(getattr(mod, n, None)) for n in dir(mod) if not n.startswith("_")
         )
@@ -150,7 +150,7 @@ class TestFase1NucleoOperativo:
 
     def test_apex_009_cortex_conversion(self):
         """DESTROY: Prove Base-60 conversion doesn't actually work."""
-        mod = importlib.import_module("cortex.engine.cortex")
+        mod = importlib.import_module("cortex.engine.babylon60")
         # Find any conversion function
         convert_funcs = [
             n for n in dir(mod)

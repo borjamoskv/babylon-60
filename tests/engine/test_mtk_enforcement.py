@@ -16,7 +16,7 @@ def force_mtk_enforcement(monkeypatch):
     monkeypatch.setenv("CORTEX_KERNEL_KEY", "test_key_123")
 from cortex.engine.mtk_sqlite_authorizer import install_mtk_authorizer
 from cortex.engine.mtk_core import MTKGuard
-from legacy_research.types.evidence import ClosurePayload, EvidenceBundle
+from cortex.types.evidence import ClosurePayload, EvidenceBundle
 
 
 

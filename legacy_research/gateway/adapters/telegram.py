@@ -33,7 +33,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from legacy_research.gateway import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
+from cortex.gateway import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
 
 logger = logging.getLogger("cortex.gateway.telegram")
 
@@ -250,7 +250,7 @@ async def telegram_webhook(
     # Send reply back to Telegram
     import httpx
 
-    from legacy_research.guards.url_guard import SafeTransport
+    from cortex.guards.url_guard import SafeTransport
 
     token = os.environ.get("CORTEX_TELEGRAM_TOKEN", "")
     if token:

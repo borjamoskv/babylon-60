@@ -12,7 +12,6 @@ import logging
 import random
 from typing import Any
 
-from cortex.math.babylon import Babylon60
 from cortex.engine._genome_tree_helper import remove_target, replace_target
 from cortex.engine._genome_types import MutationType, StrategyGenome
 from cortex.isa.builder import (
@@ -26,6 +25,7 @@ from cortex.isa.builder import (
     par,
     seq,
 )
+from cortex.math.babylon import Babylon60
 
 logger = logging.getLogger("cortex.engine.genome")
 

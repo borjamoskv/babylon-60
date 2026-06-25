@@ -26,8 +26,8 @@ def start_worker(db: str, poll: float):
     """Start all background workers (Enrichment, Compaction)."""
     import asyncio
 
-    from legacy_research.worker.enrichment import EnrichmentWorker
-    from legacy_research.worker.telemetry_compaction import TelemetryCompactionWorker
+    from cortex.worker.enrichment import EnrichmentWorker
+    from cortex.worker.telemetry_compaction import TelemetryCompactionWorker
 
     db_path = db or DEFAULT_DB
     enrichment = EnrichmentWorker(db_path=db_path, poll_interval=poll)

@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 from starlette.requests import Request
 
 from cortex.api.deps import get_async_engine
-from legacy_research.auth import require_permission
-from legacy_research.extensions.swarm.psychohistory import PsychohistoryOrchestrator
+from cortex.auth import require_permission
+from cortex.extensions.swarm.psychohistory import PsychohistoryOrchestrator
 
 
 async def get_manager(request: Request):

@@ -27,7 +27,7 @@ from pathlib import Path
 
 from legacy_research import config
 from cortex.database.core import connect_async
-from legacy_research.extensions.daemon.models import SecurityAlert
+from cortex.extensions.daemon.models import SecurityAlert
 
 logger = logging.getLogger("moskv-daemon")
 

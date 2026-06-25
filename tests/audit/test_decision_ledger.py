@@ -6,7 +6,7 @@ import aiosqlite
 import os
 import tempfile
 import json
-from legacy_research.audit.decision_ledger import (
+from cortex.audit.decision_ledger import (
 
 
     DecisionNode,

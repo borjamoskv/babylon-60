@@ -20,10 +20,10 @@ def _bft_sqlite_connect(*args, **kwargs):
 _sqlite3_bft_orig.connect = _bft_sqlite_connect
 # -------------------------------
 
-from legacy_research.compat.optional import np
-from legacy_research.guards.exergy_guard import calculate_exergy
-from legacy_research.memory.models import CortexFactModel
-from legacy_research.utils import void_vec
+from cortex.compat.optional import np
+from cortex.guards.exergy_guard import calculate_exergy
+from cortex.memory.models import CortexFactModel
+from cortex.utils import void_vec
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ class WriteTrait:
                             (rowid, binary_bytes),
                         )
                         # MIH Indexing
-                        from legacy_research.utils.void_mih import slice_void_bit
+                        from cortex.utils.void_mih import slice_void_bit
 
                         shards = slice_void_bit(binary_bytes)
                         insert_mih_sql = (

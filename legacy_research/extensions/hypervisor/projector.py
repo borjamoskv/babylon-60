@@ -99,7 +99,7 @@ class EventProjector:
     async def _signal_endocrine(self, hormone: str, intensity: float) -> None:
         """Signal the Digital Endocrine system if available."""
         try:
-            from legacy_research.extensions.sovereign.endocrine import DigitalEndocrine
+            from cortex.extensions.sovereign.endocrine import DigitalEndocrine
 
             endocrine = DigitalEndocrine()
             endocrine.signal(hormone, intensity=intensity)  # type: ignore[reportAttributeAccessIssue]
@@ -111,7 +111,7 @@ class EventProjector:
     async def _verify_songlines(self, project: str) -> None:
         """Trigger autopoiesis songline verification if available."""
         try:
-            from legacy_research.extensions.sovereign.autopoiesis import Autopoiesis
+            from cortex.extensions.sovereign.autopoiesis import Autopoiesis
 
             ap = Autopoiesis()
             await ap.verify_songlines(project)  # type: ignore[reportAttributeAccessIssue]

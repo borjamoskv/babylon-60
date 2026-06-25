@@ -8,7 +8,7 @@ quorum enforcement, edge cases.
 
 import pytest
 
-from legacy_research.consensus.rwa_bft import (
+from cortex.consensus.rwa_bft import (
     AgentVote,
     ConsensusResult,
     RWABFTConsensus,

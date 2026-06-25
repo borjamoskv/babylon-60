@@ -12,7 +12,7 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from legacy_research.utils.result import Result
+from cortex.utils.result import Result
 
 if TYPE_CHECKING:
     from cortex.database.writer import SqliteWriteWorker

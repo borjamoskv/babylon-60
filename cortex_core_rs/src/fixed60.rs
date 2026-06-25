@@ -8,6 +8,7 @@ pub const SCALE: i64 = 216_000;
 #[pyclass]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Fixed60 {
+    #[pyo3(get, set)]
     pub raw_value: i64,
 }
 

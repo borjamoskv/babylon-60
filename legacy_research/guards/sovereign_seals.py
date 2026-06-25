@@ -14,7 +14,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from legacy_research.guards._seal_printer import SealPrinter
+from cortex.guards._seal_printer import SealPrinter
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -429,7 +429,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
 
     # ── SSRF URLGuard Verification (CodeQL #95) ──
     try:
-        from legacy_research.guards.url_guard import is_safe_url
+        from cortex.guards.url_guard import is_safe_url
 
         if is_safe_url("https://sunoapi.org/api/v1"):
             printer.success("SSRF URLGuard: Logic active and functional.")

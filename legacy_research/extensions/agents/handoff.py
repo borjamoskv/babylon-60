@@ -14,8 +14,8 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from legacy_research.extensions.sync.common import CORTEX_DIR, atomic_write
-from legacy_research.memory.temporal import now_iso
+from cortex.extensions.sync.common import CORTEX_DIR, atomic_write
+from cortex.memory.temporal import now_iso
 
 __all__ = [
     "DEFAULT_HANDOFF_PATH",
@@ -68,7 +68,7 @@ async def generate_handoff(
         ) as cursor:
             decision_rows = await cursor.fetchall()
 
-        from legacy_research.crypto import get_default_encrypter
+        from cortex.crypto import get_default_encrypter
 
         enc = get_default_encrypter()
 
@@ -123,7 +123,7 @@ async def generate_handoff(
         # ── Causal Episodes (Epoch 8 - WHY context) ────────────────────
         causal_episodes_data: list[dict[str, Any]] = []
         try:
-            from legacy_research.memory.episodic import CausalTracer
+            from cortex.memory.episodic import CausalTracer
 
             tracer = CausalTracer(conn)
             # Trace causal chains for each hot decision
@@ -216,7 +216,7 @@ async def generate_handoff(
     # ── Cognitive Fingerprint (v1.3) - Behavioral prior for receiving agent ─
     cognitive_fingerprint: dict = {}
     try:
-        from legacy_research.extensions.fingerprint.extractor import FingerprintExtractor
+        from cortex.extensions.fingerprint.extractor import FingerprintExtractor
 
         fp = await FingerprintExtractor.extract(engine, project=None, top_domains=10)
         cognitive_fingerprint = fp.to_dict()

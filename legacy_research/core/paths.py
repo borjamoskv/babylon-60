@@ -11,7 +11,7 @@ CI, Docker, and third-party onboarding.
 
 Usage::
 
-    from legacy_research.core.paths import CORTEX_DIR, AGENT_DIR, CORTEX_DB
+    from cortex.core.paths import CORTEX_DIR, AGENT_DIR, CORTEX_DB
 
 Environment variables::
 

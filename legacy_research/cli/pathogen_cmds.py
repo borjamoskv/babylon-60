@@ -14,7 +14,7 @@ import click
 from rich.panel import Panel
 
 from cortex.cli.common import console, get_engine
-from legacy_research.utils.errors import CortexError
+from cortex.utils.errors import CortexError
 
 
 @click.group("pathogen")

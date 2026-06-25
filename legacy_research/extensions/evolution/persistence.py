@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final
 
-from legacy_research.extensions.evolution.agents import (
+from cortex.extensions.evolution.agents import (
     AgentDomain,
     Mutation,
     MutationType,

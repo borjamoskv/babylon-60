@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from legacy_research.auth.rbac import Permission
+from cortex.auth.rbac import Permission
 
 
 @dataclass

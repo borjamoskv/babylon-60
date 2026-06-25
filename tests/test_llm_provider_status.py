@@ -9,10 +9,10 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
 
-from legacy_research.auth.models import AuthResult
+from cortex.auth.models import AuthResult
 from cortex.cli import cli
-from legacy_research.extensions.llm._presets import _PRESETS_CACHE, provider_inventory
-from legacy_research.routes import ask as ask_router
+from cortex.extensions.llm._presets import _PRESETS_CACHE, provider_inventory
+from cortex.routes import ask as ask_router
 
 
 @pytest.fixture(autouse=True)

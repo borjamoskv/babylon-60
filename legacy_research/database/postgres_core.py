@@ -24,7 +24,7 @@ try:
 except ImportError:
     register_vector = None
 
-from legacy_research.utils.errors import DBLockError
+from cortex.utils.errors import DBLockError
 
 __all__ = [
     "connect_async_ctx",

@@ -179,7 +179,6 @@ def test_forensics_command_is_experimental_in_root_cli(monkeypatch) -> None:
     if "forensics" in cortex.cli.common.cli.commands:
         del cortex.cli.common.cli.commands["forensics"]
 
-    import os
     if "CORTEX_ENABLE_EXPERIMENTAL_CLI" in os.environ:
         del os.environ["CORTEX_ENABLE_EXPERIMENTAL_CLI"]
     importlib.reload(cortex.cli.forensics_cmds)

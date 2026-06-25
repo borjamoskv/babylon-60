@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from legacy_research.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
+from cortex.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
 
 
 class EntropyFilter(ImmuneFilter):

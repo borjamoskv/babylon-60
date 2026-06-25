@@ -11,7 +11,7 @@ import logging
 from typing import Any
 
 from cortex.engine import CortexEngine
-from legacy_research.extensions.llm.manager import LLMManager
+from cortex.extensions.llm.manager import LLMManager
 
 logger = logging.getLogger("cortex.extensions.evolution.demiurge")
 
@@ -74,7 +74,7 @@ class DemiurgeCompiler:
                     generated_code = generated_code[6:].strip()
 
             # Phase 3: Zero-Trust Validation (AST Sandbox - CRIT-01 hardened)
-            from legacy_research.utils.sandbox import ASTSandbox
+            from cortex.utils.sandbox import ASTSandbox
 
             _sandbox = ASTSandbox(max_nodes=500, max_depth=20, timeout_seconds=5)
             verdict = _sandbox.validate(generated_code)

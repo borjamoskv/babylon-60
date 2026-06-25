@@ -19,7 +19,7 @@ from collections import OrderedDict
 
 from pydantic import BaseModel
 
-from legacy_research.agents.copilot_contracts import SuggestionBatch
+from cortex.agents.copilot_contracts import SuggestionBatch
 
 logger = logging.getLogger("cortex.agents.copilot.cache")
 

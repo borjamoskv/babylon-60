@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from legacy_research.sica.strategy import SearchStrategy
+from cortex.sica.strategy import SearchStrategy
 
 from .types import TournamentResult
 

@@ -77,7 +77,7 @@ async def execute_circuit_trip(gap_description: str, cortex_engine: CortexEngine
 
     # 3. Trigger Autodidact (mocked or actual if integrated)
     try:
-        from legacy_research.agents.autodidact import (
+        from cortex.agents.autodidact import (
             force_ingestion,  # pyright: ignore[reportMissingImports]
         )
 

@@ -10,8 +10,8 @@ import pytest
 from pathlib import Path
 
 from cortex.engine import CortexEngine
-from legacy_research.cache.redis_l1 import RedisL1Cache
-from legacy_research.search.models import SearchResult
+from cortex.cache.redis_l1 import RedisL1Cache
+from cortex.search.models import SearchResult
 
 # Mark tests as slow due to CortexEngine DB initialization
 pytestmark = pytest.mark.slow

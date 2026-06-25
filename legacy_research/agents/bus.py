@@ -14,7 +14,7 @@ import os
 import time
 from typing import Any, Protocol
 
-from legacy_research.agents.message_schema import AgentMessage
+from cortex.agents.message_schema import AgentMessage
 
 logger = logging.getLogger("cortex.agents.bus")
 

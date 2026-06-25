@@ -27,8 +27,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from legacy_research.extensions.daemon.models import SecurityAlert
-from legacy_research.memory import AsyncEncoder, VectorStoreL2
+from cortex.extensions.daemon.models import SecurityAlert
+from cortex.memory import AsyncEncoder, VectorStoreL2
 
 logger = logging.getLogger("moskv-daemon")
 

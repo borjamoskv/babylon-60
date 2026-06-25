@@ -39,7 +39,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 
 from cortex.api.deps import get_async_engine
-from legacy_research.auth import AuthResult, require_permission
+from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
 
 __all__ = [
@@ -59,7 +59,7 @@ logger = logging.getLogger(__name__)
 # ─── Request / Response Models ───────────────────────────────────────
 
 
-from legacy_research.routes.facts import (
+from cortex.routes.facts import (
     BatchStoreRequest,
     SearchMemoryRequest,
     StoreMemoryRequest,

@@ -19,9 +19,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from legacy_research.extensions.mejoralo.engine import MejoraloEngine
-from legacy_research.extensions.mejoralo.chronos import calculate_chronos_yield
-from legacy_research.extensions.mejoralo.constants import (
+    from cortex.extensions.mejoralo.engine import MejoraloEngine
+from cortex.extensions.mejoralo.chronos import calculate_chronos_yield
+from cortex.extensions.mejoralo.constants import (
     ESCALATION_ITER_L2,
     ESCALATION_ITER_L3,
     HARD_ITERATION_CAP,
@@ -29,12 +29,12 @@ from legacy_research.extensions.mejoralo.constants import (
     PYTEST_TIMEOUT_SECONDS,
     STAGNATION_LIMIT,
 )
-from legacy_research.extensions.mejoralo.deps import sort_by_topological_order
-from legacy_research.extensions.mejoralo.heal_prompts import (
+from cortex.extensions.mejoralo.deps import sort_by_topological_order
+from cortex.extensions.mejoralo.heal_prompts import (
     get_files_per_iteration as _get_files_per_iteration,
 )
-from legacy_research.extensions.mejoralo.models import ScanResult
-from legacy_research.extensions.mejoralo.taint import is_file_tainted, mark_file_tainted
+from cortex.extensions.mejoralo.models import ScanResult
+from cortex.extensions.mejoralo.taint import is_file_tainted, mark_file_tainted
 
 __all__ = ["heal_proj", "heal_project"]
 logger = logging.getLogger("cortex.extensions.mejoralo.heal")
@@ -77,7 +77,7 @@ async def _heal_file_async(
 
     Returns the new code if successful, None otherwise.
     """
-    from legacy_research.extensions.mejoralo.swarm import MejoraloSwarm
+    from cortex.extensions.mejoralo.swarm import MejoraloSwarm
 
     swarm = MejoraloSwarm(level=level)
     return await swarm.refactor_file(
@@ -90,7 +90,7 @@ def _calculate_total_complexity(source_code: str) -> int:
         tree = ast.parse(source_code)
     except SyntaxError:
         return 0
-    from legacy_research.extensions.mejoralo.scan import _COMPLEXITY_NODES
+    from cortex.extensions.mejoralo.scan import _COMPLEXITY_NODES
 
     comp = 0
     for node in ast.walk(tree):
@@ -346,7 +346,7 @@ def _run_healing_iteration(
     engine: MejoraloEngine | None = None,
 ) -> tuple[bool, ScanResult]:
     """Execute a single multi-file healing pass with re-scan."""
-    from legacy_research.extensions.mejoralo.scan import scan
+    from cortex.extensions.mejoralo.scan import scan
 
     file_issues = _extract_issues_from_findings(current_result)
     if not file_issues:

@@ -16,7 +16,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 
-from legacy_research.extensions.llm.provider import LLMProvider
+from cortex.extensions.llm.provider import LLMProvider
 
 __all__ = [
     "ProviderPool",

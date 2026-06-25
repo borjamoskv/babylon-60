@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Final
 
-from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 __all__ = ["DriftMonitor", "DriftSignature"]
 

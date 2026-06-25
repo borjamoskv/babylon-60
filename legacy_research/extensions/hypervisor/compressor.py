@@ -12,11 +12,11 @@ import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from legacy_research.extensions.hypervisor.models import HealthReport, Memory, Receipt
+from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
 
 if TYPE_CHECKING:
     from cortex.engine.models import Fact
-    from legacy_research.search import SearchResult
+    from cortex.search import SearchResult
 
 __all__ = ["ComplexityCompressor"]
 

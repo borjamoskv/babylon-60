@@ -15,8 +15,8 @@ from cortex.engine.zero_prompting import (
     ResolutionReport,
     ZeroPromptingEvolutionStrategy,
 )
-from legacy_research.extensions.skills.cadastral.engine import CadastralEngine
-from legacy_research.extensions.skills.cadastral.models import (
+from cortex.extensions.skills.cadastral.engine import CadastralEngine
+from cortex.extensions.skills.cadastral.models import (
     CadastralReport,
     Coordinate,
     ExpropiationStatus,
@@ -340,13 +340,13 @@ class TestZeroPromptingEvolution:
 
 class TestAxiomRegistry:
     def test_sovereign_axiom_registered(self) -> None:
-        from legacy_research.extensions.axioms.registry import AXIOM_REGISTRY
+        from cortex.extensions.axioms.registry import AXIOM_REGISTRY
 
         ax = AXIOM_REGISTRY.get("AX-VII")
         assert ax is not None
 
     def test_total_axiom_count(self) -> None:
-        from legacy_research.extensions.axioms.registry import AXIOM_REGISTRY
+        from cortex.extensions.axioms.registry import AXIOM_REGISTRY
 
         assert len(AXIOM_REGISTRY) == 7
 

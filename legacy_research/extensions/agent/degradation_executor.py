@@ -14,7 +14,7 @@ import time
 from collections.abc import Awaitable, Callable
 from typing import Any, ParamSpec, TypeVar
 
-from legacy_research.extensions.agent.degradation_types import (
+from cortex.extensions.agent.degradation_types import (
     AgentAction,
     AgentDegradedError,
     AgentResult,

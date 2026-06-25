@@ -51,10 +51,10 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from legacy_research.memory.models import MemoryEvent
+from cortex.memory.models import MemoryEvent
 
 try:
-    from legacy_research.extensions.security.tenant import get_tenant_id
+    from cortex.extensions.security.tenant import get_tenant_id
 except ImportError:
 
     def get_tenant_id() -> str:

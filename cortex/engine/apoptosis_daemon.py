@@ -93,7 +93,7 @@ class ApoptosisDaemon:
         
         # 3. Cruzar la barrera física del MTK
         try:
-            async with self.mtk_guard.transaction_boundary(payload) as token:
+            async with self.mtk_guard.transaction_boundary(payload) as _token:
                 # 4. Aniquilación Causal en la DB (DELETE)
                 ids_to_delete = tuple(fact["id"] for fact in stale_facts)
                 placeholders = ",".join(["?"] * len(ids_to_delete))

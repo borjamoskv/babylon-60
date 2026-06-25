@@ -12,7 +12,7 @@ except ImportError:
     ApplicationServices = None
     NSWorkspace = None
 
-from legacy_research.extensions.ui_control.models import AXElement, InteractionResult
+from cortex.extensions.ui_control.models import AXElement, InteractionResult
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine

@@ -94,6 +94,6 @@ async def test_dame_async_delegator():
         
         log_file = tmp_path / "async_test.log"
         assert log_file.exists()
-        with open(log_file, "r") as f:
+        with open(log_file) as f:
             content = f.read().strip()
         assert "decoupled_exergy" in content

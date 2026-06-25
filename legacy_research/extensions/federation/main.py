@@ -32,7 +32,7 @@ _sqlite3_bft_orig.connect = _bft_sqlite_connect
 from pathlib import Path
 from typing import Any
 
-from legacy_research.config import FEDERATION_MODE, SHARD_DIR
+from cortex.config import FEDERATION_MODE, SHARD_DIR
 
 __all__ = ["FederatedEngine", "get_engine"]
 

@@ -23,7 +23,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from legacy_research.gateway import GatewayIntent, GatewayRequest, GatewayRouter
+from cortex.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 
 logger = logging.getLogger("cortex.gateway.rest")
 

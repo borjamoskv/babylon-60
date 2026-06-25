@@ -27,7 +27,7 @@ import time
 from typing import Any
 
 from cortex.database.core import connect as db_connect
-from legacy_research.extensions.nexus.types import DomainOrigin, IntentType, WorldMutation
+from cortex.extensions.nexus.types import DomainOrigin, IntentType, WorldMutation
 
 
 class NexusDB:

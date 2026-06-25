@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections import Counter
 
-from legacy_research.sica.meta_level import MetaJudgment
+from cortex.sica.meta_level import MetaJudgment
 
 
 class AdaptiveRetry:

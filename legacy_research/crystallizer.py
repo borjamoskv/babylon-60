@@ -13,7 +13,7 @@ import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from legacy_research.extensions.llm.manager import LLMManager
+    from cortex.extensions.llm.manager import LLMManager
 
 logger = logging.getLogger("cortex.engine.crystallizer")
 

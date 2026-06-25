@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import pytest
-from legacy_research.extensions.federation.gossip import GossipNode
+from cortex.extensions.federation.gossip import GossipNode
 
 
 @pytest.mark.asyncio

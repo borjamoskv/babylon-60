@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from legacy_research.config import DEFAULT_DB_PATH
+from cortex.config import DEFAULT_DB_PATH
 
 # ── Constants ──────────────────────────────────────────────────────────
 NOTEBOOKLM_DIR = Path("notebooklm_sources")
@@ -228,7 +228,7 @@ def _get_db_path() -> str:
 
 def _run_async(coro: Any) -> Any:
     """Helper to run async coroutines from sync CLI."""
-    from legacy_research.events.loop import sovereign_run
+    from cortex.events.loop import sovereign_run
 
     return sovereign_run(coro)
 

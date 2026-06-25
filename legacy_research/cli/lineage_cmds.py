@@ -13,8 +13,9 @@ from rich.panel import Panel
 from rich.tree import Tree
 
 from cortex.cli.common import DEFAULT_DB, cli
+from cortex.core.lineage import LineageNode, LineageVerifier
 from cortex.engine import CortexEngine
-from legacy_research.core.lineage import LineageNode, LineageVerifier
+from cortex.core.lineage import LineageNode, LineageVerifier
 
 console = Console()
 

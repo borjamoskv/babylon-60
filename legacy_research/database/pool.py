@@ -62,7 +62,7 @@ def _bft_aiosqlite_connect(*args, **kwargs):
 _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 # ----------------------------------------
 
-from legacy_research.extensions.immune.chaos import ChaosGate, async_interceptor
+from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["CortexConnectionPool"]
 

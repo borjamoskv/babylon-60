@@ -6,14 +6,14 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from legacy_research.mcp.resilient_gateway import (
+from cortex.mcp.resilient_gateway import (
     _HAS_BS4,
     _HAS_MARKDOWNIFY,
     ResilientFetcher,
     _extract_with_selector,
     _html_to_markdown,
 )
-from legacy_research.utils.pulmones import CircuitBreaker
+from cortex.utils.pulmones import CircuitBreaker
 
 # ─── Fixtures ────────────────────────────────────────────────────────
 

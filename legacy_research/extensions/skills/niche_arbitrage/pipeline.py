@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
-from legacy_research.extensions.scraper.engine import ScraperEngine
-from legacy_research.extensions.scraper.models import ExtractionStrategy, ScrapeRequest, ScrapeResult
+from cortex.extensions.scraper.engine import ScraperEngine
+from cortex.extensions.scraper.models import ExtractionStrategy, ScrapeRequest, ScrapeResult
 
 from .models import MarketReport, NicheTarget
 

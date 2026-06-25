@@ -16,7 +16,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from legacy_research.memory.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 __all__ = ["export_obsidian"]
 
@@ -323,7 +323,7 @@ async def export_obsidian(
     Returns:
         Dict with export stats: notes_created, projects, types, tags.
     """
-    from legacy_research.extensions.sync.common import CORTEX_DIR
+    from cortex.extensions.sync.common import CORTEX_DIR
 
     if vault_path is None:
         vault_path = CORTEX_DIR / "obsidian-vault"

@@ -50,8 +50,8 @@ async def test_store_decoupled(engine):
 @pytest.mark.asyncio
 async def test_worker_processing(engine):
     """Verify that the EnrichmentWorker can process a pending job."""
-    from legacy_research.embeddings.provider import NullEmbeddingProvider
-    from legacy_research.worker.enrichment import EnrichmentWorker
+    from cortex.embeddings.provider import NullEmbeddingProvider
+    from cortex.worker.enrichment import EnrichmentWorker
 
     # Store a fact
     fact_id = await engine.store(

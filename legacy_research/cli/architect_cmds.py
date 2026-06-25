@@ -23,7 +23,7 @@ from rich.prompt import Prompt
 from rich.syntax import Syntax
 
 from cortex.cli.common import cli, console
-from legacy_research.extensions.llm.sovereign import SovereignLLM
+from cortex.extensions.llm.sovereign import SovereignLLM
 
 __all__ = ["architect"]
 

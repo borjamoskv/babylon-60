@@ -7,7 +7,7 @@ C5-REAL audit remediation: consensus/ had 0% test coverage.
 import hashlib
 import pytest
 
-from legacy_research.consensus.merkle import compute_merkle_root, verify_merkle_proof, MerkleTree
+from cortex.consensus.merkle import compute_merkle_root, verify_merkle_proof, MerkleTree
 
 
 # ── compute_merkle_root ──────────────────────────────────────────────────

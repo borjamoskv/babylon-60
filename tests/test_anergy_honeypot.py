@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import pytest
 
-from legacy_research.guards.anergy_honeypot import AnergyHoneypotGuard
+from cortex.guards.anergy_honeypot import AnergyHoneypotGuard
 
 
 def test_anergy_honeypot_clean_claims():

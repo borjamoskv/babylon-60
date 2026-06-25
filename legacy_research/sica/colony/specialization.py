@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 
-from legacy_research.sica.strategy import SearchStrategy, StrategyGenome
+from cortex.sica.strategy import SearchStrategy, StrategyGenome
 
 from .types import AgentSpecialization
 

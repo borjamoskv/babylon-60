@@ -7,13 +7,13 @@ Ensures no agent can forge an epistemic certainty level it is not entitled to.
 
 from typing import Any
 
-from legacy_research.types.epistemics import (
+from cortex.types.epistemics import (
     ConsensusNode,
     EpistemicNode,
     InferenceNode,
     ObservationNode,
 )
-from legacy_research.types.models import RejectionResult
+from cortex.types.models import RejectionResult
 
 
 class EpistemicGuard:

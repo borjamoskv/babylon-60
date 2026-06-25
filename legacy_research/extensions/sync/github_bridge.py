@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from legacy_research.memory.temporal import now_iso
+from cortex.memory.temporal import now_iso
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -315,7 +315,7 @@ class GitHubCortexBridge:
                 )
                 rows = await cursor.fetchall()
 
-            from legacy_research.crypto import get_default_encrypter
+            from cortex.crypto import get_default_encrypter
 
             enc = get_default_encrypter()
 

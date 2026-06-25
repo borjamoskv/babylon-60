@@ -18,7 +18,7 @@ import re
 import time
 from dataclasses import dataclass, field
 
-from legacy_research.extensions.llm._models import IntentProfile
+from cortex.extensions.llm._models import IntentProfile
 
 __all__ = ["DriftSignal", "IntentValidator"]
 

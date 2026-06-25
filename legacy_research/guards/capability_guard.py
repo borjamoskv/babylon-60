@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
-from legacy_research.guards.capabilities import AgentCredentials, Capability, RiskTier
+from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
 
 logger = logging.getLogger("cortex.guards.capability_guard")
 

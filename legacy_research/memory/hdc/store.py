@@ -32,18 +32,18 @@ import time
 from pathlib import Path
 from typing import Any
 
-from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
     import sqlite_vec
 except ImportError:
     sqlite_vec = None
 
-from legacy_research.memory.hdc.algebra import unbind
-from legacy_research.memory.hdc.codec import HDCEncoder
-from legacy_research.memory.hdc.item_memory import ItemMemory
-from legacy_research.memory.models import CortexFactModel
-from legacy_research.memory.sqlite_vec_store import cortex_decay
+from cortex.memory.hdc.algebra import unbind
+from cortex.memory.hdc.codec import HDCEncoder
+from cortex.memory.hdc.item_memory import ItemMemory
+from cortex.memory.models import CortexFactModel
+from cortex.memory.sqlite_vec_store import cortex_decay
 
 __all__ = ["HDCVectorStoreL2"]
 

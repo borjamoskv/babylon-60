@@ -42,7 +42,7 @@ class TestTypeReconciliation:
     def test_memory_model_type(self):
         import typing
 
-        from legacy_research.memory.models import CortexFactModel
+        from cortex.memory.models import CortexFactModel
 
         field = CortexFactModel.model_fields["parent_decision_id"]
         args = typing.get_args(field.annotation)

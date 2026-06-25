@@ -163,7 +163,7 @@ async def stripe_webhook(
     event_type = event["type"]
 
     # ── Enqueue event into Immutable Ledger ──
-    from legacy_research.ledger.billing_gateway import get_billing_gateway
+    from cortex.ledger.billing_gateway import get_billing_gateway
     await get_billing_gateway().append_billing_event(event_type, event) # type: ignore
 
     return {"status": "enqueued", "type": event_type}

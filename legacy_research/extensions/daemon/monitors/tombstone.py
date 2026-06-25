@@ -24,7 +24,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from legacy_research.extensions.daemon.models import TombstoneAlert
+from cortex.extensions.daemon.models import TombstoneAlert
 
 logger = logging.getLogger("moskv-daemon")
 

@@ -7,12 +7,12 @@ breaks automatically.
 
 from __future__ import annotations
 
-from legacy_research.extensions.health.collector import (
+from cortex.extensions.health.collector import (
     CollectorRegistry,
     create_default_registry,
 )
-from legacy_research.extensions.health.health_protocol import MetricCollectorProtocol
-from legacy_research.extensions.health.models import Grade
+from cortex.extensions.health.health_protocol import MetricCollectorProtocol
+from cortex.extensions.health.models import Grade
 
 
 def verify_health_system(

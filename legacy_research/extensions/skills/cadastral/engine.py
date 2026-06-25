@@ -21,7 +21,7 @@ import math
 import uuid
 from typing import Any
 
-from legacy_research.extensions.skills.cadastral.models import (
+from cortex.extensions.skills.cadastral.models import (
     BlindSpot,
     CadastralReport,
     Coordinate,

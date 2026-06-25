@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from legacy_research.mcp.server import _MCPContext
+    from cortex.mcp.server import _MCPContext
     from mcp.server.fastmcp import FastMCP
 
 __all__ = ["register_mega_tools"]

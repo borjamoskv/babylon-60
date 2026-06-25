@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import pytest
 
-from legacy_research.extensions.shannon.exergy import ExergyReport, compute_exergy_report
-from legacy_research.shannon.exergy import (
+from cortex.extensions.shannon.exergy import ExergyReport, compute_exergy_report
+from cortex.shannon.exergy import (
     ActionRisk,
     ExergyInput,
     ThermodynamicWasteError,

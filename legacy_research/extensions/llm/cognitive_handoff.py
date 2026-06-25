@@ -25,13 +25,13 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from legacy_research.extensions.hypervisor.belief_object import (
+from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
     BeliefVerdict,
     VerdictAction,
 )
-from legacy_research.extensions.llm._models import CortexPrompt, IntentProfile, ReasoningMode
+from cortex.extensions.llm._models import CortexPrompt, IntentProfile, ReasoningMode
 
 logger = logging.getLogger(__name__)
 

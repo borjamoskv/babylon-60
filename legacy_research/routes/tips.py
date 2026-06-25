@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_engine
-from legacy_research.auth import AuthResult, require_permission
+from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine
 from cortex.engine.tips import Tip, TipCategory, TipsEngine
 

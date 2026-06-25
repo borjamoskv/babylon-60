@@ -42,8 +42,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
-from legacy_research.compaction.compaction_drift import apply_drift_check as _apply_drift_check
-from legacy_research.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune
+from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
+from cortex.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune
 
 if TYPE_CHECKING:
     import aiosqlite
@@ -153,7 +153,7 @@ def _apply_dedup_strategy(
     dry_run: bool,
     similarity_threshold: float,
 ) -> None:
-    from legacy_research.compaction.strategies.dedup import execute_dedup
+    from cortex.compaction.strategies.dedup import execute_dedup
 
     prev_count = len(result.deprecated_ids)
     execute_dedup(  # type: ignore[reportUnusedCoroutine]
@@ -179,7 +179,7 @@ async def _apply_strategies(
 ) -> None:
     """Execute selected compaction strategies."""
     if CompactionStrategy.DEDUP in strategies:
-        from legacy_research.compaction.strategies.dedup import execute_dedup
+        from cortex.compaction.strategies.dedup import execute_dedup
 
         prev_count = len(result.deprecated_ids)
         await execute_dedup(engine, project, result, dry_run, similarity_threshold)
@@ -187,7 +187,7 @@ async def _apply_strategies(
             result.strategies_applied.append(str(CompactionStrategy.DEDUP.value))
 
     if CompactionStrategy.MERGE_ERRORS in strategies:
-        from legacy_research.compaction.strategies.merge_errors import execute_merge_errors
+        from cortex.compaction.strategies.merge_errors import execute_merge_errors
 
         prev_count = len(result.deprecated_ids)
         await execute_merge_errors(engine, project, result, dry_run)
@@ -195,7 +195,7 @@ async def _apply_strategies(
             result.strategies_applied.append(str(CompactionStrategy.MERGE_ERRORS.value))
 
     if CompactionStrategy.STALENESS_PRUNE in strategies:
-        from legacy_research.compaction.strategies.staleness import execute_staleness_prune
+        from cortex.compaction.strategies.staleness import execute_staleness_prune
 
         prev_count = len(result.deprecated_ids)
         await execute_staleness_prune(engine, project, result, dry_run, max_age_days, min_consensus)

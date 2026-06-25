@@ -9,8 +9,8 @@ Uses AppleScript (System Events) for reliable keystroke injection.
 import logging
 from typing import TYPE_CHECKING, Optional
 
-from legacy_research.extensions.ui_control.applescript import run_applescript
-from legacy_research.extensions.ui_control.models import (
+from cortex.extensions.ui_control.applescript import run_applescript
+from cortex.extensions.ui_control.models import (
     SPECIAL_KEY_MAP,
     AppTarget,
     InteractionResult,

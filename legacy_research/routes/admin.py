@@ -23,12 +23,12 @@ from starlette.requests import Request
 import cortex.api.state as api_state
 from cortex import __version__
 from cortex.api.deps import get_engine
-from legacy_research.auth import AuthResult, get_auth_manager, require_permission
+from cortex.auth import AuthResult, get_auth_manager, require_permission
 from cortex.database.schema import SCHEMA_VERSION
 from cortex.engine import CortexEngine
-from legacy_research.routes.admin_health_probes import build_health_probes as _build_health_probes
-from legacy_research.routes.middleware import AuditLogger, RateLimiter, SelfHealingHook
-from legacy_research.types.models import (
+from cortex.routes.admin_health_probes import build_health_probes as _build_health_probes
+from cortex.routes.middleware import AuditLogger, RateLimiter, SelfHealingHook
+from cortex.types.models import (
     ApiKeyListItem,
     ApiKeyResponse,
     DeepHealthResponse,
@@ -36,11 +36,11 @@ from legacy_research.types.models import (
     HealthCheckDetail,
     StatusResponse,
 )
-from legacy_research.utils.export import export_facts
-from legacy_research.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex.utils.export import export_facts
+from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 if TYPE_CHECKING:
-    from legacy_research.auth.manager import AuthManager as ApiKeyManager
+    from cortex.auth.manager import AuthManager as ApiKeyManager
 
 __all__ = [
     "create_api_key",
@@ -281,7 +281,7 @@ async def deep_health_check(
             detail="Health check failed",
         ) from None
 
-    from legacy_research.routes.context import get_p95_context_latency
+    from cortex.routes.context import get_p95_context_latency
 
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
     result = DeepHealthResponse(
@@ -419,7 +419,7 @@ async def generate_handoff_context(
 
     Used for transferring agentic state between platforms (macOS -> Web).
     """
-    from legacy_research.extensions.agents.handoff import generate_handoff, save_handoff
+    from cortex.extensions.agents.handoff import generate_handoff, save_handoff
 
     lang = _get_lang(request)
 

@@ -6,7 +6,7 @@ Provides /v1/runtime/health, /v1/runtime/boot_recovery
 
 from fastapi import APIRouter, HTTPException, Request
 
-from legacy_research.types.models import HealthReport, RecoveryReport
+from cortex.types.models import HealthReport, RecoveryReport
 
 router = APIRouter(prefix="/v1/runtime", tags=["runtime"])
 

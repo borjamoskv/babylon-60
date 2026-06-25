@@ -14,7 +14,7 @@ import time
 
 import pytest
 
-from legacy_research.pipeline import (
+from cortex.pipeline import (
     ContextPacket,
     DeliveryTarget,
     DeliveryType,
@@ -24,8 +24,8 @@ from legacy_research.pipeline import (
     PipelineStatus,
     StageTrace,
 )
-from legacy_research.pipeline.orchestrator import CortexOrchestrator
-from legacy_research.pipeline._orchestrator_exceptions import (
+from cortex.pipeline.orchestrator import CortexOrchestrator
+from cortex.pipeline._orchestrator_exceptions import (
     BudgetExhaustedError,
     PipelineCancelledError,
 )

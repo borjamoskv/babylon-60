@@ -69,9 +69,9 @@ def test_memory_imports_without_numpy(tmp_path: Path) -> None:
             sys.executable,
             "-c",
             (
-                "from legacy_research.memory.models import MemoryEvent; "
-                "from legacy_research.memory.working import WorkingMemoryL1; "
-                "from legacy_research.memory.ledger import EventLedgerL3; "
+                "from cortex.memory.models import MemoryEvent; "
+                "from cortex.memory.working import WorkingMemoryL1; "
+                "from cortex.memory.ledger import EventLedgerL3; "
                 "WorkingMemoryL1(); "
                 "MemoryEvent(role='user', content='x', token_count=1, session_id='s'); "
                 "print('ok')"
@@ -100,7 +100,7 @@ def test_engine_init_without_numpy_stays_quiet_about_optional_l2(tmp_path: Path)
                     "import asyncio",
                     "import logging",
                     "from cortex.engine import CortexEngine",
-                    "from legacy_research.observability.jsonl_logger import setup_cortex_logging",
+                    "from cortex.observability.jsonl_logger import setup_cortex_logging",
                     f"db_path = r'{db_path}'",
                     "setup_cortex_logging()",
                     "",
@@ -141,7 +141,7 @@ def test_cli_init_without_numpy_logs_partial_memory_once(tmp_path: Path) -> None
                     "import logging",
                     "from click.testing import CliRunner",
                     "from cortex.cli.main import cli",
-                    "from legacy_research.observability.jsonl_logger import setup_cortex_logging",
+                    "from cortex.observability.jsonl_logger import setup_cortex_logging",
                     "setup_cortex_logging()",
                     f"db_path = r'{db_path}'",
                     "result = CliRunner().invoke(cli, ['init', '--db', db_path])",
@@ -277,7 +277,7 @@ def test_mcp_package_import_is_lazy(tmp_path: Path) -> None:
             "\n".join(
                 [
                     "import sys",
-                    "import legacy_research.mcp",
+                    "import cortex.mcp",
                     "assert 'aiohttp' not in sys.modules",
                     "assert 'bs4' not in sys.modules",
                     "assert 'markdownify' not in sys.modules",

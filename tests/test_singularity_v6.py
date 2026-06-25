@@ -2,8 +2,8 @@
 import pytest
 
 from cortex.engine.swarm_10k import CenturionSuperv
-from legacy_research.extensions.llm._cascade import CascadeManager, IntentProfile
-from legacy_research.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from cortex.extensions.llm._cascade import CascadeManager, IntentProfile
+from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 
 @pytest.mark.asyncio

@@ -15,8 +15,8 @@ from cortex.cli.common import (
     cli,
     console,
 )
-from legacy_research.compliance.comply_signer import ComplySigner
-from legacy_research.compliance.tracker import ComplianceTracker
+from cortex.compliance.comply_signer import ComplySigner
+from cortex.compliance.tracker import ComplianceTracker
 
 
 @click.group("comply")

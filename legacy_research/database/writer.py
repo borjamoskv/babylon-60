@@ -76,7 +76,7 @@ from cortex.database.messages import (
     _TxRollback,
     _WriteOp,
 )
-from legacy_research.utils.result import Err, Ok, Result
+from cortex.utils.result import Err, Ok, Result
 
 __all__ = ["SqliteWriteWorker"]
 

@@ -11,8 +11,8 @@ from typing import Optional, Any
 
 import cortex_rs as _cortex_rs
 cortex_rs: Any = _cortex_rs
-from legacy_research.audit.ledger import EnterpriseAuditLedger
-from legacy_research.auth.enterprise_identity import SovereignIdentity, TenantRBAC
+from cortex.audit.ledger import EnterpriseAuditLedger
+from cortex.auth.enterprise_identity import SovereignIdentity, TenantRBAC
 
 logger = logging.getLogger("cortex.engine.logic.semantic_crdt")
 

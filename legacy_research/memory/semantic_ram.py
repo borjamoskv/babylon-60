@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any, Final, TypedDict
 
 import aiosqlite
 
-from legacy_research.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 
 class SemanticFactPayload(TypedDict):
@@ -33,7 +33,7 @@ class SemanticFactPayload(TypedDict):
     timestamp: str
 
 
-from legacy_research.memory.sqlite_vec_store import SovereignVectorStoreL2
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 __all__ = ["DynamicSemanticSpace", "SemanticMutator"]
 
@@ -41,9 +41,9 @@ logger = logging.getLogger("cortex.memory.semantic_ram")
 
 # Import topological health types (lazy to avoid circular imports)
 if TYPE_CHECKING:
-    from legacy_research.memory._protocols import CortexMemoryManagerProtocol as CortexMemoryManager
-    from legacy_research.memory.models import CortexFactModel
-    from legacy_research.memory.topological_health import (
+    from cortex.memory._protocols import CortexMemoryManagerProtocol as CortexMemoryManager
+    from cortex.memory.models import CortexFactModel
+    from cortex.memory.topological_health import (
         TopologicalAnchor,
         TopologicalHealthMonitor,
     )

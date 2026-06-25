@@ -18,7 +18,7 @@ from unittest.mock import MagicMock
 import pytest
 
 # Reset global collector before each test to avoid cross-test bleed.
-from legacy_research.telemetry.core import (
+from cortex.telemetry.core import (
     Span,
     SpanContext,
     TraceCollector,

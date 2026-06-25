@@ -12,7 +12,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from legacy_research.pipeline import ContextPacket
+from cortex.pipeline import ContextPacket
 
 logger = logging.getLogger("cortex.router")
 

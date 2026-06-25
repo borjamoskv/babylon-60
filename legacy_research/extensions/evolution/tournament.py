@@ -14,7 +14,7 @@ import logging
 import secrets
 from dataclasses import dataclass
 
-from legacy_research.extensions.evolution.agents import (
+from cortex.extensions.evolution.agents import (
     Mutation,
     MutationType,
     SovereignAgent,

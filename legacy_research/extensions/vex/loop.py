@@ -22,7 +22,7 @@ import time
 from collections.abc import Callable, Coroutine
 from typing import TYPE_CHECKING, Any
 
-from legacy_research.extensions.vex.models import (
+from cortex.extensions.vex.models import (
     ExecutionReceipt,
     PlannedStep,
     StepResult,

@@ -11,7 +11,7 @@ from rich.table import Table
 
 from cortex.cli.common import cli
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
-from legacy_research.core.paths import SKILLS_DIR
+from cortex.core.paths import SKILLS_DIR
 
 __all__ = [
     "GHOST_SKILL_PATH",

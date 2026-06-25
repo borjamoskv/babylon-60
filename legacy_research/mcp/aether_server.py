@@ -18,9 +18,9 @@ try:
 except ImportError:
     FastMCP = None  # type: ignore
 
-from legacy_research.config import DB_PATH
+from cortex.config import DB_PATH
 from cortex.engine import CortexEngine
-from legacy_research.mcp.utils import AsyncConnectionPool, MCPMetrics, SimpleAsyncCache
+from cortex.mcp.utils import AsyncConnectionPool, MCPMetrics, SimpleAsyncCache
 
 logger = logging.getLogger("cortex.mcp.aether")
 

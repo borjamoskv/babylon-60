@@ -11,7 +11,7 @@ import logging
 import time
 from pathlib import Path
 
-from legacy_research.extensions.daemon.models import CORTEX_DIR, DEFAULT_DISK_WARN_MB, DiskAlert
+from cortex.extensions.daemon.models import CORTEX_DIR, DEFAULT_DISK_WARN_MB, DiskAlert
 
 logger = logging.getLogger("moskv-daemon")
 

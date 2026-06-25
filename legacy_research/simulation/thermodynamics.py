@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 
 import numpy as np
-from legacy_research.simulation.primitives import MemoryTrajectory
+from cortex.simulation.primitives import MemoryTrajectory
 
 
 @dataclass

@@ -16,10 +16,10 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any
 
-from legacy_research.extensions.immune import ImmuneArbiter, Verdict
-from legacy_research.extensions.sovereign.bridge import SovereignBridge
-from legacy_research.extensions.sovereign.endocrine import DigitalEndocrine
-from legacy_research.extensions.sovereign.observability import (
+from cortex.extensions.immune import ImmuneArbiter, Verdict
+from cortex.extensions.sovereign.bridge import SovereignBridge
+from cortex.extensions.sovereign.endocrine import DigitalEndocrine
+from cortex.extensions.sovereign.observability import (
     Dimension,
     PowerLevel,
     compute_power,
@@ -233,7 +233,7 @@ async def _phase_evolution(ctx: SovereignContext) -> PipelineResult:
     """Phase - Run one evolution cycle for continuous agent improvement."""
     t0 = time.monotonic()
     try:
-        from legacy_research.extensions.evolution.engine import EvolutionEngine
+        from cortex.extensions.evolution.engine import EvolutionEngine
 
         # Thermodynamic God-Tier Engine
         engine = EvolutionEngine()

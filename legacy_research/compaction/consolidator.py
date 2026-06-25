@@ -257,7 +257,7 @@ class BeliefConsolidator:
 
             # Decrypt content
             try:
-                from legacy_research.crypto import get_default_encrypter
+                from cortex.crypto import get_default_encrypter
 
                 enc = get_default_encrypter()
                 contents = []

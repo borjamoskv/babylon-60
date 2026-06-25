@@ -10,8 +10,8 @@ import time
 from typing import Any, Final
 
 from cortex.database.tlru_cache import TLRUCache
-from legacy_research.extensions.nexus.db import NexusDB
-from legacy_research.extensions.nexus.types import DomainOrigin, IntentType, WorldMutation
+from cortex.extensions.nexus.db import NexusDB
+from cortex.extensions.nexus.types import DomainOrigin, IntentType, WorldMutation
 
 logger = logging.getLogger("cortex.extensions.nexus.model")
 

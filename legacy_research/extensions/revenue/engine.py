@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any
 
-from legacy_research.extensions.revenue.models import (
+from cortex.extensions.revenue.models import (
     ExecutionResult,
     Opportunity,
     OpportunityStatus,

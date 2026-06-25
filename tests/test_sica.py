@@ -13,10 +13,10 @@ from __future__ import annotations
 
 import pytest
 
-from legacy_research.sica.constitution import Constitution, Principle, Severity, Violation
-from legacy_research.sica.meta_level import FailureClass, MetaAction, MetaLevel
-from legacy_research.sica.object_level import ExecutionStep, ExecutionTrace, ObjectLevel, StepOutcome
-from legacy_research.sica.strategy import (
+from cortex.sica.constitution import Constitution, Principle, Severity, Violation
+from cortex.sica.meta_level import FailureClass, MetaAction, MetaLevel
+from cortex.sica.object_level import ExecutionStep, ExecutionTrace, ObjectLevel, StepOutcome
+from cortex.sica.strategy import (
     Heuristic,
     MutationType,
     SearchStrategy,

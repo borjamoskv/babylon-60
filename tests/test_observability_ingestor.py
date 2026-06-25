@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from datetime import datetime, timezone
 
-from legacy_research.observability.ingestor import (
+from cortex.observability.ingestor import (
     _extract_skill_info,
     _duration_ms,
     _parse_timestamp,

@@ -25,8 +25,6 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.math.babylon import Babylon60
-
 from cortex.engine.genome import FitnessRecord, GenomeMutator, StrategyGenome
 from cortex.isa.builder import (
     Predicate,
@@ -37,6 +35,7 @@ from cortex.isa.builder import (
     par,
     seq,
 )
+from cortex.math.babylon import Babylon60
 
 __all__ = [
     "AgentBlueprint",

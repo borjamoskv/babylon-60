@@ -114,8 +114,8 @@ class P0VulnerabilityExtractor:
 
     Usage::
 
-        from legacy_research.extensions.evolution.ouroboros_omega import OuroborosOmega
-        from legacy_research.extensions.evolution.p0_extractor import P0VulnerabilityExtractor
+        from cortex.extensions.evolution.ouroboros_omega import OuroborosOmega
+        from cortex.extensions.evolution.p0_extractor import P0VulnerabilityExtractor
 
         engine = OuroborosOmega("target.py", dry_run=True)
         diagnosis = await engine.diagnose()
@@ -241,8 +241,8 @@ class P0VulnerabilityExtractor:
         import asyncio
 
         try:
-            from legacy_research.extensions.thinking.orchestra import ThoughtOrchestra
-            from legacy_research.extensions.thinking.presets import OrchestraConfig
+            from cortex.extensions.thinking.orchestra import ThoughtOrchestra
+            from cortex.extensions.thinking.presets import OrchestraConfig
 
             config = OrchestraConfig(
                 timeout_seconds=self._timeout,
@@ -267,7 +267,7 @@ class P0VulnerabilityExtractor:
         """Fallback: use SovereignLLM directly if orchestra unavailable."""
         import asyncio
 
-        from legacy_research.extensions.llm.sovereign import SovereignLLM
+        from cortex.extensions.llm.sovereign import SovereignLLM
 
         async with SovereignLLM(
             preferred_providers=["deepseek", "gemini", "openai"],

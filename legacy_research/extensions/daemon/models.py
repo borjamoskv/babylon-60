@@ -5,15 +5,15 @@ from __future__ import annotations
 import dataclasses
 from dataclasses import dataclass, field
 
-from legacy_research.core.paths import (
+from cortex.core.paths import (
     AGENT_DIR,
     CORTEX_DB,
     CORTEX_DIR,
 )
-from legacy_research.core.paths import (
+from cortex.core.paths import (
     DAEMON_CONFIG_FILE as CONFIG_FILE,
 )
-from legacy_research.core.paths import (
+from cortex.core.paths import (
     DAEMON_STATUS_FILE as STATUS_FILE,
 )
 

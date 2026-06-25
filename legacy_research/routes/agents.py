@@ -26,10 +26,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from starlette.requests import Request
 
 from cortex.api.deps import get_async_engine
-from legacy_research.auth import AuthResult, require_permission
+from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
-from legacy_research.types.models import AgentRegisterRequest, AgentResponse
-from legacy_research.utils.i18n import get_trans
+from cortex.types.models import AgentRegisterRequest, AgentResponse
+from cortex.utils.i18n import get_trans
 
 __all__ = ["get_agent", "list_agents", "register_agent"]
 

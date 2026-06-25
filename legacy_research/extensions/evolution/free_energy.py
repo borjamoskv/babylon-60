@@ -40,8 +40,8 @@ import math
 from dataclasses import dataclass
 from typing import Any
 
-from legacy_research.extensions.evolution.agents import AgentDomain
-from legacy_research.extensions.evolution.cortex_metrics import CortexMetrics, DomainMetrics
+from cortex.extensions.evolution.agents import AgentDomain
+from cortex.extensions.evolution.cortex_metrics import CortexMetrics, DomainMetrics
 
 logger = logging.getLogger(__name__)
 

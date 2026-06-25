@@ -19,7 +19,7 @@ import random
 from dataclasses import dataclass
 from typing import Any
 
-from legacy_research.runtime.replay.engine import ReplayEngine
+from cortex.runtime.replay.engine import ReplayEngine
 
 
 @dataclass(frozen=True)

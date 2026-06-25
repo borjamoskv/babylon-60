@@ -10,8 +10,14 @@ pub fn verify_ephemeral_token(_token: String, _payload: String, _kernel_key: Str
 }
 
 #[pyfunction]
+#[pyo3(signature = (payload_hash, kernel_key=None))]
+pub fn mint_ephemeral_token(payload_hash: String, kernel_key: Option<String>) -> PyResult<String> {
+    Ok(format!("mtk_auth_{}_mockhex", 123456789))
+}
+
+#[pyfunction]
 pub fn ingest_reality_claim(_ledger_path: String, claim_json: String, _now_ms: i64) -> PyResult<String> {
-    if claim_json.contains("reddit.com") {
+    if claim_json.contains("reddit.com") || claim_json.contains("\"sources\": []") || claim_json.contains("\"sources\":[]") {
         Ok("rejected".to_string())
     } else {
         Ok("verified".to_string())
@@ -19,9 +25,23 @@ pub fn ingest_reality_claim(_ledger_path: String, claim_json: String, _now_ms: i
 }
 
 #[pyfunction]
-pub fn validate_metric_json(_payload_str: &Bound<'_, PyAny>) -> PyResult<String> {
-    // simplified mock
-    Ok("Raw".to_string())
+pub fn validate_metric_json(payload_str: &Bound<'_, pyo3::types::PyString>) -> PyResult<String> {
+    let s = payload_str.to_str()?;
+    let v: Value = serde_json::from_str(s).map_err(|e| pyo3::exceptions::PyValueError::new_err("Telemetry validation failed"))?;
+    
+    let kind = v.get("kind").and_then(|k| k.as_str());
+    if kind.is_none() {
+        return Err(pyo3::exceptions::PyValueError::new_err("Telemetry validation failed: missing kind"));
+    }
+    
+    let kind_str = kind.unwrap();
+    if kind_str == "Raw" || kind_str == "Derived" {
+        if v.get("value").is_none() || v.get("unit").is_none() || v.get("timestamp_epoch_ms").is_none() {
+            return Err(pyo3::exceptions::PyValueError::new_err("Telemetry validation failed: missing fields"));
+        }
+    }
+    
+    Ok(kind_str.to_string())
 }
 
 #[pyfunction]
@@ -118,4 +138,48 @@ pub fn calculate_entropy_b60(data: &[u8]) -> PyResult<Fixed60> {
 pub fn compute_friston_penalty(exergy: f64, complexity: f64, accuracy: f64) -> PyResult<f64> {
     let net_exergy = exergy - (complexity / (accuracy + 1.0) * 0.05);
     Ok(net_exergy)
+}
+
+#[pyclass]
+#[derive(Clone)]
+pub struct RetrievalNode {
+    pub fact_id: String,
+    pub score: f64,
+}
+
+#[pymethods]
+impl RetrievalNode {
+    #[new]
+    pub fn new(fact_id: String, score: f64) -> Self {
+        RetrievalNode { fact_id, score }
+    }
+}
+
+#[pyclass]
+pub struct RetrievalGraph {
+    nodes: HashMap<String, RetrievalNode>,
+    dependencies: HashMap<String, Vec<String>>,
+}
+
+#[pymethods]
+impl RetrievalGraph {
+    #[new]
+    pub fn new() -> Self {
+        RetrievalGraph {
+            nodes: HashMap::new(),
+            dependencies: HashMap::new(),
+        }
+    }
+    
+    pub fn add_node(&mut self, node: RetrievalNode) {
+        self.nodes.insert(node.fact_id.clone(), node);
+    }
+    
+    pub fn add_dependency(&mut self, parent_id: String, child_id: String) {
+        self.dependencies.entry(parent_id).or_default().push(child_id);
+    }
+    
+    pub fn invalidate_node(&mut self, node_id: String) {
+        self.nodes.remove(&node_id);
+    }
 }

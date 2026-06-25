@@ -24,7 +24,7 @@ def clean_shard_dir(tmp_path, monkeypatch):
     monkeypatch.setenv("CORTEX_SHARD_DIR", str(shard_dir))
     
     # Reload config to pick up env variables
-    from legacy_research.config import reload
+    from cortex.config import reload
     reload()
     
     yield db_file, shard_dir

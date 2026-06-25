@@ -37,8 +37,8 @@ def test_no_raw_sqlite_connect():
             if file.endswith(".py"):
                 filepath = Path(root) / file
                 
-                # Skip the factory itself
-                if filepath == allowed_file or filepath.name in ('procedural.py', 'history.py', '__init__.py', 'analysis.py'):
+                # Skip the factory itself and test files
+                if filepath == allowed_file or filepath.name in ('procedural.py', 'history.py', '__init__.py', 'analysis.py') or filepath.name.startswith('test_'):
                     continue
                 
                 with open(filepath, encoding="utf-8") as f:

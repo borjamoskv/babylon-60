@@ -12,13 +12,13 @@ import logging
 import time
 import uuid
 
-from legacy_research.extensions.scraper.extractors import (
+from cortex.extensions.scraper.extractors import (
     CASCADE_ORDER,
     EXTRACTORS,
     ExtractionError,
     check_robots_txt,
 )
-from legacy_research.extensions.scraper.models import (
+from cortex.extensions.scraper.models import (
     ExtractionStrategy,
     JobStatus,
     ScrapeJob,
@@ -54,7 +54,7 @@ class ScraperEngine:
         Returns:
             ScrapeResult with extracted content or error details.
         """
-        from legacy_research.http import SSRFBlockedError, validate_url
+        from cortex.http import SSRFBlockedError, validate_url
 
         try:
             request.url = validate_url(request.url)
@@ -189,7 +189,7 @@ class ScraperEngine:
         """
         LOG.info("🗺️ [MAP] Mapping site: %s (depth=%d)", url, max_depth)
 
-        from legacy_research.http import SSRFBlockedError, validate_url
+        from cortex.http import SSRFBlockedError, validate_url
 
         try:
             url = validate_url(url)

@@ -6,9 +6,9 @@ OUROBOROS-∞ Loop: Autonomous Evolution & Entropy Purge
 import asyncio
 from typing import Any
 
-from legacy_research.causal.edg_graph import EpistemicDependencyGraph
-from legacy_research.consensus.merkle_vote import MerkleVote
-from legacy_research.swarm.dispatcher import invoke_subagent
+from cortex.causal.edg_graph import EpistemicDependencyGraph
+from cortex.consensus.merkle_vote import MerkleVote
+from cortex.swarm.dispatcher import invoke_subagent
 
 inject_ledger_event: Any
 EntropyAnnihilator: Any

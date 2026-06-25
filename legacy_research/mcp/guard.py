@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 
-from legacy_research.config import (
+from cortex.config import (
     MCP_MAX_CONTENT_LENGTH,
     MCP_MAX_QUERY_LENGTH,
     MCP_MAX_TAGS,

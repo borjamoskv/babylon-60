@@ -6,7 +6,7 @@ import tempfile
 import pytest
 
 from cortex.engine import CortexEngine
-from legacy_research.extensions.security.tenant import tenant_id_var
+from cortex.extensions.security.tenant import tenant_id_var
 
 
 @pytest.fixture

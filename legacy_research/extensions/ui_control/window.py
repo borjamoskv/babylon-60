@@ -11,8 +11,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from legacy_research.extensions.ui_control.applescript import run_applescript
-from legacy_research.extensions.ui_control.models import AppTarget, InteractionResult, WindowInfo
+from cortex.extensions.ui_control.applescript import run_applescript
+from cortex.extensions.ui_control.models import AppTarget, InteractionResult, WindowInfo
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine

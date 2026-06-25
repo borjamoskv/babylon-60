@@ -165,9 +165,7 @@ def storage_status() -> None:
         else:  # local
             from pathlib import Path
 
-            from legacy_research.core.config import (
-                DB_PATH,  # type: ignore[reportAttributeAccessIssue]
-            )
+            from cortex.core.config import DB_PATH  # type: ignore[reportAttributeAccessIssue]
 
             grid.add_row("DB Path", str(DB_PATH))
             grid.add_row("Exists", "[#CCFF00]✓[/]" if Path(DB_PATH).exists() else "[red]✗[/]")

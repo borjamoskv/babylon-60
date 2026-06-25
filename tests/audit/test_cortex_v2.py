@@ -2,8 +2,8 @@ import pytest
 import os
 import json
 import asyncio
-from legacy_research.audit.ledger import EnterpriseAuditLedger
-from legacy_research.crypto.identity import generate_event_identity
+from cortex.audit.ledger import EnterpriseAuditLedger
+from cortex.crypto.identity import generate_event_identity
 import cortex_core_rs
 
 @pytest.mark.asyncio

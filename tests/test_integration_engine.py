@@ -3,7 +3,7 @@ import asyncio
 
 import pytest
 
-from legacy_research.consensus.manager import ConsensusManager
+from cortex.consensus.manager import ConsensusManager
 from cortex.database.schema import get_all_schema
 from cortex.engine import CortexEngine as AsyncCortexEngine
 

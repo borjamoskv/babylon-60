@@ -30,12 +30,12 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 if TYPE_CHECKING:
-    from legacy_research.extensions.llm.manager import LLMManager
+    from cortex.extensions.llm.manager import LLMManager
 
 from cortex.engine.autopoiesis import AutopoiesisEngine
 from cortex.engine.crystallizer import AutoCrystallizer
 from cortex.engine.swarm_10k import SwarmCommander
-from legacy_research.utils.errors import CortexError
+from cortex.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.engine.synthesis")
 

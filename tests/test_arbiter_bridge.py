@@ -26,8 +26,8 @@ from cortex.engine.meta_arbiter import (
     MetaArbiter,
     Resolution,
 )
-from legacy_research.router.causal import CausalPolicyGradientRouter
-from legacy_research.router.contract import (
+from cortex.router.causal import CausalPolicyGradientRouter
+from cortex.router.contract import (
     CognitiveMode,
     RoutingDecision,
     Severity,

@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from legacy_research.agents.base import BaseAgent
-from legacy_research.agents.contracts import (
+from cortex.agents.base import BaseAgent
+from cortex.agents.contracts import (
     TaskCompletedPayload,
     TaskFailedPayload,
     TaskRequestPayload,
@@ -13,8 +13,8 @@ from legacy_research.agents.contracts import (
     VerificationRequestPayload,
     VerificationResultPayload,
 )
-from legacy_research.agents.manifest import AgentManifest
-from legacy_research.agents.message_schema import AgentMessage, MessageKind
+from cortex.agents.manifest import AgentManifest
+from cortex.agents.message_schema import AgentMessage, MessageKind
 
 
 class ToolExecutor(Protocol):

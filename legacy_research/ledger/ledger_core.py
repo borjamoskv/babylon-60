@@ -67,7 +67,7 @@ _aiosqlite_bft_orig.connect = _bft_aiosqlite_connect
 if TYPE_CHECKING:
     from cortex.database.pool import CortexConnectionPool
 
-from legacy_research.utils.canonical import (
+from cortex.utils.canonical import (
     canonical_json,
     compute_tx_hash,
     now_iso,
@@ -92,7 +92,7 @@ class SovereignLedger(LedgerAuditMixin):
     HIGH_WRITE_THRESHOLD = 10  # writes/sec triggers adaptive reduction
 
     def __init__(self, db: sqlite3.Connection | aiosqlite.Connection | CortexConnectionPool):
-        from legacy_research import config
+        from cortex import config
 
         self.db = db
         self._write_timestamps: deque[float] = deque(maxlen=5000)
@@ -104,7 +104,7 @@ class SovereignLedger(LedgerAuditMixin):
 
     @property
     def _lock(self) -> asyncio.Lock:
-        from legacy_research.utils.locks import get_loop_lock
+        from cortex.utils.locks import get_loop_lock
 
         return get_loop_lock(self, "ledger")
 
