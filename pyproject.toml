@@ -94,7 +94,7 @@ dev = [
     "ruff>=0.11.0",
     "z3-solver>=4.13.0",
     "hypothesis>=6.92.0",
-    "atheris>=2.3.0; sys_platform != 'win32'",
+    "atheris>=2.3.0; sys_platform == 'linux'",
 ]
 adk = [
     "google-antigravity>=0.1.0",

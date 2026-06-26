@@ -32,7 +32,7 @@ async def test_engine_lifecycle(tmp_path):
 
     with (
         patch("cortex.engine.core._engine_connection.run_migrations_async"),
-        patch("cortex.engine.PersistenceSupervisor.start"),
+        patch("cortex.engine.core.cortex_engine.PersistenceSupervisor.start"),
     ):
         await engine.init_db()
         assert engine.get_connection() is not None

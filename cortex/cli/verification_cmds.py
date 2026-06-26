@@ -59,3 +59,43 @@ def verify_files_cmd(files: tuple[str, ...]) -> None:
         raise click.exceptions.Exit(1)
 
     console.print("\n[bold green]✓ VERIFICACIÓN FORMAL COMPLETADA CON ÉXITO.[/]")
+
+
+@cli.command("verify-ledger")
+@click.option("--db-path", default=None, help="Path to the cortex SQLite DB")
+def verify_ledger_cmd(db_path: str | None) -> None:
+    """Verifica criptográficamente la integridad offline del CORTEX Ledger (H5.1)."""
+    import asyncio
+
+    from cortex.compliance.tracker import ComplianceTracker
+    
+    console.print("[bold cyan]Iniciando auditoría offline del Sovereign Ledger...[/]")
+    
+    kwargs = {}
+    if db_path:
+        kwargs["db_path"] = db_path
+        
+    tracker = ComplianceTracker(**kwargs)
+    try:
+        result = asyncio.run(tracker.verify_chain_async())
+        
+        table = Table(title="Sovereign Ledger Audit", show_header=True)
+        table.add_column("Métrica", style="cyan")
+        table.add_column("Valor", style="bold")
+        
+        table.add_row("Estado", "[green]VÁLIDO[/]" if result.get("valid") else "[red]COMPROMETIDO[/]")
+        table.add_row("Transacciones", str(result.get("tx_checked", 0)))
+        table.add_row("Nodos Merkle", str(result.get("roots_checked", 0)))
+        
+        console.print(table)
+        
+        if not result.get("valid"):
+            console.print("[bold red]❌ FALLO DE INTEGRIDAD CRIPTOGRÁFICA DETECTADO.[/]")
+            for v in result.get("violations", []):
+                console.print(f"[red] - {v}[/]")
+            raise click.exceptions.Exit(1)
+            
+        console.print("[bold green]✓ EL LEDGER ESTÁ CRIPTOGRÁFICAMENTE INTACTO.[/]")
+        
+    finally:
+        tracker.close()

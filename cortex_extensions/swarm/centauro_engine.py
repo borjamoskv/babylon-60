@@ -14,8 +14,8 @@ from typing import Any, TypedDict, cast
 
 from pydantic import BaseModel, Field
 
-from cortex.engine.aleph_omega import AxiomaticLeapEngine
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.swarm.aleph_omega import AxiomaticLeapEngine
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 from cortex_extensions.swarm.byzantine import ByzantineConsensus
 
 __all__ = [

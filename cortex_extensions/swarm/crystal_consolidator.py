@@ -298,7 +298,7 @@ async def _execute_heuristic_integration(
     dry_run: bool,
 ) -> None:
     """Connect Right-Brain HeuristicEngine to enable automated architectural suggestions."""
-    from cortex.engine.right_brain import HeuristicEngine
+    from cortex.engine.meta.right_brain import HeuristicEngine
     from cortex_extensions.evolution.agents import AgentDomain
     from cortex_extensions.evolution.free_energy import FreeEnergyState
 
