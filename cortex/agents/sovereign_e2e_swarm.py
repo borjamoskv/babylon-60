@@ -124,7 +124,7 @@ async def main():
 
         # Aquí simulamos el run() principal.
         response = await agent.chat(user_prompt)
-        print(f"Respuesta final: {response.text()}")
+        logger.info("Respuesta final: %s", response.text())
 
         logger.info("[!] Nodo terminal E2E completado. Esperando próxima anomalía.")
 
