@@ -18,9 +18,17 @@ for skill_dir in (_SKILL_DIR_LOCAL, _SKILL_DIR_HOME):
 try:
     from vsa_engine import VSAEngine  # pyright: ignore[reportAssignmentType]
 except ImportError:
-    # Fallback dummy class if the skill engine is not available, avoiding crash-on-import
-    class VSAEngine:  # type: ignore
-        def __init__(self, *args, **kwargs):
-            raise ImportError(
-                "VSAEngine could not be imported from local or home skills directory."
-            )
+    # Fallback minimal VSAEngine para habilitar Staged Legion (C5-REAL) sin la skill externa
+    import numpy as np
+
+    class VSAEngine:
+        def __init__(self, D: int, algebra: str = "HRR"):
+            self.D = D
+            self.algebra = algebra
+
+        def normalize(self, v: np.ndarray) -> np.ndarray:
+            """Normalización L2 del hipervector."""
+            norm = np.linalg.norm(v)
+            if norm == 0:
+                return v
+            return v / norm
