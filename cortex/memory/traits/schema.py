@@ -104,10 +104,12 @@ class SchemaTrait:
                     """
                 print(f"TEMPORARY DEBUG SQL: {sql!r}", flush=True)
                 print(f"TEMPORARY DEBUG ENCODER: {type(self._encoder).__name__} | DIM: {self._encoder.dimension!r} | DIM TYPE: {type(self._encoder.dimension).__name__}", flush=True)
+                import sqlite3
+                print(f"TEMPORARY DEBUG SQLITE: {sqlite3.sqlite_version}", flush=True)
                 try:
                     conn.executescript(sql)
                 except Exception as e:
-                    print(f"TEMPORARY DEBUG SQL ERROR: {e} | SQL was: {sql!r}", flush=True)
+                    print(f"TEMPORARY DEBUG ERROR: {e}", flush=True)
                     raise
 
 

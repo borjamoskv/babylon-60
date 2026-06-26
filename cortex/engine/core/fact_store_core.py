@@ -121,7 +121,12 @@ async def insert_fact_record(
 
     # Edge sensor telemetry is authenticated via X-Cortex-Source header, not taint tokens
     if not taint_already_verified and fact_type not in ("telemetry_batch", "mafia_node"):
-        token = meta.get("cortex_taint") if meta else None
+        token = (
+            meta.get("cortex_taint")
+            or meta.get("CORTEX-TAINT")
+            or meta.get("cortex-taint")
+            or meta.get("CORTEX_TAINT")
+        ) if meta else None
         await enforce_taint_check(conn, token, content)
 
     if fact_type == "UI_ACTION" and meta:
