@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import platform
 import time
 from typing import TYPE_CHECKING
+
+logger = logging.getLogger("cortex.extensions.daemon.sidecar.telemetry.thermodynamics_oracle")
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine as AsyncCortexEngine
@@ -58,7 +61,7 @@ class ThermodynamicsOracle:
                 break
             except Exception as e:
                 # Log thermal noise error but don't choke the event loop
-                print(f"[THERMODYNAMIC NOISE] {e}")
+                logger.error("[THERMODYNAMIC NOISE] %s", e)
             await asyncio.sleep(self.poll_interval)
 
     async def stop(self) -> None:

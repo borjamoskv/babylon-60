@@ -26,6 +26,7 @@ __all__ = [
     "VirgoGuardAdapter",
     "ZKGuardAdapter",
     "ArchaeologyGuardAdapter",
+    "OuroborosEntropyGuardAdapter",
 ]
 
 logger = logging.getLogger("cortex.engine")
@@ -378,3 +379,29 @@ class EpistemicBreakerHook:
         # Daemon runs asynchronously in the background.
         # Direct evaluation here is disabled until EpistemicBreakerDaemon exposes a stateless `evaluate` method.
         pass
+
+
+class OuroborosEntropyGuardAdapter:
+    """AX-II Hook -> StoreGuard protocol for Ouroboros entropy detection in async tasks."""
+
+    async def check(
+        self,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        conn: aiosqlite.Connection,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
+        from cortex.guards.ouroboros_entropy_guard import OuroborosEntropyGuard
+
+        guard = OuroborosEntropyGuard()
+        await guard.check(
+            content,
+            project,
+            fact_type,
+            meta,
+            conn,
+            tenant_id=tenant_id,
+        )

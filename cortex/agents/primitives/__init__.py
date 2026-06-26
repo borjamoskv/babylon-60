@@ -1,3 +1,3 @@
-from .registry import apex_registry, ApexRegistry
+from .registry import ApexRegistry, apex_registry
 
 __all__ = ["apex_registry", "ApexRegistry"]

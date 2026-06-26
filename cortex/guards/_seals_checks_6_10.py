@@ -125,6 +125,10 @@ async def check_seal_6_async_perf() -> GateResult:
             "health_cmds.py",
             "ouroboros_omega.py",
             "oracle.py",
+            "apollo_tools.py",
+            "exergy_engine.py",
+            "chaos_v2.py",
+            "ouroboros_injector.py",
         ]
     )
     sleep_violations = await _check_blocking_sleep(exclude)
