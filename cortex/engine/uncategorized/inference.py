@@ -345,7 +345,7 @@ class InferenceEngine:
         graph = AsyncCausalGraph(conn)
         await graph.ensure_table()
         ts = now_iso()
-        
+
         if hasattr(conn, "_conn") and hasattr(conn._conn, "authorize_causal_writes"):
             conn._conn.authorize_causal_writes()
 
@@ -391,7 +391,7 @@ class InferenceEngine:
                 source=f"inference:{d.rule_name}",
                 meta=None,
                 tx_id=None,
-                taint_already_verified=True
+                taint_already_verified=True,
             )
 
             # Record causal edges from source facts

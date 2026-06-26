@@ -7,14 +7,13 @@ Manages fact consolidation and autonomous pattern promotion (Bridges -> Global A
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any
 
 import aiosqlite
 
-from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.core.mutation_engine import MUTATION_ENGINE
+from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 
 logger = logging.getLogger("cortex.growth")
 
@@ -114,8 +113,8 @@ class NeuralGrowthEngine:
                     commit=False,
                 )
             else:
-                from cortex.memory.temporal import now_iso
                 from cortex.engine.core.fact_store_core import insert_fact_record
+                from cortex.memory.temporal import now_iso
 
                 ts = now_iso()
                 # Ω₈: Morphic Resonance. Promoción a Axioma Global.
@@ -136,7 +135,7 @@ class NeuralGrowthEngine:
                     source="neural-growth",
                     meta=meta_dict,
                     tx_id=None,
-                    taint_already_verified=True
+                    taint_already_verified=True,
                 )
 
             ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.05)

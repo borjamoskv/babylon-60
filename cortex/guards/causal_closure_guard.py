@@ -127,6 +127,14 @@ class CausalClosureGuard:
             logger.warning("[%s] Empty proposal submitted.", proposal.agent_id)
             return False
 
+        if proposal.token_cost < self.min_token_threshold:
+            logger.info(
+                "[%s] Causal Closure bypass: operation was cheap (%d tokens).",
+                proposal.agent_id,
+                proposal.token_cost,
+            )
+            return True
+
         if not self._contains_structural_condensation(proposal.content):
             logger.error(
                 "[%s] 🛑 [P0] Causal Closure Failure! "

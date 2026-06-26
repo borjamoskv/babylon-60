@@ -291,16 +291,16 @@ class ComplianceTracker:
                     "category": "Data Governance (Art 10)",
                     "description": "Risk of processing unverified training data.",
                     "mitigation": "CORTEX Cryptographic Fact Verification.",
-                    "residual_risk": "Low"
+                    "residual_risk": "Low",
                 },
                 {
                     "risk_id": f"RSK-{proj}-002",
                     "category": "Human Oversight (Art 14)",
                     "description": "Agent taking autonomous actions without human override.",
                     "mitigation": "CORTEX Ledger Sovereign Pauses & Rollbacks.",
-                    "residual_risk": "Low"
-                }
-            ]
+                    "residual_risk": "Low",
+                },
+            ],
         }
 
     def generate_dpia_template(self, project: str | None = None) -> dict[str, Any]:
@@ -318,8 +318,8 @@ class ComplianceTracker:
                 "purpose": "Autonomous decision making via LLMs.",
                 "data_minimization": "CORTEX Thermodynamic Context Compression purges PII.",
                 "transparency": "Merkle Hash Chain guarantees traceability.",
-                "security": "AES-256-GCM Envelope Encryption."
-            }
+                "security": "AES-256-GCM Envelope Encryption.",
+            },
         }
 
     # ─── Internal helpers ─────────────────────────────────────────
@@ -437,7 +437,7 @@ class ComplianceTracker:
 
     def export_audit_bundle(self, output_dir: str | Path = ".", project: str | None = None) -> str:
         """Generates an EU AI Act Audit Bundle (.zip) for external auditors.
-        
+
         Includes:
         - compliance_report.json (Article 12)
         - risk_register.json (Article 9)
@@ -447,20 +447,20 @@ class ComplianceTracker:
         import json
         import zipfile
         from pathlib import Path
-        
+
         out_path = Path(output_dir)
         out_path.mkdir(parents=True, exist_ok=True)
-        
+
         proj = project or self._default_project
         now_str = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
         bundle_name = f"eu_ai_act_audit_{proj}_{now_str}.zip"
         bundle_path = out_path / bundle_name
-        
+
         # 1. Generate Reports
         compliance_report = self.export_audit(project=proj, include_facts=True)
         risk_register = self.generate_risk_register_template(project=proj)
         dpia = self.generate_dpia_template(project=proj)
-        
+
         # 2. Extract Ledger
         self._ensure_init()
         ledger_export = {}
@@ -468,15 +468,15 @@ class ComplianceTracker:
             # We fetch a subset or full export. Since it's for audit, we get it all.
             export_data = self._engine._run_sync(self._engine._ledger.export_public_ledger_async())
             if export_data:
-                 ledger_export = export_data.to_dict()
-        
+                ledger_export = export_data.to_dict()
+
         # 3. Zip it all
         with zipfile.ZipFile(bundle_path, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.writestr("compliance_report.json", json.dumps(compliance_report, indent=2))
             zf.writestr("risk_register.json", json.dumps(risk_register, indent=2))
             zf.writestr("dpia.json", json.dumps(dpia, indent=2))
             zf.writestr("ledger_export.json", json.dumps(ledger_export, indent=2))
-            
+
         logger.info("Generated EU AI Act Audit Bundle at %s", bundle_path)
         return str(bundle_path.absolute())
 

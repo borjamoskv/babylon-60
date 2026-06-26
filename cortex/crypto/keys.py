@@ -28,6 +28,7 @@ logger = logging.getLogger("cortex.crypto.keys")
 
 class AgentKeyPair(NamedTuple):
     """The local identity of an autonomous agent."""
+
     public_key_b64: str
     private_key_b64: str
     expires_at: Optional[str] = None
@@ -38,9 +39,13 @@ class KeyManager:
     Enterprise Key Management (H1.2).
     Manages Ed25519 keys with rotation, revocation, and expiration support.
     """
+
     def __init__(self, service_name: str = "cortex_persist_enterprise"):
         self.service_name = service_name
-        self.db_path = Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex")).expanduser().parent / "key_metadata.json"
+        self.db_path = (
+            Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex")).expanduser().parent
+            / "key_metadata.json"
+        )
         self._metadata = self._load_metadata()
 
     def _load_metadata(self) -> dict:
@@ -64,21 +69,21 @@ class KeyManager:
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.NoEncryption(),
         )
-        
+
         public_bytes = public_key.public_bytes(
             encoding=serialization.Encoding.OpenSSH,
             format=serialization.PublicFormat.OpenSSH,
         )
 
         keyring.set_password(self.service_name, actor_id, private_bytes.decode("utf-8"))
-        
+
         expires_at = (datetime.now(timezone.utc) + timedelta(days=expiration_days)).isoformat()
         public_key_b64 = base64.b64encode(public_bytes).decode("ascii")
-        
+
         self._metadata[actor_id] = {
             "public_key_b64": public_key_b64,
             "expires_at": expires_at,
-            "revoked": False
+            "revoked": False,
         }
         self._save_metadata()
         logger.info(f"Generated Ed25519 key for actor: {actor_id} (expires: {expires_at})")
@@ -92,16 +97,16 @@ class KeyManager:
         private_pem = keyring.get_password(self.service_name, actor_id)
         if not private_pem:
             return None
-            
+
         private_key = serialization.load_pem_private_key(private_pem.encode("utf-8"), password=None)
         if not isinstance(private_key, ed25519.Ed25519PrivateKey):
             raise ValueError("Key is not an Ed25519PrivateKey")
-            
+
         return base64.b64encode(
             private_key.private_bytes(
                 encoding=serialization.Encoding.Raw,
                 format=serialization.PrivateFormat.Raw,
-                encryption_algorithm=serialization.NoEncryption()
+                encryption_algorithm=serialization.NoEncryption(),
             )
         ).decode("ascii")
 
@@ -136,7 +141,7 @@ class KeyManager:
 
 class Signer:
     """Enterprise Signer (H1.1). Handles Ed25519 cryptographic signing."""
-    
+
     @staticmethod
     def sign_payload(private_key_b64: str, payload_hash: str, timestamp: str) -> str:
         """
@@ -170,9 +175,11 @@ class Signer:
 
 class Verifier:
     """Enterprise Verifier (H1.1). Handles Ed25519 cryptographic verification."""
-    
+
     @staticmethod
-    def verify_signature(public_key_b64: str, payload_hash: str, timestamp: str, signature_b64: str) -> bool:
+    def verify_signature(
+        public_key_b64: str, payload_hash: str, timestamp: str, signature_b64: str
+    ) -> bool:
         try:
             pub_bytes = base64.b64decode(public_key_b64)
             try:
@@ -211,6 +218,7 @@ class Verifier:
 
 class ZKSwarmIdentity:
     """Legacy compatibility for ZK-Swarm Identity."""
+
     @staticmethod
     def generate_keypair() -> AgentKeyPair:
         km = KeyManager("zk_swarm_temp")
@@ -230,6 +238,7 @@ class ZKSwarmIdentity:
 
 class KeyLifecycleManager:
     """Legacy Compatibility."""
+
     def __init__(self, storage_path: str | Path | None = None, vault: Vault | None = None):
         self.km = KeyManager()
 

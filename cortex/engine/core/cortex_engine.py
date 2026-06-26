@@ -17,14 +17,14 @@ import aiosqlite
 from cortex.config import DEFAULT_DB_PATH
 from cortex.engine.core._engine_connection import ConnectionMixin
 from cortex.engine.core._engine_delegates import DelegatesMixin
-from cortex.engine.swarm.agent_mixin import AgentMixin
-from cortex.engine.uncategorized.durability import PersistenceSupervisor
 from cortex.engine.core.memory_mixin import MemoryMixin
+from cortex.engine.core.store_mixin import StoreMixin
 from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
+from cortex.engine.swarm.agent_mixin import AgentMixin
+from cortex.engine.uncategorized.durability import PersistenceSupervisor
 from cortex.engine.uncategorized.query_mixin import QueryMixin
 from cortex.engine.uncategorized.search_mixin import SearchMixin
-from cortex.engine.core.store_mixin import StoreMixin
 from cortex.engine.uncategorized.sync_mixin import SyncMixin
 from cortex.engine.uncategorized.transaction_mixin import TransactionMixin
 
@@ -32,8 +32,8 @@ if TYPE_CHECKING:
     from cortex.consensus.manager import ConsensusManager
     from cortex.embeddings import LocalEmbedder
     from cortex.embeddings.manager import EmbeddingManager
-    from cortex.engine.swarm.auth import ByzantineAuthLayer
     from cortex.engine.flow.lock import SovereignLock
+    from cortex.engine.swarm.auth import ByzantineAuthLayer
     from cortex.engine.swarm.trust_registry import TrustRegistry
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter

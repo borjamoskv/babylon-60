@@ -3,7 +3,7 @@
 Topological Arbitrage & DAG Index - v19 Structural Compression Engine
 
 Convierte a LEA-Ω en un arbitrajista de incertidumbre utilizando un índice
-topológico en memoria (TopologyIndex). Se recarga únicamente cuando 
+topológico en memoria (TopologyIndex). Se recarga únicamente cuando
 `graph_version` se incrementa en SQLite, garantizando lecturas O(1)-O(log N).
 
 Características:
@@ -15,31 +15,32 @@ Características:
 
 import logging
 from collections import defaultdict, deque
-from typing import List, Dict, Any, Set, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
+
 
 class TopologyIndex:
     """
     Índice topológico en memoria de las hipótesis del sistema.
     """
-    
+
     def __init__(self, db_conn):
         self.db = db_conn
         self.current_version = -1
-        
+
         # Graph structures
-        self.nodes = {}          # node_id -> node_data
-        self.adj_out = defaultdict(list) # node_id -> list of (child_id, weight, rel_type, conf)
+        self.nodes = {}  # node_id -> node_data
+        self.adj_out = defaultdict(list)  # node_id -> list of (child_id, weight, rel_type, conf)
         self.adj_in = defaultdict(list)  # node_id -> list of (parent_id, weight, rel_type, conf)
-        
+
         # Structural Metrics cache
-        self.metrics = {}        # node_id -> {w_h, cbr, depth, criticality, descendants_count}
-        self.sorted_nodes = []   # Topological sort order
-        
+        self.metrics = {}  # node_id -> {w_h, cbr, depth, criticality, descendants_count}
+        self.sorted_nodes = []  # Topological sort order
+
         # Heuristic weights for W_h
         self.alpha = 1.0  # descendants
-        self.beta = 0.5   # fanout
+        self.beta = 0.5  # fanout
         self.gamma = 0.3  # betweenness approx (fan-in * fan-out)
         self.delta = 0.8  # criticality (depth)
 
@@ -61,7 +62,9 @@ class TopologyIndex:
         """
         db_version = await self._fetch_version()
         if db_version != self.current_version:
-            logger.info(f"Graph version drift ({self.current_version} -> {db_version}). Rebuilding TopologyIndex.")
+            logger.info(
+                f"Graph version drift ({self.current_version} -> {db_version}). Rebuilding TopologyIndex."
+            )
             await self._rebuild()
             self.current_version = db_version
             return True
@@ -75,9 +78,11 @@ class TopologyIndex:
         self.adj_out.clear()
         self.adj_in.clear()
         self.metrics.clear()
-        
+
         # Load nodes
-        async with self.db.execute("SELECT id, statement, probability, svi, evi, cost, impact, status FROM system_hypotheses") as cursor:
+        async with self.db.execute(
+            "SELECT id, statement, probability, svi, evi, cost, impact, status FROM system_hypotheses"
+        ) as cursor:
             async for row in cursor:
                 self.nodes[row[0]] = {
                     "statement": row[1],
@@ -86,26 +91,30 @@ class TopologyIndex:
                     "evi": row[4],
                     "cost": row[5],
                     "impact": row[6],
-                    "status": row[7]
+                    "status": row[7],
                 }
-                
+
         # Load edges
-        async with self.db.execute("SELECT parent_id, child_id, edge_weight, relation_type, confidence FROM hypothesis_edges") as cursor:
+        async with self.db.execute(
+            "SELECT parent_id, child_id, edge_weight, relation_type, confidence FROM hypothesis_edges"
+        ) as cursor:
             async for row in cursor:
                 p, c, w, r, conf = row
                 self.adj_out[p].append((c, w, r, conf))
                 self.adj_in[c].append((p, w, r, conf))
-                
+
         # Validate SCC
         sccs = self._tarjan_scc()
         if any(len(comp) > 1 for comp in sccs):
-            logger.error("[P0] CORTEX-OMEGA: Cyclic dependency detected in Causal DAG! Graph structural integrity compromised.")
+            logger.error(
+                "[P0] CORTEX-OMEGA: Cyclic dependency detected in Causal DAG! Graph structural integrity compromised."
+            )
             # Depending on strictness, we might raise an error here.
-            
+
         # Compute Topo Sort & Metrics
         self._compute_topological_metrics()
 
-    def _tarjan_scc(self) -> List[List[str]]:
+    def _tarjan_scc(self) -> list[list[str]]:
         """
         Tarjan's strongly connected components algorithm.
         Returns a list of components (each is a list of node_ids).
@@ -145,7 +154,7 @@ class TopologyIndex:
         for v in self.nodes:
             if v not in index:
                 strongconnect(v)
-                
+
         return sccs
 
     def _compute_topological_metrics(self):
@@ -154,10 +163,10 @@ class TopologyIndex:
         """
         in_degree = {u: len(self.adj_in[u]) for u in self.nodes}
         queue = deque([u for u in self.nodes if in_degree[u] == 0])
-        
+
         topo_order = []
         depth = {u: 0 for u in self.nodes}
-        
+
         while queue:
             u = queue.popleft()
             topo_order.append(u)
@@ -166,66 +175,72 @@ class TopologyIndex:
                 in_degree[v] -= 1
                 if in_degree[v] == 0:
                     queue.append(v)
-                    
+
         self.sorted_nodes = topo_order
-        
+
         # Reverse pass for descendants aggregate impact
-        subtree_impact = {u: self.nodes[u]["probability"] * self.nodes[u]["impact"] for u in self.nodes}
+        subtree_impact = {
+            u: self.nodes[u]["probability"] * self.nodes[u]["impact"] for u in self.nodes
+        }
         descendants_count = {u: 0 for u in self.nodes}
-        
+
         for u in reversed(topo_order):
             for v, w, _, conf in self.adj_out[u]:
                 # Transitive aggregation
                 subtree_impact[u] += subtree_impact[v] * w * conf
                 descendants_count[u] += descendants_count[v] + 1
-                
+
         # Final computation
         for u in self.nodes:
             fan_out = len(self.adj_out[u])
             fan_in = len(self.adj_in[u])
             betweenness_approx = fan_in * fan_out
             crit = depth[u]
-            
+
             # W_h = alpha * descendants_impact + beta * fanout + gamma * betweenness + delta * depth
-            w_h = (self.alpha * subtree_impact[u] + 
-                   self.beta * fan_out + 
-                   self.gamma * betweenness_approx + 
-                   self.delta * crit)
-                   
+            w_h = (
+                self.alpha * subtree_impact[u]
+                + self.beta * fan_out
+                + self.gamma * betweenness_approx
+                + self.delta * crit
+            )
+
             # CBR = (Sum(P_i * Impact_i)) / (Cost * Uncertainty)
             # We use subtree_impact[u] as the numerator (Sum of P_i * Impact_i for this subtree)
             cost = max(self.nodes[u]["cost"], 0.001)
             uncertainty = max(self.nodes[u]["svi"], 0.001)
-            
+
             cbr = subtree_impact[u] / (cost * uncertainty)
-            
+
             self.metrics[u] = {
                 "w_h": w_h,
                 "cbr": cbr,
                 "depth": crit,
                 "descendants": descendants_count[u],
-                "subtree_impact": subtree_impact[u]
+                "subtree_impact": subtree_impact[u],
             }
 
     # Public Daemon Interface
-    
-    def get_cbr_ranking(self) -> List[Dict[str, Any]]:
+
+    def get_cbr_ranking(self) -> list[dict[str, Any]]:
         """Returns active hypotheses sorted by CBR."""
         active = []
         for u, data in self.nodes.items():
             if data["status"] == "ACTIVE":
                 m = self.metrics[u]
-                active.append({
-                    "id": u,
-                    "statement": data["statement"],
-                    "cbr": m["cbr"],
-                    "w_h": m["w_h"],
-                    "cost": data["cost"],
-                    "uncertainty": data["svi"]
-                })
+                active.append(
+                    {
+                        "id": u,
+                        "statement": data["statement"],
+                        "cbr": m["cbr"],
+                        "w_h": m["w_h"],
+                        "cost": data["cost"],
+                        "uncertainty": data["svi"],
+                    }
+                )
         return sorted(active, key=lambda x: x["cbr"], reverse=True)
 
-    def descendants(self, node_id: str) -> Set[str]:
+    def descendants(self, node_id: str) -> set[str]:
         """Returns all transitive descendants."""
         visited = set()
         queue = deque([node_id])
@@ -245,18 +260,20 @@ class TopologyIndex:
         targets = self.descendants(node_id)
         if not targets:
             return
-            
+
         target_list = list(targets)
         # We prepare an update to SQLite
-        query = f"UPDATE system_hypotheses SET status = 'INVALIDATED', resolution_reason = ? WHERE id IN ({','.join(['?']*len(target_list))})"
-        
+        query = f"UPDATE system_hypotheses SET status = 'INVALIDATED', resolution_reason = ? WHERE id IN ({','.join(['?'] * len(target_list))})"
+
         params = [reason] + target_list
         try:
             await self.db.execute(query, params)
             await self.db.commit()
             logger.info(f"Invalidated {len(target_list)} descendants of {node_id} due to {reason}.")
             # Force cache rebuild next cycle
-            await self.db.execute("UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'hypothesis_graph_version'")
+            await self.db.execute(
+                "UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'hypothesis_graph_version'"
+            )
             await self.db.commit()
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:
             logger.error(f"Failed to cascade invalidate: {e}")

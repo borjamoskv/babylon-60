@@ -112,7 +112,7 @@ async def test_blue_team_agent_synthesis():
     code2 = await blue.synthesize("test", {}, feedback)
     assert "import ast" in code2
     assert "ast.literal_eval" in code2
-    assert "except Exception as e:" in code2
+    assert "except (ValueError, TypeError, KeyError, OSError, RuntimeError) as e:" in code2
 
 
 @pytest.mark.asyncio

@@ -46,7 +46,7 @@ class LedgerWriter:
         self.queue = queue
         self.origin_policy = origin_policy
         self.replay_policy = replay_policy
-        
+
         self.rekor_client = RekorClient()
         self.rfc3161_client = RFC3161Client()
         self.key_manager = KeyLifecycleManager()
@@ -56,16 +56,16 @@ class LedgerWriter:
         try:
             # 1. Get current identity
             keypair = self.key_manager.get_or_create_identity()
-            
+
             # 2. Sign the hash
             signature_b64 = ZKSwarmIdentity.sign_payload(event_hash, keypair.private_key_b64)
-            
+
             # 3. Anchor to Rekor
             # Wait, Rekor takes a PEM. We will use the raw b64 as PEM content.
             # In a full implementation we'd format it as PEM properly.
             pem = f"-----BEGIN PUBLIC KEY-----\n{keypair.public_key_b64}\n-----END PUBLIC KEY-----"
             self.rekor_client.anchor_payload(event_hash, signature_b64, pem)
-            
+
             # 4. Request RFC3161 Timestamp
             tsr = self.rfc3161_client.request_timestamp(event_hash)
             if tsr:
@@ -119,8 +119,8 @@ class LedgerWriter:
             )
 
         self.queue.enqueue(event.event_id)
-        
+
         # Fire and forget external anchoring
         threading.Thread(target=self._async_anchor, args=(event.hash,), daemon=True).start()
-        
+
         return event.event_id

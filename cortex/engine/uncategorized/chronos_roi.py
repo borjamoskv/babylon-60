@@ -19,8 +19,6 @@ import subprocess
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.database.core import connect as db_connect
-
 logger = logging.getLogger("cortex.chronos")
 
 __all__ = ["CHRONOS", "ChronosROI", "ChronosReport"]
@@ -226,8 +224,8 @@ class ChronosROI:
         """
         from cortex.database.core import connect_async_ctx
         from cortex.engine.core.fact_store_core import insert_fact_record
-        from cortex_extensions.signals.bus import AsyncSignalBus
         from cortex.memory.temporal import now_iso
+        from cortex_extensions.signals.bus import AsyncSignalBus
 
         try:
             async with connect_async_ctx(db_path) as conn:
@@ -248,9 +246,9 @@ class ChronosROI:
                     source="chronos-roi",
                     meta=meta_dict,
                     tx_id=None,
-                    taint_already_verified=True
+                    taint_already_verified=True,
                 )
-                
+
                 if fact_id is not None:
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
@@ -260,7 +258,7 @@ class ChronosROI:
                         project=project,
                         tenant_id="default",
                     )
-                
+
                 await conn.commit()
                 logger.info("CHRONOS ROI report persisted securely as Fact #%s", fact_id)
                 return fact_id
@@ -281,6 +279,7 @@ class ChronosROI:
         This is the recommended entry point for the observability loop.
         """
         import asyncio
+
         report = self.audit_project(project_path, tokens_used, db_path=db_path)
         try:
             loop = asyncio.get_running_loop()

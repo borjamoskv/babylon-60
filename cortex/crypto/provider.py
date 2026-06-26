@@ -5,10 +5,10 @@ Decouples and centralizes hashing, signatures, key derivation, and randomness
 into distinct providers for FIPS-readiness, auditing, and dependency injection.
 """
 
+import abc
 import hashlib
 import hmac
 import os
-import abc
 
 
 class KMSProvider(abc.ABC):
@@ -27,7 +27,7 @@ class KMSProvider(abc.ABC):
 
 class AWSKMSProvider(KMSProvider):
     """AWS KMS Implementation."""
-    
+
     def __init__(self, key_id: str):
         self.key_id = key_id
         # In a real implementation, this would initialize a boto3 client
@@ -41,7 +41,7 @@ class AWSKMSProvider(KMSProvider):
 
 class VaultKMSProvider(KMSProvider):
     """Hashicorp Vault Transit Secrets Engine Implementation."""
-    
+
     def __init__(self, vault_url: str, token: str, key_name: str):
         self.vault_url = vault_url
         self.token = token
@@ -52,7 +52,6 @@ class VaultKMSProvider(KMSProvider):
 
     def decrypt(self, ciphertext: bytes) -> bytes:
         raise NotImplementedError("Vault KMS decrypt not yet implemented")
-
 
 
 class HashProvider:

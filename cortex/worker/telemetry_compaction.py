@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 
 import aiosqlite
 
-from cortex.database.core import connect_async_ctx
+from cortex.database.core import causal_write, connect_async_ctx
 
 logger = logging.getLogger("cortex.worker.telemetry_compaction")
 
@@ -88,7 +88,7 @@ class TelemetryCompactionWorker:
                     payload = meta.get("payload", {})
                     if payload:
                         combined_payloads.append(payload)
-            except Exception:
+            except (ValueError, TypeError, KeyError):
                 pass
 
         if combined_payloads:
@@ -106,19 +106,20 @@ class TelemetryCompactionWorker:
             # Store summary using unified pipeline
             from cortex.engine.core.fact_store_core import insert_fact_record
 
-            await insert_fact_record(
-                conn=conn,
-                tenant_id="default",
-                project=project,
-                content=summary_content,
-                fact_type="telemetry_summary",
-                tags=["telemetry_summary", "compacted"],
-                confidence="C4",
-                ts=None,
-                source="telemetry-compactor",
-                meta=json.loads(summary_meta),
-                tx_id=None,
-            )
+            with causal_write(conn):
+                await insert_fact_record(
+                    conn=conn,
+                    tenant_id="default",
+                    project=project,
+                    content=summary_content,
+                    fact_type="telemetry_summary",
+                    tags=["telemetry_summary", "compacted"],
+                    confidence="C4",
+                    ts=None,
+                    source="telemetry-compactor",
+                    meta=json.loads(summary_meta),
+                    tx_id=None,
+                )
 
         # Mark raw facts as compacted so we don't process them again
         if ids_to_mark:
@@ -128,7 +129,8 @@ class TelemetryCompactionWorker:
                 SET tags = json_insert(tags, '$[#]', 'compacted')
                 WHERE id IN ({placeholders})
             """
-            await conn.execute(update_query, ids_to_mark)
+            with causal_write(conn):
+                await conn.execute(update_query, ids_to_mark)
             logger.info(
                 "Compacted and tagged %d telemetry facts in project %s", len(ids_to_mark), project
             )

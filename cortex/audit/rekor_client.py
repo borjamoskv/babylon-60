@@ -7,7 +7,6 @@ cryptographic verifiable proof of existence for ledger entries.
 """
 
 import base64
-import hashlib
 import logging
 from typing import Any
 
@@ -29,7 +28,9 @@ class RekorClient:
         """Close the underlying HTTP client."""
         await self._client.aclose()
 
-    async def log_entry(self, entry_hash: str, signature_hex: str, public_key_pem: bytes) -> str | None:
+    async def log_entry(
+        self, entry_hash: str, signature_hex: str, public_key_pem: bytes
+    ) -> str | None:
         """
         Submits a hashedrekord to the Rekor transparency log.
 
@@ -51,23 +52,13 @@ class RekorClient:
                 "kind": "hashedrekord",
                 "apiVersion": "0.0.1",
                 "spec": {
-                    "signature": {
-                        "content": sig_b64,
-                        "publicKey": {
-                            "content": pk_b64
-                        }
-                    },
-                    "data": {
-                        "hash": {
-                            "algorithm": "sha256",
-                            "value": entry_hash
-                        }
-                    }
-                }
+                    "signature": {"content": sig_b64, "publicKey": {"content": pk_b64}},
+                    "data": {"hash": {"algorithm": "sha256", "value": entry_hash}},
+                },
             }
 
             response = await self._client.post(self.rekor_url, json=payload)
-            
+
             if response.status_code == 201:
                 data = response.json()
                 if data and isinstance(data, dict):
@@ -77,9 +68,11 @@ class RekorClient:
                 if data and isinstance(data, dict):
                     return list(data.keys())[0]
             else:
-                logger.error(f"[Rekor] Failed to log entry. Status: {response.status_code}, Body: {response.text}")
+                logger.error(
+                    f"[Rekor] Failed to log entry. Status: {response.status_code}, Body: {response.text}"
+                )
                 return None
-                
+
         except Exception as e:
             logger.error(f"[Rekor] Exception during log_entry: {e}")
             return None
@@ -93,7 +86,9 @@ class RekorClient:
             if response.status_code == 200:
                 return response.json()
             else:
-                logger.warning(f"[Rekor] Failed to fetch entry {rekor_uuid}. Status: {response.status_code}")
+                logger.warning(
+                    f"[Rekor] Failed to fetch entry {rekor_uuid}. Status: {response.status_code}"
+                )
                 return None
         except Exception as e:
             logger.error(f"[Rekor] Exception fetching entry: {e}")

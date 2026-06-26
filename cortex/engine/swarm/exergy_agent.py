@@ -3,9 +3,9 @@ import logging
 from collections.abc import Mapping
 from typing import Any
 
+from cortex.engine.swarm.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.uncategorized.exergy_optimizer import ExergyOptimizer
-from cortex.engine.swarm.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 
 logger = logging.getLogger("cortex.exergy_agent")
 

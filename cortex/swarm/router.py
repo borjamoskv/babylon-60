@@ -134,7 +134,10 @@ def _evaluate_entropy(request: dict) -> float:
     # Simple structural heuristic for high entropy
     if len(task) > 100:
         score += 0.3
-    if any(k in task.lower() for k in ["refactor", "research", "architecture", "consensus", "byzantine", "deep"]):
+    if any(
+        k in task.lower()
+        for k in ["refactor", "research", "architecture", "consensus", "byzantine", "deep"]
+    ):
         score += 0.4
     if request.get("force_quorum", False):
         score = 1.0

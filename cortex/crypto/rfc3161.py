@@ -2,8 +2,8 @@
 """
 RFC3161 Time-Stamping Authority Client.
 
-Provides a standalone mechanism to request and verify cryptographic timestamps 
-from external TSA providers (e.g., FreeTSA, Apple, ZeroSSL) to anchor the 
+Provides a standalone mechanism to request and verify cryptographic timestamps
+from external TSA providers (e.g., FreeTSA, Apple, ZeroSSL) to anchor the
 Sovereign Ledger hashes in time.
 """
 
@@ -19,6 +19,7 @@ logger = logging.getLogger("cortex.crypto.rfc3161")
 # Default public TSA URL
 DEFAULT_TSA_URL = os.environ.get("CORTEX_TSA_URL", "https://freetsa.org/tsr")
 
+
 class RFC3161Client:
     """Client for requesting cryptographic timestamps from RFC3161 authorities."""
 
@@ -29,7 +30,7 @@ class RFC3161Client:
         """
         Manually construct a basic RFC3161 TimeStampReq (ASN.1 DER).
         This is a minimal implementation targeting SHA-256 (OID 2.16.840.1.101.3.4.2.1).
-        
+
         Using standard ASN.1 encoding for:
         TimeStampReq ::= SEQUENCE {
            version                      INTEGER  { v1(1) },
@@ -74,10 +75,10 @@ class RFC3161Client:
     def request_timestamp(self, hash_hex: str) -> dict[str, Any] | None:
         """
         Requests a timestamp for a given hex hash.
-        
+
         Args:
             hash_hex: The hex-encoded SHA-256 hash.
-            
+
         Returns:
             A dictionary containing the base64-encoded TimeStampResp (tsr) or None on failure.
         """
@@ -89,7 +90,7 @@ class RFC3161Client:
                 self.tsa_url,
                 data=tsq,
                 headers={"Content-Type": "application/timestamp-query"},
-                method="POST"
+                method="POST",
             )
 
             with urllib.request.urlopen(req, timeout=10) as response:
@@ -98,11 +99,11 @@ class RFC3161Client:
                     return {
                         "tsr_b64": base64.b64encode(tsr_bytes).decode("utf-8"),
                         "hash_hex": hash_hex,
-                        "tsa_url": self.tsa_url
+                        "tsa_url": self.tsa_url,
                     }
         except urllib.error.HTTPError as e:
             logger.error("HTTPError requesting timestamp from %s: %s", self.tsa_url, e.code)
         except Exception as e:
             logger.error("Failed to request timestamp: %s", e)
-            
+
         return None

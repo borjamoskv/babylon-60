@@ -46,8 +46,12 @@ class AIDecisionReport:
                 "action_type": action,
             },
             "parameters": {
-                "inputs_hashed": hashlib.sha256(json.dumps(input_data, sort_keys=True).encode()).hexdigest(),
-                "outputs_hashed": hashlib.sha256(json.dumps(output_data, sort_keys=True).encode()).hexdigest(),
+                "inputs_hashed": hashlib.sha256(
+                    json.dumps(input_data, sort_keys=True).encode()
+                ).hexdigest(),
+                "outputs_hashed": hashlib.sha256(
+                    json.dumps(output_data, sort_keys=True).encode()
+                ).hexdigest(),
             },
             "robustness_metrics": {
                 "confidence_score": confidence_score,
@@ -83,7 +87,7 @@ class HumanOversightGate:
             await self._init_db(conn)
             await conn.execute(
                 "INSERT OR REPLACE INTO oversight_gates (audit_id, tenant_id, status, comments) VALUES (?, ?, ?, ?)",
-                (audit_id, tenant_id, "PENDING_REVIEW", reason)
+                (audit_id, tenant_id, "PENDING_REVIEW", reason),
             )
             await conn.commit()
         logger.warning(f"[HumanOversight] Decision {audit_id} escalated for human review: {reason}")
@@ -95,7 +99,7 @@ class HumanOversightGate:
             await self._init_db(conn)
             await conn.execute(
                 "UPDATE oversight_gates SET status = ?, reviewer_id = ?, review_timestamp = ?, comments = ? WHERE audit_id = ?",
-                ("APPROVED", reviewer_id, timestamp, comments, audit_id)
+                ("APPROVED", reviewer_id, timestamp, comments, audit_id),
             )
             await conn.commit()
         logger.info(f"[HumanOversight] Decision {audit_id} APPROVED by {reviewer_id}.")
@@ -107,7 +111,7 @@ class HumanOversightGate:
             await self._init_db(conn)
             await conn.execute(
                 "UPDATE oversight_gates SET status = ?, reviewer_id = ?, review_timestamp = ?, comments = ? WHERE audit_id = ?",
-                ("REJECTED", reviewer_id, timestamp, comments, audit_id)
+                ("REJECTED", reviewer_id, timestamp, comments, audit_id),
             )
             await conn.commit()
         logger.info(f"[HumanOversight] Decision {audit_id} REJECTED by {reviewer_id}.")
@@ -116,6 +120,8 @@ class HumanOversightGate:
         """Gets the status of an escalated decision."""
         async with aiosqlite.connect(self.db_path) as conn:
             await self._init_db(conn)
-            cursor = await conn.execute("SELECT status FROM oversight_gates WHERE audit_id = ?", (audit_id,))
+            cursor = await conn.execute(
+                "SELECT status FROM oversight_gates WHERE audit_id = ?", (audit_id,)
+            )
             row = await cursor.fetchone()
             return row[0] if row else None
