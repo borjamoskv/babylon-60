@@ -10,7 +10,7 @@ from cortex.swarm.gatekeeper import ZeroKnowledgeGatekeeper
 class MockSandboxJIT:
     def execute(self, code, context):
         if "VIOLATION" in code:
-            from cortex.engine.uncategorized.sandbox_jit import JITSandboxViolation
+            from cortex.engine.core.sandbox_jit import JITSandboxViolation
             raise JITSandboxViolation("Pipeline violation")
         return context
 

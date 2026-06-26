@@ -6,7 +6,7 @@ import logging
 import math
 import uuid
 
-from cortex.engine.uncategorized.slashing import SlashingEngine
+from cortex.engine.forensic.slashing import SlashingEngine
 
 __all__ = ["ConsensusManager"]
 

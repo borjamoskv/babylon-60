@@ -11,7 +11,7 @@ from cortex.engine.evo.evolution_types import (
     SovereignAgent,
     SubAgent,
 )
-from cortex.engine.uncategorized.zero_prompting import (
+from cortex.engine.cognitive.zero_prompting import (
     ResolutionReport,
     ZeroPromptingEvolutionStrategy,
 )

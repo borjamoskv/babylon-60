@@ -318,5 +318,3 @@ class CentauroEngine:
             raise
         finally:
             self._active_missions.pop(str(mission_hash), None)
-
-        raise RuntimeError("Unreachable")

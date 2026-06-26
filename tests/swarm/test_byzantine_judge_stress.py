@@ -8,7 +8,7 @@ from pathlib import Path
 from cortex.crypto.keys import KeyManager, Signer, Verifier
 from cortex.swarm.byzantine_judge import ByzantineJudge
 from cortex.swarm.exergy import ExergyBank
-from cortex.engine.uncategorized.sandbox_jit import JITSandboxViolation, SandboxJIT
+from cortex.engine.core.sandbox_jit import JITSandboxViolation, SandboxJIT
 
 # We will test both real execution and simulated host crashes.
 # To simulate a host crash, we can monkeypatch SandboxJIT.execute to raise a base Exception.

@@ -32,12 +32,12 @@ import httpx
 if TYPE_CHECKING:
     from cortex_extensions.llm.manager import LLMManager
 
+from cortex.engine.cognitive.crystallizer import AutoCrystallizer
 from cortex.engine.evo.autopoiesis import AutopoiesisEngine
 from cortex.engine.swarm.swarm_10k import SwarmCommander
-from cortex.engine.uncategorized.crystallizer import AutoCrystallizer
 from cortex.utils.errors import CortexError
 
-logger = logging.getLogger("cortex.engine.uncategorized.synthesis")
+logger = logging.getLogger("cortex.engine.cognitive.synthesis")
 
 # ---------------------------------------------------------------------------
 # Data contracts

@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from cortex.engine.uncategorized.models import Fact
+from cortex.engine.cognitive.models import Fact
 
 logger = logging.getLogger("cortex.anomaly")
 

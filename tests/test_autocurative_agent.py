@@ -24,7 +24,7 @@ from cortex.engine.evo.repair_strategies import (
     RepairStatus,
     RepairRegistry,
 )
-from cortex.engine.uncategorized.circuit_breaker import CircuitBreaker, CircuitState
+from cortex.engine.forensic.circuit_breaker import CircuitBreaker, CircuitState
 
 
 # ─── Fixtures ─────────────────────────────────────────────────────
@@ -457,7 +457,7 @@ async def test_full_healing_loop_integration():
     assert health.status == "healthy"
 
     # Verify endocrine impact
-    from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
+    from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
     # Cortisol should have been pulsed (both up and down)
     # Neural growth should have been rewarded
     # These are integration checks - exact values depend on decay

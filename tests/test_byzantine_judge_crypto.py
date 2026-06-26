@@ -4,13 +4,13 @@ from datetime import datetime, timezone
 
 from cortex.crypto.keys import KeyManager, Signer, Verifier
 from cortex.swarm.byzantine_judge import ByzantineJudge
-from cortex.engine.uncategorized.sandbox_jit import SandboxJIT
+from cortex.engine.core.sandbox_jit import SandboxJIT
 
 # To mock SandboxJIT successfully since we don't need real execution logic here
 class MockSandboxJIT:
     def execute(self, code, context):
         if "VIOLATION" in code:
-            from cortex.engine.uncategorized.sandbox_jit import JITSandboxViolation
+            from cortex.engine.core.sandbox_jit import JITSandboxViolation
             raise JITSandboxViolation("Mock violation")
         return context
 

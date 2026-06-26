@@ -35,12 +35,12 @@ else:
             """Fallback class when watchdog is not installed."""
 
 
+from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.cognitive.manifestation import transfigure_ui
+from cortex.engine.cognitive.reflex import trigger_autonomic_reflex
 from cortex.engine.meta.cognitive import scan_file_entropy
-from cortex.engine.uncategorized.apotheosis_audits_mixin import ApotheosisAuditsMixin
-from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.uncategorized.manifestation import transfigure_ui
-from cortex.engine.uncategorized.reflex import trigger_autonomic_reflex
-from cortex.engine.uncategorized.rem_cycle import REMCoordinator
+from cortex.engine.speculative.apotheosis_audits_mixin import ApotheosisAuditsMixin
+from cortex.engine.temporal.rem_cycle import REMCoordinator
 from cortex.services.notebooklm import NotebookLMService
 from cortex.services.trust import TrustService
 from cortex_extensions.immune.membrane import ImmuneMembrane, Verdict
@@ -199,7 +199,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
                 critical_actions = [a for a in actions if a.value > 0.9]
                 if critical_actions and self.is_active:
-                    from cortex.engine.uncategorized.keter import KeterEngine
+                    from cortex.engine.speculative.keter import KeterEngine
 
                     keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
                     for action in critical_actions:
@@ -279,7 +279,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
     async def _heal_file_or_prune(self, py_file: Path, entropy: list[dict]) -> None:
         """Autonomic healing for high-entropy nodes (Ω₅)."""
-        from cortex.engine.uncategorized.keter import KeterEngine
+        from cortex.engine.speculative.keter import KeterEngine
 
         keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
 

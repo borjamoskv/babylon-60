@@ -11,10 +11,10 @@ Validates the structural integrity and high-throughput execution of the 5 inject
 
 import time
 import pytest
-from cortex.engine.uncategorized.data_surgery import DataSurgeon
+from cortex.engine.forensic.data_surgery import DataSurgeon
 from cortex_extensions.hardware.schgen_router import SchGenRouter
 from cortex.engine.meta.vision_reasoner import VisAnomReasoner
-from cortex.engine.uncategorized.video_mla_cache import VideoMLACache
+from cortex.engine.core.video_mla_cache import VideoMLACache
 from cortex.engine.flow.rim_latent_blocks import ReasoningInMemoryEngine
 
 

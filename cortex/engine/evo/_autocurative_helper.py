@@ -7,10 +7,10 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any
 
+from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.evo._autocurative_state import HealingEvent, HealingPhase
 from cortex.engine.evo.repair_strategies import RepairResult
-from cortex.engine.uncategorized.circuit_breaker import CircuitState
-from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.forensic.circuit_breaker import CircuitState
 
 if TYPE_CHECKING:
     from cortex.engine.swarm.autocurative_agent import AutoCurativeAgent

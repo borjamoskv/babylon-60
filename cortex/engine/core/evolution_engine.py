@@ -10,6 +10,7 @@ import random
 import time
 from typing import Any
 
+from cortex.engine.cognitive.zero_prompting import ZeroPromptingEvolutionStrategy
 from cortex.engine.evo.evolution_metrics import CortexMetrics
 from cortex.engine.evo.evolution_types import (
     DomainMetrics,
@@ -17,7 +18,6 @@ from cortex.engine.evo.evolution_types import (
     SovereignAgent,
     SubAgent,
 )
-from cortex.engine.uncategorized.zero_prompting import ZeroPromptingEvolutionStrategy
 
 # ==============================================================================
 # EVOLUTIONARY STRATEGIES

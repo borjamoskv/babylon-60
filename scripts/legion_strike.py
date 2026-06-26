@@ -2,8 +2,8 @@ import argparse
 import asyncio
 import sys
 
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.extensions.swarm.centauro_engine import CentauroEngine
+from cortex_extensions.llm.router import CortexLLMRouter
+from cortex_extensions.swarm.centauro_engine import CentauroEngine
 
 
 async def main():
@@ -39,7 +39,7 @@ async def main():
 
     # Despertar del Router (C5-REAL awakening)
     if not args.sim:
-        from cortex.extensions.llm.provider import LLMProvider
+        from cortex_extensions.llm.provider import LLMProvider
 
         primary_provider = LLMProvider("gemini")
         fallback_providers = [

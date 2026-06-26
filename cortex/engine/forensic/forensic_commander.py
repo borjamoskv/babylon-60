@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
+from cortex.engine.forensic.forensic_strike_config import STRIKE_V1, MissionProfile
 from cortex.engine.swarm.swarm_10k import SwarmCommander
-from cortex.engine.uncategorized.forensic_strike_config import STRIKE_V1, MissionProfile
 
 logger = logging.getLogger("forensic_commander")
 

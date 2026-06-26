@@ -133,8 +133,8 @@ class TrendDetector:
             finally:
                 conn.close()
         except (sqlite3.Error, OSError, ValueError) as e:
-            logger.debug("Failed to persist health score: %s", e)
-
+            logger.error("Failed to persist health score: %s", e)
+            raise
     def prune_history(self, db_path: str, keep_days: int = 30) -> None:
         """Delete historical records older than keep_days."""
         try:

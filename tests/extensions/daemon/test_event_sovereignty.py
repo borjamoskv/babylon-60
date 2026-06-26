@@ -2,7 +2,7 @@
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from cortex.engine.uncategorized.event_sovereignty import EventSovereigntyRuntime
+from cortex.engine.temporal.event_sovereignty import EventSovereigntyRuntime
 
 
 @pytest.mark.asyncio
