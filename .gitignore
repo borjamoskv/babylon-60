@@ -324,3 +324,4 @@ cortex/swarm/staged_legion_2m.py
 .cortex_ast_dataset.json
 .cortex_swarm.lock
 cli-init.db
+cortex_hypothesis_*.db*
