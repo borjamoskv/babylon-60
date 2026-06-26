@@ -12,7 +12,7 @@ from typing import Optional
 import httpx
 
 try:
-    import rfc3161ng
+    import rfc3161ng  # pyright: ignore[reportMissingImports] # Opt-in secure dependency
 except ImportError:
     rfc3161ng = None
 

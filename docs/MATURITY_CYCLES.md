@@ -4,6 +4,20 @@
 
 Este documento define la trayectoria de madurez operativa y estructural de **CORTEX-Persist**, orientada a convertirlo en un proyecto comparable a infraestructuras críticas y software de alta confianza. Cada ciclo termina con evidencia objetiva, auditable y automatizada.
 
+Para la auditoría externa y la adopción por terceros, el marco de madurez CORTEX se mapea en los siguientes **Niveles de Aseguramiento (Assurance Levels)** estandarizados:
+
+## Assurance Levels (M0 - M6)
+
+| Nivel | Objetivo | Estado Interno (Exergy / Legion) |
+| :---: | :--- | :--- |
+| **M0** | El código compila sin errores fatales. | Funcionalidad en fase fluida / Entropía alta. |
+| **M1** | Integración Continua (CI) estable. | Autómatas validados contra métricas base. |
+| **M2** | Baseline de deuda técnica congelada. | Cristalización de vectores. Umbral termodinámico fijado. |
+| **M3** | Invariantes lógicas verificadas empíricamente. | Property Testing. El Ledger no admite mutaciones Cross-Tenant. |
+| **M4** | Resistencia a fallos y apagones demostrada. | Crash Consistency y Tolerancia Bizantina (OOM, SIGKILL). |
+| **M5** | Auditoría forense totalmente reproducible. | Trazabilidad Ledger determinista sin puntos ciegos. |
+| **M6** | **Security Assurance Case** completo. | Operación Singularity / Singularidad Ouroboros. |
+
 ---
 
 ## CICLO 0 — Base reproducible

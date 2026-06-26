@@ -1,4 +1,6 @@
 # [C5-REAL] Exergy-Maximized
+import pytest
+pytestmark = pytest.mark.chaos
 """Chaos Simulation Tests for Audit Stream L1.
 
 Axiom: Ω₅ (Antifragile by Default)

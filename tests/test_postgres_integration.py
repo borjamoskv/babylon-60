@@ -1,4 +1,6 @@
 # [C5-REAL] Exergy-Maximized
+import pytest
+pytestmark = pytest.mark.integration
 """
 Integration tests for PostgreSQL backend integration in FastAPI endpoints.
 """

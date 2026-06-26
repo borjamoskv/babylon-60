@@ -40,6 +40,8 @@ class KeyManager:
     Manages Ed25519 keys with rotation, revocation, and expiration support.
     """
 
+    _fallback_keyring: dict[str, dict[str, str]] = {}  # service_name -> {actor_id: private_pem}
+
     def __init__(self, service_name: str = "cortex_persist_enterprise"):
         self.service_name = service_name
         self.db_path = (
@@ -75,7 +77,13 @@ class KeyManager:
             format=serialization.PublicFormat.OpenSSH,
         )
 
-        keyring.set_password(self.service_name, actor_id, private_bytes.decode("utf-8"))
+        try:
+            keyring.set_password(self.service_name, actor_id, private_bytes.decode("utf-8"))
+        except Exception as e:
+            logger.warning(f"Keyring set_password failed, falling back to in-memory storage: {e}")
+            if self.service_name not in self._fallback_keyring:
+                self._fallback_keyring[self.service_name] = {}
+            self._fallback_keyring[self.service_name][actor_id] = private_bytes.decode("utf-8")
 
         expires_at = (datetime.now(timezone.utc) + timedelta(days=expiration_days)).isoformat()
         public_key_b64 = base64.b64encode(public_bytes).decode("ascii")
@@ -94,7 +102,14 @@ class KeyManager:
             logger.warning(f"Key for actor {actor_id} is revoked or expired.")
             return None
 
-        private_pem = keyring.get_password(self.service_name, actor_id)
+        private_pem = self._fallback_keyring.get(self.service_name, {}).get(actor_id)
+
+        if not private_pem:
+            try:
+                private_pem = keyring.get_password(self.service_name, actor_id)
+            except Exception:
+                pass
+
         if not private_pem:
             return None
 
@@ -117,8 +132,10 @@ class KeyManager:
             self._save_metadata()
             try:
                 keyring.delete_password(self.service_name, actor_id)
-            except keyring.errors.PasswordDeleteError:
+            except Exception:
                 pass
+            if self.service_name in self._fallback_keyring:
+                self._fallback_keyring[self.service_name].pop(actor_id, None)
             logger.info(f"Revoked key for actor: {actor_id}")
             return True
         return False
@@ -190,6 +207,18 @@ class Verifier:
                     return False
 
             signature = base64.b64decode(signature_b64)
+            if len(signature) != 64:
+                logger.error(f"Invalid signature length: {len(signature)} bytes (expected 64)")
+                return False
+
+            raw_pub_bytes = public_key.public_bytes(
+                encoding=serialization.Encoding.Raw,
+                format=serialization.PublicFormat.Raw,
+            )
+            if len(raw_pub_bytes) != 32:
+                logger.error(f"Invalid public key length: {len(raw_pub_bytes)} bytes (expected 32)")
+                return False
+
             message = f"{payload_hash}:{timestamp}".encode()
             public_key.verify(signature, message)
             return True
@@ -208,7 +237,18 @@ class Verifier:
                 public_key = serialization.load_ssh_public_key(pub_bytes)
                 if not isinstance(public_key, ed25519.Ed25519PublicKey):
                     return False
+
             signature = base64.b64decode(signature_b64)
+            if len(signature) != 64:
+                return False
+
+            raw_pub_bytes = public_key.public_bytes(
+                encoding=serialization.Encoding.Raw,
+                format=serialization.PublicFormat.Raw,
+            )
+            if len(raw_pub_bytes) != 32:
+                return False
+
             content_hash = hashlib.sha256(content.encode("utf-8")).digest()
             public_key.verify(signature, content_hash)
             return True
@@ -225,6 +265,8 @@ class ZKSwarmIdentity:
         actor_id = "temp_" + os.urandom(4).hex()
         pub = km.generate_and_store_key(actor_id)
         priv = km.get_private_key_b64(actor_id)
+        if priv is None:
+            raise RuntimeError(f"Failed to retrieve generated key for {actor_id}")
         return AgentKeyPair(public_key_b64=pub, private_key_b64=priv)
 
     @staticmethod

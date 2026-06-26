@@ -59,12 +59,13 @@ class VirgoContextGuard:
 
         import os
 
-        is_strict = os.environ.get("CORTEX_STRICT_GUARDS") == "1"
-        is_testing = os.environ.get("CORTEX_TESTING") == "1"
+        virgo_mode = os.environ.get("CORTEX_VIRGO_MODE", "STRICT").upper()
+        if virgo_mode not in ("STRICT", "LEGACY", "TEST"):
+            virgo_mode = "STRICT"
 
         if not logos_signature:
-            if is_testing and not is_strict:
-                # Bypass missing signature error for non-Virgo tests in test environments
+            if virgo_mode == "TEST":
+                # Bypass missing signature error for non-Virgo tests in relaxed test environments
                 return
             self._apply_trust_penalty(agent_id, taint_severity=0.5)
             await self._trigger_ledger_rollback(
@@ -79,6 +80,25 @@ class VirgoContextGuard:
             is_valid_sig = ZKSwarmIdentity.verify_payload(
                 content=content, public_key_b64=agent_public_key, signature_b64=logos_signature
             )
+
+        # B. Fallback to Deterministic HMAC/Hash binding (LEGACY or TEST mode)
+        if not is_valid_sig and virgo_mode in ("LEGACY", "TEST"):
+            # Expected deterministic hash: sha256(content + str(nonce) + project)
+            expected_hash = hashlib.sha256(f"{content}{nonce}{project}".encode()).hexdigest()
+            if logos_signature == expected_hash:
+                is_valid_sig = True
+
+        # C. Verify agent registered key matches (if registered and signature is valid)
+        if is_valid_sig and agent_id and agent_public_key:
+            from cortex.crypto.keys import KeyManager
+            try:
+                km = KeyManager()
+                registered_key = km._metadata.get(agent_id, {}).get("public_key_b64")
+                if registered_key and registered_key != agent_public_key:
+                    is_valid_sig = False
+                    logger.error(f"Agent key mismatch: key passed {agent_public_key[:16]}... does not match registered key {registered_key[:16]}...")
+            except Exception as e:
+                logger.debug(f"Could not load KeyManager metadata for agent key verification: {e}")
 
 
 
@@ -160,6 +180,14 @@ class VirgoContextGuard:
         """
         source = meta.get("source") or ""
         agent_id = meta.get("agent_id")
+
+        # 0. Tenant Context Validation
+        meta_tenant = meta.get("tenant_id")
+        if meta_tenant and meta_tenant != tenant_id:
+            self._apply_trust_penalty(agent_id, taint_severity=0.5)
+            await self._trigger_ledger_rollback(
+                conn, f"Tenant mismatch: metadata tenant '{meta_tenant}' does not match context tenant '{tenant_id}'."
+            )
 
         # Determine if this write originates from an autonomous agent
         is_agent = (

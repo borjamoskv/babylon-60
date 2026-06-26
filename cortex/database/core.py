@@ -350,11 +350,11 @@ async def connect_async(
     else:
         await apply_pragmas_async(conn)
 
-    conn._cortex_db_path = str(db_path)
+    conn._cortex_db_path = str(db_path)  # pyright: ignore[reportAttributeAccessIssue] # Inject metadata for telemetry
     try:
-        conn._cortex_loop = asyncio.get_running_loop()
+        conn._cortex_loop = asyncio.get_running_loop()  # pyright: ignore[reportAttributeAccessIssue] # Thread safety marker
     except RuntimeError:
-        conn._cortex_loop = None
+        conn._cortex_loop = None  # pyright: ignore[reportAttributeAccessIssue] # Thread safety marker
 
     return conn
 

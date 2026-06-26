@@ -83,20 +83,22 @@ class SQLiteAuthBackend(BaseAuthBackend):
 
     async def initialize(self) -> None:
         from cortex.auth import AUTH_SCHEMA
+        from cortex.database.core import causal_write
 
         conn = await self._get_conn_async()
         try:
-            await conn.executescript(AUTH_SCHEMA)
-            # Migration
-            try:
-                await conn.execute("ALTER TABLE api_keys ADD COLUMN key_hash_argon2 TEXT")
-                await conn.execute(
-                    "ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'"
-                )
-                await conn.execute("ALTER TABLE api_keys ADD COLUMN migrated_at TEXT")
-            except aiosqlite.OperationalError:
-                pass  # Columns already exist
-            await conn.commit()
+            with causal_write(conn):
+                await conn.executescript(AUTH_SCHEMA)
+                # Migration
+                try:
+                    await conn.execute("ALTER TABLE api_keys ADD COLUMN key_hash_argon2 TEXT")
+                    await conn.execute(
+                        "ALTER TABLE api_keys ADD COLUMN hash_algo TEXT NOT NULL DEFAULT 'sha256'"
+                    )
+                    await conn.execute("ALTER TABLE api_keys ADD COLUMN migrated_at TEXT")
+                except aiosqlite.OperationalError:
+                    pass  # Columns already exist
+                await conn.commit()
         finally:
             await conn.close()
 
@@ -131,6 +133,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         hash_algo: str = "sha256",
     ) -> int:
         from cortex.auth import SQL_INSERT_KEY
+        from cortex.database.core import causal_write
 
         args = (
             name,
@@ -145,9 +148,10 @@ class SQLiteAuthBackend(BaseAuthBackend):
         )
         conn = await self._get_conn_async()
         try:
-            cursor = await conn.execute(SQL_INSERT_KEY, args)
-            await conn.commit()
-            return cursor.lastrowid  # type: ignore[reportReturnType]
+            with causal_write(conn):
+                cursor = await conn.execute(SQL_INSERT_KEY, args)
+                await conn.commit()
+                return cursor.lastrowid  # type: ignore[reportReturnType]
         finally:
             await conn.close()
 
@@ -168,24 +172,30 @@ class SQLiteAuthBackend(BaseAuthBackend):
             await conn.close()
 
     async def revoke_key(self, key_id: KeyID) -> bool:
+        from cortex.database.core import causal_write
+
         conn = await self._get_conn_async()
         try:
-            cursor = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = ?", (key_id,))
-            await conn.commit()
-            return cursor.rowcount > 0
+            with causal_write(conn):
+                cursor = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = ?", (key_id,))
+                await conn.commit()
+                return cursor.rowcount > 0
         finally:
             await conn.close()
 
     async def update_last_used(self, key_id: KeyID) -> None:
         from datetime import datetime, timezone
 
+        from cortex.database.core import causal_write
+
         conn = await self._get_conn_async()
         try:
-            await conn.execute(
-                "UPDATE api_keys SET last_used = ? WHERE id = ?",
-                (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id),
-            )
-            await conn.commit()
+            with causal_write(conn):
+                await conn.execute(
+                    "UPDATE api_keys SET last_used = ? WHERE id = ?",
+                    (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id),
+                )
+                await conn.commit()
         except (aiosqlite.Error, OSError) as e:
             logger.debug("Could not update last_used (async): %s", e)
         finally:
@@ -206,18 +216,20 @@ class SQLiteAuthBackend(BaseAuthBackend):
 
     async def migrate_key_to_argon2(self, key_id: KeyID, key_hash_argon2: str) -> None:
         from datetime import datetime, timezone
+        from cortex.database.core import causal_write
 
         conn = await self._get_conn_async()
         try:
-            await conn.execute(
-                "UPDATE api_keys SET key_hash_argon2 = ?, hash_algo = 'argon2id', migrated_at = ? WHERE id = ?",
-                (
-                    key_hash_argon2,
-                    datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
-                    key_id,
-                ),
-            )
-            await conn.commit()
+            with causal_write(conn):
+                await conn.execute(
+                    "UPDATE api_keys SET key_hash_argon2 = ?, hash_algo = 'argon2id', migrated_at = ? WHERE id = ?",
+                    (
+                        key_hash_argon2,
+                        datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                        key_id,
+                    ),
+                )
+                await conn.commit()
         except (aiosqlite.Error, OSError) as e:
             logger.debug("Could not migrate key (async): %s", e)
         finally:
