@@ -27,9 +27,9 @@ def delivery_report(err, msg):
         logger.error(f"Fallo de entrega: {err}")
 
 
-def inject_synthetic_friction(broker="localhost:9092", num_events=500):
+async def inject_synthetic_friction(broker="localhost:9092", num_events=500):
     """Inyecta una carga de exergía y entropía en el bus system.friction."""
-    producer = Producer({"bootstrap.servers": broker})
+    from confluent_kafka import Producer
 
     # Pool de 10 agentes virtuales
     agent_ids = [f"Agent-Ω-{i}" for i in range(10)]
@@ -65,7 +65,8 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
 
         # Pausa ligera para emular streaming natural
         if i % 50 == 0:
-            time.sleep(0.05)
+            import asyncio
+            await asyncio.sleep(0.05)
 
     producer.flush()
     logger.info(
@@ -73,6 +74,10 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
     )
 
 
+async def main():
+    await inject_synthetic_friction()
+
 if __name__ == "__main__":
+    import asyncio
     logging.basicConfig(level=logging.INFO)
-    inject_synthetic_friction()
+    asyncio.run(main())

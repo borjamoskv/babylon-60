@@ -29,7 +29,9 @@ class RuntimeLoop:
             "deterministic_seed": "0xDEADBEEF",
         }
 
-    def start(self, injected_state: RuntimeState = None):
+    async def start(self, injected_state: RuntimeState = None):
+        """Bloqueo principal de ejecución asíncrona."""
+        import asyncio
         self.is_running = True
         self.state = injected_state or self.state
 
@@ -56,7 +58,7 @@ class RuntimeLoop:
                 # 5. Bill & Emit
                 self.metrics.emit(self.state)
 
-                time.sleep(1)  # Simulation pacing
+                await asyncio.sleep(1)  # Simulation pacing
 
         except KeyboardInterrupt:
             self.is_running = False
