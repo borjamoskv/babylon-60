@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "kernel",
+    "compiler",
+    "proof_ir",
+    "runtime",
+    "fuzz",
+]
+resolver = "2"

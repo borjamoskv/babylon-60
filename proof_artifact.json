@@ -1,0 +1,9 @@
+{
+  "initial_state_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tick_sequence": ["Tick 0: CO#0 -> FORK TIMELINE_A", "Tick 1: CO#0 -> FORK TIMELINE_B", "Tick 2: CO#1 -> ALLOC TIME R0", "Tick 3: CO#1 -> NIG R0 [ Y ] UNIT.HOUR", "Tick 4: CO#2 -> ALLOC TIME R1", "Tick 5: CO#2 -> NIG R1 [ <<< ] UNIT.MINUTE", "Tick 6: CO#0 -> EXECUTE \"ROOT_SPAWNED\"", "Tick 7: CO#1 -> AFTER R0 ALARM_A", "Tick 8: CO#0 -> HALT", "Tick 10: CO#2 -> AFTER R1 ALARM_B", "Tick 1800011: CO#2 -> EXECUTE \"30M_REACHED\"", "Tick 1800013: CO#2 -> HALT", "Tick 3600007: CO#1 -> EXECUTE \"1H_REACHED\"", "Tick 3600008: CO#1 -> HALT"],
+  "op_trace": ["FORK -> TIMELINE_A", "FORK -> TIMELINE_B", "EXECUTE ROOT_SPAWNED", "AFTER 3600000 ticks -> ALARM_A", "AFTER 1800000 ticks -> ALARM_B", "EXECUTE 30M_REACHED", "EXECUTE 1H_REACHED"],
+  "f60_deltas": [],
+  "energy_vector": ["CAUSAL_CONSERVATION_VALID"],
+  "replay_hash": "deterministic_run_valid",
+  "theorem_prover_payload": "def final_tick : Nat := 3600009"
+}
