@@ -23,7 +23,6 @@ def mock_db_path(tmp_path):
                 action TEXT,
                 resource TEXT,
                 status TEXT,
-                payload_hash TEXT,
                 prev_hash TEXT,
                 signature TEXT,
                 external_anchor TEXT
@@ -33,7 +32,7 @@ def mock_db_path(tmp_path):
         cursor.execute("""
             INSERT INTO security_audit_log VALUES (
                 'audit-123', '2026-06-26T00:00:00Z', 'tenant-1', 'admin', 'actor-1',
-                'CREATE', 'resource-1', 'SUCCESS', 'hash1', 'hash0', 'sig1',
+                'CREATE', 'resource-1', 'SUCCESS', 'hash0', 'sig1',
                 '{"rekor_uuid": "abc", "rfc3161_token": "def"}'
             )
         """)

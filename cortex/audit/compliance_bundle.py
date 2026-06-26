@@ -39,7 +39,7 @@ class ComplianceBundler:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
-                cursor.execute("SELECT * FROM security_audit_log ORDER BY timestamp ASC")
+                cursor.execute("SELECT * FROM security_audit_log ORDER BY rowid ASC")
                 rows = cursor.fetchall()
 
             export_data = []
@@ -53,7 +53,6 @@ class ComplianceBundler:
                     "action": row["action"],
                     "resource": row["resource"],
                     "status": row["status"],
-                    "payload_hash": row["payload_hash"],
                     "prev_hash": row["prev_hash"],
                     "signature": row["signature"],
                     "external_anchor": json.loads(row["external_anchor"]) if row["external_anchor"] else None

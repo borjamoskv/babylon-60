@@ -65,3 +65,26 @@ def export_cmd(format: str, out: str):
     else:
         console.print("[bold red]❌ Failed to export compliance bundle. Check logs for details.[/bold red]")
 
+
+@audit.command("verify-bundle")
+@click.option("--bundle", "-b", required=True, help="Path to the audit_bundle.zip")
+@click.option("--public-key", "-k", required=True, help="Base64-encoded Ed25519 Public Key")
+def verify_bundle_cmd(bundle: str, public_key: str):
+    """Offline cryptographic verification of an EU AI Act compliance bundle."""
+    console.print(f"[bold magenta]🔍 Initiating offline verification of bundle: {bundle}[/bold magenta]")
+    
+    from cortex.audit.compliance_verifier import ComplianceVerifier
+    
+    verifier = ComplianceVerifier(bundle_path=bundle, public_key_b64=public_key)
+    report = verifier.verify()
+    
+    if report["status"] == "VALID":
+        console.print(f"[bold green]✔ Bundle Cryptographically Verified[/bold green]")
+        console.print(f"  Records Verified: {report.get('records_verified')}")
+        console.print(f"  Batches Verified: {report.get('batches_verified')}")
+        console.print(f"  Details: {report.get('details')}")
+    else:
+        console.print(f"[bold red]❌ Verification Failed: {report['status']}[/bold red]")
+        console.print(f"  Reason: {report.get('reason')}")
+        import sys
+        sys.exit(1)
