@@ -18,7 +18,7 @@ TEST_SUITE = {
         NIG R1 [ - < Y ]
         HALT
         """,
-        ["NIG|R1=601"]
+        ["(Assign R1 601"]
     ),
     "BA.EXACT": (
         """
@@ -39,7 +39,7 @@ TEST_SUITE = {
         EXECUTE "Worker_Spawned"
         HALT
         """,
-        ["FORK|\"TaskA\"", "EXECUTE|Worker_Spawned"]
+        ["(Spawn \"TaskA\"", "(Emit Worker_Spawned"]
     ),
     "AWAIT": (
         """
@@ -53,7 +53,7 @@ TEST_SUITE = {
         EXECUTE "SignalX"
         HALT
         """,
-        ["AWAIT|SignalX", "EXECUTE|SignalX", "EXECUTE|Consumed"]
+        ["(Block SignalX", "(Emit SignalX", "(Emit Consumed"]
     ),
     "AFTER": (
         """
@@ -65,7 +65,7 @@ TEST_SUITE = {
         EXECUTE "TimerFired"
         HALT
         """,
-        ["AFTER|1", "EXECUTE|TimerFired"]
+        ["(Wait 1", "(Emit TimerFired"]
     ),
     "SAR.B60": (
         """
@@ -92,7 +92,7 @@ def run_test(name, source, expected_trace):
         return False
 
     try:
-        with open("artifact_bundle_v3/graph.canonical", "r") as f:
+        with open("artifact_bundle_v3/proof.ir", "r") as f:
             canonical = f.read()
 
         # Assert Expected State
