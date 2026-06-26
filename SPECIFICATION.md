@@ -159,3 +159,10 @@ The Proof IR contains exclusively:
 - `Lemma`: Auto-generated proof requirements for the backend.
 - `Obligation`: Tasks delegated to the external prover.
 - `Witness`: Evidence of singularity or state collapse.
+
+## 17. Contrato de Implementación Conforme (Conformance Contract)
+Para que una implementación independiente (I) sea catalogada como **Conforme** a la especificación normativa BABYLON-60, debe probar exhaustivamente bajo la *Conformance Test Suite* que para cualquier programa válido (P):
+1. Acepta y rechaza exactamente el mismo conjunto sintáctico de programas que la especificación.
+2. Produce el mismo estado observable final e intermedio que el Intérprete de Referencia.
+3. Genera un `Artifact Bundle` canónico idéntico (mismo hash).
+4. Satisface todas las invariantes causales y fraccionales (F60) definidas por la semántica.
