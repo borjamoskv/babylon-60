@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from cortex.crypto import get_default_encrypter
 from cortex.engine.causal.graph import AsyncCausalGraph, CausalGraph, propagate_refutation
 from cortex.engine.causal.oracle import AsyncCausalOracle, CausalOracle
 from cortex.engine.causality_models import (
@@ -39,6 +40,7 @@ __all__ = [
     "_downgrade_confidence",
     "link_causality",
     "propagate_refutation",
+    "get_default_encrypter",
 ]
 
 
