@@ -111,7 +111,7 @@ class ShardedAsyncSignalBus:
             await conn.commit()
             self.session_emitted += 1
             return cursor.lastrowid or 0
-        except Exception:
+        except (ValueError, TypeError, OSError, RuntimeError):
             self.session_errors += 1
             raise
 

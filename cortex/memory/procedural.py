@@ -141,7 +141,7 @@ class ProceduralMemory:
                 except ImportError:
                     import logging
 
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             import logging
 
             logging.getLogger("cortex.memory.procedural").error(

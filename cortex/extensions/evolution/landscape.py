@@ -173,6 +173,6 @@ class FitnessLandscape:
                 for key in counts:
                     if key in line:
                         counts[key] += 1
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, RuntimeError) as exc:
             logger.warning("Suppressed exception: %s", exc)
         return counts

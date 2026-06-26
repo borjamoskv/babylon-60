@@ -140,7 +140,7 @@ class ContextAssembler:
 
                     if budget <= 0:
                         break
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             logger.warning("  [VSA] Query failed: %s", e)
 
         return max(0, budget)
@@ -164,5 +164,5 @@ class ContextAssembler:
                             "created_at": fact.get("created_at", 0),
                         }
                     )
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             logger.warning("  [FACTS] Query failed: %s", e)

@@ -60,7 +60,7 @@ class DistributedEventBus:
                     source=payload.get("source", "event-bus"),
                     project=payload.get("project"),
                 )
-            except Exception:
+            except (ValueError, TypeError, OSError, RuntimeError):
                 logger.warning(
                     "Signal Bus persistence failed for topic %s",
                     topic,

@@ -63,7 +63,7 @@ async def execute_stream(
                     yield chunk
                     yielded_any = True
                 return
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             latency = time.monotonic() - start_time
             last_exc = e
             if yielded_any:

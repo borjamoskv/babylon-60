@@ -78,7 +78,7 @@ class HandoffAgent(BaseAgent):
                 {"path": str(path), "saved": True},
                 kind=MessageKind.HANDOFF_ACCEPTED,
             )
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, RuntimeError) as exc:
             logger.exception("HandoffAgent - save_handoff failed")
             await self._reply(
                 message,
@@ -95,7 +95,7 @@ class HandoffAgent(BaseAgent):
             try:
                 data = load_handoff(Path(path_str) if path_str else None)
                 await self._reply(message, {"handoff": data}, kind=MessageKind.TASK_RESULT)
-            except Exception as exc:
+            except (ValueError, TypeError, OSError, RuntimeError) as exc:
                 await self._reply(message, {"error": str(exc)}, kind=MessageKind.TASK_RESULT)
         else:
             await self._reply(

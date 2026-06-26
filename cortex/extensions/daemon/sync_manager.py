@@ -57,7 +57,7 @@ class CortexSyncManager:
 
                 return stats
 
-            except Exception as e:
+            except (ValueError, TypeError, OSError, RuntimeError) as e:
                 logger.exception("Sync cycle failed")
                 return {"error": str(e)}
 

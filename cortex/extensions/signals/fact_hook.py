@@ -150,11 +150,11 @@ def emit_fact_stored(
                     project,
                     unconsumed,
                 )
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             logger.debug("compact:needed check failed: %s", e)
 
         conn.close()
 
-    except Exception as e:
+    except (ValueError, TypeError, OSError, RuntimeError) as e:
         # Never propagate - this hook must never break the store operation.
         logger.debug("fact:stored signal emission failed: %s", e)

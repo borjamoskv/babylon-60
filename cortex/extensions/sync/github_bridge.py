@@ -327,7 +327,7 @@ class GitHubCortexBridge:
                         index[meta_dict["github_key"]] = fact_id
                 except (ValueError, TypeError, OSError):
                     continue  # Skip corrupted or non-GitHub entries
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, RuntimeError) as exc:
             logger.warning("Failed to load existing GitHub keys: %s", exc)
 
         logger.debug("Loaded %d existing GitHub bridge keys", len(index))

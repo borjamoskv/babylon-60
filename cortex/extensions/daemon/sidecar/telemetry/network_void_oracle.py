@@ -33,7 +33,7 @@ class NetworkVoidOracle:
         while self._running:
             try:
                 await self._ping_reality()
-            except Exception as exc:
+            except (ValueError, TypeError, OSError, RuntimeError) as exc:
                 import logging
 
                 logging.warning("Suppressed exception: %s", exc)

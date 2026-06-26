@@ -336,7 +336,7 @@ async def health_check(request: Request) -> dict:
         hs = HealthScorer.score(metrics_snap)
         health_score = round(hs.score, 2)
         health_grade = hs.grade
-    except Exception as exc:
+    except (ValueError, TypeError, OSError, RuntimeError) as exc:
         logger.warning("Suppressed exception: %s", exc)
 
     return {

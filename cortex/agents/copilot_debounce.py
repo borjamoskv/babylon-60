@@ -177,7 +177,7 @@ class DebounceController:
 
         except asyncio.CancelledError:
             logger.debug("Debounce cancelled: %s", request_id)
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, RuntimeError) as exc:
             logger.error("Debounce callback error: %s", exc)
 
     def _cancel_all_locked(self) -> int:

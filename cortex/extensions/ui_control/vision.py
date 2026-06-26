@@ -94,5 +94,5 @@ class VisionEngine:
             if os.path.exists(filepath):
                 os.remove(filepath)
             return data
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             raise RuntimeError(f"Failed to read screenshot file: {e}")

@@ -124,7 +124,7 @@ class EntropicWakeDaemon:
                 actor_id="entropic_wake"
             )
             logger.info("Logged autopoiesis cycle to CORTEX.")
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             logger.critical("BFT CONSENSUS FAILURE: Could not persist autopoiesis cycle to Ledger. %s", e)
             raise
 

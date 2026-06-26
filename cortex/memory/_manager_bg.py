@@ -45,13 +45,13 @@ async def cancel_background_tasks(
     if dynamic_space:
         try:
             await dynamic_space.stop()
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             logger.error("Error stopping dynamic semantic space: %s", e)
 
     if tasks_to_wait:
         try:
             await asyncio.gather(*tasks_to_wait, return_exceptions=True)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             logger.debug("Failed to gather tasks: %s", e)
 
     bg_workers.clear()

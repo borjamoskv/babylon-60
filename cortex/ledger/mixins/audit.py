@@ -100,7 +100,7 @@ class LedgerAuditMixin:
 
                 try:
                     detail = json.loads(det) if det else {}
-                except Exception as e:
+                except (ValueError, TypeError, OSError, RuntimeError) as e:
                     logger.debug("Failed to parse transaction detail json for tx %s: %s", tid, e)
                     detail = {}
 
@@ -180,7 +180,7 @@ class LedgerAuditMixin:
                             "computed_hash": computed_hash,
                         }
                     )
-            except Exception as e:
+            except (ValueError, TypeError, OSError, RuntimeError) as e:
                 violations.append(
                     {"id": f_tx_id, "type": "FACT_DECRYPTION_FAILED", "error": str(e)}
                 )

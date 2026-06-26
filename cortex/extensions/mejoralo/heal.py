@@ -173,7 +173,7 @@ def _run_functional_inquisitor(
             if engine and project:
                 engine.record_scar(project, top_file_rel, f"Inquisidor: Eliminó {deleted}")
             return False
-    except Exception as exc:
+    except (ValueError, TypeError, OSError, RuntimeError) as exc:
         logger.warning("Suppressed exception: %s", exc)
     return True
 
@@ -279,7 +279,7 @@ def _commit_healed_file(
                     ],
                 )
                 console.print(f"  [dim]⏱ CHRONOS-1: {hours}h saved recorded in ledger.[/]")
-            except Exception:
+            except (ValueError, TypeError, OSError, RuntimeError):
                 logger.exception("Failed to record CHRONOS-1 yield for %s", top_file_rel)
         return True
     except (OSError, subprocess.SubprocessError):

@@ -83,7 +83,7 @@ def execute_sieve_chunk(start_n: int, count: int, worker_id: int):
 
         conn.commit()
         return True
-    except Exception as e:
+    except (ValueError, TypeError, OSError, RuntimeError) as e:
         conn.rollback()
         logger.error(f"[Worker-{worker_id}] Apoptosis de Chunk: {e}")
         return False

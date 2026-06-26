@@ -14,7 +14,7 @@ class CircuitBreaker:
             self.failures = 0
             return result
 
-        except Exception:
+        except (ValueError, TypeError, OSError, RuntimeError):
             self.failures += 1
 
             if self.failures >= self.threshold:

@@ -8,7 +8,6 @@ import logging
 import zipfile
 from pathlib import Path
 
-import aiosqlite
 import click
 from rich.console import Console
 
@@ -76,7 +75,7 @@ def export_bundle(tenant_id: str, output: str) -> None:
                 console.print(
                     f"  [green]✓[/green] Exported {len(ledger_data)} cryptographically linked ledger entries."
                 )
-            except Exception as e:
+            except (ValueError, TypeError, OSError, RuntimeError) as e:
                 console.print(f"  [red]✗[/red] Ledger export failed: {e}")
 
         # 2. Package Public Keys for signature verification
@@ -98,7 +97,7 @@ def export_bundle(tenant_id: str, output: str) -> None:
                 with open(pk_path, "wb") as f:
                     f.write(pub_pem)
                 console.print("  [green]✓[/green] Exported Sovereign Audit Public Key.")
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             console.print(f"  [red]✗[/red] Public Key export failed: {e}")
 
         # 3. Create ZIP bundle

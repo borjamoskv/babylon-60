@@ -283,7 +283,7 @@ class SystemsConsolidator:
                     stats["matured"],
                     stats["deceased"],
                 )
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             logger.error("Failed to run O(1) consolidation sweep: %s", e)
 
         return stats

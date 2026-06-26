@@ -82,7 +82,7 @@ class VerificationAgent(BaseAgent):
                 message,
                 {"error": "missing required field: code or subject/candidate"},
             )
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, RuntimeError) as exc:
             logger.exception("VerificationAgent check failed")
             await self._reply(message, {"error": str(exc)})
 
