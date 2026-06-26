@@ -16,13 +16,14 @@ async def test_ledger_tamper_evident_corruption_detection():
         ledger = EnterpriseAuditLedger(conn)
         await ledger.ensure_table()
         
-        id1 = await ledger.log_action("tenant_1", "system", "actor_1", "CREATE", "fact:1001")
-        id2 = await ledger.log_action("tenant_1", "system", "actor_1", "UPDATE", "fact:1001")
-        id3 = await ledger.log_action("tenant_1", "system", "actor_1", "DELETE", "fact:1001")
+        id1 = await asyncio.wait_for(ledger.log_action("tenant_1", "system", "actor_1", "CREATE", "fact:1001"), timeout=5.0)
+        id2 = await asyncio.wait_for(ledger.log_action("tenant_1", "system", "actor_1", "UPDATE", "fact:1001"), timeout=5.0)
+        id3 = await asyncio.wait_for(ledger.log_action("tenant_1", "system", "actor_1", "DELETE", "fact:1001"), timeout=5.0)
         
         # Force flush and close
         await asyncio.sleep(0.1)
         await ledger.close()
+
     
     # 3. Verify clean state
     async with connect_async_ctx(db_path) as conn2:
