@@ -331,6 +331,9 @@ fn main() {
                 let action = tokens[1].trim_matches('"');
                 let ev_id = format!("EV_{}", clock.0);
                 ledger.append(ev_id, "EXECUTE".to_string(), action.to_string(), clock);
+                if action.starts_with("CRITICAL_HALT") {
+                    is_halting = true;
+                }
             }
             "CRITICAL" => {
                 if tokens.get(1).map(|s| s.as_str()) == Some("HALT") {
@@ -338,6 +341,48 @@ fn main() {
                     is_halting = true;
                 }
             }
+            "ALLOC" => {
+                let typ_str = &tokens[1];
+                let idx = get_reg_index(&tokens[2]);
+                co.regs[idx].typ = match typ_str.as_str() {
+                    "TIME" => B60Type::TIME,
+                    "F60" => B60Type::F60,
+                    _ => B60Type::I64,
+                };
+            }
+            "DAH" => {
+                let idx = get_reg_index(&tokens[1]);
+                let val = eval_expr(&tokens[2], "", &co.regs);
+                co.regs[idx].val += val;
+                ledger.append(format!("EV_{}", clock.0), "DAH".to_string(), format!("R{}+={}", idx, val), clock);
+            }
+            "LAL" => {
+                let idx = get_reg_index(&tokens[1]);
+                let idx2 = get_reg_index(&tokens[2]);
+                let val = co.regs[idx2].val;
+                co.regs[idx].val -= val;
+                ledger.append(format!("EV_{}", clock.0), "LAL".to_string(), format!("R{}-={}", idx, val), clock);
+            }
+            "NU" => {
+                let idx = get_reg_index(&tokens[1]);
+                let target = &tokens[2];
+                if co.regs[idx].val == 0 {
+                    co.pc = *labels.get(target).unwrap_or(&0);
+                    ledger.append(format!("EV_{}", clock.0), "NU".to_string(), format!("JMP {}", target), clock);
+                }
+            }
+            "BA.EXACT" => {
+                let idx = get_reg_index(&tokens[1]);
+                let idx2 = get_reg_index(&tokens[2]);
+                let div = co.regs[idx2].val;
+                if div != 0 {
+                    co.regs[idx].val /= div;
+                }
+            }
+            "HALT" => {
+                co.state = CoroutineState::Halted;
+            }
+            "SAR" | "SAR.B60" => {}
             _ => {}
         }
         
@@ -379,10 +424,32 @@ fn export_artifact_bundle(ledger: &DAGLedger) {
   "global_hash": "{}"
 }}"#, graph_hash);
 
+    let mut ir_lines = Vec::new();
+    let mut sorted_events: Vec<_> = ledger.events.values().collect();
+    sorted_events.sort_by_key(|ev| &ev.id);
+    
+    for ev in sorted_events {
+        ir_lines.push(format!("(Event {} {})", ev.id, ev.logical_timestamp.0));
+        for parent in &ev.parents {
+            ir_lines.push(format!("(HappensBefore {} {})", parent, ev.id));
+        }
+        match ev.opcode.as_str() {
+            "NIG" => ir_lines.push(format!("(Assign {} {})", ev.payload.replace("=", " "), ev.id)),
+            "DAH" => ir_lines.push(format!("(Add {} {})", ev.payload.replace("+=", " "), ev.id)),
+            "LAL" => ir_lines.push(format!("(Sub {} {})", ev.payload.replace("-=", " "), ev.id)),
+            "FORK" => ir_lines.push(format!("(Spawn {} {})", ev.payload, ev.id)),
+            "AWAIT" => ir_lines.push(format!("(Block {} {})", ev.payload, ev.id)),
+            "AFTER" => ir_lines.push(format!("(Wait {} {})", ev.payload, ev.id)),
+            "EXECUTE" => ir_lines.push(format!("(Emit {} {})", ev.payload, ev.id)),
+            _ => ir_lines.push(format!("(Unknown {} {})", ev.payload, ev.id)),
+        }
+    }
+    let proof_ir = ir_lines.join("\n") + "\n";
+
     fs::create_dir_all("artifact_bundle_v3").unwrap();
     fs::write("artifact_bundle_v3/manifest.json", manifest).unwrap();
     fs::write("artifact_bundle_v3/graph.canonical", &canonical_graph).unwrap();
-    fs::write("artifact_bundle_v3/proof.ir", "Mock Proof IR").unwrap();
+    fs::write("artifact_bundle_v3/proof.ir", proof_ir).unwrap();
     
     println!("-> [Exporter] Canonical graph generated. graph.sha256 approx: {}", graph_hash);
     println!("-> [Exporter] Proof IR extracted. Dispatched to Lean/Coq Backends.");

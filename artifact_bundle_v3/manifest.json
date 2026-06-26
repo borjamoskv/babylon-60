@@ -1,5 +1,5 @@
 {
   "version": "1.0",
   "components": ["trace.bin", "graph.canonical", "proof.ir", "metadata.json", "hashes/", "signature/"],
-  "global_hash": "d05ed639f4cf1f"
+  "global_hash": "b80dc683d218c567"
 }
