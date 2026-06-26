@@ -23,7 +23,7 @@ of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12**
 
 | Requirement | CORTEX Implementation | Evidence |
 |:---|:---|:---|
-| High-risk AI systems shall technically allow for the automatic recording of events (logs) | Every `store()` operation creates a transaction in the tamper-evident ledger with SHA-256 hash linking | `cortex/ledger/ledger_core.py` — `ImmutableLedger` |
+| High-risk AI systems shall technically allow for the automatic recording of events (logs) | Every `store()` operation creates a transaction in the tamper-evident ledger with SHA-256 hash linking | `cortex/ledger/ledger_core.py` — `EnterpriseAuditLedger` |
 | Logs shall be generated throughout the lifetime of the system | Transaction ledger operates continuously; every fact insertion, update, or deletion is recorded | `transactions` table in cortex.db |
 
 **Verification Commands:** `cortex compliance-report`, `cortex trust-ledger verify`
@@ -60,7 +60,7 @@ of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12**
 
 | Requirement | CORTEX Implementation | Evidence |
 |:---|:---|:---|
-| Providers shall implement means for periodic integrity verification | Merkle tree checkpoints created at configurable intervals | `ImmutableLedger.create_checkpoint_async()` |
+| Providers shall implement means for periodic integrity verification | Merkle tree checkpoints created at configurable intervals | `EnterpriseAuditLedger.create_checkpoint_async()` |
 | Verification results shall be recorded | `integrity_checks` table stores every verification result | `integrity_checks` table (3 checks recorded) |
 
 **Verification Command:** `cortex compliance-report` (runs integrity check)

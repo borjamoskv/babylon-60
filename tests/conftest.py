@@ -8,6 +8,7 @@ from pathlib import Path
 
 # Set environment variables for tests globally before any imports/fixtures run
 os.environ["CORTEX_TESTING"] = "1"
+os.environ["CORTEX_TEST_ENV"] = "1"
 os.environ["CORTEX_NO_OMEGA"] = "1"
 os.environ["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
 os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"

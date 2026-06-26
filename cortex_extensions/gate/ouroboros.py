@@ -137,21 +137,50 @@ class OuroborosGate:
 
     def _log_scaling_event(self, content: str):
         """Persists architectural scaling decisions."""
-        self.conn.execute(
-            """
-            INSERT INTO facts (project, content, fact_type, confidence, source, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (
-                "cortex",
-                content,
-                "decision",
-                "C5",
-                "ag:ouroboros",
-                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
-            ),
-        )
-        self.conn.commit()
+        import asyncio
+        import time
+        from datetime import datetime, timezone
+        from cortex.database.core import connect_async_ctx, causal_write
+        from cortex.engine.core.fact_store_core import insert_fact_record
+
+        async def _async_log():
+            try:
+                # Fetch DB path from sync connection
+                cursor = self.conn.execute("PRAGMA database_list")
+                db_path = None
+                for row in cursor.fetchall():
+                    if row[1] == 'main':
+                        db_path = row[2]
+                        break
+                if not db_path or db_path == '':
+                    import os
+                    db_path = os.environ.get("CORTEX_DB_PATH", "cortex.db")
+
+                async with connect_async_ctx(db_path) as aconn:
+                    with causal_write(aconn):
+                        await insert_fact_record(
+                            conn=aconn,
+                            tenant_id="default",
+                            project="cortex",
+                            content=content,
+                            fact_type="decision",
+                            tags=["ouroboros", "scaling", "pruning"],
+                            confidence="C5",
+                            ts=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                            source="ag:ouroboros",
+                            meta=None,
+                            tx_id=None
+                        )
+                        await aconn.commit()
+            except Exception as e:
+                import logging
+                logging.getLogger("ouroboros").error("Failed to async log scaling event: %s", e)
+
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(_async_log())
+        except RuntimeError:
+            asyncio.run(_async_log())
 
 
 def get_ouroboros_gate(engine: Any) -> OuroborosGate:

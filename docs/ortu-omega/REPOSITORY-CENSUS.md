@@ -16,7 +16,7 @@
 | 3 | `engine/memory_mixin.py` | `MemoryMixin._init_memory_subsystem()` | 132 | ✅ REAL | Tripartite init: L1 Working, L2 Vector (`sqlite-vec`/HDC), L3 Ledger |
 | 4 | `engine/transaction_mixin.py` | `TransactionMixin._log_transaction()` | 81 | ✅ REAL | SHA-256 hash chain, `prev_hash` continuity, ledger checkpoint trigger |
 | 5 | `engine/search_mixin.py` | `SearchMixin.search()` | 108 | ✅ REAL | Hybrid vector+text search, Graph-RAG enrichment, tenant-aware |
-| 6 | `ledger/ledger_core.py` | `SovereignLedger` (`ImmutableLedger` re-export) | 520 | ✅ REAL | Adaptive Merkle checkpointing, full integrity verify (chain + roots) |
+| 6 | `ledger/ledger_core.py` | `SovereignLedger` (`EnterpriseAuditLedger` re-export) | 520 | ✅ REAL | Adaptive Merkle checkpointing, full integrity verify (chain + roots) |
 | 7 | `guards/contradiction_guard.py` | `detect_contradictions()` | 556 | ✅ REAL | 3-layer conflict detection: FTS5 → project co-occurrence → negation/supersession |
 | 8 | `verification/verifier.py` | `SovereignVerifier.check()` | 81 | ⚠️ PARTIAL | AST heuristic extraction implemented; Z3 SMT stub ("Phase 2" comment) |
 | 9 | `causality/taint.py` | `propagate_taint()` | 162 | ✅ REAL | BFS DAG taint propagation, confidence downgrade, `≥50%` escalation rule |
@@ -51,7 +51,7 @@ input → StoreMixin.store()
   ├─ AES-GCM encryption (optional)
   ├─ Embedding generation (L2 vector)
   ├─ TransactionMixin._log_transaction() → SHA-256 chain
-  ├─ ImmutableLedger.create_checkpoint_async() → Merkle root
+  ├─ EnterpriseAuditLedger.create_checkpoint_async() → Merkle root
   └─ fact_id returned
 ```
 
@@ -73,7 +73,7 @@ query → SearchMixin.search()
 ### 2.3 Verification Path
 
 ```
-ImmutableLedger.verify_integrity_async()
+EnterpriseAuditLedger.verify_integrity_async()
   ├─ Hash chain walk (prev_hash continuity)
   ├─ Hash recomputation (v2 canonical + v1 legacy fallback)
   ├─ Merkle root recomputation per checkpoint
@@ -107,7 +107,7 @@ WBFTConsensus.evaluate()
 ```
 ComplianceTracker
   ├─ log_decision() → store_sync() with EU AI Act metadata
-  ├─ verify_chain() → ImmutableLedger.verify_integrity_async()
+  ├─ verify_chain() → EnterpriseAuditLedger.verify_integrity_async()
   └─ export_audit() → Article 12 compliance report
 ```
 
@@ -166,7 +166,7 @@ ComplianceTracker
 **All five ORTU-Ω pillars have implemented backing primitives.** No P0 gaps (missing primitive) detected. The terrain is structurally sound for API surface definition.
 
 Key risks for Phase 1 (Pillar Mapping):
-- **Verification surface is thin**: `SovereignVerifier` is 81 LOC with Z3 in stub mode. The real verification power comes from the `ImmutableLedger` + `ContradictionGuard` + `TaintPropagation` trio.
+- **Verification surface is thin**: `SovereignVerifier` is 81 LOC with Z3 in stub mode. The real verification power comes from the `EnterpriseAuditLedger` + `ContradictionGuard` + `TaintPropagation` trio.
 - **Coordination has migration debt**: v1/v2 consensus vote tables coexist. The external API should expose only v2.
 - **Swarm orchestration is partial**: `CapatazOrchestrator` can run parallel tasks but lacks completion tracking integration.
 - **`valid_until` vs `is_tombstoned` drift**: Dedup query uses legacy predicate — a P1 contract inconsistency.

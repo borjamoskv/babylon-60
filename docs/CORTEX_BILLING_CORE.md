@@ -31,7 +31,7 @@ if failure.type == "F2" and not explicitly_simulated:
     escalate_to_observability_review()
 ```
 
-## 4. BILLING LEDGER (THE IMMUTABLE MONEY LAYER)
+## 4. BILLING LEDGER (THE TAMPER-EVIDENT MONEY LAYER)
 Operates exactly like the Execution Ledger, but strictly for financial truth and causality scoring.
 ```python
 class BillingEvent:

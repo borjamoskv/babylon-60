@@ -309,7 +309,7 @@ export for external auditors |\n    58\t| **Redundant** | P2 | Multiple storage
 backends (local + remote hash log) |\n    59\t\n    60\t### 1.3 Architecture: 
 Hierarchical Ledger System\n    61\t\n    62\t```\n    
 63\t┌─────────────────────────────────────────────────────────────────────┐\n   
-64\t│                    IMMUTABLE LEDGER ARCHITECTURE                      │\n 
+64\t│                    TAMPER-EVIDENT LEDGER ARCHITECTURE                      │\n 
 65\t├─────────────────────────────────────────────────────────────────────┤\n   
 66\t│                                                                       │\n 
 67\t│   ┌──────────────┐     ┌──────────────┐     ┌──────────────┐         │\n  
@@ -360,7 +360,7 @@ INTEGER PRIMARY KEY AUTOINCREMENT,\n   124\t    check_type      TEXT NOT NULL,
 -- JSON with findings\n   127\t    started_at      TEXT NOT NULL,\n   128\t    
 completed_at    TEXT NOT NULL\n   129\t);\n   130\t```\n   131\t\n   132\t### 
 1.5 Implementation: Merkle Tree\n   133\t\n   134\t```python\n   135\t# 
-cortex/ledger.py\n   136\t"""\n   137\tImmutable Ledger — Cryptographic 
+cortex/ledger.py\n   136\t"""\n   137\tTamper-Evident Ledger — Cryptographic 
 integrity for CORTEX transactions.\n   138\t"""\n   139\t\n   140\timport 
 hashlib\n   141\timport json\n   142\tfrom typing import List, Optional, Tuple\n
 143\tfrom dataclasses import dataclass\n   144\t\n   145\t\n   146\t@dataclass\n
@@ -415,7 +415,7 @@ for sibling, direction in proof:\n   234\t            if direction == \'L\':\n
 235\t                current = self._hash_pair(sibling, current)\n   236\t      
 else:\n   237\t                current = self._hash_pair(current, sibling)\n   
 238\t        return current == root\n   239\t\n   240\t\n   241\tclass 
-ImmutableLedger:\n   242\t    """\n   243\t    Manages the cryptographic 
+EnterpriseAuditLedger:\n   242\t    """\n   243\t    Manages the cryptographic 
 integrity of the CORTEX transaction ledger.\n   244\t    \n   245\t    
 Features:\n   246\t    - Periodic Merkle tree generation\n   247\t    - Tamper 
 detection via hash verification\n   248\t    - Export with integrity proofs\n   
@@ -2764,7 +2764,7 @@ temporal ordering of all votes |\\n| **Efficient** | P1 | <5ms overhead per vote
 **Redundant** | P2 | Multiple storage backends (local + remote hash log) 
 |\\n\\n### 1.3 Architecture: Hierarchical Vote 
 Ledger\\n\\n```\\n┌─────────────────────────────────────────────────────────────
-────────────────┐\\n│                    IMMUTABLE VOTE LEDGER ARCHITECTURE     
+────────────────┐\\n│                    TAMPER-EVIDENT VOTE LEDGER ARCHITECTURE     
 │\\n├───────────────────────────────────────────────────────────────────────────
 ──┤\\n│                                                                         
      │\\n│   ┌──────────────┐     ┌──────────────┐     ┌──────────────┐         
@@ -2836,7 +2836,7 @@ INTEGER PRIMARY KEY AUTOINCREMENT,\\n    check_type      TEXT NOT NULL,
 -- \'ok\', \'violation\', \'error\'\\n    details         TEXT,                 
 -- JSON with findings\\n    started_at      TEXT NOT NULL,\\n    completed_at   
 TEXT NOT NULL\\n);\\n```\\n\\n### 1.5 Implementation: Tamper-Evident Vote 
-Ledger\\n\\n```python\\n# cortex/vote_ledger.py\\n\\"\\"\\"\\nImmutable Vote 
+Ledger\\n\\n```python\\n# cortex/vote_ledger.py\\n\\"\\"\\"\\nTamper-Evident Vote 
 Ledger — Cryptographic integrity for CORTEX consensus votes.\\n\\nFeatures:\\n- 
 Hash-chained vote entries\\n- Periodic Merkle tree generation\\n- Tamper 
 detection via hash verification\\n- Export with integrity 
@@ -3805,7 +3805,7 @@ of all votes |\n| **Efficient** | P1 | <5ms overhead per vote |\n|
 P2 | Multiple storage backends (local + remote hash log) |\n\n### 1.3 
 Architecture: Hierarchical Vote 
 Ledger\n\n```\n┌────────────────────────────────────────────────────────────────
-─────────────┐\n│                    IMMUTABLE VOTE LEDGER ARCHITECTURE         
+─────────────┐\n│                    TAMPER-EVIDENT VOTE LEDGER ARCHITECTURE         
 │\n├────────────────────────────────────────────────────────────────────────────
 ─┤\n│                                                                           
    │\n│   ┌──────────────┐     ┌──────────────┐     ┌──────────────┐            
@@ -3877,7 +3877,7 @@ PRIMARY KEY AUTOINCREMENT,\n    check_type      TEXT NOT NULL,              --
 -- \'ok\', \'violation\', \'error\'\n    details         TEXT,                  
 -- JSON with findings\n    started_at      TEXT NOT NULL,\n    completed_at    
 TEXT NOT NULL\n);\n```\n\n### 1.5 Implementation: Tamper-Evident Vote 
-Ledger\n\n```python\n# cortex/vote_ledger.py\n"""\nImmutable Vote Ledger — 
+Ledger\n\n```python\n# cortex/vote_ledger.py\n"""\nTamper-Evident Vote Ledger — 
 Cryptographic integrity for CORTEX consensus votes.\n\nFeatures:\n- Hash-chained
 vote entries\n- Periodic Merkle tree generation\n- Tamper detection via hash 
 verification\n- Export with integrity proofs\n"""\n\nimport hashlib\nimport 
@@ -4880,7 +4880,7 @@ Pillar 1: Tamper-Evident Vote Logging\\n\\n**Problem:** Current votes are stored
 standard SQL tables without cryptographic protection.\\n\\n**Solution:** 
 Hash-chained vote ledger with Merkle 
 trees\\n\\n```\\n┌──────────────────────────────────────────────────────────────
-───────────────┐\\n│                    IMMUTABLE VOTE LEDGER                   
+───────────────┐\\n│                    TAMPER-EVIDENT VOTE LEDGER                   
 │\\n├───────────────────────────────────────────────────────────────────────────
 ──┤\\n│                                                                         
      │\\n│   Genesis    Vote 1      Vote 2      Vote 3      Vote N              
@@ -5030,7 +5030,7 @@ Together\\n\\n```\\n┌───────────────────
 │  └────────────────────┼───────────────────────────────────────────┘  │   │\\n│
 │                       │                                              │   │\\n│
 │  ┌────────────────────▼───────────────────────────────────────────┐  │   │\\n│
-│  │              PILLAR 1: IMMUTABLE VOTE LEDGER                    │  │   
+│  │              PILLAR 1: TAMPER-EVIDENT VOTE LEDGER                    │  │   
 │\\n│  │  │                                                                 │  │
 │\\n│  │  │  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐    │  │ 
 │\\n│  │  │  │ Vote Cast    │────►│ Hash Chain   │────►│ Merkle Root  │    │  │ 
@@ -5304,7 +5304,7 @@ Tamper-Evident Vote Logging\n\n**Problem:** Current votes are stored in standard
 tables without cryptographic protection.\n\n**Solution:** Hash-chained vote 
 ledger with Merkle 
 trees\n\n```\n┌─────────────────────────────────────────────────────────────────
-────────────┐\n│                    IMMUTABLE VOTE LEDGER                       
+────────────┐\n│                    TAMPER-EVIDENT VOTE LEDGER                       
 │\n├────────────────────────────────────────────────────────────────────────────
 ─┤\n│                                                                           
    │\n│   Genesis    Vote 1      Vote 2      Vote 3      Vote N                 
@@ -5450,7 +5450,7 @@ Together\n\n```\n┌────────────────────
 │\n│  │  └────────────────────┼───────────────────────────────────────────┘  │  
 │\n│  │                       │                                              │  
 │\n│  │  ┌────────────────────▼───────────────────────────────────────────┐  │  
-│\n│  │  │              PILLAR 1: IMMUTABLE VOTE LEDGER                    │  │ 
+│\n│  │  │              PILLAR 1: TAMPER-EVIDENT VOTE LEDGER                    │  │ 
 │\n│  │  │                                                                 │  │ 
 │\n│  │  │  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐    │  │  
 │\n│  │  │  │ Vote Cast    │────►│ Hash Chain   │────►│ Merkle Root  │    │  │  
