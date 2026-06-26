@@ -185,7 +185,7 @@ if __name__ == "__main__":
 ## ▀▄ 外能遥测 (性能)
 
 <div align="center">
-  <img src="assets/marketing/telemetry.svg" alt="C5-REAL 遥测" width="100%">
+  <img src="https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/telemetry/assets/marketing/telemetry.svg" alt="C5-REAL 遥测" width="100%">
 </div>
 
 *在 C5-REAL 终端状态 4 架构 (L0 硅级旁路) 下实现的外能极限。*
