@@ -151,13 +151,13 @@ class OmegaKernel:
                     logger.debug("Desplegando formación PHOENIX vía SwarmCommander...")
                     # Dispatch asíncrono para sanación técnica
                     if hasattr(commander, "deploy"):
-                        await commander.deploy(
+                        await commander.deploy( # type: ignore 
                             formation="PHOENIX", mission="Sanar Entropía", cycles=1
                         )
 
                     logger.debug("Iniciando mutación recursiva vía AutopoiesisEngine...")
                     if hasattr(ouroboros, "mutate"):
-                        await ouroboros.mutate(target="entropy_resolution")
+                        await ouroboros.mutate(target="entropy_resolution") # type: ignore 
 
                 except (ImportError, RuntimeError, ValueError) as e:
                     logger.exception("Fallo al desatar el Enjambre o Ouroboros: %s", e)

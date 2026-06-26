@@ -90,7 +90,7 @@ def _calculate_total_complexity(source_code: str) -> int:
         tree = ast.parse(source_code)
     except SyntaxError:
         return 0
-    from cortex.extensions.mejoralo.scan import _COMPLEXITY_NODES
+    _COMPLEXITY_NODES = (ast.If, ast.For, ast.While, ast.Try, ast.With, ast.AsyncFor, ast.AsyncWith)
 
     comp = 0
     for node in ast.walk(tree):

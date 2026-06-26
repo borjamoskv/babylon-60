@@ -1,3 +1,4 @@
+from typing import Any
 # [C5-REAL] Exergy-Maximized
 """
 DSP Apotheosis.
@@ -45,7 +46,7 @@ PEAK_CEILING = 0.99
 
 @njit
 def _fast_envelope_follower(
-    audio_data: np.ndarray,
+    audio_data: Any,
     alpha_attack: float,
     alpha_release: float,  # pyright: ignore[reportInvalidTypeForm]
 ) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
@@ -72,7 +73,7 @@ class DSPApotheosis:
     def __init__(self):
         pass
 
-    def calculate_lufs(self, audio_data: np.ndarray, sample_rate: int) -> float:  # pyright: ignore[reportInvalidTypeForm]
+    def calculate_lufs(self, audio_data: Any, sample_rate: int) -> float:
         """Calcula Integrated LUFS usando pyloudnorm (EBU R128 / ITU-R BS.1770)."""
         if len(audio_data) == 0:
             return LUFS_FLOOR
@@ -86,7 +87,7 @@ class DSPApotheosis:
             logger.error("Error calculando LUFS: %s", e)
             return LUFS_FLOOR
 
-    def match_pink_noise_curve(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
+    def match_pink_noise_curve(self, audio_data: Any, sample_rate: int) -> Any:
         """
         Ecualización adaptativa para balancear el espectro hacia una pendiente de -3dB/octavo.
         """
@@ -127,7 +128,7 @@ class DSPApotheosis:
 
         return audio_matched
 
-    def apply_transient_shaping(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
+    def apply_transient_shaping(self, audio_data: Any, sample_rate: int) -> Any:
         """
         Realza ataques percusivos perdiendo 'bluntness' de IA usando un seguidor de envolvente.
         """
@@ -148,7 +149,7 @@ class DSPApotheosis:
         boost = np.where(diff > TRANSIENT_BOOST_THRESHOLD, TRANSIENT_BOOST_FACTOR, 1.0)
         return audio_data * boost
 
-    def master_track(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
+    def master_track(self, audio_data: Any, sample_rate: int) -> Any:
         """
         Finalización determinista: Tonal Match -> Transient Design -> Loudness Norm -> Peak Limiting.
         """

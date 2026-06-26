@@ -132,7 +132,7 @@ def run_cli(
     from cortex.extensions.adk.agents import (
         create_analyst_agent,
         create_cortex_swarm,
-        create_gem_agent,
+        create_gem_agent,  # type: ignore[attr-defined]
         create_google_one_agent,
         create_guardian_agent,
         create_memory_agent,
@@ -151,17 +151,17 @@ def run_cli(
         mcp_tools = []
 
     if gem_name:
-        agent = create_gem_agent(gem_name=gem_name, model=model, mcp_tools=mcp_tools)
+        agent = create_gem_agent(gem_name=gem_name, model=model, mcp_tools=mcp_tools)  # type: ignore
     else:
         agent_map = {
-            "memory": lambda: create_memory_agent(model=model, mcp_tools=mcp_tools),
+            "memory": lambda: create_memory_agent(model=model, mcp_tools=mcp_tools),  # type: ignore
             "analyst": lambda: create_analyst_agent(
-                model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
+                model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools  # type: ignore
             ),
-            "guardian": lambda: create_guardian_agent(model=model, mcp_tools=mcp_tools),
-            "google-one": lambda: create_google_one_agent(model=model, mcp_tools=mcp_tools),
+            "guardian": lambda: create_guardian_agent(model=model, mcp_tools=mcp_tools),  # type: ignore
+            "google-one": lambda: create_google_one_agent(model=model, mcp_tools=mcp_tools),  # type: ignore
             "sovereign": lambda: create_cortex_swarm(
-                model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
+                model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools  # type: ignore
             ),
         }
         agent = agent_map[agent_name]()

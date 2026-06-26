@@ -36,13 +36,13 @@ class MemoryConfig(BaseModel):
     """Memory configuration for an agent role."""
 
     art_rho: Decimal = Field(
-        default=0.85,
+        default=Decimal("0.85"),
         ge=0.0,
         le=1.0,
         description="ART vigilance parameter. Higher = more granular memory.",
     )
     pruning_threshold: Decimal = Field(
-        default=0.2,
+        default=Decimal("0.2"),
         ge=0.0,
         le=1.0,
         description="ATP threshold for thermodynamic pruning.",
@@ -64,7 +64,7 @@ class MemoryConfig(BaseModel):
         description="Enable dual-trace consolidation (active + silent).",
     )
     maturation_days: Decimal = Field(
-        default=3.0,
+        default=Decimal("3.0"),
         ge=0.0,
         description="Days for silent engrams to mature.",
     )
@@ -84,7 +84,7 @@ class GuardrailConfig(BaseModel):
         description="Hard cap on total tokens consumed per session.",
     )
     warn_threshold: Decimal = Field(
-        default=0.8,
+        default=Decimal("0.8"),
         ge=0.0,
         le=1.0,
         description="Ratio at which to emit a budget warning.",
@@ -124,11 +124,11 @@ class AgentRole(BaseModel):
         description="Project scope for memory operations.",
     )
     memory: MemoryConfig = Field(
-        default_factory=MemoryConfig,
+        default_factory=lambda: MemoryConfig(),
         description="Memory subsystem configuration.",
     )
     guardrails: GuardrailConfig = Field(
-        default_factory=GuardrailConfig,
+        default_factory=lambda: GuardrailConfig(),
         description="Session guardrail configuration.",
     )
     tools: list[str] = Field(
