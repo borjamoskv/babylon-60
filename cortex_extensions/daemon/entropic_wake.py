@@ -75,7 +75,8 @@ class EntropicWakeDaemon:
             entropy_score += db_ghosts * 0.15
 
         except (sqlite3.Error, OSError, ValueError) as e:
-            logger.error("RADAR-Ω Entropic query failed: %s", e)
+            logger.critical("RADAR-Ω SENSOR DRIFT: %s", e)
+            raise RuntimeError(f"Sensor Drift: Epistemic failure in entropy calculation. Original error: {e}")
 
         logger.debug("Current Zenón Entropy τ_z: %s", entropy_score)
         return entropy_score
@@ -122,7 +123,8 @@ class EntropicWakeDaemon:
             conn.commit()
             logger.info("Logged autopoiesis cycle to CORTEX.")
         except sqlite3.Error as e:
-            logger.error("Failed to log to cortex DB: %s", e)
+            logger.critical("BFT CONSENSUS FAILURE: Could not persist autopoiesis cycle to Ledger. %s", e)
+            raise
 
     async def run_loop(self):
         """The main continuous loop for the Void Daemon."""
@@ -134,9 +136,10 @@ class EntropicWakeDaemon:
                     # In a true system, we dynamically select the target based on entropy clusters
                     highest_entropy_target = "cortex_router"  # Placeholder
                     self.ignite_purification_agent(highest_entropy_target)
-            except (sqlite3.Error, OSError, ValueError) as e:
-                logger.error("Entropic Wake (BFT Matrix) encountered a structural error: %s", e)
-                # Sensor Drift mitigation: unknown exceptions must crash the loop to trigger system restart.
+            except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
+                logger.critical("BFT STRUCTURAL COLLAPSE: %s. Initiating Apoptosis.", e)
+                self.stop()
+                raise  # Crash daemon to allow supervisor restart (C5-REAL)
 
             # Sleep until next pulse
             await asyncio.sleep(self.interval_seconds)
