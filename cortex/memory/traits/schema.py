@@ -86,8 +86,7 @@ class SchemaTrait:
             """)
             if self._vector_enabled:
                 # pyright: ignore[reportAttributeAccessIssue]
-                conn.executescript(
-                    f"""
+                sql = f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(
                         embedding int8[{self._encoder.dimension}]
                     );
@@ -103,7 +102,15 @@ class SchemaTrait:
                         s12 INTEGER, s13 INTEGER, s14 INTEGER, s15 INTEGER
                     );
                     """
-                )
+                print(f"TEMPORARY DEBUG SQL: {sql!r}", flush=True)
+                print(f"TEMPORARY DEBUG ENCODER: {type(self._encoder).__name__} | DIM: {self._encoder.dimension!r} | DIM TYPE: {type(self._encoder.dimension).__name__}", flush=True)
+                try:
+                    conn.executescript(sql)
+                except Exception as e:
+                    print(f"TEMPORARY DEBUG SQL ERROR: {e} | SQL was: {sql!r}", flush=True)
+                    raise
+
+
                 for i in range(16):
                     conn.execute(
                         f"CREATE INDEX IF NOT EXISTS idx_void_mih_s{i} ON vec_void_mih(s{i})"

@@ -39,6 +39,13 @@ class SQLiteAdapter:
     def __init__(self, conn: aiosqlite.Connection):
         self._conn = conn
 
+    @classmethod
+    async def create(cls, conn: aiosqlite.Connection) -> SQLiteAdapter:
+        """Factory method enforcing R10 rigid connection factors (WAL + busy_timeout=5000)."""
+        await conn.execute("PRAGMA busy_timeout = 5000")
+        await conn.execute("PRAGMA journal_mode = WAL")
+        return cls(conn)
+
     async def get_conn(self) -> aiosqlite.Connection:
         """Return the underlying aiosqlite.Connection."""
         return self._conn

@@ -33,8 +33,13 @@ class CortexStoreMachine(RuleBasedStateMachine):
     def teardown(self):
         self.loop.run_until_complete(self.engine.close())
         self.loop.close()
-        if os.path.exists(self.db_path):
-            os.remove(self.db_path)
+        for suffix in ("", "-wal", "-shm"):
+            path = f"{self.db_path}{suffix}"
+            if os.path.exists(path):
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
             
         if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
             del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
