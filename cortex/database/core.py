@@ -93,13 +93,15 @@ class CortexConnection(sqlite3.Connection):
             # Allow internal SQLite tables and FTS5/Vector shadow tables to be mutated
             # during schema creation and normal index updates.
             if table and (
-                table.startswith("sqlite_") 
+                table.startswith("sqlite_")
+                or table.startswith("vec_")
                 or table.endswith("_data") 
                 or table.endswith("_idx") 
                 or table.endswith("_content") 
                 or table.endswith("_docsize") 
                 or table.endswith("_config")
                 or table == "health_history"
+                or table == "enrichment_jobs"
             ):
                 return sqlite3.SQLITE_OK
 
@@ -156,20 +158,24 @@ sqlite3.connect = __import__("typing").cast(Any, _secure_sqlite3_connect)
 @contextmanager
 def causal_write(conn: Any) -> Any:
     """Context manager to temporarily authorize causal writes on a connection."""
-    if not hasattr(conn, "_causal_write_auth_count"):
-        conn._causal_write_auth_count = 0
-    
-    conn._causal_write_auth_count += 1
-    
+    # aiosqlite connection has _conn, while raw sqlite3/CortexConnection does not
     underlying = conn._conn if hasattr(conn, "_conn") else conn
-    if hasattr(underlying, "authorize_causal_writes"):
-        underlying.authorize_causal_writes()
+    is_cortex_conn = hasattr(underlying, "authorize_causal_writes")
+    
+    # Only try to mutate the connection if it's a CortexConnection that supports dynamic attributes
+    if is_cortex_conn:
+        if getattr(conn, "_causal_write_auth_count", 0) == 0:
+            underlying.authorize_causal_writes()
+        conn._causal_write_auth_count = getattr(conn, "_causal_write_auth_count", 0) + 1
+
     try:
-        yield
+        yield conn
     finally:
-        conn._causal_write_auth_count -= 1
-        if conn._causal_write_auth_count <= 0 and hasattr(underlying, "revoke_causal_writes"):
-            underlying.revoke_causal_writes()
+        if is_cortex_conn:
+            conn._causal_write_auth_count -= 1
+            if conn._causal_write_auth_count <= 0:
+                underlying.revoke_causal_writes()
+                conn._causal_write_auth_count = 0
 
 
 __all__ = [
