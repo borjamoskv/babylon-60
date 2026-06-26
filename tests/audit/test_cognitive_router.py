@@ -254,47 +254,49 @@ class TestCognitiveRouter:
         # Insert two entries directly with the same prev_hash to trigger database constraint
         import aiosqlite
 
-        await router._conn.execute(
-            """INSERT INTO cognitive_router_log 
-               (routing_id, timestamp, prompt_hash, detected_sensitivity, user_tier, 
-                assigned_model, data_retention_flag, prev_hash, signature, classifier_version, routing_policy_version)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                "id-1",
-                "2026-06-11T08:00:00Z",
-                "hash1",
-                "[]",
-                "General-Public",
-                "Fable-5-Core",
-                0,
-                "DUPLICATE_HASH",
-                "sig1",
-                "ver1",
-                "ver2",
-            ),
-        )
-        await router._conn.commit()
-
-        with pytest.raises(aiosqlite.IntegrityError):
+        from cortex.database.core import causal_write
+        with causal_write(router._conn):
             await router._conn.execute(
                 """INSERT INTO cognitive_router_log 
                    (routing_id, timestamp, prompt_hash, detected_sensitivity, user_tier, 
                     assigned_model, data_retention_flag, prev_hash, signature, classifier_version, routing_policy_version)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
-                    "id-2",
-                    "2026-06-11T08:01:00Z",
-                    "hash2",
+                    "id-1",
+                    "2026-06-11T08:00:00Z",
+                    "hash1",
                     "[]",
                     "General-Public",
                     "Fable-5-Core",
                     0,
-                    "DUPLICATE_HASH",  # Duplicate prev_hash!
-                    "sig2",
-                    "ver1",
-                    "ver2",
+                    "DUPLICATE_HASH",
+                    "sig1",
+                    "v1",
+                    "v2",
                 ),
             )
+
+        with pytest.raises(aiosqlite.IntegrityError, match="UNIQUE constraint failed"):
+            with causal_write(router._conn):
+                await router._conn.execute(
+                    """INSERT INTO cognitive_router_log 
+                       (routing_id, timestamp, prompt_hash, detected_sensitivity, user_tier, 
+                        assigned_model, data_retention_flag, prev_hash, signature, classifier_version, routing_policy_version)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        "id-2",
+                        "2026-06-11T08:00:01Z",
+                        "hash2",
+                        "[]",
+                        "General-Public",
+                        "Fable-5-Core",
+                        0,
+                        "DUPLICATE_HASH",  # Identical prev_hash
+                        "sig2",
+                        "v1",
+                        "v2",
+                    ),
+                )
             await router._conn.commit()
 
     @pytest.mark.asyncio

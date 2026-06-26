@@ -33,54 +33,58 @@ async def ensure_table_for_router(router: Any) -> None:
                 or "classifier_version" not in sql
                 or "routing_policy_version" not in sql
             ):
+                from cortex.database.core import causal_write
                 try:
-                    await router._conn.execute(
-                        "ALTER TABLE cognitive_router_log RENAME TO _cognitive_router_log_old"
-                    )
-                    await router._conn.execute(_CREATE_ROUTER_LOG_SQL)
+                    with causal_write(router._conn):
+                        await router._conn.execute(
+                            "ALTER TABLE cognitive_router_log RENAME TO _cognitive_router_log_old"
+                        )
+                        await router._conn.execute(_CREATE_ROUTER_LOG_SQL)
 
-                    cursor_old = await router._conn.execute(
-                        "PRAGMA table_info(_cognitive_router_log_old)"
-                    )
-                    old_cols = [r[1] for r in await cursor_old.fetchall()]
+                        cursor_old = await router._conn.execute(
+                            "PRAGMA table_info(_cognitive_router_log_old)"
+                        )
+                        old_cols = [r[1] for r in await cursor_old.fetchall()]
 
-                    select_cols = [
-                        "routing_id",
-                        "timestamp",
-                        "prompt_hash",
-                        "detected_sensitivity",
-                        "user_tier",
-                        "assigned_model",
-                        "data_retention_flag",
-                        "prev_hash",
-                        "signature",
-                    ]
-                    insert_cols = list(select_cols)
+                        select_cols = [
+                            "routing_id",
+                            "timestamp",
+                            "prompt_hash",
+                            "detected_sensitivity",
+                            "user_tier",
+                            "assigned_model",
+                            "data_retention_flag",
+                            "prev_hash",
+                            "signature",
+                        ]
+                        insert_cols = list(select_cols)
 
-                    if "classifier_version" in old_cols:
-                        select_cols.append("classifier_version")
-                        insert_cols.append("classifier_version")
-                    else:
-                        select_cols.append(f"'{router.classifier.version}'")
-                        insert_cols.append("classifier_version")
+                        if "classifier_version" in old_cols:
+                            select_cols.append("classifier_version")
+                            insert_cols.append("classifier_version")
+                        else:
+                            select_cols.append(f"'{router.classifier.version}'")
+                            insert_cols.append("classifier_version")
 
-                    if "routing_policy_version" in old_cols:
-                        select_cols.append("routing_policy_version")
-                        insert_cols.append("routing_policy_version")
-                    else:
-                        select_cols.append(f"'{router.routing_policy['version']}'")
-                        insert_cols.append("routing_policy_version")
+                        if "routing_policy_version" in old_cols:
+                            select_cols.append("routing_policy_version")
+                            insert_cols.append("routing_policy_version")
+                        else:
+                            select_cols.append(f"'{router.routing_policy['version']}'")
+                            insert_cols.append("routing_policy_version")
 
-                    query = f"INSERT INTO cognitive_router_log ({', '.join(insert_cols)}) SELECT {', '.join(select_cols)} FROM _cognitive_router_log_old"
-                    await router._conn.execute(query)
-                    await router._conn.execute("DROP TABLE _cognitive_router_log_old")
-                    await router._conn.commit()
+                        query = f"INSERT INTO cognitive_router_log ({', '.join(insert_cols)}) SELECT {', '.join(select_cols)} FROM _cognitive_router_log_old"
+                        await router._conn.execute(query)
+                        await router._conn.execute("DROP TABLE _cognitive_router_log_old")
+                        await router._conn.commit()
                 except Exception as e:
                     logger.error("Failed to migrate cognitive_router_log table: %s", e)
                     raise
         else:
-            await router._conn.execute(_CREATE_ROUTER_LOG_SQL)
-            await router._conn.commit()
+            from cortex.database.core import causal_write
+            with causal_write(router._conn):
+                await router._conn.execute(_CREATE_ROUTER_LOG_SQL)
+                await router._conn.commit()
 
         cursor = await router._conn.execute(
             "SELECT timestamp, prompt_hash, detected_sensitivity, user_tier, assigned_model, data_retention_flag, prev_hash, classifier_version, routing_policy_version FROM cognitive_router_log ORDER BY rowid DESC LIMIT 1"

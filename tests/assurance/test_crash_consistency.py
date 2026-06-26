@@ -24,7 +24,7 @@ def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fau
             
         # Monkeypatch the SQLite session execute to intercept writes
         # We will instead intercept the ledger append as the proxy for "after_sqlite"
-        original_append = engine._ledger_writer.append
+        original_append = engine.ledger_writer.append
         
         async def _faulty_append(*args, **kwargs):
             if fault_point == "after_sqlite_before_ledger":
@@ -32,17 +32,14 @@ def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fau
                 await asyncio.sleep(10) # Wait for SIGKILL
             return await original_append(*args, **kwargs)
             
-        engine._ledger_writer.append = _faulty_append
+        engine.ledger_writer.append = _faulty_append
         
-        try:
-            await engine.facts.store(project="test", content="crash_test_payload", tenant_id="test_tenant")
-            if fault_point == "after_commit":
-                sync_event.set()
-                await asyncio.sleep(10)
-        except Exception:
-            pass
-        finally:
-            await engine.close()
+        await engine.facts.store(project="test", content="crash_test_payload", tenant_id="test_tenant", source="test")
+        if fault_point == "after_commit":
+            sync_event.set()
+            await asyncio.sleep(10)
+        
+        await engine.close()
 
     asyncio.run(_run())
 

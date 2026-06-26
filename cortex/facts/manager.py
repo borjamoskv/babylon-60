@@ -197,22 +197,38 @@ class FactManager:
 
         from cortex.engine.core.store_mixin import StoreMixin
 
-        return await StoreMixin._store_impl(
-            cast("StoreMixin", self.engine),
-            conn,  # type: ignore[reportArgumentType]
-            project,
-            content,
-            tenant_id,
-            fact_type,
-            tags,
-            confidence,
-            source,
-            actor_id,
-            meta,
-            valid_from,
-            commit,
-            tx_id,
-        )
+        started_tx = False
+        if not conn.in_transaction:
+            await conn.execute("BEGIN IMMEDIATE")
+            started_tx = True
+
+        try:
+            return await StoreMixin._store_impl(
+                cast("StoreMixin", self.engine),
+                conn,  # type: ignore[reportArgumentType]
+                project,
+                content,
+                tenant_id,
+                fact_type,
+                tags,
+                confidence,
+                source,
+                actor_id,
+                meta,
+                valid_from,
+                commit,
+                tx_id,
+            )
+        except Exception as e:
+            import logging
+            log = logging.getLogger(__name__)
+            log.error(f"EXCEPTION IN _store_delegate: {type(e).__name__} - started_tx={started_tx}, in_transaction={conn.in_transaction}")
+            if started_tx and conn.in_transaction:
+                log.error("ROLLING BACK NOW")
+                await conn.rollback()
+            else:
+                log.error("SKIPPING ROLLBACK")
+            raise
 
     async def store_many(self, facts: list[dict]) -> list[int]:
         if not facts:

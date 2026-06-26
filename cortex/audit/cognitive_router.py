@@ -180,26 +180,29 @@ class CognitiveRouter:
 
         signature = self.ledger.private_key.sign(entry_hash.encode("utf-8")).hex()
 
-        await self._conn.execute(
-            """INSERT INTO cognitive_router_log 
-               (routing_id, timestamp, prompt_hash, detected_sensitivity, user_tier, 
-                assigned_model, data_retention_flag, prev_hash, signature, classifier_version, routing_policy_version)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                routing_id,
-                timestamp,
-                prompt_hash,
-                sensitivity_json,
-                user_tier,
-                assigned_model,
-                retention_flag,
-                self._last_hash,
-                signature,
-                self.classifier.version,
-                self.routing_policy["version"],
-            ),
-        )
-        await self._conn.commit()
+        from cortex.database.core import causal_write
+
+        with causal_write(self._conn):
+            await self._conn.execute(
+                """INSERT INTO cognitive_router_log 
+                   (routing_id, timestamp, prompt_hash, detected_sensitivity, user_tier, 
+                    assigned_model, data_retention_flag, prev_hash, signature, classifier_version, routing_policy_version)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    routing_id,
+                    timestamp,
+                    prompt_hash,
+                    sensitivity_json,
+                    user_tier,
+                    assigned_model,
+                    retention_flag,
+                    self._last_hash,
+                    signature,
+                    self.classifier.version,
+                    self.routing_policy["version"],
+                ),
+            )
+            await self._conn.commit()
 
         self._last_hash = entry_hash
 
