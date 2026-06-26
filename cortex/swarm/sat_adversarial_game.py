@@ -13,12 +13,21 @@ class SatAdversarialGame:
     Generador (Enjambre): Intenta crear grafos que sean EXACTAMENTE k-colorables (o muy densos pero colorables).
     Destructor (Z3): Inyecta ruido/prueba rigurosamente si el grafo propuesto es k-colorable.
     """
-    def __init__(self, n: int = 10, k: int = 3, timeout_ms: int = 5000):
+    # ---------------------------------------------------------
+    # Parámetros del Juego Adversarial
+    # ---------------------------------------------------------
+    N_NODOS = 20
+    P_CONEXION_BASE = 0.6
+    K_COLORS = 4
+    POBLACION_GENERADOR = 50
+    GENERACIONES_GENERADOR = 10
+
+    def __init__(self, n: int = N_NODOS, k: int = K_COLORS, timeout_ms: int = 5000):
         self.n = n
         self.k = k
         self.orchestrator = SatOrchestrator(timeout_ms=timeout_ms)
         # Usamos el enjambre de la fase 1 para generar el "Champion"
-        self.swarm = SatGeneticSwarm(population_size=10, n=n, k=k, timeout_ms=timeout_ms)
+        self.swarm = SatGeneticSwarm(population_size=self.POBLACION_GENERADOR, n=n, k=k, timeout_ms=timeout_ms)
         
     def play_round(self, evolutions: int = 5) -> dict[str, Any]:
         """Juega una ronda adversarial: Enjambre Genético vs Z3 K-Color."""
@@ -64,5 +73,5 @@ class SatAdversarialGame:
         }
 
 if __name__ == "__main__":
-    game = SatAdversarialGame(n=10, k=3)
-    game.play_round()
+    game = SatAdversarialGame(n=SatAdversarialGame.N_NODOS, k=SatAdversarialGame.K_COLORS)
+    game.play_round(evolutions=SatAdversarialGame.GENERACIONES_GENERADOR)
