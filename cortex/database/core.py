@@ -109,24 +109,38 @@ class CortexConnection(sqlite3.Connection):
 _original_sqlite3_connect = sqlite3.connect
 
 
+<<<<<<< Updated upstream
 def _secure_sqlite3_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
     """
     [C5-REAL] Kernel-owned Connection Allocator Hook.
     Blocks any raw sqlite3.connect() calls that do not use the CortexConnection factory.
     """
+=======
+def _secure_sqlite3_connect(*args, **kwargs):
+>>>>>>> Stashed changes
     factory = kwargs.get("factory")
+    print(f"DEBUG: _secure_sqlite3_connect called with factory={factory}")
     if factory is not CortexConnection:
         import os
 
         pytest_test = os.environ.get("PYTEST_CURRENT_TEST", "")
-        is_security_test = "test_verify" in pytest_test or "test_physical_claims" in pytest_test
-        if (
-            "PYTEST_CURRENT_TEST" in os.environ or "CORTEX_TEST_ENV" in os.environ
-        ) and not is_security_test:
+        is_security_test = (
+            "test_verify" in pytest_test 
+            or "test_physical_claims" in pytest_test 
+            or "test_ataque" in pytest_test 
+            or "test_metal" in pytest_test
+        )
+        if "PYTEST_CURRENT_TEST" in os.environ and not is_security_test:
+            print(f"DEBUG: bypassing security check for test {pytest_test}")
             return _original_sqlite3_connect(*args, **kwargs)
+            
+        if args and isinstance(args[0], (str, bytes)) and ".coverage" in str(args[0]):
+            return _original_sqlite3_connect(*args, **kwargs)
+            
         raise RuntimeError(
             "[C5-REAL] FATAL: Direct sqlite3.connect() is structurally forbidden. Use MTK Allocator (cortex.database.core.connect)."
         )
+    print("DEBUG: returning original with factory")
     return _original_sqlite3_connect(*args, **kwargs)
 
 
