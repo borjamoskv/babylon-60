@@ -27,7 +27,7 @@ class ByzantineJudge:
 
         # The Judge needs its own key to sign consensus proofs
         self.judge_id = "byzantine_judge_root"
-        if not self.km.get_private_key_b64(self.judge_id):
+        if not self.km.get_private_key_b64(self.judge_id) or not self.km.get_public_key_b64(self.judge_id):
             self.km.generate_and_store_key(self.judge_id)
 
     def evaluate_proposals(

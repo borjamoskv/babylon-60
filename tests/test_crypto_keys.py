@@ -3,7 +3,8 @@ import base64
 from cortex.crypto.keys import KeyManager, Signer, Verifier
 
 @pytest.fixture
-def km():
+def km(tmp_path, monkeypatch):
+    monkeypatch.setenv("CORTEX_DB_PATH", str(tmp_path / "cortex.db"))
     # Use a test service name so it doesn't collide with the real OS keyring
     manager = KeyManager(service_name="cortex_test_enterprise")
     yield manager

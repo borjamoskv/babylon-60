@@ -20,7 +20,8 @@ def test_ataque_b_sql_direct(test_db_path):
     """
     # 1. Bypass factory entirely (cortex.database.core patches sqlite3.connect)
     with pytest.raises(RuntimeError, match=r"Direct sqlite3.connect\(\) is structurally forbidden"):
-        sqlite3.connect(test_db_path)
+        import cortex.database.core
+        cortex.database.core.sqlite3.connect(test_db_path)
 
     # 2. Use the factory but without causal authorization
     conn = connect(test_db_path)
@@ -64,6 +65,7 @@ async def test_ataque_c_wal_injection(test_db_path):
 
     # 3 mutate storage directly (simulating disk/WAL injection)
     # We alter the actor_id of the first record without updating signature
+    conn._conn.authorize_causal_writes()
     await conn.execute("UPDATE security_audit_log SET actor_id = 'hacker' WHERE resource = 'resource1'")
     await conn.commit()
     
