@@ -284,7 +284,8 @@ class TopologyIndex:
         if not active:
             return None
 
-        active.sort(key=lambda x: x["boosted_cbr"], reverse=True)
+        # Determinist fallback using id for ties
+        active.sort(key=lambda x: (x["boosted_cbr"], x["id"]), reverse=True)
         return active[0]
 
     def descendants(self, node_id: str) -> set[str]:

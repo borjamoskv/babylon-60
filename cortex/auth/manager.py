@@ -76,6 +76,11 @@ class AuthManager:
         self._executor = ThreadPoolExecutor(max_workers=4)
         self._background_tasks: set[asyncio.Task[Any]] = set()
 
+        try:
+            self._dummy_hash = cortex_rs.hash_password("ctx_dummy_key_to_initialize_hashing_parameters")
+        except Exception:
+            self._dummy_hash = "$argon2id$v=19$m=16,t=2,p=1$stub$dummyhash"
+
     async def initialize(self) -> None:
         """Initialize the backend schema (async)."""
         await self.backend.initialize()
@@ -107,8 +112,9 @@ class AuthManager:
 
         loop = asyncio.get_running_loop()
         try:
+            hash_fn = getattr(cortex_rs, "hash_password")
             return await loop.run_in_executor(
-                self._executor, cortex_rs.hash_password, key + AUTH_PEPPER
+                self._executor, hash_fn, key + AUTH_PEPPER
             )
         except AttributeError:
             logger.warning("cortex_rs.hash_password missing. Falling back to stub.")
@@ -271,26 +277,39 @@ class AuthManager:
             # 2. Try Argon2id candidates by prefix
             key_prefix = raw_key[:12]
             candidates = await self.backend.get_key_candidates(key_prefix)
-            for cand in candidates:
+
+            # Determine the target Argon2 hash: use candidates if present, otherwise fallback to _dummy_hash
+            target_hash = self._dummy_hash
+            has_candidate = False
+
+            if candidates:
+                cand = candidates[0]
                 if cand.get("hash_algo") == "argon2id" and cand.get("key_hash_argon2"):
-                    try:
-                        loop = asyncio.get_running_loop()
-                        try:
-                            is_valid = await loop.run_in_executor(
-                                self._executor,
-                                getattr(cortex_rs, "verify_password", None),
-                                raw_key + AUTH_PEPPER,
-                                cand["key_hash_argon2"],
-                            )
-                        except TypeError:
-                            # if getattr returned None
-                            stub_hash = f"$argon2id$v=19$m=16,t=2,p=1$stub${self.hash_key_legacy_sha256(raw_key + AUTH_PEPPER)}"
-                            is_valid = stub_hash == cand["key_hash_argon2"]
-                        if is_valid:
-                            row = cand
-                            break
-                    except Exception:
-                        pass
+                    target_hash = cand["key_hash_argon2"]
+                    has_candidate = True
+
+            is_valid = False
+            try:
+                loop = asyncio.get_running_loop()
+                try:
+                    verify_fn = getattr(cortex_rs, "verify_password", None)
+                    if verify_fn is None:
+                        raise TypeError("verify_password not found")
+                    is_valid = await loop.run_in_executor(
+                        self._executor,
+                        verify_fn,
+                        raw_key + AUTH_PEPPER,
+                        target_hash,
+                    )
+                except TypeError:
+                    # if getattr returned None
+                    stub_hash = f"$argon2id$v=19$m=16,t=2,p=1$stub${self.hash_key_legacy_sha256(raw_key + AUTH_PEPPER)}"
+                    is_valid = stub_hash == target_hash
+            except Exception:
+                pass
+
+            if is_valid and has_candidate:
+                row = candidates[0]
 
         if not row:
             return AuthResult(authenticated=False, error="Invalid or revoked key")

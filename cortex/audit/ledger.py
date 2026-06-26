@@ -180,7 +180,7 @@ class EnterpriseAuditLedger:
         async with self._conn.execute(
             "SELECT rowid, audit_id, timestamp, actor_id, action, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
         ) as cursor:
-            rows = await cursor.fetchall()
+            rows = list(await cursor.fetchall())
 
         if not rows:
             return {"status": "verified", "blocks": 0}
@@ -252,7 +252,7 @@ class EnterpriseAuditLedger:
 
         import httpx
         try:
-            import rfc3161ng
+            import rfc3161ng  # pyright: ignore[reportMissingImports] # Opt-in secure dependency
         except ImportError:
             rfc3161ng = None
             logger.warning("rfc3161ng is not installed. TSA signatures will be disabled. Run pip install cortex-persist[secure]")

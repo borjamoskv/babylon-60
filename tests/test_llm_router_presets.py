@@ -1,4 +1,6 @@
 # [C5-REAL] Exergy-Maximized
+import pytest
+pytestmark = pytest.mark.integration
 """Permanent pytest tests for LLM Router cost/tier-aware routing.
 
 Covers:

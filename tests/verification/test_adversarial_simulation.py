@@ -1,4 +1,6 @@
 # [C5-REAL] Exergy-Maximized
+import pytest
+pytestmark = pytest.mark.chaos
 """
 Adversarial Agent Simulation and Verification Test Suite.
 
