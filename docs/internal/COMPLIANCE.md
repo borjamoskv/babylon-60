@@ -23,7 +23,7 @@ of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12**
 
 | Requirement | CORTEX Implementation | Evidence |
 |:---|:---|:---|
-| High-risk AI systems shall technically allow for the automatic recording of events (logs) | Every `store()` operation creates a transaction in the immutable ledger with SHA-256 hash linking | `cortex/ledger/ledger_core.py` — `ImmutableLedger` |
+| High-risk AI systems shall technically allow for the automatic recording of events (logs) | Every `store()` operation creates a transaction in the tamper-evident ledger with SHA-256 hash linking | `cortex/ledger/ledger_core.py` — `ImmutableLedger` |
 | Logs shall be generated throughout the lifetime of the system | Transaction ledger operates continuously; every fact insertion, update, or deletion is recorded | `transactions` table in cortex.db |
 
 **Verification Commands:** `cortex compliance-report`, `cortex trust-ledger verify`

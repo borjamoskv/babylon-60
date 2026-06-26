@@ -7,7 +7,7 @@ El módulo "Simple DVT" de Lido no utiliza un smart contract radicalmente nuevo 
 
 La revolución del módulo ocurre off-chain y en la capa de recompensas:
 1. **Lógica de Validación:** Los validadores están fragmentados mediante DKG (Distributed Key Generation) usando infraestructura **Obol Network** (Charon) o **SSV Network**.
-2. **Recepción de Recompensas (Execution Layer):** Las fee recipients no apuntan a los operadores individuales, sino a contratos **0xSplits** pre-configurados. `0xSplits` enruta de forma inmutable (o controlada por multisig) los balances de MEV/Priority fees entre los nodos participantes del clúster y la DAO de Lido.
+2. **Recepción de Recompensas (Execution Layer):** Las fee recipients no apuntan a los operadores individuales, sino a contratos **0xSplits** pre-configurados. `0xSplits` enruta de forma tamper-evident (o controlada por multisig) los balances de MEV/Priority fees entre los nodos participantes del clúster y la DAO de Lido.
 
 ## 2. Superficie de Ataque Teórica (Vectores P0/P1)
 

@@ -82,13 +82,12 @@ class EntropyAnnihilator:
     def purge_energy_sinks(self, threshold: float = 0.8, confidence: float = 0.0) -> list[str]:
         """
         Identifies and (conceptually) removes zero-value abstraction layers (Ω₇).
-        If confidence > 0.95, bypasses manual confirmation (Apotheosis).
+        Auto-approval based on 'confidence' is structurally forbidden.
+        Requires explicit SAGA evidence or cryptographic signature.
         """
         sinks = [path for path, entropy in self.scan_ecosystem() if entropy > threshold]
 
         if confidence > 0.95 and sinks:
-            # Axiom Ω₇: Permissionless Sovereignty
-            # Bridges to JARL-OMEGA for atomic rewrite WITHOUT permission
-            return sinks
+            raise RuntimeError("[SAGA-1] Evidence required. Confidence > Evidence is an epistemic violation. Auto-purge rejected.")
 
         return sinks

@@ -38,7 +38,7 @@ Sistema de IA de ALBA (scoring, riesgos, fraude)
                     ↓
            CORTEX Trust Engine
            ├── Registra cada decisión (automático)
-           ├── Encadena con hash SHA-256 (inmutable)
+           ├── Encadena con hash SHA-256 (tamper-evident)
            ├── Genera checkpoints Merkle (verificable)
            └── Produce informes de compliance (auditable)
                     ↓

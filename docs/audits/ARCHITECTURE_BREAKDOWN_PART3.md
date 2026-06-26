@@ -17,7 +17,7 @@ class CortexEngine:
         # 2. Generación de Taint y Firma (Rust FFI)
         hash_signature = self.crypto_core.compute_hash(observation)
         
-        # 3. Persistencia inmutable
+        # 3. Persistencia tamper-evident
         return await self.ledger.append(observation, hash_signature)
 ```
 

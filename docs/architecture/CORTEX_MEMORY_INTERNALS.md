@@ -265,7 +265,7 @@ scipy.spatial.cKDTree is opt-in for intrinsic dimensionality (brute-force fallba
 Stratified anchoring: different stability thresholds per fact_type.
 
 ### Class: `DriftSignature`
-> Immutable topological snapshot of the vector space at time t.
+> Tamper-Evident topological snapshot of the vector space at time t.
 **Methods:** to_dict, from_dict, save, load
 
 ### Class: `PageHinkley`
@@ -532,16 +532,16 @@ DECISION: Operate on L2's sync conn to avoid aiosqlite overhead for
 ## Module: `ledger.py`
 
 **Description:**
-CORTEX v5.3 — L3 Event Ledger (Immutable Event Sourcing).
+CORTEX v5.3 — L3 Event Ledger (Tamper-Evident Event Sourcing).
 
-Every interaction, thought, and state change is recorded as an immutable
+Every interaction, thought, and state change is recorded as an tamper-evident
 event in SQLite WAL via `cortex.db`. If L1 or L2 collapse, the full
 cognitive state can be reconstructed by replaying L3 events.
 
 Uses the hardened `cortex.db.connect_async()` factory for zero-lock I/O.
 
 ### Class: `EventLedgerL3`
-> Immutable event sourcing ledger for cognitive memory.
+> Tamper-Evident event sourcing ledger for cognitive memory.
 **Methods:** __init__
 
 ### Public Functions
@@ -699,7 +699,7 @@ Tripartite Memory Architecture (KETER-∞ Frontera 2):
 **Methods:** *None*
 
 ### Class: `MemoryEvent`
-> Atomic unit of cognitive memory — an immutable interaction record.
+> Atomic unit of cognitive memory — an tamper-evident interaction record.
 **Methods:** *None*
 
 ### Class: `EpisodicSnapshot`
@@ -807,7 +807,7 @@ NREMReport with stats from every phase.
 Derivation: Ω₂ (Entropic Asymmetry) + Ω₅ (Antifragile by Default)
 
 ### Class: `NREMReport`
-> Immutable report from a single NREM consolidation cycle.
+> Tamper-Evident report from a single NREM consolidation cycle.
 **Methods:** total_mutations
 
 ### Class: `NREMConsolidationCycle`
@@ -941,7 +941,7 @@ v1 had the core labilization logic but was missing:
   4. Dream cycle integration hook
 
 v2 adds:
-  - ReconsolidationEvent: immutable audit record of every state transition
+  - ReconsolidationEvent: tamper-evident audit record of every state transition
   - LabilizationRecord.version_id + parent_version: full provenance chain
   - ReconsolidationTracker.audit_trail: O(1) lookup of all events for an engram
   - ConfirmationBiasDetector: flags when confirm/contradict ratio is suspicious
@@ -956,7 +956,7 @@ Axiom derivation:
 **Methods:** *None*
 
 ### Class: `ReconsolidationEvent`
-> Immutable audit record of a single reconsolidation state transition.
+> Tamper-Evident audit record of a single reconsolidation state transition.
 **Methods:** *None*
 
 ### Class: `LabilizationRecord`

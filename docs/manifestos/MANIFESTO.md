@@ -13,7 +13,7 @@ CORTEX vive en *tu* hardware. No hay telemetría oculta, no hay servidores centr
 
 ## 2. El Fin del "Black-Box" (The Open Trust Standard)
 Hoy en día, cuando una IA toma una decisión o comete un error, nadie sabe por qué. CORTEX transforma la IA en un sistema auditable.
-Cada vez que el enjambre de agentes toma una decisión, descubre una solución o detecta un fallo ("Ghost"), el evento se sella en un **Ledger Criptográfico** (una cadena de hash inmutable). Es el primer motor de memoria 100% auditable y preparado para regulaciones estrictas (como el *EU AI Act*). La IA pasa de ser una "caja negra" insondable a un libro de contabilidad matemático transparente.
+Cada vez que el enjambre de agentes toma una decisión, descubre una solución o detecta un fallo ("Ghost"), el evento se sella en un **Ledger Criptográfico** (una cadena de hash tamper-evident). Es el primer motor de memoria 100% auditable y preparado para regulaciones estrictas (como el *EU AI Act*). La IA pasa de ser una "caja negra" insondable a un libro de contabilidad matemático transparente.
 
 ## 3. Agnosticismo de Modelos (Anti Vendor Lock-in)
 La industria quiere que dependas exclusivamente de su infraestructura. CORTEX desacopla la **Memoria** del **Razonamiento**.

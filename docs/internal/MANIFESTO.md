@@ -66,7 +66,7 @@ CORTEX isn't just a library — it's a paradigm for what autonomous agents *shou
 
 | Spec | Purpose | Key Insight | Status |
 |:---|:---|:---|:---:|
-| **`soul.md`** | Immutable identity and values | Who you were designed to be | ✅ Implemented |
+| **`soul.md`** | Tamper-Evident identity and values | Who you were designed to be | ✅ Implemented |
 | **`lore.md`** | Episodic memory with causal chains | What you've survived — not just what you know | ✅ Implemented |
 | **`nemesis.md`** | Operational allergies (the Anti-Prompt) | Reject bad patterns before planning begins | 🔵 Conceptual |
 | **`tether.md`** | Physical/economic/entropy limits | The Dead-Man's Switch — agents need leashes | 🔵 Conceptual |

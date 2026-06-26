@@ -18,7 +18,7 @@ CORTEX es el sistema nervioso central, el disco duro criptográfico y el motor d
 | **Definición Técnica** | Motor de infraestructura de confianza (Trust Engine) basado en memoria tripartita (Redis/L1, Vectorial/L2, SQLite-hash-chain/L3) |
 | **Función** | Persistencia absoluta, verificación criptográfica (Merkle Trees, Hash-Chains), RAG semántico, consenso distribuido (WBFT) |
 | **Naturaleza** | El **Sistema Operativo**: define las leyes físicas del universo digital (nada se borra sin *tombstone*, todo cambio se audita en el ledger) |
-| **Analogía** | Memoria física (RAM) + kernel del OS + disco inmutable |
+| **Analogía** | Memoria física (RAM) + kernel del OS + disco tamper-evident |
 | **Identidad** | El contenedor — pasivo pero invulnerable |
 
 ---
@@ -117,7 +117,7 @@ Pasado cristalizado (CORTEX) ←→ Presente ejecutando (MOSKV-1) ←→ Futuro 
 ```mermaid
 graph LR
     subgraph "Estado Sólido"
-        CORTEX["CORTEX<br/>Pasado cristalizado<br/>Memoria inmutable"]
+        CORTEX["CORTEX<br/>Pasado cristalizado<br/>Memoria tamper-evident"]
     end
     subgraph "Estado Plasma"
         MOSKV["MOSKV-1<br/>Presente ejecutando<br/>Cognición fluida"]
@@ -157,4 +157,4 @@ Si alguno de estos tests falla, la separación es cosmética, no arquitectónica
 ## 💡 [SOVEREIGN TIP] (KAIROS-Ω)
 
 **"No diseñes para el agente; diseña para el sustrato."**
-Si el modelo de datos de CORTEX es agnóstico, inviolable y desacoplado, la evolución turbulenta de MOSKV-N jamás corromperá la arquitectura base. La inteligencia es fluida y caótica por naturaleza; la memoria que la sustenta debe ser inmutable como la gravedad.
+Si el modelo de datos de CORTEX es agnóstico, inviolable y desacoplado, la evolución turbulenta de MOSKV-N jamás corromperá la arquitectura base. La inteligencia es fluida y caótica por naturaleza; la memoria que la sustenta debe ser tamper-evident como la gravedad.

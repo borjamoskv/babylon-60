@@ -27,7 +27,7 @@ Every record securely binds context to an explicitly defined agent, tenant, and 
 
 ## 2. The Cryptographic Proof (Why it matters)
 
-The exact payload from Step 1 is hashed, and that hash is chained to the *previous* state of the memory system, creating a blockchain-like immutable ledger inside your private SQLite Database.
+The exact payload from Step 1 is hashed, and that hash is chained to the *previous* state of the memory system, creating a blockchain-like tamper-evident ledger inside your private SQLite Database.
 
 ```json
   "cryptographic_proof": {

@@ -46,7 +46,7 @@ def reload() -> None:
     for attr in CortexConfig.__dataclass_fields__:
         setattr(_module, attr, getattr(_cfg, attr))  # Non-atomic update
 ```
-- **Fix:** Use `asyncio.Lock` or `threading.RLock` around reload operations; implement atomic configuration swap using immutable config objects.
+- **Fix:** Use `asyncio.Lock` or `threading.RLock` around reload operations; implement atomic configuration swap using tamper-evident config objects.
 
 #### Issue SPOF-002
 - **File:** `cortex/notifications/bus.py`

@@ -19,7 +19,7 @@ El flujo de datos no es simple escritura en disco. Es un proceso de **transforma
 3.  **Mapeo de Divergencia (`DivergenceMap`):** Calcula la distancia geométrica entre la ejecución actual y la "ejecución canónica" (la línea base).
     *   *Si la distancia > umbral:* Se activa una señal de control (`ExecutionControl`) para estabilizar, reorientar o detener el agente.
 4.  **Sello Criptográfico (SHA-256 + Merkle):** Cada estado validado se sella en una cadena de hash. No son solo hashes individuales; forman una **cadena de Merkle** donde cada bloque depende del anterior.
-5.  **Ledger Append-Only (AOF):** El registro final es inmutable. Cualquier intento de modificar una entrada anterior invalidaría todos los hashes subsiguientes, haciendo la alteración detectable en tiempo O(1).
+5.  **Ledger Append-Only (AOF):** El registro final es tamper-evident. Cualquier intento de modificar una entrada anterior invalidaría todos los hashes subsiguientes, haciendo la alteración detectable en tiempo O(1).
 
 ### 🧬 Primitivas Críticas y su Función Matemática
 
@@ -51,7 +51,7 @@ CORTEX-PERSIST se posiciona como una **capa de substrato**, no como un reemplazo
 
 El modelo de confianza se invierte radicalmente:
 *   **Tradicional:** "Confío en el proceso porque el log dice X".
-*   **CORTEX:** "Verifico la evidencia. El hash coincide con la cadena de Merkle, por lo tanto, el estado es inmutable y verificable".
+*   **CORTEX:** "Verifico la evidencia. El hash coincide con la cadena de Merkle, por lo tanto, el estado es tamper-evident y verificable".
 *   **Cadenas de Claves y Criptografía:** Utiliza **ZK-STARKs** (Zero-Knowledge Scalable Transparent Arguments of Knowledge) en combinación con SHA-256 para permitir pruebas de validez sin exponer datos sensibles subyacentes.
 
 ### 💡 Conclusión Técnica

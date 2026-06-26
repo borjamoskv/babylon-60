@@ -83,7 +83,7 @@ ingestión
 ## 6. Distinción formal: Guard vs Seal
 
 **Guard falla** → rechazo o cuarentena.  (Manejado como excepción validación de admisión)
-**Seal falla** → incidente de seguridad. (El hash inmutable criptográfico detectó mutación tras haberse sellado la memoria)
+**Seal falla** → incidente de seguridad. (El hash tamper-evident criptográfico detectó mutación tras haberse sellado la memoria)
 
 Regla dura para Seals:
 - un `SealRecord` no se edita.

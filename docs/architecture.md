@@ -8,7 +8,7 @@
 
 ## System Overview
 
-CORTEX is a **trust infrastructure engine** that provides cryptographic verification, immutable audit trails, and regulatory compliance for AI agent memory. It is built under the strict premise that generative AI output is fundamentally *thermodynamically unstable conjecture* (`Void-State`). It only becomes durable state after surviving a predefined path of deterministic filters.
+CORTEX is a **trust infrastructure engine** that provides cryptographic verification, tamper-evident audit trails, and regulatory compliance for AI agent memory. It is built under the strict premise that generative AI output is fundamentally *thermodynamically unstable conjecture* (`Void-State`). It only becomes durable state after surviving a predefined path of deterministic filters.
 
 To enforce this, it combines a relational database with vector embeddings, hash-chained transactions, Merkle tree integrity, multi-agent consensus, and privacy protection — running locally on SQLite or scaling to AlloyDB + Qdrant + Redis for enterprise deployments.
 
@@ -96,7 +96,7 @@ graph TB
 
 ### Facts — The Memory Primitive
 
-Every piece of knowledge is a **Fact**. Facts are immutable records with temporal validity:
+Every piece of knowledge is a **Fact**. Facts are tamper-evident records with temporal validity:
 
 | Field | Type | Description |
 |:---|:---|:---|
@@ -151,7 +151,7 @@ CORTEX implements **Weighted Byzantine Fault Tolerance**:
 3. Domain-specific vote multipliers
 4. Updates `consensus_score` on each fact
 5. Elder Council verdict for edge cases without quorum
-6. Immutable vote ledger for audit
+6. Tamper-Evident vote ledger for audit
 
 ---
 

@@ -62,7 +62,7 @@ The export builder rejects common inline fact payload keys inside event
 - `fact_content`
 
 This is a guardrail for forensic packaging, not a complete PII detector. M6 is
-the enforcement milestone for immutable-ledger no-PII policy.
+the enforcement milestone for tamper-evident-ledger no-PII policy.
 
 ## Guarantee Split
 
@@ -108,4 +108,4 @@ Those controls belong to later milestones, especially M4, M5, and M6.
 M4 adds runtime origin-signature admission for `LedgerWriter` strict mode. M5
 adds live replay nonce reservation and online freshness admission; historical
 offline verification still reports `online_freshness_verified: false`. M6
-remains responsible for immutable-ledger no-PII enforcement.
+remains responsible for tamper-evident-ledger no-PII enforcement.

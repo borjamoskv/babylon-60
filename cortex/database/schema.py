@@ -149,6 +149,17 @@ CREATE INDEX IF NOT EXISTS idx_facts_parent ON facts(parent_id);
 CREATE INDEX IF NOT EXISTS idx_facts_semantic_status ON facts(semantic_status);
 """
 
+CREATE_FACTS_TRIGGERS = """
+CREATE TRIGGER IF NOT EXISTS enforce_taint_on_facts_insert
+BEFORE INSERT ON facts
+FOR EACH ROW
+WHEN (NEW.metadata IS NULL OR NEW.metadata NOT LIKE '%cortex_taint%') 
+     AND NEW.fact_type != 'mafia_node'
+BEGIN
+    SELECT RAISE(ABORT, 'ERR_LEDGER_SEALED: Cannot insert into facts without a valid cortex_taint token in metadata');
+END;
+"""
+
 CREATE_FACT_TAGS = """
 CREATE TABLE IF NOT EXISTS fact_tags (
     fact_id INTEGER NOT NULL,
@@ -371,6 +382,7 @@ ALTER TABLE facts ADD COLUMN signer_pubkey TEXT;
 _CORE_SCHEMA = [
     CREATE_FACTS,
     CREATE_FACTS_INDEXES,
+    CREATE_FACTS_TRIGGERS,
     CREATE_FACT_TAGS,
     CREATE_FACT_TAGS_INDEXES,
     CREATE_EMBEDDINGS,

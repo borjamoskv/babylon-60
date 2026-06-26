@@ -65,10 +65,10 @@ class AutoCrystallizer:
 
         refined = refined.strip()
 
-        # If refinement failes or returns empty, fallback to raw but warn
+        # If refinement failes or returns empty, raise hard exception to abort SAGA
         if not refined or len(refined) > len(content):
-            logger.warning("⚠️ Crystallization failed to reduce entropy. Using raw content.")
-            return content
+            logger.error("🛑 [SAGA-1] Crystallization failed to reduce entropy. Aborting pipeline.")
+            raise RuntimeError("[SAGA-1] Crystallization failed to reduce entropy. Aborting pipeline.")
 
         logger.info("✅ Fact crystallized: %d chars -> %d chars", len(content), len(refined))
         return refined

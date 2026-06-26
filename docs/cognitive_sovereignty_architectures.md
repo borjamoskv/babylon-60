@@ -235,7 +235,7 @@ Los **Entornos de Ejecución Confiables (TEEs)** — Intel TDX, AMD SEV, NVIDIA 
 > [!CAUTION]
 > Indispensable para el despliegue en finanzas y salud, donde la integridad del algoritmo es tan crítica como la confidencialidad de los datos.
 
-### 4.2 Auditoría Inmutable: ZK-Proofs y ZKSQL
+### 4.2 Auditoría Tamper-Evident: ZK-Proofs y ZKSQL
 
 Las **Pruebas de Conocimiento Cero (ZK-Proofs)** resuelven la "Paradoja de la Auditoría":
 
@@ -299,7 +299,7 @@ graph LR
 | Velocidad | HNSW + Cuantización Binaria | ✅ `sqlite-vec` + `EmbeddingPrunerMixin` |
 | Memoria | Unificada (Episódica + Semántica + Procedimental) | ✅ Smoke test 10/10 verificado |
 | Razonamiento | AERO + ICC + Modelos de Mundo | 🔶 `ConsensusBreaker` + `SovereignGate` |
-| Confianza | Ledger inmutable + Consenso bizantino | ✅ `LedgerMixin` + `BR-PBFT` |
+| Confianza | Ledger tamper-evident + Consenso bizantino | ✅ `LedgerMixin` + `BR-PBFT` |
 
 La convergencia de estas tecnologías define el nuevo estado del arte: **agentes que no solo procesan información a velocidades sobrehumanas, sino que razonan con profundidad estratégica y operan con integridad verificable.**
 

@@ -103,12 +103,22 @@ class TelemetryCompactionWorker:
                 }
             )
 
-            # Store summary
-            insert_query = """
-                INSERT INTO facts (project, content, fact_type, source, confidence, meta, tags, created_at, updated_at)
-                VALUES (?, ?, 'telemetry_summary', 'telemetry-compactor', 'C4', ?, '["telemetry_summary", "compacted"]', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            """
-            await conn.execute(insert_query, (project, summary_content, summary_meta))
+            # Store summary using unified pipeline
+            from cortex.engine.fact_store_core import insert_fact_record
+            
+            await insert_fact_record(
+                conn=conn,
+                tenant_id="default",
+                project=project,
+                content=summary_content,
+                fact_type="telemetry_summary",
+                tags=["telemetry_summary", "compacted"],
+                confidence="C4",
+                ts=None,
+                source="telemetry-compactor",
+                meta=json.loads(summary_meta),
+                tx_id=None
+            )
 
         # Mark raw facts as compacted so we don't process them again
         if ids_to_mark:

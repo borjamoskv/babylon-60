@@ -25,7 +25,7 @@ flowchart TD
 
     Agent -->|Drafts & Thoughts| L1
     Agent -->|RAG Queries| L2
-    Agent -->|Immutable Decisions & Core Facts| Membrane
+    Agent -->|Tamper-Evident Decisions & Core Facts| Membrane
     Membrane -->|Validates & Hashes| SQLite
 ```
 

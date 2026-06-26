@@ -12,7 +12,7 @@ When an AI agent stores a durable fact, every system below performs an `UPSERT` 
 
 | Property | Industry Standard | CORTEX |
 | :--- | :--- | :--- |
-| Write model | `UPSERT` (overwrite) | `APPEND` (hash-chained, immutable) |
+| Write model | `UPSERT` (overwrite) | `APPEND` (hash-chained, tamper-evident) |
 | Hallucination guard | None (ingest whatever arrives) | `Verification Membrane` — formal guards reject invalid payloads |
 | Tamper evidence | Logs can be silently edited | SHA-256 chain — any mutation breaks the hash |
 | Audit export | Ad-hoc CSV/JSON dump | Canonical JSON artifact with cryptographic proof (EU AI Act Art. 12 ready) |
@@ -28,7 +28,7 @@ The memory market has consolidated around three archetypes. None provide cryptog
 | :--- | :--- | :--- | :--- | :--- |
 | **Mem0** | $24M (Seed+A, Oct 2025). Basis Set, YC, Kindred. 41K+ ⭐ | Hybrid: Vector + Graph + KV | Fastest personalization API. AWS Agent SDK exclusive provider. | Mutable graph. No hash chain. Admin can silently rewrite "facts". |
 | **Letta** (ex-MemGPT) | $10M Seed ($70M val, Sep 2024). Felicis, Jeff Dean angel. Apache 2.0 | OS-inspired: core memory (RAM) + archival (disk) | Agent self-governs memory hierarchy. Highest autonomy. | Self-hosted runtime lacks tamper-evident audit trail. |
-| **Zep** (Graphiti) | $2.3M (YC). Capital-efficient. | Temporal knowledge graph (bi-temporal model) | Timestamps facts. Understands contradiction over time. | Temporal ≠ immutable. Graph edges are mutable. |
+| **Zep** (Graphiti) | $2.3M (YC). Capital-efficient. | Temporal knowledge graph (bi-temporal model) | Timestamps facts. Understands contradiction over time. | Temporal ≠ tamper-evident. Graph edges are mutable. |
 | **Evermind** | Undisclosed | Self-organizing long-term memory | Framework-agnostic. High temporal consistency. | No cryptographic chaining. |
 | **Supermemory** | Undisclosed | Full-stack memory API | Sub-300ms recall. Production-grade latency. | Speed-optimized, not trust-optimized. |
 | **Hindsight** | Undisclosed | Multi-strategy retrieval (Graph/Temporal/Semantic) | Native MCP integration. High-accuracy benchmarks. | No formal verification guards. |
@@ -63,7 +63,7 @@ These solve *routing and coordination*. None solve *accountability*.
 
 ## 🆚 Agent Observability (Langfuse, LangSmith, Arize, Braintrust)
 
-The observability market has shifted from trace viewers to causal reconstruction engines. Still — none provide *immutable* traces.
+The observability market has shifted from trace viewers to causal reconstruction engines. Still — none provide *tamper-evident* traces.
 
 | Platform | Strength | Limitation |
 | :--- | :--- | :--- |
@@ -151,7 +151,7 @@ The observability market has shifted from trace viewers to causal reconstruction
 | Threat Vector | Probability | Impact | Mitigation |
 | :--- | :--- | :--- | :--- |
 | Mem0/Letta adds hash-chaining | Medium | High — removes CORTEX's primary differentiator | Ship formal verification guards first. Hash-chaining alone ≠ trust system. Guards + chaining + export = moat. |
-| LangGraph adds native immutable checkpoints | Low-Medium | High | Integrate as LangGraph plugin *before* they build in-house. Be the standard persistence layer. |
+| LangGraph adds native tamper-evident checkpoints | Low-Medium | High | Integrate as LangGraph plugin *before* they build in-house. Be the standard persistence layer. |
 | Datadog/Splunk adds "AI Audit Trail" product | Medium | Medium | Enterprise sales cycle = slow. CORTEX ships sovereign/local-first. They can't. |
 | Cognition (Devin) builds proprietary memory | High | Medium | Devin solves code execution, not general agent trust. CORTEX's scope is broader. |
 | EU AI Act enforcement delayed further | Medium | Low | Regulation creates demand but isn't the only driver. Sovereign data ownership has independent value. |

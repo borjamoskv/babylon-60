@@ -42,7 +42,7 @@ A system is considered **CORTEX-Native** if it abides by the following pipeline:
 1. **Proposal (Stochastic):** An agent (via any framework) generates a hypothesis or action intent.
 2. **Validation (Deterministic):** The proposal hits a rigid boundary (Pydantic schemas, AST linters, compiler checks).
 3. **Admission (CORTEX Guard):** Only upon passing validation does the proposal reach CORTEX Guards. Here, semantic collisions, contradictions with historical truths, and system policies are evaluated.
-4. **Crystallization (The Ledger):** If the proposal passes, it is mathematically hashed and cryptographically sealed into the CORTEX Ledger as an immutable `Fact`. 
+4. **Crystallization (The Ledger):** If the proposal passes, it is mathematically hashed and cryptographically sealed into the CORTEX Ledger as an tamper-evident `Fact`. 
 5. **Execution (Cinetic):** The validated, persisted action is allowed to mutate external state.
 
 ---

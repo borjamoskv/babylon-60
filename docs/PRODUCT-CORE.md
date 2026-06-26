@@ -24,7 +24,7 @@ These modules form the public surface of `cortex-persist`. Their APIs are covere
 | Module | Path | Description |
 |:---|:---|:---|
 | **CortexEngine** | `cortex/engine/` | Main entry point. Orchestrates all core operations. |
-| **Ledger** | `cortex/ledger/` | Hash-chained immutable transaction log. |
+| **Ledger** | `cortex/ledger/` | Hash-chained tamper-evident transaction log. |
 | **Crypto** | `cortex/crypto/` | SHA-256 hashing, Merkle trees, key management. |
 | **Memory** | `cortex/memory/` | Memory store and temporal retrieval. |
 | **Facts** | `cortex/facts/` | Fact lifecycle management (store, deprecate, verify). |

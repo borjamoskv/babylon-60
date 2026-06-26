@@ -3,7 +3,7 @@
 
 ## 1. El Salto Arquitectónico a Event Sourcing
 
-La topología de `AntiLimerenceTopology` ha sido elevada desde un estado mutable en memoria (entropía de persistencia) a un modelo de memoria inmutable distribuido basado en **Redpanda (C++)**.
+La topología de `AntiLimerenceTopology` ha sido elevada desde un estado mutable en memoria (entropía de persistencia) a un modelo de memoria tamper-evident distribuido basado en **Redpanda (C++)**.
 
 Kafka/Redpanda aquí NO opera como un sistema de mensajería (pub/sub estándar).
 Opera exclusivamente como:

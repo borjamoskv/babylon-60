@@ -130,30 +130,39 @@ class ConnectionMixin:
         with getattr(self, "_thread_init_lock", None) or threading.Lock():
             if self._schema_ready:
                 return
-            await run_migrations_async(conn)
-            for k, v in get_init_meta():
-                await conn.execute(
-                    "INSERT OR IGNORE INTO cortex_meta (key, value) VALUES (?, ?)",
-                    (k, v),
-                )
-            await conn.commit()
-
-            # Dynamic tenant isolation salt resolution
-            cursor = await conn.execute(
-                "SELECT value FROM cortex_meta WHERE key = 'tenant_isolation_salt'"
-            )
-            row = await cursor.fetchone()
-            if row:
-                import cortex.core.config as config
-                config.HKDF_SALT = row[0]
-            else:
-                import cortex.core.config as config
-                # Store the default config salt in the DB if not present
-                await conn.execute(
-                    "INSERT INTO cortex_meta (key, value) VALUES ('tenant_isolation_salt', ?)",
-                    (config.HKDF_SALT,),
-                )
+                
+            # Autorizar migraciones físicamente
+            if hasattr(conn._conn, "authorize_causal_writes"):
+                conn._conn.authorize_causal_writes()
+            
+            try:
+                await run_migrations_async(conn)
+                for k, v in get_init_meta():
+                    await conn.execute(
+                        "INSERT OR IGNORE INTO cortex_meta (key, value) VALUES (?, ?)",
+                        (k, v),
+                    )
                 await conn.commit()
+                
+                # Dynamic tenant isolation salt resolution
+                cursor = await conn.execute(
+                    "SELECT value FROM cortex_meta WHERE key = 'tenant_isolation_salt'"
+                )
+                row = await cursor.fetchone()
+                if row:
+                    import cortex.core.config as config
+                    config.HKDF_SALT = row[0]
+                else:
+                    import cortex.core.config as config
+                    # Store the default config salt in the DB if not present
+                    await conn.execute(
+                        "INSERT INTO cortex_meta (key, value) VALUES ('tenant_isolation_salt', ?)",
+                        (config.HKDF_SALT,),
+                    )
+                    await conn.commit()
+            finally:
+                if hasattr(conn._conn, "revoke_causal_writes"):
+                    conn._conn.revoke_causal_writes()
             
             # Query dynamic salt if present to reload config dynamically
             try:

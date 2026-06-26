@@ -37,6 +37,11 @@ CORTEX      →  proves what your agent actually did, mathematically
 Every AI agent framework answers *"what should the agent do next?"*  
 None of them answer *"can you prove what the agent did, and that it hasn't been altered?"*
 
+**The Epistemic Pipeline:**
+`Agent Output ──▶ CORTEX Validation ──▶ Cryptographic Ledger ──▶ JSON Proof`
+
+[Read the Security & Trust Model](docs/SECURITY_TRUST_MODEL.md) for full cryptographic assumptions.
+
 CORTEX-PERSIST is the missing substrate layer:
 
 - **LangGraph** gives you checkpoints. CORTEX gives you **cryptographic proof those checkpoints haven't been tampered with.**
@@ -276,6 +281,7 @@ The `examples/` directory has ready-to-run scenarios:
 - [**SECURITY_TRUST_MODEL.md**](docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants & guarantees
 - [**AGENTS.md**](AGENTS.md) — Substrate directives for autonomous orchestration
 - [**ROADMAP.md**](ROADMAP.md) — Deployment phases and LEGION-10k scaling
+- [**BENCHMARKS.md**](docs/BENCHMARKS.md) — Reproducible throughput & latency baseline
 - [**API Reference**](docs/api.md) — SDK primitives and REST endpoints
 - [**MCP Integration**](docs/mcp.md) — MCP server setup and tool catalog
 - [**LangGraph Integration**](docs/langgraph_integration.md) — How CORTEX sits under LangGraph

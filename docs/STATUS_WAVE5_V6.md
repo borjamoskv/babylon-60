@@ -21,7 +21,7 @@ y qué ha sido superado por la arquitectura v6.
 
 ## Estado por componente
 
-### 1. Immutable Audit Logs / Merkle Ledger
+### 1. Tamper-Evident Audit Logs / Merkle Ledger
 
 | Feature | Estado | Evidencia |
 |---|---|---|

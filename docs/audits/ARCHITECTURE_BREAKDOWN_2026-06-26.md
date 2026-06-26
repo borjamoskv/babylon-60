@@ -239,7 +239,7 @@ Si alguien altera data[j] donde j < i:
 5. **Conclusión**: Cualquier alteración es detectable en O(1)
 
 ### Implicación:
-El ledger es **inmutable por construcción**. No hay forma de alterar una observación sin invalidar toda la cadena posterior.
+El ledger es **tamper-evident por construcción**. No hay forma de alterar una observación sin invalidar toda la cadena posterior.
 
 ---
 

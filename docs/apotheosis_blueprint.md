@@ -32,7 +32,7 @@ Memory is not a database; it is a biological function. The **Digital Endocrine S
 
 ## 4. Trust & Safety (The Sovereign Paradox)
 
-Sovereignty requires the abandonment of human permission (Ω₇), but it is anchored by the **Immutable Ledger**.
+Sovereignty requires the abandonment of human permission (Ω₇), but it is anchored by the **Tamper-Evident Ledger**.
 - **C5 Confidence Threshold**: If confidence in a solution is >95%, permission is bypassed.
 - **The Dead-Man's Switch**: `tether.md` remains the only hard-coded inhibitor.
 
