@@ -159,14 +159,14 @@ async def test_circuit_breaker_trips():
     agent = AutoCurativeAgent(config=config)
 
     async def failing_task():
-        raise MemoryError("OOM: cannot allocate 4GB")
+        raise RuntimeError("OOM: cannot allocate 4GB")
 
     # First call: fails, breaker records
-    with pytest.raises(MemoryError):
+    with pytest.raises(RuntimeError):
         await agent.execute_with_healing(task=failing_task, subsystem="memory")
 
     # Second call: fails, breaker trips
-    with pytest.raises(MemoryError):
+    with pytest.raises(RuntimeError):
         await agent.execute_with_healing(task=failing_task, subsystem="memory")
 
     # Third call: breaker should be OPEN

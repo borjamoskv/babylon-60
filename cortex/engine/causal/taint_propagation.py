@@ -67,8 +67,10 @@ class TaintPropagator:
         )
 
         if changes:
-            await self._apply_fact_updates(changes, nodes_data, meta_col, has_tenant, tenant_id)
-            await self._record_taint_edges(changes, fact_id, has_tenant, tenant_id)
+            from cortex.database.core import causal_write
+            with causal_write(self.conn):
+                await self._apply_fact_updates(changes, nodes_data, meta_col, has_tenant, tenant_id)
+                await self._record_taint_edges(changes, fact_id, has_tenant, tenant_id)
 
         await self.conn.commit()
         return TaintReport(
