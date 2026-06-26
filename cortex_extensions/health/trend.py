@@ -115,7 +115,7 @@ class TrendDetector:
     ) -> None:
         """Persist a health score snapshot to SQLite."""
         try:
-            from cortex.database.core import connect
+            from cortex.database.core import connect, causal_write
 
             conn = connect(db_path, timeout=5)
             try:
@@ -125,10 +125,11 @@ class TrendDetector:
                     if timestamp
                     else datetime.fromtimestamp(time.time(), tz=timezone.utc)
                 ).isoformat()
-                conn.execute(
-                    "INSERT INTO health_history (timestamp, score, grade) VALUES (?, ?, ?)",
-                    (ts_str, score, grade),
-                )
+                with causal_write(conn):
+                    conn.execute(
+                        "INSERT INTO health_history (timestamp, score, grade) VALUES (?, ?, ?)",
+                        (ts_str, score, grade),
+                    )
                 conn.commit()
             finally:
                 conn.close()
@@ -138,7 +139,7 @@ class TrendDetector:
     def prune_history(self, db_path: str, keep_days: int = 30) -> None:
         """Delete historical records older than keep_days."""
         try:
-            from cortex.database.core import connect
+            from cortex.database.core import connect, causal_write
 
             conn = connect(db_path, timeout=5)
             try:
@@ -149,10 +150,11 @@ class TrendDetector:
                 cutoff = (
                     datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=keep_days)
                 ).isoformat()
-                conn.execute(
-                    "DELETE FROM health_history WHERE timestamp < ?",
-                    (cutoff,),
-                )
+                with causal_write(conn):
+                    conn.execute(
+                        "DELETE FROM health_history WHERE timestamp < ?",
+                        (cutoff,),
+                    )
                 conn.commit()
             finally:
                 conn.close()
