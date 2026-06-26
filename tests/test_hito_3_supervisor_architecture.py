@@ -82,25 +82,25 @@ async def test_supervisor_pipeline_end_to_end():
     supervisor = SwarmSupervisor(db_path=db_path, agent_factory=TestAgent, concurrency=2, bus_maxsize=10)
     await supervisor.initialize()
 
-    # Dispatch tasks
-    dispatched = await supervisor.dispatch_optimal_hypotheses(count=5)
-    assert dispatched == 5
+    try:
+        # Dispatch tasks
+        dispatched = await supervisor.dispatch_optimal_hypotheses(count=5)
+        assert dispatched == 5
 
-    # Wait for processing
-    await asyncio.sleep(0.5)
+        # Wait for processing
+        await asyncio.sleep(0.5)
 
-    # Verify State was mutated by StateStore
-    verify_db = await aiosqlite.connect(db_path)
-    async with verify_db.execute("SELECT count(*) FROM system_hypotheses WHERE status = 'COMPLETED'") as cur:
-        completed = (await cur.fetchone())[0]
-    
-    assert completed == 5, "All 5 tasks should be COMPLETED"
-
-    await verify_db.close()
-    await supervisor.shutdown()
-    
-    if os.path.exists(db_path):
-        os.remove(db_path)
+        # Verify State was mutated by StateStore
+        verify_db = await aiosqlite.connect(db_path)
+        async with verify_db.execute("SELECT count(*) FROM system_hypotheses WHERE status = 'COMPLETED'") as cur:
+            completed = (await cur.fetchone())[0]
+        
+        await verify_db.close()
+        assert completed == 5, "All 5 tasks should be COMPLETED"
+    finally:
+        await supervisor.shutdown()
+        if os.path.exists(db_path):
+            os.remove(db_path)
         
 @pytest.mark.asyncio
 async def test_ghost_state_recovery():

@@ -49,7 +49,7 @@ class SwarmSupervisor:
     async def initialize(self) -> None:
         """Starts the components and recovers ghost state."""
         from cortex.database.core import connect_async
-        self._db = await connect_async(self.db_path, timeout=5.0)
+        self._db = await connect_async(self.db_path)
         await self._db.execute("PRAGMA journal_mode=WAL;")
         await self._db.execute("PRAGMA busy_timeout=5000;")
         self._topo = TopologyIndex(self._db)
@@ -108,11 +108,13 @@ class SwarmSupervisor:
                 
             try:
                 # SANEDRIN VECTOR 3: Lease lock task using supervisor_id
-                await self._db.execute(
-                    "UPDATE system_hypotheses SET status = 'IN_FLIGHT', owner_id = ? WHERE id = ?", 
-                    (self.supervisor_id, task["id"])
-                )
-                await self._db.commit()
+                from cortex.database.core import causal_write
+                with causal_write(self._db):
+                    await self._db.execute(
+                        "UPDATE system_hypotheses SET status = 'IN_FLIGHT', owner_id = ? WHERE id = ?", 
+                        (self.supervisor_id, task["id"])
+                    )
+                    await self._db.commit()
                 
                 # Push to worker pool
                 await self.worker_pool.dispatch(task["id"])
