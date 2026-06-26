@@ -128,9 +128,9 @@ class BaseAgent:
                     break
 
                 # Brief backoff before retrying
-                print(f"[{self.agent_id}] SLEEPING FOR 0.5s")
+                logger.info("[%s] SLEEPING FOR 0.5s", self.agent_id)
                 await asyncio.sleep(0.5)
-                print(f"[{self.agent_id}] WOKE UP FROM EXCEPTION SLEEP")
+                logger.info("[%s] WOKE UP FROM EXCEPTION SLEEP", self.agent_id)
 
         # Cleanup - preserve terminal statuses (QUARANTINED, FAILED)
         try:

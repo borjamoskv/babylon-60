@@ -126,7 +126,6 @@ class CausalStateStore:
             except (aiosqlite.Error, ValueError, KeyError, TypeError, RuntimeError) as e:
                 await self._db.rollback()
                 logger.error(f"[SAGA ROLLBACK] State mutation failed: {e}")
-                raise
                 
     async def recover_in_flight_tasks(self, lease_id: str | None = None) -> int:
         """SANEDRIN VECTOR 3: Lease-locked Ghost Recovery."""

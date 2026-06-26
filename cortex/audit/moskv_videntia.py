@@ -8,10 +8,13 @@ Responsible for generating symbolic attacks and constructing exploit chains.
 from __future__ import annotations
 
 import json
+import logging
 import subprocess
 import urllib.request
 from dataclasses import dataclass
 from typing import Any
+
+logger = logging.getLogger("cortex.audit.moskv_videntia")
 
 
 @dataclass
@@ -90,15 +93,13 @@ Git Diff:
                     if isinstance(attacks, list):
                         return attacks
             except Exception as e:
-                import sys
-
-                print(f"[MoskvVidentiaOracle] LLM Call Failed: {e}", file=sys.stderr)
+                logger.error("[MoskvVidentiaOracle] LLM Call Failed: %s", e)
                 try:
-                    print(
-                        f"[MoskvVidentiaOracle] Raw text was: {raw_response_text}", file=sys.stderr
+                    logger.error(
+                        "[MoskvVidentiaOracle] Raw text was: %s", raw_response_text
                     )
                 except Exception as inner_e:
-                    print(f"[MoskvVidentiaOracle] Failed to print raw text: {inner_e}", file=sys.stderr)
+                    logger.error("[MoskvVidentiaOracle] Failed to log raw text: %s", inner_e)
                 # Fallback to simulated heuristics
 
         attacks = []

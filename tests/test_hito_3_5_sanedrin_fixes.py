@@ -18,6 +18,7 @@ async def setup_db(db_path: str) -> aiosqlite.Connection:
             id TEXT PRIMARY KEY,
             statement TEXT,
             probability REAL,
+            svi REAL,
             evi REAL,
             cost REAL,
             impact REAL,
@@ -30,6 +31,17 @@ async def setup_db(db_path: str) -> aiosqlite.Connection:
         CREATE TABLE IF NOT EXISTS cortex_meta (
             key TEXT PRIMARY KEY,
             value TEXT
+        )
+    ''')
+    await db.execute('''
+        CREATE TABLE IF NOT EXISTS hypothesis_edges (
+            parent_id TEXT NOT NULL,
+            child_id TEXT NOT NULL,
+            edge_weight REAL NOT NULL DEFAULT 1.0,
+            relation_type TEXT NOT NULL DEFAULT 'requires',
+            confidence REAL NOT NULL DEFAULT 1.0,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY(parent_id, child_id)
         )
     ''')
     await db.execute("INSERT INTO cortex_meta (key, value) VALUES ('hypothesis_graph_version', '1')")

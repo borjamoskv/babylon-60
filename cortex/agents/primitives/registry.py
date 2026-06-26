@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
+
 
 class ApexRegistry:
     """
@@ -8,7 +9,7 @@ class ApexRegistry:
     Loads and serves the 100 Sovereign APEX Primitives.
     """
     def __init__(self):
-        self._primitives: Dict[str, Dict[str, Any]] = {}
+        self._primitives: dict[str, dict[str, Any]] = {}
         self._load_registry()
         
     def _load_registry(self):
@@ -16,16 +17,16 @@ class ApexRegistry:
         if not registry_path.exists():
             return
             
-        with open(registry_path, "r", encoding="utf-8") as f:
+        with open(registry_path, encoding="utf-8") as f:
             data = json.load(f)
             for p in data.get("primitives", []):
                 self._primitives[p["id"]] = p
 
-    def get_primitive(self, apex_id: str) -> Dict[str, Any]:
+    def get_primitive(self, apex_id: str) -> dict[str, Any]:
         """Retrieve a specific primitive by ID (e.g. 'APEX-001')"""
         return self._primitives.get(apex_id)
 
-    def list_all(self) -> List[Dict[str, Any]]:
+    def list_all(self) -> list[dict[str, Any]]:
         """List all loaded primitives"""
         return list(self._primitives.values())
 

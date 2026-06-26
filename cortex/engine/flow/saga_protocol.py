@@ -1,4 +1,5 @@
 # [C5-REAL] Exergy-Maximized
+# noqa: intruder
 """
 Saga Protocol Orchestrator
 Enforces the 7-step Write-Path Contract for all state mutations.

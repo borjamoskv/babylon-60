@@ -190,6 +190,11 @@ class ComponentsMixin:
 
             return ArchaeologyGuardAdapter()
 
+        def _ouroboros_entropy():
+            from cortex.engine.flow.guard_adapters import OuroborosEntropyGuardAdapter
+
+            return OuroborosEntropyGuardAdapter()
+
         self._try_add(pipeline, "HealthGuardAdapter", _health, is_hook=False)
         self._try_add(pipeline, "ContradictionGuardAdapter", _contradiction, is_hook=False)
         self._try_add(pipeline, "VerifierGuardAdapter", _verifier, is_hook=False)
@@ -197,6 +202,7 @@ class ComponentsMixin:
         self._try_add(pipeline, "VirgoGuardAdapter", _virgo, is_hook=False)
         self._try_add(pipeline, "OmegaGuardAdapter", _omega, is_hook=False)
         self._try_add(pipeline, "ArchaeologyGuardAdapter", _arch, is_hook=False)
+        self._try_add(pipeline, "OuroborosEntropyGuardAdapter", _ouroboros_entropy, is_hook=False)
 
         def _ledger():
             from cortex.engine.flow.guard_adapters import LedgerCheckpointHook
