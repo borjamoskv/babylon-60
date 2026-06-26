@@ -94,29 +94,31 @@ class LedgerWriter:
             new_hash = event.compute_hash(prev_hash)
             event = dataclasses.replace(event, prev_hash=prev_hash, hash=new_hash)
 
-            conn.execute(
-                """
-                INSERT INTO ledger_events (
-                    event_id, ts, tool, actor, action, payload_json,
-                    prev_hash, hash,
-                    semantic_status, semantic_error, correlation_id, trace_id
+            from cortex.database.core import causal_write
+            with causal_write(conn):
+                conn.execute(
+                    """
+                    INSERT INTO ledger_events (
+                        event_id, ts, tool, actor, action, payload_json,
+                        prev_hash, hash,
+                        semantic_status, semantic_error, correlation_id, trace_id
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)
+                    """,
+                    (
+                        event.event_id,
+                        event.ts,
+                        event.tool,
+                        event.actor,
+                        event.action,
+                        event.to_json(),
+                        event.prev_hash,
+                        event.hash,
+                        event.semantic_status,
+                        event.correlation_id,
+                        event.trace_id,
+                    ),
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)
-                """,
-                (
-                    event.event_id,
-                    event.ts,
-                    event.tool,
-                    event.actor,
-                    event.action,
-                    event.to_json(),
-                    event.prev_hash,
-                    event.hash,
-                    event.semantic_status,
-                    event.correlation_id,
-                    event.trace_id,
-                ),
-            )
 
         self.queue.enqueue(event.event_id)
 

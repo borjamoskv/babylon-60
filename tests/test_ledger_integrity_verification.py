@@ -47,7 +47,9 @@ def test_ledger_integrity_chain(test_db):
         # Find the 3rd event by rowid
         cursor = conn.execute("SELECT event_id FROM ledger_events LIMIT 1 OFFSET 2")
         ev_id = cursor.fetchone()["event_id"]
-        conn.execute("UPDATE ledger_events SET hash = 'BADHASH' WHERE event_id = ?", (ev_id,))
+        from cortex.database.core import causal_write
+        with causal_write(conn):
+            conn.execute("UPDATE ledger_events SET hash = 'BADHASH' WHERE event_id = ?", (ev_id,))
 
     # 4. Verify detects COMPROMISED
     res = verifier.verify_chain()
@@ -72,9 +74,11 @@ def test_ledger_chain_break(test_db):
     with store.tx() as conn:
         cursor = conn.execute("SELECT event_id FROM ledger_events LIMIT 1 OFFSET 1")
         ev_id = cursor.fetchone()["event_id"]
-        conn.execute(
-            "UPDATE ledger_events SET prev_hash = 'WRONG_PREV' WHERE event_id = ?", (ev_id,)
-        )
+        from cortex.database.core import causal_write
+        with causal_write(conn):
+            conn.execute(
+                "UPDATE ledger_events SET prev_hash = 'WRONG_PREV' WHERE event_id = ?", (ev_id,)
+            )
 
     res = verifier.verify_chain()
     assert not res["valid"]
