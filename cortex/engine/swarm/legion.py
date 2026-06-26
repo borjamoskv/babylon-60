@@ -55,54 +55,35 @@ class SwarmSignal:
 
 
 class AsyncSignalBus:
-    """Collision-free message bus for inter-agent communication."""
+    """Collision-free message bus with Backpressure for inter-agent communication."""
 
-    def __init__(self) -> None:
-        self._signals: list[SwarmSignal] = []
-        self._lock = asyncio.Lock()
+    def __init__(self, maxsize: int = 1000) -> None:
+        self._queue: asyncio.Queue[SwarmSignal] = asyncio.Queue(maxsize=maxsize)
 
     async def emit(self, signal: SwarmSignal) -> None:
-        """Emit a signal onto the bus.
-
-        Empty payloads are considered semantically empty.  Non‑VOID signals with an
-        empty ``payload`` are automatically downgraded to ``VOID`` before any
-        downstream processing (e.g. crystallization).  This invariant guarantees
-        that only signals carrying substantive data are counted as ``SUCCESS``.
+        """Emit a signal onto the bus with Backpressure.
+        
+        Empty payloads are considered semantically empty and are downgraded to VOID.
         """
-        async with self._lock:
-            if not signal.payload and signal.status == "SUCCESS":
-                raise ValueError("P0 Violation: SUCCESS signal emitted with empty payload.")
-            # Enforce VOID invariant: Drop empty signals immediately
-            if not signal.payload and signal.status != "VOID":
-                signal.status = "VOID"
+        if not signal.payload and signal.status == "SUCCESS":
+            raise ValueError("P0 Violation: SUCCESS signal emitted with empty payload.")
+        
+        # Enforce VOID invariant: Drop empty signals immediately
+        if not signal.payload and signal.status != "VOID":
+            signal.status = "VOID"
 
-            # Hito 2: Dependency-Aware Hypothesis Falsification (Cascade Death)
-            # If the signal is for a hypothesis that has already been INVALIDATED,
-            # we discard it to save exergy.
-            if signal.target.startswith("hyp-"):
-                import aiosqlite
+        # Backpressure: If queue is full, this will block, slowing down the Swarm Supervisor
+        await self._queue.put(signal)
 
-                from cortex.config import DB_PATH
-
-                try:
-                    async with aiosqlite.connect(DB_PATH) as db:
-                        async with db.execute(
-                            "SELECT status FROM system_hypotheses WHERE id = ?", (signal.target,)
-                        ) as cursor:
-                            row = await cursor.fetchone()
-                            if row and row[0] == "INVALIDATED":
-                                logger.warning(
-                                    f"Dropping signal for {signal.target}: Hypothesis is INVALIDATED."
-                                )
-                                return
-                except Exception as e:
-                    logger.error(f"Failed to verify hypothesis status: {e}")
-
-            self._signals.append(signal)
-
-    async def get_all(self) -> list[SwarmSignal]:
-        async with self._lock:
-            return list(self._signals)
+    async def consume(self) -> SwarmSignal:
+        """Consume a signal from the bus."""
+        return await self._queue.get()
+        
+    def task_done(self) -> None:
+        self._queue.task_done()
+        
+    async def join(self) -> None:
+        await self._queue.join()
 
 
 class SwarmAgent(ABC):
@@ -115,9 +96,9 @@ class SwarmAgent(ABC):
 
     async def run(self, queue: asyncio.Queue[str]) -> None:
         while True:
-            try:
-                target = queue.get_nowait()
-            except asyncio.QueueEmpty:
+            target = await queue.get()
+            if target is None:
+                queue.task_done()
                 break
 
             try:
@@ -139,6 +120,31 @@ class SwarmAgent(ABC):
     @abstractmethod
     async def execute(self, target: str) -> SwarmSignal:
         """Execute a siege task on the target."""
+
+class LegionPool:
+    """Thermally bound worker pool. Maintains a fixed number of perpetual async consumers."""
+    
+    def __init__(self, agent_factory, bus: AsyncSignalBus, concurrency: int = 50):
+        self.agent_factory = agent_factory
+        self.bus = bus
+        self.concurrency = concurrency
+        self._workers = []
+        self._queue: asyncio.Queue[str] = asyncio.Queue()
+        
+    def start(self) -> None:
+        for i in range(self.concurrency):
+            agent = self.agent_factory(f"agent-{i:03d}", self.bus)
+            task = asyncio.create_task(agent.run(self._queue))
+            self._workers.append(task)
+            
+    async def dispatch(self, target: str) -> None:
+        await self._queue.put(target)
+        
+    async def stop(self) -> None:
+        for _ in range(self.concurrency):
+            await self._queue.put(None) # type: ignore
+        await asyncio.gather(*self._workers, return_exceptions=True)
+        self._workers.clear()
 
 
 class Squadron(ABC):
