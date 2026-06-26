@@ -179,17 +179,21 @@ async def test_e2e_concurrent_message_bus_routing():
                     
     await asyncio.gather(*send_tasks)
     
-    # Wait for processing
-    await asyncio.sleep(2.0)
-    
-    # Assertions
-    total_pings = 0
-    total_pongs = 0
-    for agent in agents:
-        total_pings += agent.pings_received
-        total_pongs += agent.pongs_sent
-        
     expected_messages = NUM_AGENTS * (NUM_AGENTS - 1) * MESSAGES_PER_AGENT
+
+    # Wait for processing
+    for _ in range(100):
+        total_pings = sum(a.pings_received for a in agents)
+        total_pongs = sum(a.pongs_sent for a in agents)
+        pending_msgs = 0
+        for a in agents:
+            pending_msgs += await bus.pending_count(a.agent_id)
+            
+        if total_pings == expected_messages and total_pongs == expected_messages and pending_msgs == 0:
+            break
+        await asyncio.sleep(0.1)
+
+    # Assertions
     assert total_pings == expected_messages
     assert total_pongs == expected_messages
     
