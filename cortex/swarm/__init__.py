@@ -3,7 +3,7 @@
 import asyncio
 import threading
 
-from cortex.swarm.autopulse import autopulse
+from cortex.swarm.autopulse import process_queue as autopulse
 
 
 def start_swarm_daemon():

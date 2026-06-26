@@ -29,4 +29,7 @@ __all__ = [
     "SwarmProposal",
     "VirgoContextGuard",
     "VirgoValidationError",
+    "MemoryFirewallGuard",
 ]
+
+from cortex.guards.memory_firewall import MemoryFirewallGuard

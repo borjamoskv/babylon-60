@@ -8,6 +8,51 @@ into distinct providers for FIPS-readiness, auditing, and dependency injection.
 import hashlib
 import hmac
 import os
+import abc
+
+
+class KMSProvider(abc.ABC):
+    """Abstract Base Class for Enterprise Key Management Systems."""
+
+    @abc.abstractmethod
+    def encrypt(self, plaintext: bytes) -> bytes:
+        """Encrypts data using the KMS."""
+        pass
+
+    @abc.abstractmethod
+    def decrypt(self, ciphertext: bytes) -> bytes:
+        """Decrypts data using the KMS."""
+        pass
+
+
+class AWSKMSProvider(KMSProvider):
+    """AWS KMS Implementation."""
+    
+    def __init__(self, key_id: str):
+        self.key_id = key_id
+        # In a real implementation, this would initialize a boto3 client
+
+    def encrypt(self, plaintext: bytes) -> bytes:
+        raise NotImplementedError("AWS KMS encrypt not yet implemented")
+
+    def decrypt(self, ciphertext: bytes) -> bytes:
+        raise NotImplementedError("AWS KMS decrypt not yet implemented")
+
+
+class VaultKMSProvider(KMSProvider):
+    """Hashicorp Vault Transit Secrets Engine Implementation."""
+    
+    def __init__(self, vault_url: str, token: str, key_name: str):
+        self.vault_url = vault_url
+        self.token = token
+        self.key_name = key_name
+
+    def encrypt(self, plaintext: bytes) -> bytes:
+        raise NotImplementedError("Vault KMS encrypt not yet implemented")
+
+    def decrypt(self, ciphertext: bytes) -> bytes:
+        raise NotImplementedError("Vault KMS decrypt not yet implemented")
+
 
 
 class HashProvider:

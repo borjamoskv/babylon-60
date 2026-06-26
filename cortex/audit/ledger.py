@@ -98,7 +98,10 @@ class EnterpriseAuditLedger:
         self.max_batch_size = int(os.environ.get("CORTEX_LEDGER_MAX_BATCH", "500"))
 
         # C5-REAL Sovereign Ed25519 Keypair (Audit ZK-Seal Substrate)
-        key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit_sovereign.pem")
+        key_path = os.environ.get("CORTEX_AUDIT_SOVEREIGN_KEY_PATH")
+        if not key_path:
+            key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit_sovereign.pem")
+            
         if os.path.exists(key_path):
             with open(key_path, "rb") as key_file:
                 pk = serialization.load_pem_private_key(key_file.read(), password=None)

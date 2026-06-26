@@ -435,6 +435,51 @@ class ComplianceTracker:
             },
         }
 
+    def export_audit_bundle(self, output_dir: str | Path = ".", project: str | None = None) -> str:
+        """Generates an EU AI Act Audit Bundle (.zip) for external auditors.
+        
+        Includes:
+        - compliance_report.json (Article 12)
+        - risk_register.json (Article 9)
+        - dpia.json (Data Protection & AI Impact)
+        - ledger_export.json (Cryptographic Hash Chain)
+        """
+        import json
+        import zipfile
+        from pathlib import Path
+        
+        out_path = Path(output_dir)
+        out_path.mkdir(parents=True, exist_ok=True)
+        
+        proj = project or self._default_project
+        now_str = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
+        bundle_name = f"eu_ai_act_audit_{proj}_{now_str}.zip"
+        bundle_path = out_path / bundle_name
+        
+        # 1. Generate Reports
+        compliance_report = self.export_audit(project=proj, include_facts=True)
+        risk_register = self.generate_risk_register_template(project=proj)
+        dpia = self.generate_dpia_template(project=proj)
+        
+        # 2. Extract Ledger
+        self._ensure_init()
+        ledger_export = {}
+        if self._engine._ledger:
+            # We fetch a subset or full export. Since it's for audit, we get it all.
+            export_data = self._engine._run_sync(self._engine._ledger.export_public_ledger_async())
+            if export_data:
+                 ledger_export = export_data.to_dict()
+        
+        # 3. Zip it all
+        with zipfile.ZipFile(bundle_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("compliance_report.json", json.dumps(compliance_report, indent=2))
+            zf.writestr("risk_register.json", json.dumps(risk_register, indent=2))
+            zf.writestr("dpia.json", json.dumps(dpia, indent=2))
+            zf.writestr("ledger_export.json", json.dumps(ledger_export, indent=2))
+            
+        logger.info("Generated EU AI Act Audit Bundle at %s", bundle_path)
+        return str(bundle_path.absolute())
+
     # ─── Lifecycle ────────────────────────────────────────────────
 
     def close(self) -> None:

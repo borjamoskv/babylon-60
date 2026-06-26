@@ -59,10 +59,10 @@ def generate_secure_taint_token(
 
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp}&nonce={nonce}&content_hash={content_hash}"
 
-    priv_bytes = base64.b64decode(private_key_b64)
-    priv_key = Ed25519PrivateKey.from_private_bytes(priv_bytes)
-    sig_bytes = priv_key.sign(canonical_payload.encode("utf-8"))
-    signature = base64.b64encode(sig_bytes).decode("ascii")
+    from cortex.crypto.keys import Signer
+    
+    # Use Enterprise Signer
+    signature = Signer.sign_raw_content(private_key_b64, canonical_payload)
 
     return f"taint:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
 
@@ -205,23 +205,25 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
     content_hash = _fast_sha3(canonical_content)
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp_str}&nonce={nonce}&content_hash={content_hash}"
 
-    try:
-        pub_bytes = base64.b64decode(public_key_b64)
-        pub_key = Ed25519PublicKey.from_public_bytes(pub_bytes)
-        sig_bytes = base64.b64decode(signature)
-        pub_key.verify(sig_bytes, canonical_payload.encode("utf-8"))
+    from cortex.crypto.keys import Verifier
+    if Verifier.verify_raw_content(canonical_payload, public_key_b64, signature):
         logger.info("[TaintEngine] Cryptographic Taint Signature verified for Agent %s", agent_id)
         return True
-    except Exception as sig_err:
-        logger.error(
-            "[TaintEngine] SAGA-1: Cryptographic signature verification failed: %s", sig_err
-        )
+    else:
+        logger.error("[TaintEngine] SAGA-1: Cryptographic signature verification failed for Agent %s", agent_id)
         return False
 
 
 async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     """Enforces the CORTEX-TAINT check. Raises TaintValidationError if invalid."""
     import os
+
+    # -- OWASP Memory Firewall (SAGA-1.5) --
+    from cortex.security.memory_firewall import MemoryFirewall
+    try:
+        _, risk_level, _ = MemoryFirewall.screen_content(content)
+    except ValueError as fw_err:
+        raise TaintValidationError(f"SAGA-1 Rejection by Memory Firewall: {fw_err}")
 
     if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
         return

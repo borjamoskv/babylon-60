@@ -517,6 +517,7 @@ async def get_causal_chain(
             fact_id=str(fact_id),
             direction=direction,
             max_depth=max_depth,
+            tenant_id=auth.tenant_id,
         )
         chain_data = []
         for f in chain:

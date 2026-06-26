@@ -8,7 +8,6 @@ Sovereign Ledger hashes in time.
 """
 
 import base64
-import hashlib
 import logging
 import os
 import urllib.error
