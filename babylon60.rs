@@ -16,6 +16,29 @@ enum B60Type {
 struct Register {
     val: i64,
     typ: B60Type,
+    scale: u32,
+}
+
+#[derive(Default)]
+struct TraceExport {
+    op_trace: Vec<String>,
+}
+
+#[derive(Clone, Debug, Default)]
+struct Heap {
+    version: u64,
+    data: HashMap<usize, i128>,
+}
+
+impl Heap {
+    fn write(&mut self, addr: usize, val: i128) {
+        self.version += 1;
+        self.data.insert(addr, val);
+    }
+    
+    fn read(&self, addr: usize) -> i128 {
+        *self.data.get(&addr).unwrap_or(&0)
+    }
 }
 
 fn parse_b60_digit(token: &str) -> i64 {
@@ -70,7 +93,7 @@ fn get_reg_index(reg_str: &str) -> usize {
     }
 }
 
-fn eval_expr(expr: &str, registers: &[Register]) -> i64 {
+fn eval_expr(expr: &str, _ignored: &str, registers: &[Register]) -> i64 {
     if expr.starts_with('[') {
         parse_b60_number(expr)
     } else if expr.starts_with('R') {
@@ -91,8 +114,11 @@ fn main() {
     let code = fs::read_to_string(&args[1]).expect("Failed to read script");
     let lines: Vec<&str> = code.lines().map(|l| l.split('#').next().unwrap().trim()).collect();
     
-    let mut registers = vec![Register { val: 0, typ: B60Type::UNALLOCATED }; 64];
+    let mut registers = vec![Register { val: 0, typ: B60Type::UNALLOCATED, scale: 0 }; 64];
+    let mut heap = Heap::default();
     let mut labels: HashMap<String, usize> = HashMap::new();
+    let mut trace = TraceExport::default();
+    let clock_tick: u64 = 0;
 
     for (i, line) in lines.iter().enumerate() {
         if line.starts_with("MUB ") {
@@ -152,7 +178,7 @@ fn main() {
             }
             "NIG" => {
                 let idx = get_reg_index(&tokens[1]);
-                registers[idx].val = eval_expr(&tokens[2], &registers);
+                registers[idx].val = eval_expr(&tokens[2], "", &registers);
             }
             "AFTER" => {
                 let idx = get_reg_index(&tokens[1]);
@@ -168,16 +194,36 @@ fn main() {
                 let action = tokens[1].trim_matches('"');
                 println!("[MOSKV LEDGER DISPATCH] ⚡ {} ", action);
             }
-            "SAR" => {
-                let val = eval_expr(&tokens[1], &registers);
-                println!("SAR (DEC): {}", val);
-            }
             "SAR.B60" => {
-                let val = eval_expr(&tokens[1], &registers);
-                println!("SAR (B60): {}", format_b60(val));
+                let idx = get_reg_index(&tokens[1]);
+                let reg = &registers[idx];
+                if reg.typ == B60Type::F60 {
+                    println!("SAR.B60 (F60): {} / 60^{}", format_b60(reg.val), reg.scale);
+                } else {
+                    let val = eval_expr(&tokens[1], "", &registers);
+                    println!("SAR (B60): {}", format_b60(val));
+                }
+            }
+            "STORE" => {
+                let addr = eval_expr(&tokens[1], "", &registers) as usize;
+                let val = eval_expr(&tokens[2], "", &registers);
+                heap.write(addr, val as i128);
+                trace.op_trace.push(format!("STORE [{}] <- {}", addr, val));
+            }
+            "LOAD" => {
+                let idx = get_reg_index(&tokens[1]);
+                let addr = eval_expr(&tokens[2], "", &registers) as usize;
+                registers[idx].val = heap.read(addr) as i64;
+                trace.op_trace.push(format!("LOAD R{} <- [{}]", idx, addr));
             }
             "HALT" => {
                 break;
+            }
+            "CRITICAL" => {
+                if tokens.get(1).map(|s| s.as_str()) == Some("HALT") {
+                    println!("[MOSKV APEX] CRITICAL HALT TRIGGERED.");
+                    std::process::exit(1);
+                }
             }
             _ => {}
         }
