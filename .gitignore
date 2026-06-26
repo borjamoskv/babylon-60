@@ -1,1 +1,4 @@
 /target
+babylon60
+__pycache__/
+proof_artifact.json

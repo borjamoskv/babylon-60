@@ -347,22 +347,24 @@ fn main() {
 
     println!("[MOSKV APEX] C5-REAL Execution Completed.");
     println!("[Proof] Proof obligations generated.");
-    export_snapshot(&ledger.events.values().cloned().collect::<Vec<_>>(), clock.0);
+    export_artifact_bundle(&ledger);
 }
 
 // 11. Immutable Artifact Export
-fn export_snapshot(ledger: &[DAGEvent], final_tick: u64) {
+fn export_artifact_bundle(ledger: &DAGLedger) {
     use std::io::Write;
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
     let mut canonical_lines = Vec::new();
-    for (i, ev) in ledger.iter().enumerate() {
-        let parent = if ev.parents.is_empty() { "".to_string() } else { ev.parents.join(",") };
-        canonical_lines.push(format!("{}|{}|{}|{}|{}", ev.id, parent, ev.logical_timestamp.0, ev.opcode, ev.payload));
+    for ev in ledger.events.values() {
+        let mut parents = ev.parents.clone();
+        parents.sort();
+        let parents_str = parents.join(",");
+        canonical_lines.push(format!("{}|{}|{}|{}|{}", ev.id, parents_str, ev.logical_timestamp.0, ev.payload, ev.signature));
     }
     
-    // Sort lines to mock deterministic tie-breaking (though here it's already ordered)
+    // Sort lines lexicographically for deterministic tie-breaking
     canonical_lines.sort();
     let canonical_graph = canonical_lines.join("\n") + "\n";
     
