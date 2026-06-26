@@ -135,9 +135,15 @@ The runtime VM is deliberately minimized for formal provability:
 The compiler directly generates Lean/Coq proof obligations alongside the binary.
 e.g. producing `Lemma VelocityUpdated` and `Hypothesis ForceFinite` simultaneously with execution.
 
-## 14. Trust Model (Trusted Computing Base)
-**Trusted**: Kernel, Parser, SSA Builder, Exporter
-**Untrusted**: Numerical Solver, Input Programs, External Storage
+## 14. Minimal Trusted Computing Base (TCB) & Open Conformity
+To guarantee cryptographic trust, the TCB is strictly reduced to mathematical artifacts rather than implementation code.
+The official TCB consists exclusively of:
+1. Formal Semantics (The abstract mathematical model)
+2. Reference Interpreter
+3. Proof IR Specification
+4. Artifact Bundle Verifier
+
+Security is NOT derived from obfuscating the VM. Any independent implementation (cloned VM) is valid and secure **IF and ONLY IF** it proves mathematically that its transformation preserves the official semantics (`Nueva VM ≡ Semántica oficial`). The specification, artifact format, and semantics are designed to be explicitly public, shifting trust from execution secrecy to verifiable evidence.
 
 ## 15. The "Theorem of BABYLON" (Operational Version)
 > **"Si un programa bien tipado termina sin `CRITICAL HALT` y el `Artifact Bundle` supera la validación criptográfica, entonces existe una correspondencia uno a uno entre la ejecución observada del runtime y la traza representada en el artefacto exportado."**
