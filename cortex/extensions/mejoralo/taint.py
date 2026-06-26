@@ -37,8 +37,8 @@ def mark_file_tainted(
             source="cortex-mejoralo",
             meta={"file_path": file_path, "tainted": True},
         )
-    except Exception:
-        logger.exception("Failed to persist taint for %s", file_path)
+    except Exception as e:
+        logger.exception("[P0] Untracked Exception: Failed to persist taint for %s: %s", file_path, e)
 
 
 def is_file_tainted(
@@ -52,5 +52,6 @@ def is_file_tainted(
     try:
         scars = engine.scars(project, file_path, limit=10)
         return any(TAINT_TAG in (s.get("content", "")) for s in scars)
-    except Exception:
+    except Exception as e:
+        logger.error("[P0] Untracked Exception: is_file_tainted failed for %s: %s", file_path, e)
         return False
