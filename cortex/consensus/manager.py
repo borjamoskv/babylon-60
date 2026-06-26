@@ -40,15 +40,17 @@ class ConsensusManager:
         public_key: str = "",
         tenant_id: str = "default",
     ) -> str:
+        from cortex.database.core import causal_write
         agent_id = str(uuid.uuid4())
         async with self.engine.session() as conn:
-            await conn.execute(
-                "INSERT INTO agents "
-                "(id, name, agent_type, public_key, tenant_id) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (agent_id, name, agent_type, public_key, tenant_id),
-            )
-            await conn.commit()
+            with causal_write(conn):
+                await conn.execute(
+                    "INSERT INTO agents "
+                    "(id, name, agent_type, public_key, tenant_id) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (agent_id, name, agent_type, public_key, tenant_id),
+                )
+                await conn.commit()
             return agent_id
 
     async def vote_v2(
@@ -58,6 +60,7 @@ class ConsensusManager:
         value: int,
         reason: str | None = None,
     ) -> float:
+        from cortex.database.core import causal_write
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
@@ -67,56 +70,57 @@ class ConsensusManager:
                 (agent_id,),
             )
             agent = await cursor.fetchone()
-            if not agent:
-                # Auto-register agent to avoid BFT failure under swarm tests
-                is_human = agent_id == "human"
-                initial_rep = 1.0 if is_human else 0.5
-                await conn.execute(
-                    "INSERT INTO agents (id, name, agent_type, reputation_score, public_key, tenant_id) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
-                    (
-                        agent_id,
-                        agent_id.capitalize(),
-                        "human" if is_human else "ai",
-                        initial_rep,
-                        "",
-                        "default",
-                    ),
-                )
-                rep = initial_rep
-            else:
-                rep = agent[0]
+            with causal_write(conn):
+                if not agent:
+                    # Auto-register agent to avoid BFT failure under swarm tests
+                    is_human = agent_id == "human"
+                    initial_rep = 1.0 if is_human else 0.5
+                    await conn.execute(
+                        "INSERT INTO agents (id, name, agent_type, reputation_score, public_key, tenant_id) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
+                        (
+                            agent_id,
+                            agent_id.capitalize(),
+                            "human" if is_human else "ai",
+                            initial_rep,
+                            "",
+                            "default",
+                        ),
+                    )
+                    rep = initial_rep
+                else:
+                    rep = agent[0]
 
-            if value == 0:
-                await conn.execute(
-                    "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
-                    (fact_id, agent_id),
-                )
-                action = "unvote_v2"
-            else:
-                await conn.execute(
-                    "INSERT OR REPLACE INTO consensus_votes_v2 "
-                    "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
-                    (fact_id, agent_id, value, rep, rep, reason),
-                )
-                action = "vote_v2"
+                if value == 0:
+                    await conn.execute(
+                        "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
+                        (fact_id, agent_id),
+                    )
+                    action = "unvote_v2"
+                else:
+                    await conn.execute(
+                        "INSERT OR REPLACE INTO consensus_votes_v2 "
+                        "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
+                        (fact_id, agent_id, value, rep, rep, reason),
+                    )
+                    action = "vote_v2"
 
-            await self.engine._log_transaction(
-                conn,
-                "consensus",
-                action,
-                {
-                    "fact_id": fact_id,
-                    "agent_id": agent_id,
-                    "actor_id": agent_id,
-                    "vote": value,
-                    "rep": rep,
-                    "reason": reason,
-                },
-            )
-            score = await self._recalculate_consensus_v2(fact_id, conn)
-            await conn.commit()
+                await self.engine._log_transaction(
+                    conn,
+                    "consensus",
+                    action,
+                    {
+                        "fact_id": fact_id,
+                        "agent_id": agent_id,
+                        "actor_id": agent_id,
+                        "vote": value,
+                        "rep": rep,
+                        "reason": reason,
+                    },
+                )
+                score = await self._recalculate_consensus_v2(fact_id, conn)
+                await conn.commit()
             return score
 
     async def _recalculate_consensus_v2(self, fact_id: int, conn) -> float:
@@ -252,6 +256,8 @@ class ConsensusManager:
     ) -> float:
         """Slash an agent's reputation manually for consensus deviation or taint."""
         async with self.engine.session() as conn:
-            new_rep = await SlashingEngine.slash(conn, agent_id, penalty_type, reason, tenant_id)
-            await conn.commit()
+            from cortex.database.core import causal_write
+            with causal_write(conn):
+                new_rep = await SlashingEngine.slash(conn, agent_id, penalty_type, reason, tenant_id)
+                await conn.commit()
             return new_rep
