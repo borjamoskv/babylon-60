@@ -93,7 +93,11 @@ async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str):
     elif fault_point == "after_commit":
         # The transaction committed completely
         assert len(rows) == 1, "Integrity Breach: Fact lost despite completing commit"
-        assert rows[0][0] == "crash_test_payload"
+        
+        # Verify via engine to test decryption
+        facts = await engine_verify.facts.search(query="crash_test_payload", tenant_id="test_tenant")
+        assert len(facts) > 0, "Failed to decrypt/retrieve fact from engine"
+        assert facts[0].content == "crash_test_payload"
 
     # 6. Verify SQLite integrity PRAGMA
     async with engine_verify.session() as conn:
