@@ -7,7 +7,10 @@ try:
     _PROMETHEUS_AVAILABLE = True
 except ImportError:
     _PROMETHEUS_AVAILABLE = False
-    Counter = Gauge = Histogram = None
+    from typing import Any
+    Counter: Any = None
+    Gauge: Any = None
+    Histogram: Any = None
 
 if _PROMETHEUS_AVAILABLE:
     CORTEX_EXERGY = Gauge(

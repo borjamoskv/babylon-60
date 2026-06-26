@@ -68,6 +68,7 @@ class CortexConnection(sqlite3.Connection):
         self._connection_id = uuid.uuid4().hex
         self._mtk_nonce = secrets.token_hex(16)
         self._causal_write_authorized = False
+        self._causal_write_auth_count = 0
 
         # Inyectar el authorizer atado al estado físico de esta conexión
         self.set_authorizer(self._physical_authorizer_bound)
@@ -135,18 +136,19 @@ sqlite3.connect = _secure_sqlite3_connect
 @contextmanager
 def causal_write(conn: Any) -> Any:
     """Context manager to temporarily authorize causal writes on a connection."""
-    underlying = conn._conn if hasattr(conn, "_conn") else conn
-    if not hasattr(underlying, "_causal_write_auth_count"):
-        underlying._causal_write_auth_count = 0
+    if not hasattr(conn, "_causal_write_auth_count"):
+        conn._causal_write_auth_count = 0
     
-    underlying._causal_write_auth_count += 1
+    conn._causal_write_auth_count += 1
+    
+    underlying = conn._conn if hasattr(conn, "_conn") else conn
     if hasattr(underlying, "authorize_causal_writes"):
         underlying.authorize_causal_writes()
     try:
         yield
     finally:
-        underlying._causal_write_auth_count -= 1
-        if underlying._causal_write_auth_count <= 0 and hasattr(underlying, "revoke_causal_writes"):
+        conn._causal_write_auth_count -= 1
+        if conn._causal_write_auth_count <= 0 and hasattr(underlying, "revoke_causal_writes"):
             underlying.revoke_causal_writes()
 
 
