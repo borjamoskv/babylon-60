@@ -155,19 +155,22 @@ sqlite3.connect = __import__("typing").cast(Any, _secure_sqlite3_connect)
 @contextmanager
 def causal_write(conn: Any) -> Any:
     """Context manager to temporarily authorize causal writes on a connection."""
-    if not hasattr(conn, "_causal_write_auth_count"):
-        conn._causal_write_auth_count = 0
-    
-    conn._causal_write_auth_count += 1
-    
     underlying = conn._conn if hasattr(conn, "_conn") else conn
-    if hasattr(underlying, "authorize_causal_writes"):
-        underlying.authorize_causal_writes()
+    if not hasattr(underlying, "authorize_causal_writes"):
+        yield
+        return
+
+    if not hasattr(underlying, "_causal_write_auth_count"):
+        underlying._causal_write_auth_count = 0
+    
+    underlying._causal_write_auth_count += 1
+    underlying.authorize_causal_writes()
+    
     try:
         yield
     finally:
-        conn._causal_write_auth_count -= 1
-        if conn._causal_write_auth_count <= 0 and hasattr(underlying, "revoke_causal_writes"):
+        underlying._causal_write_auth_count -= 1
+        if underlying._causal_write_auth_count <= 0:
             underlying.revoke_causal_writes()
 
 
