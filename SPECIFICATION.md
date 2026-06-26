@@ -1,4 +1,4 @@
-# BABYLON-60: Temporal & Cognitive Scheduler DSL (v2.5.0-C5-REAL)
+# BABYLON-60: Formal Infrastructure for Verifiable Science (v3.0.0-C5-REAL)
 
 > [!IMPORTANT]
 > **Evolución Arquitectónica (Score: 910/1000):** BABYLON-60 trasciende al dominio de Scheduler de Enjambre (Swarm Clock). Se elimina la ambigüedad simulada. Se establece una semántica estricta de tiempo nativo, suspensión asíncrona de corrutinas (Stackless), y contratos de eventos idempotentes. 
@@ -89,3 +89,56 @@ ExportArtifactSchema:
     - replay_hash:        # Firma determinista final para garantizar la reproducibilidad 1:1
     - theorem_prover_payload: # Código de aserción (Lean 4/Coq) auto-generado
 ```
+
+## 6. Denotational Semantics
+Beyond operational semantics ("how it executes"), we define *what* a program means formalizing its observable trace. This enables reasoning independent of the interpreter.
+`Program -> Sequence of State Transformations -> Observable Trace -> Proof Obligations`
+
+## 7. Separate Temporal Domains
+Temporal concepts are strongly typed and incompatible:
+- `PhysicalClock` (Wall clock)
+- `LogicalClock` (Scheduler order)
+- `SimulationClock` (Mathematical simulation time)
+Mixing these clocks is a compile-time error.
+
+## 8. DAG Ledger
+The execution ledger is no longer a simple `vector<Event>`, but a formal Directed Acyclic Graph `DAG(Event)`.
+Each event contains: `ID`, `Parents`, `Logical Timestamp`, `Hash`, `Payload`, `Signature`.
+Properties: No cycles, no lost events, 100% deterministic replay reconstruction.
+
+## 9. Self-Aware Compiler
+Before emitting SSA, the compiler runs a **Static Proof** pass to automatically verify:
+- Impossible dependencies
+- Circular waits
+- Uninitialized registers
+- Unreachable events
+- Useless forks
+Flow: `Compile -> Static Proof -> Emit`
+
+## 10. Immutable Artifact Export
+Instead of a single JSON, BABYLON-60 exports a cryptographically sealed package:
+`manifest.json`, `trace.bin`, `ledger.bin`, `proof/`, `hashes/`, `metadata/`, `signature/`
+A global hash seals the custody chain.
+
+## 11. Reproducible Compilation
+Two different machines compiling the same `.b60` source must yield exactly the same `SHA256(binary)`.
+This requires: stable ordering, stripped timestamps, normalized paths, and deterministic compilation.
+
+## 12. Minimal Virtual Machine (TCB Reduction)
+The runtime VM is deliberately minimized for formal provability:
+- ~25 instructions
+- 3 special registers
+- Strong typing
+- Minimal heap, no reflection, no arbitrary pointers
+
+## 13. Proof-Aware DSL
+The compiler directly generates Lean/Coq proof obligations alongside the binary.
+e.g. producing `Lemma VelocityUpdated` and `Hypothesis ForceFinite` simultaneously with execution.
+
+## 14. Trust Model (Trusted Computing Base)
+**Trusted**: Kernel, Parser, SSA Builder, Exporter
+**Untrusted**: Numerical Solver, Input Programs, External Storage
+
+## 15. The "Theorem of BABYLON"
+> "If a BABYLON-60 program terminates without `CRITICAL HALT` and produces a valid artifact, then said artifact corresponds exactly to an execution of the operational model specified."
+The artifact perfectly represents the semantic execution, independent of the correctness of the mathematical simulation logic.
