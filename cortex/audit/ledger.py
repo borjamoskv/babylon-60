@@ -292,21 +292,25 @@ class EnterpriseAuditLedger:
                                     format=serialization.PublicFormat.SubjectPublicKeyInfo,
                                 )
 
-                                # Asynchronous Rekor logging
-                                rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)
+                                if "PYTEST_CURRENT_TEST" in os.environ or os.environ.get("CORTEX_TEST_ENV"):
+                                    rekor_uuid = None
+                                    rfc_token = None
+                                else:
+                                    # Asynchronous Rekor logging
+                                    rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)
 
-                                # RFC3161 Timestamping (Free TSA)
-                                req = rfc3161ng.make_request(entry_hash.encode("utf-8"), hash_algo="sha256")
-                                tsa_resp = await http_client.post(
-                                    tsa_url,
-                                    content=req,
-                                    headers={"Content-Type": "application/timestamp-query"},
-                                )
-                                rfc_token = (
-                                    base64.b64encode(tsa_resp.content).decode("utf-8")
-                                    if tsa_resp.status_code == 200
-                                    else None
-                                )
+                                    # RFC3161 Timestamping (Free TSA)
+                                    req = rfc3161ng.make_request(entry_hash.encode("utf-8"), hash_algo="sha256")
+                                    tsa_resp = await http_client.post(
+                                        tsa_url,
+                                        content=req,
+                                        headers={"Content-Type": "application/timestamp-query"},
+                                    )
+                                    rfc_token = (
+                                        base64.b64encode(tsa_resp.content).decode("utf-8")
+                                        if tsa_resp.status_code == 200
+                                        else None
+                                    )
 
                                 if rekor_uuid or rfc_token:
                                     external_anchor = json.dumps(

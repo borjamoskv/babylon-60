@@ -14,7 +14,7 @@ Let:
 - \( P_t = \text{SHA-256}(J(D_t)) \) be the payload hash.
 - \( H_t = \text{SHA-256}(H_{t-1} \parallel P_t \parallel J(M_t)) \) be the block hash.
 - \( \sigma_t = \text{Ed25519\_Sign}(sk, H_t) \) be the block signature (Auth-Seal).
-- \( R_t = (seq\_id, H_t, \sigma_t, D_t, M_t) \) be the immutable ledger row.
+- \( R_t = (seq\_id, H_t, \sigma_t, D_t, M_t) \) be the tamper-evident ledger row.
 
 The exported audit pack is the ordered sequence:
 \( A = [R_1, R_2, \dots, R_n] \)

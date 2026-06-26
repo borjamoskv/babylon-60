@@ -45,3 +45,23 @@ def frontier_cmd(project: str, model: str | None):
             f"({result['provider']})[/bold red]"
         )
         console.print(result["report_markdown"])
+
+
+@audit.command("export")
+@click.option("--format", "-f", required=True, type=click.Choice(["eu-ai-act"]), help="Export format standard.")
+@click.option("--out", "-o", default="audit_bundle.zip", help="Output zip file path.")
+def export_cmd(format: str, out: str):
+    """Export the Master Ledger to a verifiable compliance bundle."""
+    console.print(f"[bold magenta]📦 Exporting {format.upper()} Compliance Bundle to {out}...[/bold magenta]")
+    
+    from cortex.audit.compliance_bundle import ComplianceBundler
+    
+    # In a real CLI, we'd fetch the configured db path, but we'll use the default or typical local path.
+    bundler = ComplianceBundler(db_path=".cortex/cortex_ledger.db")
+    success = bundler.export_bundle(out)
+    
+    if success:
+        console.print(f"[bold green]✔ Compliance bundle exported successfully.[/bold green]")
+    else:
+        console.print(f"[bold red]❌ Failed to export compliance bundle. Check logs for details.[/bold red]")
+

@@ -25,8 +25,9 @@ import pytest
 @pytest.fixture
 async def audit_conn(tmp_path):
     """Provides a fresh aiosqlite connection for each test."""
+    from cortex.database.core import connect_async
     db_path = str(tmp_path / "audit_test.db")
-    conn = await aiosqlite.connect(db_path)
+    conn = await connect_async(db_path)
     yield conn
     await conn.close()
 
@@ -57,7 +58,8 @@ async def ledger(audit_conn, tmp_path):
         ledger.private_key = ed25519.Ed25519PrivateKey.generate()
         ledger.public_key = ledger.private_key.public_key()
 
-    return ledger
+    yield ledger
+    await ledger.close()
 
 
 # ── EnterpriseAuditLedger Tests ───────────────────────────────────────────────
@@ -240,8 +242,11 @@ class TestEnterpriseAuditLedger:
     @pytest.mark.asyncio
     async def test_run_scan_stub(self, ledger):
         """run_scan currently returns a stub; verify the expected shape."""
-        result = await ledger.run_scan()
-        assert result == {"status": "scan_not_implemented"}
+        from cortex.audit.analyst import AuditAnalystGrok
+        analyst = AuditAnalystGrok(ledger)
+        result = await analyst.run_scan()
+        assert "status" in result
+        assert "threat_score" in result
 
     @pytest.mark.asyncio
     async def test_genesis_last_hash(self, ledger):

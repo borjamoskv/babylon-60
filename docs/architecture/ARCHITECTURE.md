@@ -45,7 +45,7 @@
 │                                                                                  │
 │  Tripartite Memory: L1 (Working) → L2 (Vector) → L3 (Event Ledger)              │
 │  Episodic Memory · KnowledgeGraph · Compaction Strategies                        │
-│  Privacy Shield (storage/classifier.py) · AST Sandbox · ImmutableLedger          │
+│  Privacy Shield (storage/classifier.py) · AST Sandbox · EnterpriseAuditLedger          │
 ├──────────────────────────────────────────────────────────────────────────────────┤
 │                              TRUST & INTEGRITY LAYER                             │
 │                                                                                  │

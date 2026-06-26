@@ -256,7 +256,7 @@ CORTEX Persist graduates from beta to production-stable. This release represents
 ### Added
 - **Sovereign Engine**: New `CortexEngine` with modular mixin architecture (Store, Query, Consensus)
 - **Consensus Layer**: Reputation-Weighted Consensus (RWC) for multi-agent fact verification
-- **Immutable Ledger**: Hash-chained transaction log (`SHA-256`) with Merkle tree checkpoints
+- **Tamper-Evident Ledger**: Hash-chained transaction log (`SHA-256`) with Merkle tree checkpoints
 - **Temporal Facts**: Native `valid_from` / `valid_until` support on knowledge facts
 - **MCP Server** (`mcp/`): Full Model Context Protocol implementation for AI agent integration
 - **Async API**: High-performance FastAPI backend with connection pooling and async SQLite

@@ -22,8 +22,9 @@ import pytest
 @pytest.fixture
 async def audit_conn(tmp_path):
     """Provides a fresh aiosqlite connection for each test."""
+    from cortex.database.core import connect_async
     db_path = str(tmp_path / "audit_test.db")
-    conn = await aiosqlite.connect(db_path)
+    conn = await connect_async(db_path)
     yield conn
     await conn.close()
 
@@ -52,7 +53,8 @@ async def ledger(audit_conn):
         ledger.private_key = ed25519.Ed25519PrivateKey.generate()
         ledger.public_key = ledger.private_key.public_key()
 
-    return ledger
+    yield ledger
+    await ledger.close()
 
 
 @pytest.fixture
