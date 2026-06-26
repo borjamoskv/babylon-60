@@ -187,6 +187,7 @@ class ResourceMgrMixin:
                     event_bus=self._event_bus,
                     hot_state=self.hot_state,
                     tick_interval=float(file_config.get("scheduler_tick_interval", 5.0)),
+                    engine=self._shared_engine,  # type: ignore
                 )
                 logger.info("⏱️  SovereignScheduler ENABLED")
             except Exception as e:  # noqa: BLE001

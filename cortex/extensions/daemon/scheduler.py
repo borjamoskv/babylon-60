@@ -107,6 +107,7 @@ class SovereignScheduler:
         event_bus: Any | None = None,
         hot_state: Any | None = None,
         tick_interval: float = 5.0,
+        engine: Any | None = None,
     ) -> None:
         if db_path is None:
             db_path = Path.home() / ".cortex" / "scheduler.db"
@@ -115,6 +116,7 @@ class SovereignScheduler:
         self._event_bus = event_bus
         self._hot_state = hot_state
         self._tick_interval = tick_interval
+        self.engine = engine
         self._running = False
         self._stop_event = asyncio.Event()
         self._tasks: dict[str, TaskFactory] = {}
@@ -288,6 +290,21 @@ class SovereignScheduler:
 
             start = time.monotonic()
             error = ""
+            
+            if self.engine is not None:
+                try:
+                    await self.engine.store(
+                        project="cortex-core",
+                        content=f"Scheduler triggered task: {entry.name}",
+                        fact_type="schedule_trigger",
+                        tags=["Scheduler", "Trigger"],
+                        confidence="C5",
+                        source="daemon:scheduler",
+                        actor_id="scheduler"
+                    )
+                except Exception as e:
+                    logger.debug("Scheduler failed to log trigger to Ledger: %s", e)
+            
             try:
                 await asyncio.wait_for(factory(), timeout=300.0)
             except asyncio.TimeoutError:
