@@ -134,8 +134,9 @@ class EntropicWakeDaemon:
                     # In a true system, we dynamically select the target based on entropy clusters
                     highest_entropy_target = "cortex_router"  # Placeholder
                     self.ignite_purification_agent(highest_entropy_target)
-            except Exception as e:
-                logger.error("Entropic Wake encountered an error: %s", e)
+            except (sqlite3.Error, OSError, ValueError) as e:
+                logger.error("Entropic Wake (BFT Matrix) encountered a structural error: %s", e)
+                # Sensor Drift mitigation: unknown exceptions must crash the loop to trigger system restart.
 
             # Sleep until next pulse
             await asyncio.sleep(self.interval_seconds)

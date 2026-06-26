@@ -114,7 +114,7 @@ async def test_ghost_state_recovery():
         ("hyp-2", "Stmt", 1.0, 1.0, 1.0, 1.0, 'ACTIVE', now)
     ]
     await db.executemany(
-        "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO system_hypotheses (id, statement, probability, evi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         tasks
     )
     await db.close()

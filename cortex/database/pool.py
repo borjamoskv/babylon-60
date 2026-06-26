@@ -12,7 +12,6 @@ import asyncio
 import logging
 import os
 import sqlite3
-import threading
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -24,6 +23,14 @@ __all__ = ["CortexConnectionPool"]
 
 logger = logging.getLogger("cortex.pool")
 
+
+class _PoolState:
+    def __init__(self, max_connections: int):
+        self.pool: asyncio.Queue[aiosqlite.Connection] = asyncio.Queue()
+        self.active_count: int = 0
+        self.lock = asyncio.Lock()
+        self.semaphore = asyncio.Semaphore(max_connections)
+        self.initialized: bool = False
 
 class CortexConnectionPool:
     """
@@ -54,33 +61,29 @@ class CortexConnectionPool:
         self.read_only = read_only
 
         self.chaos_gate = ChaosGate(name=f"sqlite_pool:{self.db_path}")
-        self._local = threading.local()
+        self._state: _PoolState | None = None
 
-    def _get_local_state(self):
-        """Get or initialize thread-local pool state."""
-        if not hasattr(self._local, "pool"):
-            self._local.pool = asyncio.Queue()
-            self._local.active_count = 0
-            self._local.lock = asyncio.Lock()
-            self._local.semaphore = asyncio.Semaphore(self.max_connections)
-            self._local.initialized = False
-        return self._local
+    def _get_state(self) -> _PoolState:
+        """Get or initialize pool state tied to the current event loop."""
+        if self._state is None:
+            self._state = _PoolState(self.max_connections)
+        return self._state
 
     @property
     def _initialized(self) -> bool:
-        return self._get_local_state().initialized
+        return self._get_state().initialized
 
     @property
     def _active_count(self) -> int:
-        return self._get_local_state().active_count
+        return self._get_state().active_count
 
     @property
     def _pool(self) -> asyncio.Queue:
-        return self._get_local_state().pool
+        return self._get_state().pool
 
     async def initialize(self) -> None:
         """Pre-warm pool with min_connections."""
-        state = self._get_local_state()
+        state = self._get_state()
         if state.initialized:
             return
 
@@ -119,7 +122,7 @@ class CortexConnectionPool:
     @asynccontextmanager
     async def acquire(self) -> AsyncGenerator[aiosqlite.Connection, None]:
         """Acquire a connection from the pool."""
-        state = self._get_local_state()
+        state = self._get_state()
         if not state.initialized:
             await self.initialize()
 
@@ -149,7 +152,7 @@ class CortexConnectionPool:
 
     async def _get_or_create_conn(self) -> aiosqlite.Connection:
         """Get a connection from the pool or create a new one."""
-        state = self._get_local_state()
+        state = self._get_state()
         try:
             return state.pool.get_nowait()
         except asyncio.QueueEmpty:
@@ -166,7 +169,7 @@ class CortexConnectionPool:
         logger.warning("Connection unhealthy, replacing.")
         await self._close_conn(conn)
         new_conn = await self._create_connection()
-        state = self._get_local_state()
+        state = self._get_state()
         async with state.lock:
             state.active_count += 1
         return new_conn
@@ -190,14 +193,14 @@ class CortexConnectionPool:
             await conn.close()
         except (sqlite3.Error, OSError) as e:
             logger.warning("Error closing connection: %s", e)
-        state = self._get_local_state()
+        state = self._get_state()
         async with state.lock:
             state.active_count = max(0, state.active_count - 1)
 
     async def close(self) -> None:
         """Close all connections in the pool."""
         logger.info("Closing connection pool...")
-        state = self._get_local_state()
+        state = self._get_state()
         while not state.pool.empty():
             try:
                 conn = state.pool.get_nowait()

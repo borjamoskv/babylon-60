@@ -90,7 +90,16 @@ class CortexConnection(sqlite3.Connection):
         ignore: str | None,
     ) -> int:
         if action in (sqlite3.SQLITE_INSERT, sqlite3.SQLITE_UPDATE, sqlite3.SQLITE_DELETE):
-            if table and table.startswith("sqlite_"):
+            # Allow internal SQLite tables and FTS5/Vector shadow tables to be mutated
+            # during schema creation and normal index updates.
+            if table and (
+                table.startswith("sqlite_") 
+                or table.endswith("_data") 
+                or table.endswith("_idx") 
+                or table.endswith("_content") 
+                or table.endswith("_docsize") 
+                or table.endswith("_config")
+            ):
                 return sqlite3.SQLITE_OK
 
             if not self._causal_write_authorized:

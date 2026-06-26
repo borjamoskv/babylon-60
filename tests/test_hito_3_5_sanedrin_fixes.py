@@ -18,7 +18,7 @@ async def setup_db(db_path: str) -> aiosqlite.Connection:
             id TEXT PRIMARY KEY,
             statement TEXT,
             probability REAL,
-            svi REAL,
+            evi REAL,
             cost REAL,
             impact REAL,
             status TEXT,
