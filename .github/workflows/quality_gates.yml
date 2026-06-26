@@ -135,6 +135,16 @@ jobs:
         run: |
           pip install -e ".[dev,api,mcp,adk]" numpy mypy pyright bandit pytest pytest-asyncio pytest-cov --quiet
 
+      - name: Secret Scanning (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dependency Vulnerability Audit
+        run: |
+          pip install pip-audit
+          pip-audit
+
       # ─── SOVEREIGN SEALS (Local & CI Unified) ────────────────────
       - name: "🩺 Release-only smoke"
         if: steps.scope.outputs.release_only == 'true'

@@ -1,152 +1,163 @@
 # CORTEX ENGINE FACADE
 # Auto-generated to maintain compatibility after structural mitosis.
 
-from .core.cortex_engine import CortexEngine, AsyncCortexEngine
-
-from .core import _engine_delegates
-from .core import runtime_kernel
-from .core import snapshots
-from .core import bifurcation_engine
-from .core import mutation_engine
-from .core import store_validators
-from .core import memory_mixin
-from .core import _engine_connection
-from .core import evolution_ledger
-from .core import fact_store_core
-from .core import tuning_store
-from .core import store_mutation
-from .core import tips
-from .core import physics
-from .core import distributed_ledger
-from .core import engine
-from .core import rollback_engine
-from .core import evolution_engine
-from .core import context_cache
-from .core import store_quarantine_mixin
-from .core import ultrathink_physics
-from .core import store_validation
-from .core import embedding_engine
-from .core import store_mixin
-from .swarm import swarm_10k
-from .swarm import auth
-from .swarm import test_autopoietic_agent
-from .swarm import auth_gateway
-from .swarm import omega_daemon
-from .swarm import legion
-from .swarm import entropy_daemon
-from .swarm import squadrons
-from .swarm import agent_mixin
-from .swarm import autopoietic_agent
-from .swarm import enrichment_worker
-from .swarm import nemesis_agent
-from .swarm import legion_vectors
-from .swarm import autocurative_agent
-from .swarm import legion_vectors_plan
-from .swarm import exergy_agent
-from .swarm import trust_registry
-from .swarm import phoenix_omega
-from .swarm import exergy_daemon
-from .swarm import aleph_omega
-from .flow import bridge_guard
-from .flow import encb_router
-from .flow import saga_protocol
-from .flow import arbiter_bridge
-from .flow import checkpoint
-from .flow import causality_models
-from .flow import causality
-from .flow import cascade_router
-from .flow import consensus
-from .flow import guard_adapters
-from .flow import causal_scheduler
-from .flow import lock
-from .flow import rim_latent_blocks
-from .flow import execution_ledger
-from .flow import storage_guard
-from .flow import guard_integration_patch
-from .flow import guard_pipeline
-from .meta import meta_arbiter
-from .meta import meta_arbiter_kernel
-from .meta import cognitive_arbiter
-from .meta import meta_arbiter_types
-from .meta import forgetting_oracle
-from .meta import metadata_engine
-from .meta import psychology
-from .meta import vision_reasoner
-from .meta import sovereign_arbiter
-from .meta import metabolism
-from .meta import _autopoietic_oracle
-from .meta import right_brain
-from .meta import cognitive
-from .meta import nemesis
-from .meta import metacognition
-from .evo import _genome_mutator
-from .evo import _autocurative_state
-from .evo import autopoiesis
-from .evo import healing_stack
-from .evo import _mutation_projectors
-from .evo import _autocurative_helper
-from .evo import repair_strategies
-from .evo import _genome_types
-from .evo import growth
-from .evo import pathogen
-from .evo import evolution_types
-from .evo import _autopoietic_helper
-from .evo import reaper
-from .evo import _autocurative_config
-from .evo import evolution_metrics
-from .evo import evaporator
-from .evo import _genome_tree_helper
-from .evo import genome
-from .evo import decalcifier
-from .evo import _autopoietic_state
-from .uncategorized import predictive_healer
-from .uncategorized import sandbox_jit
-from .uncategorized import forensic_strike_config
-from .uncategorized import manifestation
-from .uncategorized import compound_yield
-from .uncategorized import apotheosis
-from .uncategorized import models
-from .uncategorized import reflex
-from .uncategorized import semantic_hash
-from .uncategorized import data_surgery
-from .uncategorized import privacy_mixin
-from .uncategorized import shared_bus
-from .uncategorized import query_mixin
-from .uncategorized import search_mixin
-from .uncategorized import reporter
-from .uncategorized import keter
-from .uncategorized import sync_mixin
-from .uncategorized import endocrine
-from .uncategorized import exergy_optimizer
-from .uncategorized import chronos_roi
-from .uncategorized import event_sovereignty
-from .uncategorized import ghost_mixin
-from .uncategorized import conscious_recurrence
-from .uncategorized import durability
-from .uncategorized import apotheosis_audits_mixin
-from .uncategorized import substack_sidecar
-from .uncategorized import video_mla_cache
-from .uncategorized import circuit_breaker
-from .uncategorized import capabilities
-from .uncategorized import zero_prompting
-from .uncategorized import slashing
-from .uncategorized import persist_executor
-from .uncategorized import rem_cycle
-from .uncategorized import crystallizer
-from .uncategorized import enrichment_queue
-from .uncategorized import anomaly_hunter
-from .uncategorized import transaction_mixin
-from .uncategorized import inference
-from .uncategorized import forgetting_models
-from .uncategorized import reflexion
-from .uncategorized import heartbeat
-from .uncategorized import watcher
-from .uncategorized import performance_tracker
-from .uncategorized import cost_scheduler
-from .uncategorized import credibility_stack
-from .uncategorized import reporterd
-from .uncategorized import forensic_commander
-from .uncategorized import entropy
-from .uncategorized import history
-from .uncategorized import synthesis
-from .uncategorized import genesis
+from .core import (
+    _engine_connection,
+    _engine_delegates,
+    bifurcation_engine,
+    context_cache,
+    distributed_ledger,
+    embedding_engine,
+    engine,
+    evolution_engine,
+    evolution_ledger,
+    fact_store_core,
+    memory_mixin,
+    mutation_engine,
+    physics,
+    rollback_engine,
+    runtime_kernel,
+    snapshots,
+    store_mixin,
+    store_mutation,
+    store_quarantine_mixin,
+    store_validation,
+    store_validators,
+    tips,
+    tuning_store,
+    ultrathink_physics,
+)
+from .core.cortex_engine import AsyncCortexEngine, CortexEngine
+from .evo import (
+    _autocurative_config,
+    _autocurative_helper,
+    _autocurative_state,
+    _autopoietic_helper,
+    _autopoietic_state,
+    _genome_mutator,
+    _genome_tree_helper,
+    _genome_types,
+    _mutation_projectors,
+    autopoiesis,
+    decalcifier,
+    evaporator,
+    evolution_metrics,
+    evolution_types,
+    genome,
+    growth,
+    healing_stack,
+    pathogen,
+    reaper,
+    repair_strategies,
+)
+from .flow import (
+    arbiter_bridge,
+    bridge_guard,
+    cascade_router,
+    causal_scheduler,
+    causality,
+    causality_models,
+    checkpoint,
+    consensus,
+    encb_router,
+    execution_ledger,
+    guard_adapters,
+    guard_integration_patch,
+    guard_pipeline,
+    lock,
+    rim_latent_blocks,
+    saga_protocol,
+    storage_guard,
+)
+from .meta import (
+    _autopoietic_oracle,
+    cognitive,
+    cognitive_arbiter,
+    forgetting_oracle,
+    meta_arbiter,
+    meta_arbiter_kernel,
+    meta_arbiter_types,
+    metabolism,
+    metacognition,
+    metadata_engine,
+    nemesis,
+    psychology,
+    right_brain,
+    sovereign_arbiter,
+    vision_reasoner,
+)
+from .swarm import (
+    agent_mixin,
+    aleph_omega,
+    auth,
+    auth_gateway,
+    autocurative_agent,
+    autopoietic_agent,
+    enrichment_worker,
+    entropy_daemon,
+    exergy_agent,
+    exergy_daemon,
+    legion,
+    legion_vectors,
+    legion_vectors_plan,
+    nemesis_agent,
+    omega_daemon,
+    phoenix_omega,
+    squadrons,
+    swarm_10k,
+    test_autopoietic_agent,
+    trust_registry,
+)
+from .uncategorized import (
+    anomaly_hunter,
+    apotheosis,
+    apotheosis_audits_mixin,
+    capabilities,
+    chronos_roi,
+    circuit_breaker,
+    compound_yield,
+    conscious_recurrence,
+    cost_scheduler,
+    credibility_stack,
+    crystallizer,
+    data_surgery,
+    durability,
+    endocrine,
+    enrichment_queue,
+    entropy,
+    event_sovereignty,
+    exergy_optimizer,
+    forensic_commander,
+    forensic_strike_config,
+    forgetting_models,
+    genesis,
+    ghost_mixin,
+    heartbeat,
+    history,
+    inference,
+    keter,
+    manifestation,
+    models,
+    performance_tracker,
+    persist_executor,
+    predictive_healer,
+    privacy_mixin,
+    query_mixin,
+    reflex,
+    reflexion,
+    rem_cycle,
+    reporter,
+    reporterd,
+    sandbox_jit,
+    search_mixin,
+    semantic_hash,
+    shared_bus,
+    slashing,
+    substack_sidecar,
+    sync_mixin,
+    synthesis,
+    transaction_mixin,
+    video_mla_cache,
+    watcher,
+    zero_prompting,
+)

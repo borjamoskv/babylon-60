@@ -32,14 +32,14 @@ from cortex.engine.evo._autopoietic_helper import (
     spawn_from_evolved,
     validate_genome,
 )
-from cortex.engine.meta._autopoietic_oracle import EvolutionConfig, FitnessOracle
 from cortex.engine.evo._autopoietic_state import AutopoieticState
-from cortex.engine.uncategorized.genesis import (
-    GenesisEngine,
-)
 from cortex.engine.evo.genome import (
     GenomeMutator,
     StrategyGenome,
+)
+from cortex.engine.meta._autopoietic_oracle import EvolutionConfig, FitnessOracle
+from cortex.engine.uncategorized.genesis import (
+    GenesisEngine,
 )
 from cortex.isa.builder import AgentOp
 

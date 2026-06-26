@@ -3,16 +3,18 @@ from __future__ import annotations
 import os
 import sqlite3
 
+from cortex.database.core import CortexConnection
+
 from .models import SwarmEvent
 
-
-from cortex.database.core import CortexConnection
 
 class SwarmLedger:
     def __init__(self, path: str | None = None):
         if path is None:
             path = os.getenv("CORTEX_SWARM_DB_PATH", "cortex_swarm.db")
-        self.conn = sqlite3.connect(path, timeout=10, check_same_thread=False, factory=CortexConnection)
+        self.conn = sqlite3.connect(
+            path, timeout=10, check_same_thread=False, factory=CortexConnection
+        )
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA journal_mode=WAL;")
         self.conn.execute("PRAGMA synchronous=NORMAL;")
@@ -20,6 +22,7 @@ class SwarmLedger:
 
     def _init(self):
         import os
+
         schema_path = os.path.join(os.path.dirname(__file__), "schema.sql")
         with open(schema_path) as f:
             if hasattr(self.conn, "authorize_causal_writes"):
@@ -36,7 +39,7 @@ class SwarmLedger:
 
     def append(self, event: SwarmEvent) -> str:
         r = event.to_record()
-        
+
         if hasattr(self.conn, "authorize_causal_writes"):
             self.conn.authorize_causal_writes()
         try:

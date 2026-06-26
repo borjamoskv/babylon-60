@@ -388,22 +388,23 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             new_meta["previous_fact_id"] = fact_id
 
             # Deprecate first to avoid unique constraint violations on identical hashes
-            await self.deprecate(fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id)
+            with causal_write(conn):
+                await self.deprecate(fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id)
 
-            new_id = await self.store(
-                project=project,
-                content=content if content is not None else str(old_content or ""),
-                tenant_id=db_tenant_id,
-                fact_type=fact_type,
-                tags=tags if tags is not None else old_tags,
-                confidence=confidence,
-                source=source or "engine:update",
-                meta=new_meta,
-                conn=conn,
-                commit=False,
-            )
+                new_id = await self.store(
+                    project=project,
+                    content=content if content is not None else str(old_content or ""),
+                    tenant_id=db_tenant_id,
+                    fact_type=fact_type,
+                    tags=tags if tags is not None else old_tags,
+                    confidence=confidence,
+                    source=source or "engine:update",
+                    meta=new_meta,
+                    conn=conn,
+                    commit=False,
+                )
 
-            await conn.commit()
+                await conn.commit()
             return new_id
 
     async def deprecate(
@@ -444,9 +445,10 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
     ) -> bool:
         """Delegated deprecation logic."""
-        res = await deprecate_impl_logic(
-            mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
-        )
+        with causal_write(conn):
+            res = await deprecate_impl_logic(
+                mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
+            )
         if res:
             self._invalidate_l1_cache(tenant_id)
         return res
@@ -476,9 +478,10 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
     ) -> bool:
         """Delegated invalidation logic (tombstone + taint)."""
-        res = await invalidate_impl_logic(
-            mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
-        )
+        with causal_write(conn):
+            res = await invalidate_impl_logic(
+                mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
+            )
         if res:
             self._invalidate_l1_cache(tenant_id)
         return res

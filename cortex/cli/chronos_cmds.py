@@ -126,6 +126,7 @@ def compound(project: str | None, persist: bool) -> None:
 
         if persist:
             import asyncio
+
             fact_id = asyncio.run(tracker.persist_report(report, project=project or "system"))
             if fact_id:
                 console.print(f"[green]✔ Report persisted as Fact #{fact_id}[/green]")

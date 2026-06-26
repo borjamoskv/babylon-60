@@ -13,7 +13,6 @@ from typing import Any
 
 from cortex.database.core import connect as db_connect
 from cortex.memory.temporal import now_iso
-from cortex_extensions.signals.bus import SignalBus
 
 logger = logging.getLogger("cortex.chronos.compound")
 
@@ -289,7 +288,7 @@ class CompoundYieldTracker:
                     source="chronos-compound",
                     meta=meta_dict,
                     tx_id=None,
-                    taint_already_verified=True
+                    taint_already_verified=True,
                 )
 
                 if fact_id is not None:
@@ -302,7 +301,7 @@ class CompoundYieldTracker:
                         project=project,
                         tenant_id="default",
                     )
-                
+
                 await conn.commit()
                 logger.info("CHRONOS Compound report persisted securely as Fact #%s", fact_id)
                 return fact_id

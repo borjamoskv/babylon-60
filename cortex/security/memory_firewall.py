@@ -39,14 +39,14 @@ class SecretRedactor:
         """Redacts secrets from a string. Returns the redacted string and a boolean indicating if a secret was found."""
         if not text:
             return text, False
-        
+
         found = False
         redacted_text = text
         for pattern in cls.SECRET_PATTERNS:
             if pattern.search(redacted_text):
                 found = True
                 redacted_text = pattern.sub("[REDACTED_SECRET]", redacted_text)
-                
+
         return redacted_text, found
 
     @classmethod
@@ -129,7 +129,9 @@ class MemoryFirewall:
     """Orchestrates DLP and Risk Scoring before persistence."""
 
     @staticmethod
-    def screen_content(content: str | dict[str, Any]) -> tuple[str | dict[str, Any], RiskLevel, list[str]]:
+    def screen_content(
+        content: str | dict[str, Any],
+    ) -> tuple[str | dict[str, Any], RiskLevel, list[str]]:
         """
         Screens the content.
         Redacts secrets and evaluates risk.
@@ -137,7 +139,7 @@ class MemoryFirewall:
         """
         threats = []
         risk_level = RiskLevel.LOW
-        
+
         # 1. Redact Secrets
         if isinstance(content, str):
             redacted_content, has_secret = SecretRedactor.redact(content)
@@ -151,22 +153,22 @@ class MemoryFirewall:
                 risk_level = RiskLevel.HIGH
         else:
             redacted_content = content
-            
+
         # 2. Evaluate Risk
         # We evaluate the unredacted content to detect prompt injection
         str_content = str(content) if isinstance(content, dict) else str(content)
         eval_risk, eval_threats = RiskScoringEngine.evaluate(str_content)
-        
+
         threats.extend(eval_threats)
         risk_level = max(risk_level, eval_risk)
-        
+
         # Deduplicate threats
         threats = list(set(threats))
 
         if risk_level == RiskLevel.CRITICAL:
             logger.critical(f"[MemoryFirewall] CRITICAL threat detected: {threats}. Halting SAGA.")
             raise ValueError(f"Memory Firewall rejected payload due to CRITICAL risk: {threats}")
-            
+
         if risk_level in (RiskLevel.HIGH, RiskLevel.MEDIUM):
             logger.warning(f"[MemoryFirewall] Elevated risk detected ({risk_level}): {threats}")
 

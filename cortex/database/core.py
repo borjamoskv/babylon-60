@@ -116,9 +116,12 @@ def _secure_sqlite3_connect(*args, **kwargs):
     factory = kwargs.get("factory")
     if factory is not CortexConnection:
         import os
+
         pytest_test = os.environ.get("PYTEST_CURRENT_TEST", "")
         is_security_test = "test_verify" in pytest_test or "test_physical_claims" in pytest_test
-        if ("PYTEST_CURRENT_TEST" in os.environ or "CORTEX_TEST_ENV" in os.environ) and not is_security_test:
+        if (
+            "PYTEST_CURRENT_TEST" in os.environ or "CORTEX_TEST_ENV" in os.environ
+        ) and not is_security_test:
             return _original_sqlite3_connect(*args, **kwargs)
         raise RuntimeError(
             "[C5-REAL] FATAL: Direct sqlite3.connect() is structurally forbidden. Use MTK Allocator (cortex.database.core.connect)."

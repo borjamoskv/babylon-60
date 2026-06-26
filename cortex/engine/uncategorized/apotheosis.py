@@ -35,8 +35,8 @@ else:
             """Fallback class when watchdog is not installed."""
 
 
-from cortex.engine.uncategorized.apotheosis_audits_mixin import ApotheosisAuditsMixin
 from cortex.engine.meta.cognitive import scan_file_entropy
+from cortex.engine.uncategorized.apotheosis_audits_mixin import ApotheosisAuditsMixin
 from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.uncategorized.manifestation import transfigure_ui
 from cortex.engine.uncategorized.reflex import trigger_autonomic_reflex

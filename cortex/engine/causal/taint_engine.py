@@ -1,12 +1,9 @@
 # [C5-REAL] Exergy-Maximized
-import base64
 import hashlib
 import json
 import logging
 import time
 from datetime import datetime, timezone
-
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
 logger = logging.getLogger("cortex.engine.causal.taint_engine")
 
@@ -60,7 +57,7 @@ def generate_secure_taint_token(
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp}&nonce={nonce}&content_hash={content_hash}"
 
     from cortex.crypto.keys import Signer
-    
+
     # Use Enterprise Signer
     signature = Signer.sign_raw_content(private_key_b64, canonical_payload)
 
@@ -206,11 +203,15 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp_str}&nonce={nonce}&content_hash={content_hash}"
 
     from cortex.crypto.keys import Verifier
+
     if Verifier.verify_raw_content(canonical_payload, public_key_b64, signature):
         logger.info("[TaintEngine] Cryptographic Taint Signature verified for Agent %s", agent_id)
         return True
     else:
-        logger.error("[TaintEngine] SAGA-1: Cryptographic signature verification failed for Agent %s", agent_id)
+        logger.error(
+            "[TaintEngine] SAGA-1: Cryptographic signature verification failed for Agent %s",
+            agent_id,
+        )
         return False
 
 
@@ -220,6 +221,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
 
     # -- OWASP Memory Firewall (SAGA-1.5) --
     from cortex.security.memory_firewall import MemoryFirewall
+
     try:
         _, risk_level, _ = MemoryFirewall.screen_content(content)
     except ValueError as fw_err:

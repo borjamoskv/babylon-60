@@ -17,6 +17,7 @@ import aiosqlite
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
+
 from cortex.database.core import causal_write
 
 logger = logging.getLogger("cortex.audit.ledger")
@@ -100,20 +101,21 @@ class EnterpriseAuditLedger:
 
         # C5-REAL Sovereign Ed25519 Keypair (Enterprise Key Management)
         from cortex.crypto.keys import KeyManager
+
         self._km = KeyManager(service_name="cortex_ledger_enterprise")
         self.actor_id = "ledger_master"
-        
+
         priv_b64 = self._km.get_private_key_b64(self.actor_id)
         if not priv_b64:
-            pub_b64 = self._km.generate_and_store_key(self.actor_id)
+            self._km.generate_and_store_key(self.actor_id)
             priv_b64 = self._km.get_private_key_b64(self.actor_id)
-        
+
         priv_bytes = __import__("base64").b64decode(priv_b64)
         try:
             self.private_key = ed25519.Ed25519PrivateKey.from_private_bytes(priv_bytes)
         except ValueError:
             self.private_key = serialization.load_pem_private_key(priv_bytes, password=None)
-            
+
         self.public_key = self.private_key.public_key()
 
     async def ensure_table(self) -> None:
@@ -124,13 +126,12 @@ class EnterpriseAuditLedger:
                 if self._ready:
                     return
                 await self._conn.execute(_CREATE_AUDIT_SQL)
-                
-                import sqlite3
+
                 try:
                     await self._conn.execute("ALTER TABLE security_audit_log ADD COLUMN external_anchor TEXT")
-                except sqlite3.OperationalError:
+                except Exception:
                     pass
-                    
+
                 await self._conn.commit()
                 cursor = await self._conn.execute(
                     "SELECT prev_hash, signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
@@ -168,7 +169,6 @@ class EnterpriseAuditLedger:
         Returns {'status': 'verified'} if pristine, or {'status': 'tampered', 'corrupted_audit_id': id} if broken.
         """
         import hashlib
-
 
         await self.ensure_table()
 
@@ -228,7 +228,7 @@ class EnterpriseAuditLedger:
 
             try:
                 self.public_key.verify(bytes.fromhex(signature), entry_hash.encode())
-            except Exception:
+            except InvalidSignature:
                 return {
                     "status": "tampered",
                     "corrupted_audit_id": batch_rows[0][1],
@@ -271,38 +271,42 @@ class EnterpriseAuditLedger:
                     try:
                         import base64
                         import json
-                        from cryptography.hazmat.primitives import serialization
-                        from cortex.audit.rekor_client import RekorClient
-                        import rfc3161ng
+
                         import httpx
-                        
-                        sig_b64 = base64.b64encode(bytes.fromhex(signature)).decode('utf-8')
+                        import rfc3161ng
+                        from cryptography.hazmat.primitives import serialization
+
+                        from cortex.audit.rekor_client import RekorClient
+
                         pub_pem = self.public_key.public_bytes(
                             encoding=serialization.Encoding.PEM,
-                            format=serialization.PublicFormat.SubjectPublicKeyInfo
+                            format=serialization.PublicFormat.SubjectPublicKeyInfo,
                         )
-                        
+
                         # Asynchronous Rekor logging
                         client = RekorClient()
                         rekor_uuid = await client.log_entry(entry_hash, signature, pub_pem)
                         await client.close()
-                        
+
                         # RFC3161 Timestamping (Free TSA)
                         tsa_url = "http://timestamp.digicert.com"
-                        req = rfc3161ng.make_request(entry_hash.encode('utf-8'), hash_algo='sha256')
+                        req = rfc3161ng.make_request(entry_hash.encode("utf-8"), hash_algo="sha256")
                         async with httpx.AsyncClient() as http_client:
                             tsa_resp = await http_client.post(
-                                tsa_url, 
-                                content=req, 
-                                headers={'Content-Type': 'application/timestamp-query'}
+                                tsa_url,
+                                content=req,
+                                headers={"Content-Type": "application/timestamp-query"},
                             )
-                        rfc_token = base64.b64encode(tsa_resp.content).decode('utf-8') if tsa_resp.status_code == 200 else None
+                        rfc_token = (
+                            base64.b64encode(tsa_resp.content).decode("utf-8")
+                            if tsa_resp.status_code == 200
+                            else None
+                        )
 
                         if rekor_uuid or rfc_token:
-                            external_anchor = json.dumps({
-                                "rekor_uuid": rekor_uuid,
-                                "rfc3161_token": rfc_token
-                            })
+                            external_anchor = json.dumps(
+                                {"rekor_uuid": rekor_uuid, "rfc3161_token": rfc_token}
+                            )
                     except Exception as e:
                         logger.error("[AuditLedger] External anchoring failed: %s", e)
 

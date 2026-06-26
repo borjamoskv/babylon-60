@@ -27,6 +27,12 @@ import time
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from cortex.engine.evo.genome import (
+    FitnessRecord,
+    GenomeMutator,
+    MutationType,
+    StrategyGenome,
+)
 from cortex.engine.swarm.autopoietic_agent import (
     AutopoieticAgent,
     EvolutionConfig,
@@ -35,12 +41,6 @@ from cortex.engine.uncategorized.genesis import (
     AgentBlueprint,
     AgentSpecies,
     GenesisEngine,
-)
-from cortex.engine.evo.genome import (
-    FitnessRecord,
-    GenomeMutator,
-    MutationType,
-    StrategyGenome,
 )
 from cortex.isa.builder import (
     dispatch_targets,

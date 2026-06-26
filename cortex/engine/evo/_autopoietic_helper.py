@@ -5,8 +5,8 @@ import logging
 import random
 from typing import TYPE_CHECKING
 
-from cortex.engine.uncategorized.genesis import AgentBlueprint
 from cortex.engine.evo.genome import MutationType, StrategyGenome
+from cortex.engine.uncategorized.genesis import AgentBlueprint
 
 if TYPE_CHECKING:
     from cortex.engine.swarm.autopoietic_agent import AutopoieticAgent
