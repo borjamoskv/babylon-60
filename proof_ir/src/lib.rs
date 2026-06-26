@@ -1,14 +1,31 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+#![no_std]
+
+extern crate alloc;
+
+use alloc::string::String;
+use alloc::vec::Vec;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ProofObligation {
+    pub name: String,
+    pub hypotheses: Vec<String>,
+    pub goal: String,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Invariant {
+    pub name: String,
+    pub condition: String,
+}
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AbstractState {
+    pub variables: Vec<(String, String)>, // name, type
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ProofIR {
+    pub state: AbstractState,
+    pub invariants: Vec<Invariant>,
+    pub obligations: Vec<ProofObligation>,
 }

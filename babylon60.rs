@@ -211,7 +211,7 @@ fn main() {
     }
 
     // 12. Minimal Virtual Machine (TCB Reduction)
-    let initial_regs = vec![Register { val: 0, typ: B60Type::UNALLOCATED, scale: 0 }; 3];
+    let initial_regs = vec![Register { val: 0, typ: B60Type::UNALLOCATED, scale: 0 }; 64];
     let mut ledger = DAGLedger::new();
     let mut clock = LogicalClock(0);
     let mut queue: VecDeque<Coroutine> = VecDeque::new();

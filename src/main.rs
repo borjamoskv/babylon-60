@@ -6,7 +6,6 @@ use sha2::{Sha256, Digest};
 use std::collections::{HashMap, VecDeque};
 use std::env;
 use std::fs;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 enum B60Type {
@@ -34,14 +33,13 @@ impl F60 {
             self.scale = 0;
             return;
         }
-        let base = BigInt::from(60).pow(self.scale);
+        let base = BigInt::from(60_u64).pow(self.scale);
         let g = self.num.gcd(&base);
         if g > BigInt::one() {
             self.num /= &g;
-            // Simplified scale reduction based on base-60 trailing zeroes.
             let mut g_temp = g;
-            while (&g_temp % 60).is_zero() && self.scale > 0 {
-                g_temp /= 60;
+            while (&g_temp % 60u64).is_zero() && self.scale > 0 {
+                g_temp /= 60u64;
                 self.scale -= 1;
             }
         }
@@ -136,7 +134,7 @@ fn parse_b60_number(b60_str: &str) -> F60 {
     let mut total = BigInt::zero();
     let mut power = (places.len() - 1) as u32;
     for p in places {
-        total += BigInt::from(parse_b60_digit(p)) * BigInt::from(60).pow(power);
+        total += BigInt::from(parse_b60_digit(p)) * BigInt::from(60u64).pow(power);
         if power > 0 { power -= 1; }
     }
     F60::new(total, 0)
@@ -158,9 +156,9 @@ impl Machine {
             let idx = get_reg_index(expr);
             r[idx].val.clone()
         } else if expr == "UNIT.HOUR" {
-            F60::new(BigInt::from(3600), 0)
+            F60::new(BigInt::from(3600u64), 0)
         } else if expr == "UNIT.MINUTE" {
-            F60::new(BigInt::from(60), 0)
+            F60::new(BigInt::from(60u64), 0)
         } else {
             F60::new(BigInt::zero(), 0)
         }
@@ -176,11 +174,13 @@ impl Machine {
         println!("[ MOSKV KERNEL ] CAUSAL SNAPSHOT -> ARTIFACT EXPORT");
         let mut hasher = Sha256::new();
         hasher.update(b"BABYLON-60-INIT");
-        let initial_hash = format!("{:x}", hasher.finalize());
+        let initial_res = hasher.finalize();
+        let initial_hash: String = initial_res.iter().map(|b| format!("{:02x}", b)).collect();
 
         let mut hasher2 = Sha256::new();
         hasher2.update(self.c.to_be_bytes());
-        let replay_hash = format!("{:x}", hasher2.finalize());
+        let replay_res = hasher2.finalize();
+        let replay_hash: String = replay_res.iter().map(|b| format!("{:02x}", b)).collect();
 
         let artifact = ExportSchema {
             initial_state_hash: initial_hash,
@@ -243,8 +243,8 @@ impl Machine {
                 continue;
             }
 
-            let line = self.lines[coro.pc].trim();
-            if line.is_empty() || line == "DUB" || line.starts_with("MUB ") {
+            let line = self.lines[coro.pc].trim().to_string();
+            if line.is_empty() || line == "DUB" || line.starts_with("MUB ") || line.starts_with('#') {
                 coro.pc += 1;
                 coro.state = CoroutineState::Ready;
                 self.q.push_back(coro);
@@ -302,7 +302,6 @@ impl Machine {
                     let idx = get_reg_index(&tokens[1]);
                     coro.r[idx].val = self.eval_expr(&tokens[2], &coro.r);
                     if tokens.len() > 3 {
-                        // Handle implicit multiply (e.g. NIG R0 [ Y ] UNIT.HOUR)
                         let mult = self.eval_expr(&tokens[3], &coro.r);
                         coro.r[idx].val.num *= mult.num;
                     }
@@ -315,15 +314,11 @@ impl Machine {
                         self.critical_halt("DIVIDE_BY_ZERO");
                     }
 
-                    // BA.EXACT shifts scale instead of losing precision
-                    // n1 / n2 = (n1 * 60^S) / n2 -> handled by BigInt? 
-                    // No, F60 exact div: (N1 / 60^S1) / (N2 / 60^S2) = (N1 * 60^S2) / (N2 * 60^S1)
-                    // We increment scale by 1 and multiply numerator by 60 until exact div or limit.
                     let mut num = coro.r[idx1].val.num.clone();
                     let mut scale = coro.r[idx1].val.scale;
                     
                     while (&num % &val2.num) != BigInt::zero() {
-                        num *= 60;
+                        num *= 60u64;
                         scale += 1;
                         if scale > 20 { // Saturation limit
                             self.critical_halt("FALSATION_ERROR: TRUNCATION (Blowup de Numerador excedió límite de Escala F60)");
@@ -339,7 +334,7 @@ impl Machine {
                             id: self.next_cid,
                             pc: target,
                             state: CoroutineState::Ready,
-                            r: coro.r.clone(), // COW semantics
+                            r: coro.r.clone(),
                         };
                         self.next_cid += 1;
                         self.q.push_back(new_coro);
@@ -412,12 +407,11 @@ impl Machine {
                 _ => {}
             }
 
-            // Record ledger state
             let mut snap = HashMap::new();
             snap.insert("PC".to_string(), coro.pc.to_string());
             self.l.push(TickSequence {
                 tick: self.c,
-                opcode: line.to_string(),
+                opcode: line.clone(),
                 registers_snapshot: snap,
             });
 
@@ -439,7 +433,7 @@ fn main() {
     }
 
     let code = fs::read_to_string(&args[1]).expect("Failed to read script");
-    let lines: Vec<String> = code.lines().map(|l| l.split('#').next().unwrap().trim().to_string()).collect();
+    let lines: Vec<String> = code.lines().map(|l| l.trim().to_string()).collect();
     
     let mut labels = HashMap::new();
     for (i, line) in lines.iter().enumerate() {
