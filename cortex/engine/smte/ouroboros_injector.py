@@ -15,10 +15,10 @@ import uuid
 logger = logging.getLogger("cortex.engine.smte.ouroboros_injector")
 
 try:
-    pass
+    from confluent_kafka import Producer
 except ImportError:
-    logger.error("confluent_kafka not installed. Run: pip install confluent_kafka")
-    sys.exit(1)
+    Producer = None
+
 
 
 def delivery_report(err, msg):
@@ -29,8 +29,12 @@ def delivery_report(err, msg):
 
 async def inject_synthetic_friction(broker="localhost:9092", num_events=500):
     """Inyecta una carga de exergía y entropía en el bus system.friction."""
-    from confluent_kafka import Producer
+    if Producer is None:
+        logger.error("confluent_kafka not installed. Run: pip install confluent_kafka")
+        sys.exit(1)
+        
     producer = Producer({"bootstrap.servers": broker})
+
 
     # Pool de 10 agentes virtuales
     agent_ids = [f"Agent-Ω-{i}" for i in range(10)]

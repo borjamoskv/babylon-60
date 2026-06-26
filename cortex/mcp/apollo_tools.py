@@ -61,7 +61,9 @@ def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvali
 
         while len(extracted_leads) < target_leads:
             try:
-                response = requests.post(url, headers=headers, json=data)
+                response = await asyncio.to_thread(
+                    requests.post, url, headers=headers, json=data
+                )
                 response.raise_for_status()
                 contacts = response.json().get("contacts", [])
 

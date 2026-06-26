@@ -26,9 +26,10 @@ def mock_mcp():
     return mcp
 
 
+@pytest.mark.asyncio
 @patch.dict(os.environ, {"APOLLO_API_KEY": "fake_c5_real_key"})
 @patch("cortex.mcp.apollo_tools.requests.post")
-def test_apollo_extract_leads_success(mock_post, mock_mcp, tmp_path):
+async def test_apollo_extract_leads_success(mock_post, mock_mcp, tmp_path):
     # Mock response from Apollo
     mock_response = MagicMock()
     mock_response.json.return_value = {
@@ -58,7 +59,7 @@ def test_apollo_extract_leads_success(mock_post, mock_mcp, tmp_path):
     try:
         # Call the tool
         tool_func = mock_mcp.tools["cortex_apollo_extract_leads"]
-        result = tool_func(target_leads=2, output_filename="test_apollo.json")
+        result = await tool_func(target_leads=2, output_filename="test_apollo.json")
 
         assert "✅ C5-REAL Lead Extraction complete" in result
 
@@ -74,10 +75,12 @@ def test_apollo_extract_leads_success(mock_post, mock_mcp, tmp_path):
         os.chdir(original_cwd)
 
 
+@pytest.mark.asyncio
 @patch.dict(os.environ, clear=True)
-def test_apollo_extract_leads_missing_key(mock_mcp):
+async def test_apollo_extract_leads_missing_key(mock_mcp):
     # Ensure APOLLO_API_KEY is not set
     tool_func = mock_mcp.tools["cortex_apollo_extract_leads"]
-    result = tool_func(target_leads=2)
+    result = await tool_func(target_leads=2)
 
     assert "❌ Rejected: APOLLO_API_KEY" in result
+
