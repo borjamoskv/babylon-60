@@ -137,8 +137,9 @@ def inject_reflections(
         List of InjectedLearning, ordered by relevance score (desc).
     """
     import sqlite3 as _sqlite3
+    from cortex.database.core import connect as mt_connect
 
-    conn = _sqlite3.connect(str(engine._db_path))
+    conn = mt_connect(str(engine._db_path))
     conn.row_factory = _sqlite3.Row
     results = _hybrid_search_learnable(conn, context_hint, project, top_k)
     conn.close()
