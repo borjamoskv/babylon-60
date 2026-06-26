@@ -75,6 +75,29 @@ class AsyncSignalBus:
             # Enforce VOID invariant: Drop empty signals immediately
             if not signal.payload and signal.status != "VOID":
                 signal.status = "VOID"
+
+            # Hito 2: Dependency-Aware Hypothesis Falsification (Cascade Death)
+            # If the signal is for a hypothesis that has already been INVALIDATED,
+            # we discard it to save exergy.
+            if signal.target.startswith("hyp-"):
+                import aiosqlite
+
+                from cortex.config import DB_PATH
+
+                try:
+                    async with aiosqlite.connect(DB_PATH) as db:
+                        async with db.execute(
+                            "SELECT status FROM system_hypotheses WHERE id = ?", (signal.target,)
+                        ) as cursor:
+                            row = await cursor.fetchone()
+                            if row and row[0] == "INVALIDATED":
+                                logger.warning(
+                                    f"Dropping signal for {signal.target}: Hypothesis is INVALIDATED."
+                                )
+                                return
+                except Exception as e:
+                    logger.error(f"Failed to verify hypothesis status: {e}")
+
             self._signals.append(signal)
 
     async def get_all(self) -> list[SwarmSignal]:

@@ -10,7 +10,36 @@ from cortex_extensions.daemon.models import DEFAULT_INTERVAL
 logger = logging.getLogger("moskv-daemon")
 
 
+import typing
+
 class EventLoopMixin:
+    _shutdown: bool
+    _stop_event: asyncio.Event
+    scheduler: typing.Any
+    hot_state: typing.Any
+    watchdog_hub: typing.Any
+    callback_api: typing.Any
+    _aether_daemon: typing.Any
+    fiat_oracle: typing.Any
+    ast_oracle: typing.Any
+    iot_oracle: typing.Any
+    heartbeat_daemon: typing.Any
+    entropic_wake_daemon: typing.Any
+    frontier_daemon: typing.Any
+    zero_prompting_daemon: typing.Any
+    epistemic_breaker_daemon: typing.Any
+    sentinel_oracle: typing.Any
+    agy2_planner_daemon: typing.Any
+    sovereignty_runtime: typing.Any
+    _threads: list[typing.Any]
+    _event_bus: typing.Any
+
+    check: typing.Callable[[], None]
+    _run_neural_loop_async: typing.Callable[[], typing.Coroutine[typing.Any, typing.Any, None]]
+    _run_lifecycle_daemon_async: typing.Callable[..., typing.Coroutine[typing.Any, typing.Any, None]]
+    _run_loop_daemon_async: typing.Callable[..., typing.Coroutine[typing.Any, typing.Any, None]]
+    _run_health_loop_async: typing.Callable[[], typing.Coroutine[typing.Any, typing.Any, None]]
+
     def run(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Run the daemon using the sovereign async loop (all subsystems as tasks)."""
         from cortex.events.loop import sovereign_run

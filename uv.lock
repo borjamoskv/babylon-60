@@ -1016,7 +1016,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.0" },
     { name = "confluent-kafka", specifier = ">=2.1.0" },
     { name = "cortex-persist", extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality"], marker = "extra == 'all'" },
-    { name = "cryptography", specifier = ">=46.0.7" },
+    { name = "cryptography", specifier = ">=47.0.0" },
     { name = "email-validator", marker = "extra == 'api'", specifier = ">=2.1.0" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.110" },
     { name = "google-antigravity", marker = "extra == 'adk'", specifier = ">=0.1.0" },
