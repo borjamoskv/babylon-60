@@ -14,6 +14,7 @@ from typing import Any
 import aiosqlite
 
 from cortex.config import DB_PATH
+from cortex.database.core import connect_async, causal_write
 from cortex.guards import CausalClosureGuard, SwarmProposal
 
 # Replace with correct import for Ledger if needed, but the old code emitted SwarmProposal.
@@ -30,7 +31,7 @@ class CausalStateStore:
         
     async def connect(self):
         if not self._db:
-            self._db = await aiosqlite.connect(self.db_path, timeout=5.0)
+            self._db = await connect_async(self.db_path)
             await self._db.execute("PRAGMA journal_mode=WAL;")
             await self._db.execute("PRAGMA synchronous=NORMAL;")
             await self._db.execute("PRAGMA busy_timeout=5000;")
@@ -114,23 +115,24 @@ class CausalStateStore:
                 await enforce_taint_check(self._db, taint_token, json.dumps(signal.payload))
 
                 # 3. SAGA Step 2 & 3: Atomic 2PC Mutation
-                await self._db.execute(
-                    "INSERT INTO audit_ledger (agent_id, target, status, timestamp, payload) VALUES (?, ?, ?, ?, ?)",
-                    (signal.agent_id, signal.target, signal.status, ledger_payload["timestamp"], json.dumps(signal.payload))
-                )
-
-                if signal.status in ("SUCCESS", "FAILURE"):
+                with causal_write(self._db):
                     await self._db.execute(
-                        "UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'hypothesis_graph_version'"
+                        "INSERT INTO audit_ledger (agent_id, target, status, timestamp, payload) VALUES (?, ?, ?, ?, ?)",
+                        (signal.agent_id, signal.target, signal.status, ledger_payload["timestamp"], json.dumps(signal.payload))
                     )
-                    
-                    if signal.target.startswith("hyp-") and signal.status == "SUCCESS":
+
+                    if signal.status in ("SUCCESS", "FAILURE"):
                         await self._db.execute(
-                            "UPDATE system_hypotheses SET status = 'COMPLETED' WHERE id = ?", (signal.target,)
+                            "UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'hypothesis_graph_version'"
                         )
-                
-                # ATOMIC COMMIT (SANEDRIN VECTOR 1)
-                await self._db.commit()
+                        
+                        if signal.target.startswith("hyp-") and signal.status == "SUCCESS":
+                            await self._db.execute(
+                                "UPDATE system_hypotheses SET status = 'COMPLETED' WHERE id = ?", (signal.target,)
+                            )
+                    
+                    # ATOMIC COMMIT (SANEDRIN VECTOR 1)
+                    await self._db.commit()
 
             except (aiosqlite.Error, ValueError, KeyError, TypeError, RuntimeError) as e:
                 await self._db.rollback()
@@ -157,9 +159,10 @@ class CausalStateStore:
                 update_q = "UPDATE system_hypotheses SET status = 'ACTIVE' WHERE status = 'IN_FLIGHT'"
                 if lease_id:
                     update_q += " AND owner_id = ?"
-                await self._db.execute(update_q, params)
-                await self._db.execute(
-                    "UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'hypothesis_graph_version'"
-                )
-                await self._db.commit()
+                with causal_write(self._db):
+                    await self._db.execute(update_q, params)
+                    await self._db.execute(
+                        "UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'hypothesis_graph_version'"
+                    )
+                    await self._db.commit()
             return count
