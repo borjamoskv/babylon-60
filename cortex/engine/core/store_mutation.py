@@ -10,6 +10,7 @@ import aiosqlite
 
 from cortex.engine.flow.causality import AsyncCausalGraph
 from cortex.utils.canonical import now_iso
+from cortex.database.core import causal_write
 
 logger = logging.getLogger("cortex.store_mutation")
 
@@ -41,18 +42,19 @@ async def deprecate_impl_logic(
         return False
 
     ts = now_iso()
-    await conn.execute(
-        """
-        UPDATE facts
-        SET valid_until = ?, updated_at = ?,
-            metadata = CASE
-                WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata
-                ELSE json_set(COALESCE(metadata, '{}'), '$.deprecation_reason', ?)
-            END
-        WHERE id = ? AND tenant_id = ?
-        """,
-        (ts, ts, reason or "deprecated", fact_id, tenant_id),
-    )
+    with causal_write(conn):
+        await conn.execute(
+            """
+            UPDATE facts
+            SET valid_until = ?, updated_at = ?,
+                metadata = CASE
+                    WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata
+                    ELSE json_set(COALESCE(metadata, '{}'), '$.deprecation_reason', ?)
+                END
+            WHERE id = ? AND tenant_id = ?
+            """,
+            (ts, ts, reason or "deprecated", fact_id, tenant_id),
+        )
     await mixin_instance._log_transaction(
         conn,
         "system",
@@ -80,22 +82,23 @@ async def invalidate_impl_logic(
         return False
 
     ts = now_iso()
-    await conn.execute(
-        """
-        UPDATE facts
-        SET valid_until = ?, is_tombstoned = 1, confidence = 'C1', updated_at = ?,
-            metadata = CASE
-                WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata
-                ELSE json_set(
-                    COALESCE(metadata, '{}'),
-                    '$.tombstoned_at', ?,
-                    '$.tombstone_reason', ?
-                )
-            END
-        WHERE id = ? AND tenant_id = ?
-        """,
-        (ts, ts, ts, reason or "invalidated", fact_id, tenant_id),
-    )
+    with causal_write(conn):
+        await conn.execute(
+            """
+            UPDATE facts
+            SET valid_until = ?, is_tombstoned = 1, confidence = 'C1', updated_at = ?,
+                metadata = CASE
+                    WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata
+                    ELSE json_set(
+                        COALESCE(metadata, '{}'),
+                        '$.tombstoned_at', ?,
+                        '$.tombstone_reason', ?
+                    )
+                END
+            WHERE id = ? AND tenant_id = ?
+            """,
+            (ts, ts, ts, reason or "invalidated", fact_id, tenant_id),
+        )
     await mixin_instance._log_transaction(
         conn,
         "system",
@@ -116,7 +119,8 @@ async def _delete_best_effort(
     params: tuple[Any, ...],
 ) -> None:
     try:
-        await conn.execute(statement, params)
+        with causal_write(conn):
+            await conn.execute(statement, params)
     except (sqlite3.Error, aiosqlite.Error) as exc:
         if "no such table" not in str(exc).lower():
             raise
@@ -198,9 +202,10 @@ async def purge_logic(
         for statement, params in delete_specs:
             await _delete_best_effort(conn, statement, params)
 
-        cursor = await conn.execute(
-            "DELETE FROM facts WHERE id = ? AND tenant_id = ?",
-            (fact_id, tenant_id),
-        )
+        with causal_write(conn):
+            cursor = await conn.execute(
+                "DELETE FROM facts WHERE id = ? AND tenant_id = ?",
+                (fact_id, tenant_id),
+            )
         await conn.commit()
         return cursor.rowcount > 0
