@@ -20,7 +20,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import yaml
+try:
+    import yaml
+    YAMLError = yaml.YAMLError
+except ImportError:
+    yaml = None
+    class YAMLError(Exception):
+        pass
 
 logger = logging.getLogger("cortex_extensions.swarm.knowledge_radar")
 
@@ -70,6 +76,8 @@ def scan_curated_queue(queue_path: Path | str | None = None) -> list[CrystalTarg
         return []
 
     try:
+        if yaml is None:
+            raise ImportError("pyyaml is required to load YAML targets.")
         raw = yaml.safe_load(path.read_text(encoding="utf-8"))
         if not raw or "targets" not in raw:
             return []
@@ -91,7 +99,7 @@ def scan_curated_queue(queue_path: Path | str | None = None) -> list[CrystalTarg
         logger.info("📡 [RADAR] Found %d curated targets", len(targets))
         return targets
 
-    except (yaml.YAMLError, OSError, ValueError, TypeError) as e:
+    except (YAMLError, OSError, ValueError, TypeError) as e:
         logger.error("📡 [RADAR] Error reading queue %s: %s", path, e)
         return []
 

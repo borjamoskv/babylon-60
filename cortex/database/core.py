@@ -100,6 +100,7 @@ class CortexConnection(sqlite3.Connection):
                 or table.endswith("_content") 
                 or table.endswith("_docsize") 
                 or table.endswith("_config")
+                or table.endswith("_info")
                 or table == "health_history"
                 or table == "enrichment_jobs"
                 or table == "quota_bucket"
