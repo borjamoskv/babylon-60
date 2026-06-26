@@ -209,9 +209,11 @@ async def batch_store(
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> dict:
     """Batch store up to 100 memories in a single request."""
+    from cortex.routes.facts import BatchStoreRequest as FactBatchStoreRequest
     from cortex.routes.facts import execute_batch_store
 
-    return await execute_batch_store(req, auth, engine, item_label="memory")
+    fact_req = FactBatchStoreRequest(**req.model_dump())
+    return await execute_batch_store(fact_req, auth, engine, item_label="memory")
 
 
 @router.get("/verify", response_model=dict)

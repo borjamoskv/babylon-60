@@ -29,7 +29,7 @@ class RuntimeLoop:
             "deterministic_seed": "0xDEADBEEF",
         }
 
-    async def start(self, injected_state: RuntimeState = None):
+    async def start(self, injected_state: RuntimeState | None = None):
         """Bloqueo principal de ejecución asíncrona."""
         import asyncio
         self.is_running = True

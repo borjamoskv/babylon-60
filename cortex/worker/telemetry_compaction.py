@@ -54,7 +54,7 @@ class TelemetryCompactionWorker:
                 LIMIT ?
             """
             async with conn.execute(query, (self.batch_size,)) as cursor:
-                rows = await cursor.fetchall()
+                rows = list(await cursor.fetchall())
 
             if not rows:
                 return
