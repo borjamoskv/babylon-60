@@ -133,8 +133,7 @@ class ConnectionMixin:
 
             # Autorizar migraciones físicamente
             if hasattr(conn._conn, "authorize_causal_writes"):
-                conn._conn.authorize_causal_writes()
-
+                getattr(conn._conn, "authorize_causal_writes")()
             try:
                 await run_migrations_async(conn)
                 for k, v in get_init_meta():
