@@ -16,7 +16,7 @@ logger = logging.getLogger("inject_educational")
 async def inject_primitives():
     logger.info("Iniciando inyección Ultramap de Primitivas Educativas...")
     try:
-        ultramap = cortex_rs.UltramapSubstrate(capacity=10000)
+        ultramap = cortex_rs.UltramapSubstrate("ultramap.bin", capacity=10000)
     except AttributeError:
         class MockUltramap:
             def update_agent_position(self, *args, **kwargs): pass
