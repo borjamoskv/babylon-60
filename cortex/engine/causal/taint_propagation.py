@@ -281,7 +281,7 @@ class TaintPropagator:
         has_tenant: bool,
         tenant_id: str,
     ) -> None:
-        import json
+        from cortex.utils.canonical import canonical_json
 
         fact_updates: list[tuple[Any, ...]] = []
         enc = get_default_encrypter()
@@ -295,7 +295,7 @@ class TaintPropagator:
                 if data["is_encrypted"]:
                     payload = enc.encrypt_json(data["metadata"], tenant_id=tenant_id)
                 elif data["is_json"]:
-                    payload = json.dumps(data["metadata"])
+                    payload = canonical_json(data["metadata"])
                 else:
                     payload = data.get("raw_meta", "")
                 row = (new_conf, payload, fid)

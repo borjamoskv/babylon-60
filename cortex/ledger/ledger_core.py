@@ -23,6 +23,7 @@ import aiosqlite
 if TYPE_CHECKING:
     from cortex.database.pool import CortexConnectionPool
 
+from cortex.database.core import causal_write
 from cortex.utils.canonical import (
     canonical_json,
     compute_tx_hash,
@@ -230,12 +231,13 @@ class SovereignLedger(LedgerAuditMixin):
         row = cursor.fetchone()
         prev_hash = row[0] if row else "GENESIS"
         new_hash = compute_tx_hash(prev_hash, project, action, detail_json, timestamp, tenant_id)
-        conn.execute(
-            "INSERT INTO transactions "
-            "(project, action, detail, prev_hash, hash, tenant_id, timestamp)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (project, action, detail_json, prev_hash, new_hash, tenant_id, timestamp),
-        )
+        with causal_write(conn):
+            conn.execute(
+                "INSERT INTO transactions "
+                "(project, action, detail, prev_hash, hash, tenant_id, timestamp)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (project, action, detail_json, prev_hash, new_hash, tenant_id, timestamp),
+            )
         return new_hash
 
     async def record_transaction_async(

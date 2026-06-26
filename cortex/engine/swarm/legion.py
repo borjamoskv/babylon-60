@@ -79,6 +79,14 @@ class AsyncSignalBus:
         """Consume a signal from the bus."""
         return await self._queue.get()
         
+    async def get_all(self) -> list[SwarmSignal]:
+        """Flush the queue and return all signals."""
+        signals = []
+        while not self._queue.empty():
+            signals.append(self._queue.get_nowait())
+            self._queue.task_done()
+        return signals
+
     def task_done(self) -> None:
         self._queue.task_done()
         
@@ -274,6 +282,10 @@ class Squadron(ABC):
             self._create_agent(f"{self.SQUAD_NAME}-{i:03d}") for i in range(self.REPLICAS)
         ]
         tasks = [asyncio.create_task(agent.run(queue)) for agent in self.agents]
+        
+        for _ in range(len(self.agents)):
+            queue.put_nowait(None)  # Sentinel for each agent
+            
         await queue.join()
         await asyncio.gather(*tasks)
         return await self._crystallize(await self.bus.get_all())

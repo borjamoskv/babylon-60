@@ -44,10 +44,10 @@ class KeyManager:
 
     def __init__(self, service_name: str = "cortex_persist_enterprise"):
         self.service_name = service_name
-        self.db_path = (
-            Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex")).expanduser().parent
-            / "key_metadata.json"
-        )
+        base_dir = Path(os.environ.get("CORTEX_DB_PATH", "~/.cortex")).expanduser()
+        if base_dir.suffix:
+            base_dir = base_dir.parent
+        self.db_path = base_dir / "keys" / f"{self.service_name}_metadata.json"
         self._metadata = self._load_metadata()
 
     def _load_metadata(self) -> dict[str, Any]:
