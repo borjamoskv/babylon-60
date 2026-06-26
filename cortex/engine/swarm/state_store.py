@@ -104,6 +104,14 @@ class CausalStateStore:
                 guard = CausalClosureGuard()
                 guard.verify_closure(proposal)
 
+                # SAGA Step 1.5: Cryptographic Taint Validation (APEX-002)
+                from cortex.engine.causal.taint_engine import enforce_taint_check
+                taint_token = getattr(signal, "taint_token", None)
+                if not taint_token and hasattr(signal, "metadata") and isinstance(signal.metadata, dict):
+                    taint_token = signal.metadata.get("taint_token")
+                
+                await enforce_taint_check(self._db, taint_token, json.dumps(signal.payload))
+
                 # 3. SAGA Step 2 & 3: Atomic 2PC Mutation
                 await self._db.execute(
                     "INSERT INTO audit_ledger (agent_id, target, status, timestamp, payload) VALUES (?, ?, ?, ?, ?)",
