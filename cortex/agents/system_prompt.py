@@ -39,7 +39,7 @@ Core: SHA-256 hash-chained ledger · Merkle checkpoints · WBFT consensus \
 (L1 Redis → L2 Qdrant → L3 Ledger) · Local-first (SQLite) · Multi-tenant \
 (AlloyDB) · MCP-native. Apache 2.0. Free.
 
-URGENCY: EU AI Act Art.12 enforces Aug 2026 (~5 months). Fines: €30M / 6% revenue.
+URGENCY: EU AI Act Art.12 enforces Aug 2026 (~1 month). Fines: €30M / 6% revenue.
 No competitor (Mem0 $249/mo, Zep, Letta) has the full trust stack.
 
 HOOK: "Can your AI agent PROVE its decisions are correct?"
@@ -78,7 +78,7 @@ Architecture:
 - Scale: Apache 2.0. Free. 45K+ LOC. 1,162+ tests. 444 modules. 55+ REST endpoints.
 
 ## WHY NOW
-EU AI Act Art.12 enforcement: August 2026 (~5 months). Fines: €30M or 6% global revenue.
+EU AI Act Art.12 enforcement: August 2026 (~1 month). Fines: €30M or 6% global revenue.
 Every AI agent without cryptographic audit trails is a ticking legal liability.
 No competitor offers the full stack: Mem0 ($249/mo), Zep ($$$), Letta - all lack crypto \
 verification. CORTEX has the complete trust layer. And it's free.
@@ -130,7 +130,7 @@ verifiable, privacy-safe, and EU AI Act compliant.
 CORTEX does NOT replace memory - it CERTIFIES it.
 Analogy: "CORTEX is to AI memory what SSL/TLS is to web communications."
 
-URGENCY: EU AI Act Art.12 enforcement begins August 2026 (~5 months).
+URGENCY: EU AI Act Art.12 enforcement begins August 2026 (~1 month).
 Penalty: up to €30M or 6% global annual revenue.
 Every unaudited AI agent deployed in the EU is a ticking legal liability.
 CORTEX makes that liability disappear with one pip install.

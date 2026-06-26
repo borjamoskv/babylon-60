@@ -329,6 +329,41 @@ class GitTool:
         return await shell.execute(cmd=cmd, cwd=repo_path)
 
 
+class ApexKnowledgeTool:
+    """Query the 100 Sovereign APEX Primitives registry.
+
+    Reality Level: C5-REAL - loads from the centralized registry.
+    """
+
+    @property
+    def name(self) -> str:
+        return "apex_knowledge"
+
+    async def execute(self, *, action: str = "lookup", apex_id: str | None = None) -> dict[str, Any]:
+        """Query the APEX registry.
+
+        Actions:
+            list: Return IDs and names of all 100 primitives.
+            lookup: Return full details (Trigger, Execute, Verify, Fail) for a specific apex_id.
+        """
+        from cortex.agents.primitives.registry import apex_registry
+        
+        if action == "list":
+            return {
+                "ok": True,
+                "primitives": [{"id": p["id"], "name": p["name"]} for p in apex_registry.list_all()]
+            }
+        elif action == "lookup":
+            if not apex_id:
+                return {"ok": False, "error": "apex_id is required for lookup"}
+            prim = apex_registry.get_primitive(apex_id)
+            if not prim:
+                return {"ok": False, "error": f"Primitive {apex_id} not found."}
+            return {"ok": True, "primitive": prim}
+        
+        return {"ok": False, "error": f"Unknown action: {action}"}
+
+
 def register_all_builtin_tools(registry: Any) -> None:
     """Register all built-in tools into a ToolRegistry."""
     tools = [
@@ -338,6 +373,7 @@ def register_all_builtin_tools(registry: Any) -> None:
         ExergyAuditTool(),
         NoOpTool(),
         GitTool(),
+        ApexKnowledgeTool(),
     ]
     for tool in tools:
         registry.register(tool)
