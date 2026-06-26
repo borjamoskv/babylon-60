@@ -7,16 +7,16 @@ payload parsing vulnerabilities, and agent sandbox containment.
 
 from __future__ import annotations
 
-import json
 import logging
 import time
-from dataclasses import dataclass, field, asdict
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Optional
+
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
-
-from cortex.integration.rustchain.judge import ASTLintJudge, TestRunnerJudge, PolicyJudge
 from mcp.server.fastmcp import FastMCP
+
+from cortex.integration.rustchain.judge import ASTLintJudge, PolicyJudge
 
 logger = logging.getLogger("cortex.forensics.claude_mcp_fuzzer")
 

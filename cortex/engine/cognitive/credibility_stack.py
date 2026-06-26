@@ -18,12 +18,12 @@ if TYPE_CHECKING:
 
 from cortex.engine.core.snapshots import SnapshotManager
 from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
-from cortex_extensions.security.signatures import (
+from cortex.extensions.security.signatures import (
     Ed25519Signer,
     generate_keypair,
     get_default_signer,
 )
-from cortex_extensions.shannon.analyzer import shannon_entropy
+from cortex.extensions.shannon.analyzer import shannon_entropy
 
 
 class LedgerCredibilityStack:

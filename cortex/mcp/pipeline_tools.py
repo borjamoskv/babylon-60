@@ -236,7 +236,7 @@ def _get_status() -> str:
     }
 
     try:
-        from cortex_extensions.swarm.budget import get_budget_manager
+        from cortex.extensions.swarm.budget import get_budget_manager
 
         bm = get_budget_manager()
         budget_info = bm.get_remaining_budget()  # type: ignore

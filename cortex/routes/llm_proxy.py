@@ -21,7 +21,7 @@ import httpx
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from cortex_extensions.signals.bus import AsyncSignalBus
+from cortex.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.exergy.middleware")
 

@@ -8,9 +8,10 @@ from __future__ import annotations
 
 from collections import deque
 from typing import Any
-from cortex.database.core import connect_async_ctx
 
 import aiosqlite
+
+from cortex.database.core import connect_async_ctx
 
 
 class CausalGraph:

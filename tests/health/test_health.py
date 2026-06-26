@@ -13,12 +13,12 @@ import time
 
 import pytest
 
-from cortex_extensions.health.collector import (
+from cortex.extensions.health.collector import (
     CollectorRegistry,
     HealthCollector,
     create_default_registry,
 )
-from cortex_extensions.health.collectors import (
+from cortex.extensions.health.collectors import (
     DbCollector,
     DiskSpaceCollector,
     EntropyCollector,
@@ -29,18 +29,18 @@ from cortex_extensions.health.collectors import (
     SystemLoadCollector,
     WalCollector,
 )
-from cortex_extensions.health.health_mixin import HealthMixin
-from cortex_extensions.health.health_protocol import MetricCollectorProtocol
-from cortex_extensions.health.invariants import verify_health_system
-from cortex_extensions.health.models import (
+from cortex.extensions.health.health_mixin import HealthMixin
+from cortex.extensions.health.health_protocol import MetricCollectorProtocol
+from cortex.extensions.health.invariants import verify_health_system
+from cortex.extensions.health.models import (
     Grade,
     HealthReport,
     HealthScore,
     HealthThresholds,
     MetricSnapshot,
 )
-from cortex_extensions.health.scorer import HealthScorer
-from cortex_extensions.health.trend import TrendDetector
+from cortex.extensions.health.scorer import HealthScorer
+from cortex.extensions.health.trend import TrendDetector
 
 # ═══════════════════════════════════════════════════════════════
 # D1: SEALED GRADE ENUM
@@ -526,7 +526,7 @@ class TestFixRegistry:
 class TestHealthGuard:
     @pytest.mark.asyncio
     async def test_guard_safety_pass(self, tmp_path):
-        from cortex_extensions.health import Grade, HealthScore
+        from cortex.extensions.health import Grade, HealthScore
         from cortex.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
 
         if not HEALTH_AVAILABLE:
@@ -542,7 +542,7 @@ class TestHealthGuard:
 
     @pytest.mark.asyncio
     async def test_guard_violation(self, tmp_path):
-        from cortex_extensions.health import Grade, HealthScore, HealthSLA, HealthSLAViolation
+        from cortex.extensions.health import Grade, HealthScore, HealthSLA, HealthSLAViolation
         from cortex.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
 
         if not HEALTH_AVAILABLE:

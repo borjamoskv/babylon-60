@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex_extensions.swarm.crystal_synthesis import synthesize_crystals
+from cortex.extensions.swarm.crystal_synthesis import synthesize_crystals
 from cortex.utils.result import Ok
 
 

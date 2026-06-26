@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Query
 from cortex.api.deps import get_engine
 from cortex.auth import require_permission
 from cortex.engine import CortexEngine
+from cortex.extensions.mejoralo import MejoraloEngine
 from cortex.types.models import (
     DimensionResultModel,
     MejoraloScanRequest,
@@ -20,7 +21,6 @@ from cortex.types.models import (
     MejoraloShipResponse,
     ShipSealModel,
 )
-from cortex_extensions.mejoralo import MejoraloEngine
 
 __all__ = [
     "get_history",

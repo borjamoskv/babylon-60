@@ -17,7 +17,7 @@ from typing import Any
 import aiosqlite
 
 from cortex.engine.evo._mutation_projectors import project
-from cortex_extensions.axioms.topological_id import flake_gen
+from cortex.extensions.axioms.topological_id import flake_gen
 
 __all__ = ["FactMutationEngine"]
 logger = logging.getLogger("cortex.mutation_engine")

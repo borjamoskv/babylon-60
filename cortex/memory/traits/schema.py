@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 import sqlite3
+from typing import Any
 
 from cortex.guards.exergy_guard import calculate_exergy
 from cortex.utils import void_vec
@@ -22,6 +23,14 @@ def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_li
 
 
 class SchemaTrait:
+    _conn: sqlite3.Connection | None
+    _db_path: str
+    _ready: bool
+    _vector_enabled: bool
+    _hybrid: Any
+    _sanitizer: Any
+    _encoder: Any
+
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is not None:
             return self._conn

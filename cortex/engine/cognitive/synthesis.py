@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 if TYPE_CHECKING:
-    from cortex_extensions.llm.manager import LLMManager
+    from cortex.extensions.llm.manager import LLMManager
 
 from cortex.engine.cognitive.crystallizer import AutoCrystallizer
 from cortex.engine.evo.autopoiesis import AutopoiesisEngine

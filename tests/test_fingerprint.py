@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex_extensions.fingerprint.extractor import FingerprintExtractor
-from cortex_extensions.fingerprint.models import CognitiveFingerprint
+from cortex.extensions.fingerprint.extractor import FingerprintExtractor
+from cortex.extensions.fingerprint.models import CognitiveFingerprint
 
 
 def _make_engine() -> MagicMock:

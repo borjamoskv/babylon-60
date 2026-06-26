@@ -267,7 +267,7 @@ class CompoundYieldTracker:
         """Persist a CHRONOS Compound report as a CORTEX fact + emit signal."""
         from cortex.database.core import connect_async_ctx
         from cortex.engine.core.fact_store_core import insert_fact_record
-        from cortex_extensions.signals.bus import AsyncSignalBus
+        from cortex.extensions.signals.bus import AsyncSignalBus
 
         try:
             async with connect_async_ctx(self.db_path) as conn:

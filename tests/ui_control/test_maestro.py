@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, patch, MagicMock
 
 import pytest
 
-from cortex_extensions.ui_control.maestro import MaestroUI
-from cortex_extensions.ui_control.models import AppTarget
+from cortex.extensions.ui_control.maestro import MaestroUI
+from cortex.extensions.ui_control.models import AppTarget
 
 
 @pytest.fixture
@@ -102,7 +102,7 @@ async def test_click_menu_success(maestro):
 
 
 def test_screenshot_region_success(maestro):
-    from cortex_extensions.ui_control.models import InteractionResult
+    from cortex.extensions.ui_control.models import InteractionResult
     from unittest.mock import mock_open
 
     with (
@@ -125,7 +125,7 @@ def test_screenshot_region_success(maestro):
 
 @pytest.mark.asyncio
 async def test_wait_for_element_by_label_success(maestro):
-    from cortex_extensions.ui_control.models import AXElement
+    from cortex.extensions.ui_control.models import AXElement
 
     with patch("cortex_extensions.ui_control.accessibility.NSWorkspace") as mock_ws:
         mock_app = MagicMock()

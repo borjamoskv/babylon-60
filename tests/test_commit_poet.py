@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from cortex_extensions.git.poet import CommitPoet, generate_candidates, generate_commit_message
+from cortex.extensions.git.poet import CommitPoet, generate_candidates, generate_commit_message
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 

@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cortex_extensions.aether.tools import AgentToolkit
-from cortex_extensions.swarm.auto_fix import AutoFixPipeline
+from cortex.extensions.aether.tools import AgentToolkit
+from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 
 
 @pytest.fixture
@@ -168,7 +168,7 @@ async def test_hooked_tool_execution_timeout():
     """Verify that hooked_tool_execution enforces the timeout limit."""
     import time
     import asyncio
-    from cortex_extensions.aether.hooks import hooked_tool_execution
+    from cortex.extensions.aether.hooks import hooked_tool_execution
 
     @hooked_tool_execution(timeout_limit=0.1)
     async def async_slow_tool():

@@ -11,6 +11,8 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 
 from cortex.engine import CortexEngine
+from cortex.extensions.immune.filters.base import Verdict
+from cortex.extensions.immune.membrane import ImmuneMembrane
 from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
 from cortex.ledger import ImmutableLedger
 from cortex.mcp.apollo_tools import register_apollo_tools
@@ -33,8 +35,6 @@ from cortex.mcp.utils import (
     SimpleAsyncCache,
 )
 from cortex.swarm import start_swarm_daemon
-from cortex_extensions.immune.filters.base import Verdict
-from cortex_extensions.immune.membrane import ImmuneMembrane
 
 __all__ = ["create_mcp_server", "run_server"]
 
