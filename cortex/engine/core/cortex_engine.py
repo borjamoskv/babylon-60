@@ -15,18 +15,18 @@ from typing import TYPE_CHECKING, Any
 import aiosqlite
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.database.mixins.query_mixin import QueryMixin
+from cortex.database.mixins.search_mixin import SearchMixin
+from cortex.database.mixins.sync_mixin import SyncMixin
+from cortex.database.mixins.transaction_mixin import TransactionMixin
 from cortex.engine.core._engine_connection import ConnectionMixin
 from cortex.engine.core._engine_delegates import DelegatesMixin
+from cortex.engine.core.durability import PersistenceSupervisor
 from cortex.engine.core.memory_mixin import MemoryMixin
 from cortex.engine.core.store_mixin import StoreMixin
 from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
 from cortex.engine.swarm.agent_mixin import AgentMixin
-from cortex.engine.uncategorized.durability import PersistenceSupervisor
-from cortex.engine.uncategorized.query_mixin import QueryMixin
-from cortex.engine.uncategorized.search_mixin import SearchMixin
-from cortex.engine.uncategorized.sync_mixin import SyncMixin
-from cortex.engine.uncategorized.transaction_mixin import TransactionMixin
 
 if TYPE_CHECKING:
     from cortex.consensus.manager import ConsensusManager

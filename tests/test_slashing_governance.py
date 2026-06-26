@@ -2,7 +2,7 @@
 import pytest
 
 from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.engine.uncategorized.slashing import SlashingPenalty
+from cortex.engine.forensic.slashing import SlashingPenalty
 
 
 @pytest.mark.asyncio

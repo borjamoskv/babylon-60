@@ -13,14 +13,14 @@ import tempfile
 import time
 from pathlib import Path
 
-from cortex.engine.uncategorized.predictive_healer import (
+from cortex.engine.forensic.predictive_healer import (
     PredictiveHealer,
     Prediction,
     PredictionType,
     _TrendWindow,
 )
 from cortex.engine.core.tuning_store import TuningStore
-from cortex.engine.uncategorized.performance_tracker import PerformanceTracker
+from cortex.engine.core.performance_tracker import PerformanceTracker
 from cortex.engine.evo.healing_stack import HealingStack, HealingStackConfig
 from cortex.engine.evo._autocurative_config import AutoCurativeConfig
 from cortex.engine.self_optimizer import OptimizerConfig

@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import pytest
 
-from cortex.engine.uncategorized.reflexion import (
+from cortex.engine.cognitive.reflexion import (
     DiagnosisStrategy,
     Reflection,
     ReflexionConfig,

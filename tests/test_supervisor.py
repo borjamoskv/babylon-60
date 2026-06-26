@@ -27,7 +27,7 @@ from cortex.engine.supervisor import (
 )
 from cortex.engine.evo._autocurative_config import AutoCurativeConfig
 from cortex.engine.self_optimizer import OptimizerConfig
-from cortex.engine.uncategorized.predictive_healer import Prediction, PredictionType
+from cortex.engine.forensic.predictive_healer import Prediction, PredictionType
 
 
 # ─── Fixtures ─────────────────────────────────────────────────────

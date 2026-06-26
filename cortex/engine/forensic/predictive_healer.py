@@ -22,8 +22,8 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.uncategorized.performance_tracker import PerformanceTracker
+from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.core.performance_tracker import PerformanceTracker
 
 __all__ = [
     "Prediction",

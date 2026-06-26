@@ -25,7 +25,7 @@ class CascadeRouter:
     def fallback_response(self, engine: str, prompt: str) -> str:
         """Fallback response when engine is unavailable."""
         try:
-            from cortex.engine.uncategorized.circuit_breaker import CircuitBreaker
+            from cortex.engine.forensic.circuit_breaker import CircuitBreaker
 
             cb = CircuitBreaker(f"cascade_router_{engine}")
             cb._on_failure()

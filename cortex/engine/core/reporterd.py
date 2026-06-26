@@ -16,7 +16,7 @@ from aiohttp import web
 from aiohttp.web_request import Request
 from aiohttp.web_response import StreamResponse
 
-from cortex.engine.uncategorized.reporter import SovereignReporter
+from cortex.engine.core.reporter import SovereignReporter
 
 logger = logging.getLogger("cortex.reporterd")
 

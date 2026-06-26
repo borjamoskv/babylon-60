@@ -11,8 +11,8 @@ from pathlib import Path
 
 import aiosqlite
 
+from cortex.engine.cognitive.models import row_to_fact
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
-from cortex.engine.uncategorized.models import row_to_fact
 
 logger = logging.getLogger("cortex.engine.guards")
 
@@ -87,7 +87,7 @@ class DelegatesMixin:
         res = await super().get_fact(fact_id, tenant_id=tenant_id)  # pyright: ignore[reportAttributeAccessIssue]
         if not res:
             return None
-        from cortex.engine.uncategorized.models import Fact
+        from cortex.engine.cognitive.models import Fact
 
         return Fact(**{k: v for k, v in res.items() if k in Fact.__dataclass_fields__})
 
@@ -140,7 +140,7 @@ class DelegatesMixin:
     async def get_all_active_facts(self, *args, **kwargs):
         """Retrieve all active facts across all projects, wrapped in models."""
         results = await super().get_all_active_facts(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
-        from cortex.engine.uncategorized.models import Fact
+        from cortex.engine.cognitive.models import Fact
 
         return [
             Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
@@ -149,7 +149,7 @@ class DelegatesMixin:
     async def history(self, *args, **kwargs):
         """Retrieve historical facts wrapped in models."""
         results = await super().history(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
-        from cortex.engine.uncategorized.models import Fact
+        from cortex.engine.cognitive.models import Fact
 
         return [
             Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
@@ -158,7 +158,7 @@ class DelegatesMixin:
     async def get_causal_chain(self, *args, **kwargs):
         """Retrieve causal chain facts wrapped in models."""
         results = await super().get_causal_chain(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
-        from cortex.engine.uncategorized.models import Fact
+        from cortex.engine.cognitive.models import Fact
 
         return [
             Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results

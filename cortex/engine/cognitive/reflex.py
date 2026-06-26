@@ -11,7 +11,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from cortex_extensions.signals.bus import SignalBus
 
 logger = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ async def trigger_autonomic_reflex(
 
                         if target:
                             logger.warning("🎯 [REFLEX] Targeted Reflex: %s", target)
-                            from cortex.engine.uncategorized.keter import KeterEngine
+                            from cortex.engine.speculative.keter import KeterEngine
 
                             keter = KeterEngine()
                             reflex_task = asyncio.create_task(
@@ -72,7 +72,7 @@ async def trigger_autonomic_reflex(
         logger.error("[REFLEX] Reflex failure: %s", e)
 
     ENDOCRINE.pulse(HormoneType.CORTISOL, 0.1)
-    from cortex.engine.uncategorized.keter import KeterEngine
+    from cortex.engine.speculative.keter import KeterEngine
 
     keter = KeterEngine()
     try:

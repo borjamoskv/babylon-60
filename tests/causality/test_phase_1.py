@@ -26,8 +26,8 @@ import pytest
 
 from cortex.engine.core.fact_store_core import insert_fact_record
 from cortex.engine.mixins.base import FACT_COLUMNS
-from cortex.engine.uncategorized.models import Fact
-from cortex.engine.uncategorized.query_mixin import QueryMixin
+from cortex.engine.cognitive.models import Fact
+from cortex.database.mixins.query_mixin import QueryMixin
 
 
 class TestDataModel:

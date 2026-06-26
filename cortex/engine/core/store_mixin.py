@@ -15,11 +15,11 @@ import aiosqlite
 from cortex.database.core import causal_write
 
 from cortex.crypto import get_default_encrypter
-from cortex.engine.uncategorized.capabilities import CapabilityRegistry
+from cortex.engine.cognitive.capabilities import CapabilityRegistry
 from cortex.engine.core.embedding_engine import embed_fact_async
 from cortex.engine.core.fact_store_core import insert_fact_record
-from cortex.engine.uncategorized.ghost_mixin import GhostMixin
-from cortex.engine.uncategorized.privacy_mixin import PrivacyMixin
+from cortex.database.mixins.ghost_mixin import GhostMixin
+from cortex.database.mixins.privacy_mixin import PrivacyMixin
 from cortex.engine.core.store_mutation import (
     deprecate_impl_logic,
     invalidate_impl_logic,

@@ -14,6 +14,7 @@ import time
 from collections import deque
 from typing import Any
 
+from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.evo._autocurative_config import AutoCurativeConfig
 from cortex.engine.evo._autocurative_helper import (
     execute_with_healing,
@@ -24,8 +25,7 @@ from cortex.engine.evo._autocurative_state import AgentHealth, HealingEvent, Hea
 from cortex.engine.evo.repair_strategies import (
     REPAIR_REGISTRY,
 )
-from cortex.engine.uncategorized.circuit_breaker import CircuitBreaker
-from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.forensic.circuit_breaker import CircuitBreaker
 
 __all__ = [
     "AgentHealth",

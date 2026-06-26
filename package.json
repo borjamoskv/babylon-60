@@ -31,5 +31,10 @@
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
     "husky": "^9.1.7"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1",
+    "undici": "^7.28.0",
+    "ws": "^8.21.0"
   }
 }

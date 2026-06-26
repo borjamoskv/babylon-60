@@ -9,8 +9,8 @@ from typing import Any
 import aiosqlite
 
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
+from cortex.engine.forensic.slashing import SlashingEngine
 from cortex.engine.mixins.base import EngineMixinBase
-from cortex.engine.uncategorized.slashing import SlashingEngine
 
 logger = logging.getLogger("cortex.engine.flow.consensus")
 
