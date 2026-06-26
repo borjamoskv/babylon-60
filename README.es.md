@@ -186,7 +186,7 @@ if __name__ == "__main__":
 ## ▀▄ TELEMETRÍA DE EXERGÍA (RENDIMIENTO)
 
 <div align="center">
-  <img src="assets/marketing/telemetry.svg" alt="Telemetría C5-REAL" width="100%">
+  <img src="https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/telemetry/assets/marketing/telemetry.svg" alt="Telemetría C5-REAL" width="100%">
 </div>
 
 *Límites de ejecución logrados bajo la arquitectura C5-REAL Estado Terminal 4 (Bypass de silicio L0).*

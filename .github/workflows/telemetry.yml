@@ -32,10 +32,15 @@ jobs:
           mkdir -p assets/marketing
           python scripts/generate_telemetry.py
           
-      - name: Commit and Push if changed
+      - name: Commit and Push to telemetry branch
         run: |
           git config --global user.name "CORTEX-Daemon[bot]"
           git config --global user.email "cortex-daemon@users.noreply.github.com"
+          mv assets/marketing/telemetry.svg /tmp/telemetry.svg
+          git fetch origin telemetry || true
+          git checkout telemetry || git checkout --orphan telemetry
+          mkdir -p assets/marketing
+          mv /tmp/telemetry.svg assets/marketing/telemetry.svg
           git add assets/marketing/telemetry.svg
           git commit -m "chore(telemetry): update C5-REAL execution metrics [skip ci]" || exit 0
-          git push
+          git push origin telemetry

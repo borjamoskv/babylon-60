@@ -46,6 +46,16 @@ class SatAdversarialGame:
             
         logger.info(f"🏆 Ganador de la Ronda: {winner}")
         
+        # Guardar el Champion si el destructor gana (Unsat) para la fase de Verificación Formal (Lean 4)
+        if verdict == "Unsat":
+            import json
+            import os
+            export_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'math_verification', 'hard_graph.json')
+            os.makedirs(os.path.dirname(export_path), exist_ok=True)
+            with open(export_path, 'w') as f:
+                json.dump({"n": self.n, "k": self.k, "edges": champion_genome, "verdict": verdict, "elapsed_s": elapsed}, f)
+            logger.info(f"Grafo Unsat exportado para Lean 4 en: {export_path}")
+        
         return {
             "winner": winner,
             "verdict": verdict,
