@@ -139,6 +139,17 @@ e.g. producing `Lemma VelocityUpdated` and `Hypothesis ForceFinite` simultaneous
 **Trusted**: Kernel, Parser, SSA Builder, Exporter
 **Untrusted**: Numerical Solver, Input Programs, External Storage
 
-## 15. The "Theorem of BABYLON"
-> "If a BABYLON-60 program terminates without `CRITICAL HALT` and produces a valid artifact, then said artifact corresponds exactly to an execution of the operational model specified."
-The artifact perfectly represents the semantic execution, independent of the correctness of the mathematical simulation logic.
+## 15. The "Theorem of BABYLON" (Operational Version)
+> **"Si un programa bien tipado termina sin `CRITICAL HALT` y el `Artifact Bundle` supera la validación criptográfica, entonces existe una correspondencia uno a uno entre la ejecución observada del runtime y la traza representada en el artefacto exportado."**
+The artifact perfectly represents the semantic execution, completely decoupled from the physical truth of the model.
+
+## 16. Proof Intermediate Representation (Proof IR)
+To prevent the kernel from depending on a specific theorem prover (Lean 4 / Coq), BABYLON-60 utilizes a strictly minimal Proof IR.
+Flow: `Program -> Typed SSA -> Proof IR -> [Lean / Coq Emitter]`
+The Proof IR contains exclusively:
+- `State`: Tensor mapping of memory.
+- `Transition`: Immutable causal event delta.
+- `Invariant`: Mathematical properties (e.g., F60 exactness).
+- `Lemma`: Auto-generated proof requirements for the backend.
+- `Obligation`: Tasks delegated to the external prover.
+- `Witness`: Evidence of singularity or state collapse.
