@@ -251,7 +251,11 @@ class EnterpriseAuditLedger:
         import json
 
         import httpx
-        import rfc3161ng
+        try:
+            import rfc3161ng
+        except ImportError:
+            rfc3161ng = None
+            logger.warning("rfc3161ng is not installed. TSA signatures will be disabled. Run pip install cortex-persist[secure]")
         from cryptography.hazmat.primitives import serialization
 
         from cortex.audit.rekor_client import RekorClient
@@ -300,18 +304,20 @@ class EnterpriseAuditLedger:
                                     # Asynchronous Rekor logging
                                     rekor_uuid = await rekor_client.log_entry(entry_hash, signature, pub_pem)
 
-                                    # RFC3161 Timestamping (Free TSA)
-                                    req = rfc3161ng.make_request(entry_hash.encode("utf-8"), hash_algo="sha256")
-                                    tsa_resp = await http_client.post(
-                                        tsa_url,
-                                        content=req,
-                                        headers={"Content-Type": "application/timestamp-query"},
-                                    )
-                                    rfc_token = (
-                                        base64.b64encode(tsa_resp.content).decode("utf-8")
-                                        if tsa_resp.status_code == 200
-                                        else None
-                                    )
+                                    tsa_signature = None
+                                    if rfc3161ng is not None:
+                                        try:
+                                            tsa_req = rfc3161ng.make_request(merkle_root.encode("utf-8"))
+                                            tsa_resp = await http_client.post(
+                                                tsa_url,
+                                                content=tsa_req,
+                                                headers={"Content-Type": "application/timestamp-query"},
+                                            )
+                                            if tsa_resp.status_code == 200:
+                                                tsa_signature = base64.b64encode(tsa_resp.content).decode("utf-8")
+                                        except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+                                            logger.warning("TSA stamping failed: %s", exc)
+                                    rfc_token = tsa_signature
 
                                 if rekor_uuid or rfc_token:
                                     external_anchor = json.dumps(

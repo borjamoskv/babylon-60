@@ -375,10 +375,6 @@ class EpistemicBreakerHook:
         source: str | None = None,
         db_path: str | None = None,
     ) -> None:
-        from cortex_extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
-
-        await EpistemicBreakerDaemon.evaluate(  # type: ignore[reportAttributeAccessIssue]
-            conn,
-            tenant_id,
-            project,
-        )
+        # Daemon runs asynchronously in the background.
+        # Direct evaluation here is disabled until EpistemicBreakerDaemon exposes a stateless `evaluate` method.
+        pass

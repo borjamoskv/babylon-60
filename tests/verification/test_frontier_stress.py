@@ -28,7 +28,7 @@ from cortex.guards.contradiction_guard import detect_contradictions
 
 # Configure tests
 pytestmark = [pytest.mark.asyncio, pytest.mark.slow]
-CONCURRENCY_LEVEL = 100
+CONCURRENCY_LEVEL = 20
 
 
 @pytest.fixture

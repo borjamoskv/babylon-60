@@ -4,7 +4,7 @@ import os
 from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
-from typing import TypedDict, DefaultDict
+from typing import TypedDict
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
 GRAPH_OUT = os.path.expanduser("~/.gemini/config/skills/_metrics/causal_graph.json")
@@ -39,7 +39,7 @@ def build_causal_graph():
         scores_from: list[Decimal]
         scores_to: list[Decimal]
 
-    graph: DefaultDict[str, DefaultDict[str, EdgeMetrics]] = defaultdict(
+    graph: defaultdict[str, defaultdict[str, EdgeMetrics]] = defaultdict(
         lambda: defaultdict(
             lambda: {"count": 0, "latencies": [], "scores_from": [], "scores_to": []}
         )
