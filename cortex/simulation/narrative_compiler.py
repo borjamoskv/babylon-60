@@ -21,7 +21,7 @@ class NarrativeVector:
 @dataclass
 class ActionOutput:
     type: str  # DIRECT_ACTION, GUIDED_DECISION, NARRATIVE_FIELD
-    content: str | list[str] | dict[str, Any]
+    content: str | list[str] | dict[str, Any] | list[Any]
     confidence: float
     energy_cost: float
 

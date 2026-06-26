@@ -1,8 +1,12 @@
 # [C5-REAL] Exergy-Maximized
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
+
+if TYPE_CHECKING:
+    from cortex.ledger.public_verifier import VerificationInput
 
 
 class PublicVerifierProtocol(Protocol):
+    paths: "VerificationInput"
     errors: list[str]
     warnings: list[str]
     events: list[dict[str, Any]]
