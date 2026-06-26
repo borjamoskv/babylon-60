@@ -95,10 +95,9 @@ class PostgresConnectionAdapter:
         try:
             conn = self._get_active_conn()
             if hasattr(conn, "is_in_transaction"):
-                return conn.is_in_transaction()
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).warning("postgres in_transaction check failed: %s", e)
+                return bool(conn.is_in_transaction())
+        except Exception:
+            pass
         return self._in_transaction
 
     async def __aenter__(self) -> PostgresConnectionAdapter:
@@ -128,7 +127,8 @@ class PostgresConnectionAdapter:
         sql = self.translate_sqlite_to_pg(sql)
         pg_sql, pg_params = self._translate_params(sql, args)
         conn = self._get_active_conn()
-        return await conn.fetch(pg_sql, *pg_params)
+        res: list[Any] = await conn.fetch(pg_sql, *pg_params)
+        return res
 
     async def fetchrow(self, sql: str, *args: Any) -> Any:
         sql = self.translate_sqlite_to_pg(sql)
@@ -326,7 +326,7 @@ class PostgresAcquireContext:
         self._conn = None
 
     def __await__(self) -> Any:
-        async def _acquire():
+        async def _acquire() -> PostgresConnectionAdapter:
             conn = await self._acq_ctx
             return PostgresConnectionAdapter(conn, pool=self._pool)
 

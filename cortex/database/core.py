@@ -38,7 +38,7 @@ import sqlite3
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, contextmanager
-from typing import Any, Final
+from typing import Any, Final, Literal
 
 import aiosqlite
 
@@ -63,7 +63,7 @@ class CortexConnection(sqlite3.Connection):
     annihilating ContextVar drift and Thread pool leaks.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._connection_id = uuid.uuid4().hex
         self._mtk_nonce = secrets.token_hex(16)
@@ -109,7 +109,7 @@ class CortexConnection(sqlite3.Connection):
 _original_sqlite3_connect = sqlite3.connect
 
 
-def _secure_sqlite3_connect(*args, **kwargs):
+def _secure_sqlite3_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
     """
     [C5-REAL] Kernel-owned Connection Allocator Hook.
     Blocks any raw sqlite3.connect() calls that do not use the CortexConnection factory.
@@ -244,7 +244,7 @@ def connect(
     row_factory: Any | None = None,
     timeout: int = CONNECT_TIMEOUT_S,
     read_only: bool = False,
-    isolation_level: str | None = None,
+    isolation_level: Literal["DEFERRED", "EXCLUSIVE", "IMMEDIATE"] | None = None,
 ) -> sqlite3.Connection:
     """Create a hardened sync SQLite connection.
 
@@ -268,7 +268,7 @@ def connect(
             timeout=timeout,
             check_same_thread=check_same_thread,
             uri=uri,
-            isolation_level=isolation_level,  # type: ignore[type-error]
+            isolation_level=isolation_level,  # type: ignore[arg-type]
             factory=CortexConnection,
         )
     except sqlite3.OperationalError as e:
@@ -350,11 +350,11 @@ async def connect_async(
     else:
         await apply_pragmas_async(conn)
 
-    conn._cortex_db_path = str(db_path)  # pyright: ignore[reportAttributeAccessIssue] # Inject metadata for telemetry  # pyright: ignore[reportAttributeAccessIssue] # Inject metadata for telemetry
+    conn._cortex_db_path = str(db_path)  # type: ignore[attr-defined] # pyright: ignore[reportAttributeAccessIssue] # Inject metadata for telemetry
     try:
-        conn._cortex_loop = asyncio.get_running_loop()  # pyright: ignore[reportAttributeAccessIssue] # Thread safety marker  # pyright: ignore[reportAttributeAccessIssue] # Thread safety marker
+        conn._cortex_loop = asyncio.get_running_loop()  # type: ignore[attr-defined] # pyright: ignore[reportAttributeAccessIssue] # Thread safety marker
     except RuntimeError:
-        conn._cortex_loop = None  # pyright: ignore[reportAttributeAccessIssue] # Thread safety marker  # pyright: ignore[reportAttributeAccessIssue] # Thread safety marker
+        conn._cortex_loop = None  # type: ignore[attr-defined] # pyright: ignore[reportAttributeAccessIssue] # Thread safety marker
 
     return conn
 
@@ -422,7 +422,7 @@ async def load_sqlite_vec_async(conn: aiosqlite.Connection) -> bool:
     try:
         await conn.enable_load_extension(True)
         extension_toggle_enabled = True
-        await conn._execute(sqlite_vec.load, conn._conn)
+        await conn._execute(sqlite_vec.load, conn._conn)  # type: ignore[no-untyped-call]
     except (AttributeError, OSError, sqlite3.Error) as exc:
         logger.debug("sqlite-vec not available for async connection: %s", exc)
         return False
