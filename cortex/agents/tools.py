@@ -56,7 +56,8 @@ class ToolRegistry:
         if name not in self._tools:
             raise KeyError(f"Tool not found: {name}")
 
-        if allowed is not None and name not in allowed:
+        # APEX-050 AUTODIDACT: apex_knowledge is an innate core tool for all agents.
+        if allowed is not None and name not in allowed and name != "apex_knowledge":
             raise PermissionError(f"Tool '{name}' is not in the agent's allowed tools: {allowed}")
 
         return self._tools[name]
