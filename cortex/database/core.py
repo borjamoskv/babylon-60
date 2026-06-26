@@ -124,7 +124,7 @@ def _secure_sqlite3_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
     Blocks any raw sqlite3.connect() calls that do not use the CortexConnection factory.
     """
     factory = kwargs.get("factory")
-    print(f"DEBUG: _secure_sqlite3_connect called with factory={factory}")
+
     if factory is not CortexConnection:
         import os
 
@@ -136,7 +136,7 @@ def _secure_sqlite3_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
             or "test_metal" in pytest_test
         )
         if "PYTEST_CURRENT_TEST" in os.environ and not is_security_test:
-            print(f"DEBUG: bypassing security check for test {pytest_test}")
+
             return __import__("typing").cast(sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs))
             
         if args and isinstance(args[0], (str, bytes)) and ".coverage" in str(args[0]):
