@@ -81,7 +81,7 @@ class EntropicWakeDaemon:
         logger.debug("Current Zenón Entropy τ_z: %s", entropy_score)
         return entropy_score
 
-    def ignite_purification_agent(self, target: str = "modulo_entropico"):
+    async def ignite_purification_agent(self, target: str = "modulo_entropico"):
         """
         Spawn the headless agent.
         La ejecución ocurre sin un solo Input Field.
@@ -100,11 +100,11 @@ class EntropicWakeDaemon:
                 start_new_session=True,
             )
             # Log the action in memory
-            self._log_action_to_cortex(target)
+            await self._log_action_to_cortex(target)
         except (subprocess.SubprocessError, OSError) as e:
             logger.error("Failed to ignite purification agent: %s", e)
 
-    def _log_action_to_cortex(self, target: str):
+    async def _log_action_to_cortex(self, target: str):
         """Register the autonomous action into CORTEX-DB."""
         if not self.engine:
             return
@@ -114,15 +114,17 @@ class EntropicWakeDaemon:
             "Pasó los tests de inmunidad. Deuda saldada. PR en espera de merge."
         )
         try:
-            conn = self.engine.pool.get_connection()
-            conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp) "
-                "VALUES (lower(hex(randomblob(16))), 'decision', 'Autopoiesis', ?, ?)",
-                (msg, time.monotonic()),
+            await self.engine.store(
+                project="cortex-core",
+                content=msg,
+                fact_type="decision",
+                tags=["Autopoiesis"],
+                confidence="C5",
+                source="daemon:entropic_wake",
+                actor_id="entropic_wake"
             )
-            conn.commit()
             logger.info("Logged autopoiesis cycle to CORTEX.")
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.critical("BFT CONSENSUS FAILURE: Could not persist autopoiesis cycle to Ledger. %s", e)
             raise
 
@@ -135,7 +137,7 @@ class EntropicWakeDaemon:
                 if tau_z > self.threshold:
                     # In a true system, we dynamically select the target based on entropy clusters
                     highest_entropy_target = "cortex_router"  # Placeholder
-                    self.ignite_purification_agent(highest_entropy_target)
+                    await self.ignite_purification_agent(highest_entropy_target)
             except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
                 logger.critical("BFT STRUCTURAL COLLAPSE: %s. Initiating Apoptosis.", e)
                 self.stop()

@@ -6,7 +6,6 @@ The engine that ensures CORTEX is always at the bleeding edge.
 
 import asyncio
 import logging
-import sqlite3
 import time
 from pathlib import Path
 from typing import Any
@@ -58,7 +57,7 @@ class FrontierDaemon:
 
                 if status == "SUCCESS":
                     msg = f"Auto-refactored {test_file.name} with Ouroboros-Omega."
-                    self._log_evolution("metabolism", msg)
+                    await self._log_evolution("metabolism", msg)
         except Exception as e:
             logger.error("[FRONTIER] Metabolism cycle failed: %s", e)
 
@@ -73,22 +72,24 @@ class FrontierDaemon:
         for source in sources:
             logger.info("[FRONTIER] Analyzing source: %s", source)
             msg = f"Analyzed {source} for potential skill emancipation."
-            self._log_evolution("ingestion", msg)
+            await self._log_evolution("ingestion", msg)
 
-    def _log_evolution(self, type: str, content: str):
+    async def _log_evolution(self, type: str, content: str):
         """Registers the evolution event in CORTEX."""
         if not self.engine:
             return
         try:
-            conn = self.engine.pool.get_connection()
-            conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
-                "VALUES (lower(hex(randomblob(16))), 'decision', 'Evolution', ?, ?, 'C5')",
-                (f"[{type.upper()}] {content}", time.monotonic()),
+            await self.engine.store(
+                project="cortex-core",
+                content=f"[{type.upper()}] {content}",
+                fact_type="decision",
+                tags=["Evolution", type],
+                confidence="C5",
+                source="daemon:frontier",
+                actor_id="frontier"
             )
-            conn.commit()
             logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.error("[FRONTIER] Failed to log evolution: %s", e)
 
     async def run_loop(self):
