@@ -1,3 +1,4 @@
+from typing import Any
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
@@ -11,6 +12,32 @@ logger = logging.getLogger("moskv-daemon")
 
 
 class EventLoopMixin:
+    frontier_daemon: Any
+    sovereignty_runtime: Any
+    hot_state: Any
+    callback_api: Any
+    watchdog_hub: Any
+    scheduler: Any
+    heartbeat_daemon: Any
+    epistemic_breaker_daemon: Any
+    entropic_wake_daemon: Any
+    zero_prompting_daemon: Any
+    _event_bus: Any
+    auto_immune_monitor: Any
+    _stop_event: Any
+    _aether_daemon: Any
+    fiat_oracle: Any
+    _run_neural_loop_async: Any
+    ast_oracle: Any
+    _run_lifecycle_daemon_async: Any
+    iot_oracle: Any
+    _run_loop_daemon_async: Any
+    sentinel_oracle: Any
+    agy2_planner_daemon: Any
+    _run_health_loop_async: Any
+    _threads: Any
+    check: Any
+
     def run(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Run the daemon using the sovereign async loop (all subsystems as tasks)."""
         from cortex.events.loop import sovereign_run
@@ -25,7 +52,7 @@ class EventLoopMixin:
 
         self._shutdown = True
 
-        self._stop_event.set()
+        self._stop_event.set()  # type: ignore[attr-defined]
 
         # Cancel all running tasks
 
@@ -77,61 +104,61 @@ class EventLoopMixin:
             tasks.append(asyncio.create_task(self.watchdog_hub.start(), name="WatchdogHub"))
         if self.callback_api is not None:
             tasks.append(asyncio.create_task(self.callback_api.serve(), name="CallbackAPI"))
-        if self._aether_daemon is not None:
+        if self._aether_daemon is not None:  # type: ignore[attr-defined]
             tasks.append(
                 asyncio.create_task(
-                    asyncio.to_thread(self._aether_daemon.start), name="AetherAgent"
+                    asyncio.to_thread(self._aether_daemon.start), name="AetherAgent"  # type: ignore[attr-defined]
                 )
             )
-        if self.fiat_oracle:
-            tasks.append(asyncio.create_task(self.fiat_oracle.run_loop(), name="FiatOracle"))
-        tasks.append(asyncio.create_task(self._run_neural_loop_async(), name="NeuralSync"))
-        if self.ast_oracle:
+        if self.fiat_oracle:  # type: ignore[attr-defined]
+            tasks.append(asyncio.create_task(self.fiat_oracle.run_loop(), name="FiatOracle"))  # type: ignore[attr-defined]
+        tasks.append(asyncio.create_task(self._run_neural_loop_async(), name="NeuralSync"))  # type: ignore[attr-defined]
+        if self.ast_oracle:  # type: ignore[attr-defined]
             tasks.append(
                 asyncio.create_task(
-                    self._run_lifecycle_daemon_async(self.ast_oracle, "AST Oracle", "👁️"),
+                    self._run_lifecycle_daemon_async(self.ast_oracle, "AST Oracle", "👁️"),  # type: ignore[attr-defined]
                     name="ASTOracle",
                 )
             )
         if getattr(self, "iot_oracle", None):
             tasks.append(
                 asyncio.create_task(
-                    self._run_lifecycle_daemon_async(self.iot_oracle, "IoT Oracle", "📡"),
+                    self._run_lifecycle_daemon_async(self.iot_oracle, "IoT Oracle", "📡"),  # type: ignore[attr-defined]
                     name="IoTOracle",
                 )
             )
         if self.heartbeat_daemon:
             tasks.append(
                 asyncio.create_task(
-                    self._run_lifecycle_daemon_async(self.heartbeat_daemon, "Heartbeat", "❤️"),
+                    self._run_lifecycle_daemon_async(self.heartbeat_daemon, "Heartbeat", "❤️"),  # type: ignore[attr-defined]
                     name="HeartbeatDaemon",
                 )
             )
         if self.entropic_wake_daemon:
             tasks.append(
                 asyncio.create_task(
-                    self._run_loop_daemon_async(self.entropic_wake_daemon, "Entropic Wake", "🌌"),
+                    self._run_loop_daemon_async(self.entropic_wake_daemon, "Entropic Wake", "🌌"),  # type: ignore[attr-defined]
                     name="EntropicWakeDaemon",
                 )
             )
         if self.frontier_daemon:
             tasks.append(
                 asyncio.create_task(
-                    self._run_loop_daemon_async(self.frontier_daemon, "Frontier", "🚀"),
+                    self._run_loop_daemon_async(self.frontier_daemon, "Frontier", "🚀"),  # type: ignore[attr-defined]
                     name="FrontierDaemon",
                 )
             )
         if getattr(self, "zero_prompting_daemon", None):
             tasks.append(
                 asyncio.create_task(
-                    self._run_loop_daemon_async(self.zero_prompting_daemon, "Zero-Prompting", "🧠"),
+                    self._run_loop_daemon_async(self.zero_prompting_daemon, "Zero-Prompting", "🧠"),  # type: ignore[attr-defined]
                     name="ZeroPromptingDaemon",
                 )
             )
         if getattr(self, "epistemic_breaker_daemon", None):
             tasks.append(
                 asyncio.create_task(
-                    self._run_loop_daemon_async(
+                    self._run_loop_daemon_async(  # type: ignore[attr-defined]
                         self.epistemic_breaker_daemon, "Epistemic Breaker", "🛡️", run_method="run"
                     ),
                     name="EpistemicBreakerDaemon",
@@ -140,14 +167,14 @@ class EventLoopMixin:
         if getattr(self, "sentinel_oracle", None):
             tasks.append(
                 asyncio.create_task(
-                    self._run_loop_daemon_async(self.sentinel_oracle, "Sentinel Oracle", "🛡️"),
+                    self._run_loop_daemon_async(self.sentinel_oracle, "Sentinel Oracle", "🛡️"),  # type: ignore[attr-defined]
                     name="SentinelOracle",
                 )
             )
         if getattr(self, "agy2_planner_daemon", None):
             tasks.append(
                 asyncio.create_task(
-                    self._run_loop_daemon_async(self.agy2_planner_daemon, "AGY2 Planner", "🧠"),
+                    self._run_loop_daemon_async(self.agy2_planner_daemon, "AGY2 Planner", "🧠"),  # type: ignore[attr-defined]
                     name="AGY2PlannerDaemon",
                 )
             )
@@ -165,9 +192,9 @@ class EventLoopMixin:
                 tasks.append(
                     asyncio.create_task(self.sovereignty_runtime.auth_gateway.ensure_table())
                 )
-        tasks.append(asyncio.create_task(self._run_health_loop_async(), name="HealthMonitor"))
+        tasks.append(asyncio.create_task(self._run_health_loop_async(), name="HealthMonitor"))  # type: ignore[attr-defined]
         async_count = len(tasks)
-        thread_count = len(self._threads)
+        thread_count = len(self._threads)  # type: ignore[attr-defined]
         logger.info(
             "Sovereign Daemon started: %d async tasks + %d legacy threads",
             async_count,
@@ -185,7 +212,7 @@ class EventLoopMixin:
         while not self._shutdown:
             try:
                 # Run check in thread pool to not block the event loop
-                await asyncio.to_thread(self.check)
+                await asyncio.to_thread(self.check)  # type: ignore[attr-defined]
 
                 # Update hot state cycle counter
                 if self.hot_state is not None:

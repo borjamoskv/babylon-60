@@ -88,7 +88,7 @@ async def _run_bridge_phase(
     t0 = time.monotonic()
     try:
         await asyncio.to_thread(ctx.bridge.execute, skill_name)
-        details = {"status": success_status} if success_status else None
+        details = {"status": success_status} if success_status else {}
         return PipelineResult(
             phase=phase,
             success=True,

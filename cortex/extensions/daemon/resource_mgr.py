@@ -1,3 +1,4 @@
+from typing import Any
 # [C5-REAL] Exergy-Maximized
 import logging
 from pathlib import Path
@@ -74,6 +75,12 @@ logger = logging.getLogger("moskv-daemon")
 
 
 class ResourceMgrMixin:
+    _shared_engine: Any
+    entropic_wake_daemon: Any
+    frontier_daemon: Any
+    hot_state: Any
+    sovereignty_runtime: Any
+
     def _init_autopoiesis(self, file_config: dict) -> None:
         """Initialize Heartbeat and metabolism engines."""
         self.heartbeat_daemon = None
@@ -163,7 +170,7 @@ class ResourceMgrMixin:
         self.sovereignty_runtime = None
         if self._event_bus:
             try:
-                from cortex.engine.auth_gateway import AuthGateway
+                from cortex.engine.auth_gateway import QuorumGateway as AuthGateway
                 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
                 from cortex.engine.event_sovereignty import EventSovereigntyRuntime
 

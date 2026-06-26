@@ -98,7 +98,7 @@ class AsyncSignalBus:
         if not self._conn.in_transaction:
             await self._conn.commit()
         try:
-            self._conn._signals_ready = True
+            self._conn._signals_ready = True  # type: ignore[attr-defined]
         except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         self._ready = True
@@ -314,7 +314,7 @@ class SignalBus:
         if not self._conn.in_transaction:
             self._conn.commit()
         try:
-            self._conn._signals_ready = True
+            self._conn._signals_ready = True  # type: ignore[attr-defined]
         except Exception as exc:
             logger.warning("Suppressed exception: %s", exc)
         self._ready = True
