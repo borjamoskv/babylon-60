@@ -84,6 +84,6 @@ class ComplianceBundler:
             logger.info(f"[ComplianceBundler] Successfully exported {len(export_data)} records to {output_zip_path}")
             return True
 
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             logger.error(f"[ComplianceBundler] Failed to export bundle: {e}")
             return False

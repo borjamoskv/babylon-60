@@ -83,7 +83,7 @@ class SignalMonitor:
                             message=f"Reflex executed for {sig.event_type}",
                         )
                     )
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             logger.error("SignalMonitor check failed: %s", e)
 
         return alerts

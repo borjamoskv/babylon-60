@@ -227,5 +227,5 @@ class TesseractManifold:
                 capture_output=True,
                 timeout=5,
             )
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, RuntimeError) as exc:
             logger.warning("Suppressed exception: %s", exc)

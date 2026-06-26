@@ -6,6 +6,7 @@ import pytest
 
 from cortex.engine import CortexEngine
 from cortex.engine.flow.causality import EDGE_DERIVED_FROM, AsyncCausalGraph
+from cortex.database.core import causal_write
 
 
 @pytest.fixture
@@ -65,11 +66,12 @@ class TestPurgeBounded:
             )
             # Ensure causal edge is created (if store doesn't do it automatically for these types)
             async with engine.session() as conn:
-                await conn.execute(
-                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
-                    (child_id, rule_id, EDGE_DERIVED_FROM),
-                )
-                await conn.commit()
+                with causal_write(conn):
+                    await conn.execute(
+                        "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
+                        (child_id, rule_id, EDGE_DERIVED_FROM),
+                    )
+                    await conn.commit()
 
         # 3. Purge should fail
         with pytest.raises(RuntimeError, match="Bounded Demolition Denied"):
@@ -108,11 +110,12 @@ class TestPurgeBounded:
                 source="test",
             )
             async with engine.session() as conn:
-                await conn.execute(
-                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
-                    (child_id, fact_id, EDGE_DERIVED_FROM),
-                )
-                await conn.commit()
+                with causal_write(conn):
+                    await conn.execute(
+                        "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
+                        (child_id, fact_id, EDGE_DERIVED_FROM),
+                    )
+                    await conn.commit()
 
         # Should be allowed (crit=0.4 <= 0.8)
         result = await engine.purge(fact_id)

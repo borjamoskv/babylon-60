@@ -105,7 +105,7 @@ class DaemonState:
                 hs = self.daemons.get("cortex", {}).get("handshake")
                 if policy == "ZERO_LOCAL_ON_HANDSHAKE" and hs == "remote":
                     return
-            except Exception as exc:
+            except (ValueError, TypeError, OSError, RuntimeError) as exc:
                 logger.warning("Suppressed exception: %s", exc)
 
         try:

@@ -40,5 +40,5 @@ class IntentParser:
         try:
             data = json.loads(raw_json)
             return MigrationIntent(**data)
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             raise ValueError(f"Failed to parse stochastic intent into strict AST: {str(e)}")

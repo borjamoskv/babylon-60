@@ -63,7 +63,7 @@ class SecurityVisualSync:
                 asyncio.create_task(self.emit_signal(event_type, details))
             else:
                 loop.run_until_complete(self.emit_signal(event_type, details))
-        except Exception as exc:
+        except (ValueError, TypeError, OSError, RuntimeError) as exc:
             logger.warning("Suppressed exception: %s", exc)
 
 

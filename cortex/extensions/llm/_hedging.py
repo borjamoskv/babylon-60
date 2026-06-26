@@ -119,5 +119,5 @@ class HedgedRequestStrategy:
                 if not t.done():
                     try:
                         await t
-                    except Exception as exc:
+                    except (ValueError, TypeError, OSError, RuntimeError) as exc:
                         logger.warning("Suppressed exception: %s", exc)

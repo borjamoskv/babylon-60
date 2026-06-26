@@ -92,7 +92,7 @@ class GeminiCacheGateway:
                     e.response.text[:200],
                 )
                 # Fallback to None (standard inference will take over)
-            except Exception as e:
+            except (ValueError, TypeError, OSError, RuntimeError) as e:
                 logger.warning("Gemini cache HTTP execution error: %s", e)
 
         return None

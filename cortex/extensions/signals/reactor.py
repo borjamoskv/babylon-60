@@ -86,7 +86,7 @@ class SignalReactor:
         if te is not None:
             try:
                 await te.evaluate(signal)
-            except Exception:
+            except (ValueError, TypeError, OSError, RuntimeError):
                 logger.debug(
                     "TriggerEngine evaluation failed for %s",
                     signal.event_type,
@@ -127,7 +127,7 @@ class SignalReactor:
                 len(te.list_triggers()),
             )
             return te
-        except Exception:
+        except (ValueError, TypeError, OSError, RuntimeError):
             logger.debug("TriggerEngine not available - continuing")
             return None
 

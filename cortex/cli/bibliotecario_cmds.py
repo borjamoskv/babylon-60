@@ -57,7 +57,7 @@ async def _ingest_and_organize(path: Path) -> str:
     if path.is_file():
         try:
             content = path.read_text(encoding="utf-8")
-        except Exception as e:
+        except (ValueError, TypeError, OSError, RuntimeError) as e:
             return f"Error reading file {path}: {e}"
     elif path.is_dir():
         for root, _, files in os.walk(path):
@@ -68,7 +68,7 @@ async def _ingest_and_organize(path: Path) -> str:
                 try:
                     text = file_path.read_text(encoding="utf-8")
                     content += f"\\n\\n--- FILE: {file_path.relative_to(path)} ---\\n{text}"
-                except Exception as exc:
+                except (ValueError, TypeError, OSError, RuntimeError) as exc:
                     import logging
 
                     logging.warning("Suppressed exception: %s", exc)

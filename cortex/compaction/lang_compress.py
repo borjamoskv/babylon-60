@@ -240,7 +240,7 @@ def detect_language(text: str) -> str:
         detected = _detect(text[:500])
         if detected in _TOKEN_TAX_RATIOS:
             return detected
-    except Exception as exc:
+    except (ValueError, TypeError, OSError, RuntimeError) as exc:
         logger.warning("Suppressed exception: %s", exc)
 
     return "en"

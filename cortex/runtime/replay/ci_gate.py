@@ -109,7 +109,7 @@ class ReplayCIGate:
             engine = ReplayEngine(self.state_cls)
             try:
                 snapshots = engine.run(events)
-            except Exception as e:
+            except (ValueError, TypeError, OSError, RuntimeError) as e:
                 return ReplayCIResult(
                     passed=False,
                     runs_executed=run_idx + 1,

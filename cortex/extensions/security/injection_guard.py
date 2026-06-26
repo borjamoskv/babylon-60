@@ -350,7 +350,7 @@ class InjectionGuard:
                     )
                     report.is_safe = False
                     report.highest_severity = "critical"
-            except Exception as e:
+            except (ValueError, TypeError, OSError, RuntimeError) as e:
                 logger.warning("Semantic WAF evaluation failed (fallback to fast-path): %s", e)
 
         return report
