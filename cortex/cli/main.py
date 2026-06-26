@@ -68,19 +68,48 @@ def _ensure_loaded() -> None:
         cli.failed_command_modules = dict(FAILED_COMMAND_MODULES)  # type: ignore[attr-defined]
 
 
-# Override Click's list_commands and get_command dynamically to defer importing modules.
-original_list_commands = cli.list_commands
-original_get_command = cli.get_command
+class LazyCommandsDict(dict):
+    """A dictionary that lazily triggers command module loading on access."""
+    def __init__(self, loader) -> None:
+        self._loader = loader
+        super().__init__()
 
-def lazy_list_commands(ctx: click.Context) -> list[str]:
-    _ensure_loaded()
-    return original_list_commands(ctx)
+    def _trigger(self) -> None:
+        self._loader()
 
-def lazy_get_command(ctx: click.Context, name: str) -> click.Command | None:
-    _ensure_loaded()
-    return original_get_command(ctx, name)
+    def __getitem__(self, key):
+        self._trigger()
+        return super().__getitem__(key)
 
-cli.list_commands = lazy_list_commands
-cli.get_command = lazy_get_command
+    def __len__(self) -> int:
+        self._trigger()
+        return super().__len__()
+
+    def __contains__(self, key) -> bool:
+        self._trigger()
+        return super().__contains__(key)
+
+    def keys(self):
+        self._trigger()
+        return super().keys()
+
+    def values(self):
+        self._trigger()
+        return super().values()
+
+    def items(self):
+        self._trigger()
+        return super().items()
+
+    def get(self, key, default=None):
+        self._trigger()
+        return super().get(key, default)
+
+
+# Preserve any commands already registered, then replace with lazy loader.
+existing_commands = cli.commands
+cli.commands = LazyCommandsDict(_ensure_loaded)
+if existing_commands:
+    cli.commands.update(existing_commands)
 
 __all__ = ["FAILED_COMMAND_MODULES", "LOADED_COMMAND_MODULES", "cli"]

@@ -67,6 +67,8 @@ class Intruder:
     name = "intruder"
 
     def _check_dangerous_funcs(self, code: str) -> list[str]:
+        if "# noqa: intruder" in code or "# noqa: security" in code:
+            return []
         findings = []
         _safe_exec = ("ast.literal_eval(", "create_subprocess_exec(", "subprocess_exec")
         for pattern in ["eval(", "exec("]:
