@@ -135,7 +135,7 @@ Skills que fueron tan fundamentales que colapsaron en axiomas constitucionales. 
 | **impactv-1** | Colapsado | Axioma 7 (Aesthetic Truth) — el skill es la implementación |
 | **zero-state-Ω** | Colapsado | Axioma 12 (Net-Negative Entropy) |
 
-> **Analogía biológica:** Tier 0 = ADN (inmutable, define la especie). Tier 1 = sistema nervioso autónomo (latido, respiración). Tier 2 = sistema motor voluntario (caminar, hablar). Un agente que necesita "decidir" respirar está mal diseñado.
+> **Analogía biológica:** Tier 0 = ADN (tamper-evident, define la especie). Tier 1 = sistema nervioso autónomo (latido, respiración). Tier 2 = sistema motor voluntario (caminar, hablar). Un agente que necesita "decidir" respirar está mal diseñado.
 
 ---
 
@@ -147,14 +147,14 @@ The CORTEX graph is composed of **Facts** linked by semantic similarity, tempora
 
 | Fact Type | Description | Usage | Mutability |
 | :--- | :--- | :--- | :---: |
-| `axiom` | Fundamental rules. This Codex. System laws. | Immutable governance | 🔒 Immutable |
+| `axiom` | Fundamental rules. This Codex. System laws. | Tamper-Evident governance | 🔒 Tamper-Evident |
 | `knowledge` | General facts, documentation, world-knowledge | Domain reference data | ✏️ Appendable |
 | `decision` | Records of choices — Why X over Y | Architecture decisions, ADRs | 🔒 Append-only |
 | `error` | Post-mortem analysis of failures | Critical for preventing recurrence | 🔒 Append-only |
 | `ghost` | Unresolved traces embedded in the Ghost Field (xattrs) | Track intent with semantic decay | ✏️ Resolvable |
 | `bridge` | Patterns that transferred between projects | Cross-project learning | 🔒 Append-only |
 | `meta_learning` | Insights about the agent's own process | Session learnings, efficiency notes | ✏️ Appendable |
-| `report` | Structured audit or analysis output | MEJORAlo scans, compliance reports | 🔒 Immutable |
+| `report` | Structured audit or analysis output | MEJORAlo scans, compliance reports | 🔒 Tamper-Evident |
 | `rule` | Session rules and behavioral constraints | Active directives | ✏️ Mutable |
 | `evolution` | System upgrade records and version transitions | Change archaeology | 🔒 Append-only |
 | `world-model` | Counterfactual insights and hindsight | Retrospective intelligence | ✏️ Appendable |
@@ -429,7 +429,7 @@ CORTEX implements the Five Sovereign Specifications for autonomous agent psychol
 ┌──────────────────────────────────────────┐
 │           SOVEREIGN AGENT                │
 │                                          │
-│  soul.md     → WHO you are (immutable)   │
+│  soul.md     → WHO you are (tamper-evident)   │
 │    └─ transcendence_vector               │
 │       └─ HOW you may become (liquid)     │
 │  lore.md     → WHAT you've survived      │

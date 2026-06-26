@@ -44,8 +44,8 @@ New session on this repo?            → Execute Multi-Session Handoff (§6.4) f
 **CORTEX Persist** is a local-first trust substrate for autonomous, tool-using, and multi-agent AI systems. It persists facts, enforces deterministic validation boundaries, maintains cryptographic auditability, and treats generative output as conjecture until externally verified.
 
 - **Epistemic Containment:** Generative output is a probabilistic proposal — useful, invalid, partial, or dangerous. System state may only be mutated after crossing deterministic validation boundaries: guards, typed interfaces, schemas, tests, cryptographic logging, and external verification when required.
-- **The Python Paradox (🛑):** CORTEX is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, SQLite-Vec and ONNX as immutable cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; cryptographic primitives are Ed25519 (signatures), SHA-256 (ledger hash-chain), and SHA3-256 (taint engine, guard seals).
-- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for MCP — not "Tamper-Proof" (an architectural illusion), but **Tamper-Evident**. The Master Ledger commits every action to an immutable hash chain.
+- **The Python Paradox (🛑):** CORTEX is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, SQLite-Vec and ONNX as tamper-evident cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; cryptographic primitives are Ed25519 (signatures), SHA-256 (ledger hash-chain), and SHA3-256 (taint engine, guard seals).
+- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for MCP — not "Tamper-Proof" (an architectural illusion), but **Tamper-Evident**. The Master Ledger commits every action to an tamper-evident hash chain.
 
 ---
 
@@ -72,7 +72,7 @@ All agents operating in this repository MUST self-identify by role before acting
 
 | Axiom | Mantra | Operational Constraint |
 | :--- | :--- | :--- |
-| **AX-041** | *Tu repositorio de Git es tu base de datos inmutable.* | No Hidden Entropy: if not in the working tree, it does not exist causally. Rollback = `git checkout`. |
+| **AX-041** | *Tu repositorio de Git es tu base de datos tamper-evident.* | No Hidden Entropy: if not in the working tree, it does not exist causally. Rollback = `git checkout`. |
 | **AX-042** | *La recomputación de prefijos idénticos es un crimen contra la exergía.* | KV-Aware Routing: no stochastic metadata in shared system prompts. TTFT reduction is mandatory. |
 | **AX-043** | *El sentido común físico se deduce estructuralmente desde primitivas lógicas.* | PeARL 77 primitives: spatial intuition via logical primitives, not stochastic pixel inference. |
 | **AX-044** | *La inteligencia se evalúa como capacidad agéntica.* | Observation-Action Loop: inference must induce executable programs, not act as a passive oracle. |
@@ -156,7 +156,7 @@ IDLE → PROPOSED → VALIDATED → TAINTED → ENCRYPTED → COMMITTED
             REJECTED ←←←←← (any SAGA abort) ←←←←← ROLLED_BACK
 ```
 
-Transition rules: a fact may only advance forward. Any backward transition = Saga compensation. `COMMITTED` is immutable.
+Transition rules: a fact may only advance forward. Any backward transition = Saga compensation. `COMMITTED` is tamper-evident.
 
 ---
 
@@ -194,7 +194,7 @@ Grouped by domain. Risk level governs the care required before modification.
 | Module | Purpose | Key Files |
 | :--- | :--- | :--- |
 | `engine/` | Core CRUD, Kinetic Engines (EntropyAnnihilator, AutoCrystallizer), fact store, causal scheduler | `crystallizer.py`, `entropy.py`, `synthesis.py`, `causal/taint_engine.py` |
-| `audit/` | Master Ledger — immutable hash-chain for all actions | `ledger.py` |
+| `audit/` | Master Ledger — tamper-evident hash-chain for all actions | `ledger.py` |
 | `ledger/` | Ledger origin tracking, public export, verifier utilities | `origin.py`, `public_export.py`, `public_verifier_utils.py` |
 | `guards/` | Admission, contradiction, dependency, sovereign seals, ZK guard | `sovereign_seals.py`, `virgo.py`, `zk_guard.py` |
 | `memory/` | Large public API surface for fact persistence and retrieval | — |

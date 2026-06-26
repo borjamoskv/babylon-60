@@ -35,7 +35,7 @@ CORTEX v5 represents a mature local-first memory infrastructure for AI agents, f
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  LAYER 4: CONSENSUS & GOVERNANCE                                             │
 │  ┌─────────────────┬─────────────────┬─────────────────┬─────────────────┐  │
-│  │ Immutable Vote  │ SovereignGate   │ Agent Registry  │  Trust Graph    │  │
+│  │ Tamper-Evident Vote  │ SovereignGate   │ Agent Registry  │  Trust Graph    │  │
 │  │   Ledger        │(sovereign_gate) │  (AgentMixin)   │ (trust_edges)   │  │
 │  └─────────────────┴─────────────────┴─────────────────┴─────────────────┘  │
 ├─────────────────────────────────────────────────────────────────────────────┤
@@ -65,7 +65,7 @@ CORTEX v5 represents a mature local-first memory infrastructure for AI agents, f
 |---------|---------------|--------|
 | **Mixin Architecture** | `StoreMixin`, `SearchMixin`, `AgentMixin` | ✅ Mature |
 | **Connection Pool** | `CortexConnectionPool` (asyncio) | ✅ Production |
-| **Immutable Ledger** | SHA-256 hash-chained transactions | ✅ Cryptographically sound |
+| **Tamper-Evident Ledger** | SHA-256 hash-chained transactions | ✅ Cryptographically sound |
 | **Temporal Versioning** | `valid_from`/`valid_until` soft deletes | ✅ Audit-compliant |
 | **Hybrid Search** | RRF (Reciprocal Rank Fusion) vector + text | ✅ High precision |
 | **Plugin Pattern** | Optional routes, backends, embedders | ⚠️ Needs standardization |
@@ -199,7 +199,7 @@ The graph system stores edges in a relational table (`entity_relationships`). Gr
 | Checkpoint lag | 100-1000 tx | Adaptive | Disk I/O |
 | Hash verification | ~10K tx/sec | CPU bound | SHA-256 calculation |
 
-**Bottleneck:** The immutable ledger requires synchronous disk writes for cryptographic guarantees. This caps throughput regardless of CPU/memory.
+**Bottleneck:** The tamper-evident ledger requires synchronous disk writes for cryptographic guarantees. This caps throughput regardless of CPU/memory.
 
 ### 3.4 Consensus Latency
 

@@ -2,7 +2,7 @@
 # RFC 003: Void-State Security Architecture & ZK-Swarm Consensus
 
 ## Abstract
-This document introduces the **Void-State Security Architecture**, an operating paradigm that moves the CORTEX multi-agent ecosystem away from soft "rules" and "guardrails" towards rigorous **cryptographic execution proofs** (ZK-Swarm consensus). The overarching objective is to resolve the Epistemic Containment Problem natively: mitigating LLM hallucinations and drift not through prompt engineering, but through Byzantine-resilient verification and zero-knowledge evidence anchored to an immutable ledger.
+This document introduces the **Void-State Security Architecture**, an operating paradigm that moves the CORTEX multi-agent ecosystem away from soft "rules" and "guardrails" towards rigorous **cryptographic execution proofs** (ZK-Swarm consensus). The overarching objective is to resolve the Epistemic Containment Problem natively: mitigating LLM hallucinations and drift not through prompt engineering, but through Byzantine-resilient verification and zero-knowledge evidence anchored to an tamper-evident ledger.
 
 ## 1. El Teorema de la Contención Epistémica (Epistemic Containment Theorem)
 

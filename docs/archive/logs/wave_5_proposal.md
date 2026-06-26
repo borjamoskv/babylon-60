@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 Analyze the CORTEX V4.0 architecture and the new Consensus Layer. Propose Wave 5
-(Persistence & Deployment) focusing on: 1. Immutable logging of votes. 2. 
+(Persistence & Deployment) focusing on: 1. Tamper-Evident logging of votes. 2. 
 High-availability synchronization of the ledger. 3. Edge deployment via MCP 
 server optimization.
 TurnBegin(
     user_input='Analyze the CORTEX V4.0 architecture and the new Consensus 
-Layer. Propose Wave 5 (Persistence & Deployment) focusing on: 1. Immutable 
+Layer. Propose Wave 5 (Persistence & Deployment) focusing on: 1. Tamper-Evident 
 logging of votes. 2. High-availability synchronization of the ledger. 3. Edge 
 deployment via MCP server optimization.'
 )
@@ -135,16 +135,16 @@ wildcard | 🔴 P0 | ✅ Fixed — restricted origins |\n   154\t| SQL injection
 P1 | ✅ Implemented — 300 req/min |\n   157\t| Error exposure | 🟡 P1 | ✅ Fixed
 — sanitized errors |\n   158\t| Atomic transactions | 🟠 P2 | ✅ Fixed — batch 
 atomicity |\n   159\t\n   160\t### 3.2 Remaining Considerations\n   161\t\n   
-162\t1. **Immutable Audit Logs**: Current ledger is tamper-evident but not 
+162\t1. **Tamper-Evident Audit Logs**: Current ledger is tamper-evident but not 
 tamper-proof\n   163\t2. **Connection Pooling**: SQLite connections are not 
 pooled\n   164\t3. **Async Operations**: Some blocking operations in async 
 context\n   165\t4. **Key Management**: No hardware security module (HSM) 
 support\n   166\t\n   167\t---\n   168\t\n   169\t## 4. Wave 5: Persistence & 
 Deployment\n   170\t\n   171\t### 4.1 Overview\n   172\t\n   173\tWave 5 
 addresses production readiness with two main thrusts:\n   174\t\n   175\t1. 
-**Immutable Audit Logs**: Cryptographic guarantees for the transaction ledger\n 
+**Tamper-Evident Audit Logs**: Cryptographic guarantees for the transaction ledger\n 
 176\t2. **MCP Server Optimization**: High-performance Model Context Protocol 
-integration\n   177\t\n   178\t### 4.2 Immutable Audit Logs\n   179\t\n   
+integration\n   177\t\n   178\t### 4.2 Tamper-Evident Audit Logs\n   179\t\n   
 180\t**Problem**: Current ledger can be modified by database admins ("God Key" 
 attack)\n   181\t\n   182\t**Solution**: Hierarchical ledger with Merkle trees\n
 183\t\n   184\t```\n   185\tTransaction Flow:\n   186\t┌─────────┐     
@@ -203,7 +203,7 @@ ops |\n   280\t| HSM key support | P3 | 24h | Enterprise security |\n   281\t|
 Graph query language | P3 | 40h | Advanced analytics |\n   282\t\n   283\t---\n 
 284\t\n   285\t## 6. Recommendations\n   286\t\n   287\t### 6.1 Immediate 
 (Pre-Production)\n   288\t\n   289\t1. ✅ **Complete Wave 5 Implementation** (4 
-weeks)\n   290\t   - Immutable ledger with Merkle trees\n   291\t   - Optimized 
+weeks)\n   290\t   - Tamper-Evident ledger with Merkle trees\n   291\t   - Optimized 
 MCP server\n   292\t   - Docker/K8s deployment\n   293\t\n   294\t2. ✅ **Load 
 Testing**\n   295\t   - 10k requests/sec sustained\n   296\t   - 1M fact 
 database\n   297\t   - Consensus under load\n   298\t\n   299\t3. ✅ **Security 
@@ -217,7 +217,7 @@ consensus\n   313\t2. **Zero-Knowledge Proofs**: Private voting\n   314\t3.
 **Cross-Chain Anchoring**: Bitcoin/Ethereum proofs\n   315\t\n   316\t---\n   
 317\t\n   318\t## 7. Wave 5 Deliverables\n   319\t\n   320\t### 7.1 Code\n   
 321\t\n   322\t| File | Description |\n   323\t|------|-------------|\n   324\t|
-`cortex/ledger.py` | Merkle tree + immutable ledger |\n   325\t| 
+`cortex/ledger.py` | Merkle tree + tamper-evident ledger |\n   325\t| 
 `cortex/mcp_server_v2.py` | Optimized MCP server |\n   326\t| 
 `cortex/routes/ledger.py` | Ledger API endpoints |\n   327\t| 
 `tests/benchmark_mcp.py` | Performance benchmarks |\n   328\t\n   329\t### 7.2 
@@ -273,13 +273,13 @@ ToolResult(
     return_value=ToolOk(
         is_error=False,
         output='     1\t# CORTEX V4.0 — Wave 5: Persistence & Deployment\n     
-2\t## Immutable Audit Logs & MCP Server Optimization\n     3\t\n     
+2\t## Tamper-Evident Audit Logs & MCP Server Optimization\n     3\t\n     
 4\t**Date:** 2026-02-16  \n     5\t**Version:** 4.1.0-alpha  \n     
 6\t**Status:** Proposal / Design Document  \n     7\t**Author:** CORTEX 
 Architectural Analysis\n     8\t\n     9\t---\n    10\t\n    11\t## Executive 
 Summary\n    12\t\n    13\tWave 5 focuses on **production hardening** for CORTEX
 V4.0\'s Consensus Layer. Building upon the Reputation-Weighted Consensus (RWC) 
-foundation from Wave 4, this wave delivers:\n    14\t\n    15\t1. **Immutable 
+foundation from Wave 4, this wave delivers:\n    14\t\n    15\t1. **Tamper-Evident 
 Audit Logs** — Cryptographically tamper-evident transaction ledger\n    16\t2. 
 **MCP Server Optimization** — High-performance Model Context Protocol 
 integration\n    17\t3. **Deployment Readiness** — Docker, systemd, and 
@@ -290,7 +290,7 @@ cloud-native deployment patterns\n    18\t\n    19\t### Wave Completion Status\n
 Wave 3 | REST API, Auth, Dashboard | ✅ Complete |\n    26\t| Wave 4 | Consensus
 Layer (RWC) | ✅ Complete |\n    27\t| **Wave 5** | **Persistence & Deployment**
 | 🔄 **Proposed** |\n    28\t| Wave 6 | Swarm Federation & Bridge Protocols | 📋
-Planned |\n    29\t\n    30\t---\n    31\t\n    32\t## 1. Immutable Audit Logs\n
+Planned |\n    29\t\n    30\t---\n    31\t\n    32\t## 1. Tamper-Evident Audit Logs\n
 33\t\n    34\t### 1.1 Problem Statement\n    35\t\n    36\tThe current 
 transaction ledger in `engine.py` uses simple SHA-256 chaining:\n    37\t\n    
 38\t```python\n    39\t# Current Implementation (Wave 3)\n    40\thash_input = 
@@ -330,7 +330,7 @@ Hierarchical Ledger System\n    61\t\n    62\t```\n
 82\t```\n    83\t\n    84\t### 1.4 Database Schema Extensions\n    85\t\n    
 86\t```sql\n    87\t-- 
 ============================================================\n    88\t-- 
-MIGRATION 009: Immutable Ledger Enhancements\n    89\t-- 
+MIGRATION 009: Tamper-Evident Ledger Enhancements\n    89\t-- 
 ============================================================\n    90\t\n    
 91\t-- Merkle tree roots for periodic integrity verification\n    92\tCREATE 
 TABLE merkle_roots (\n    93\t    id              INTEGER PRIMARY KEY 
@@ -1020,12 +1020,12 @@ Contradiction Matrix\n   134\t\n   135\t```\n
 │\n   186\t│  C5: IMMUTABILITY vs GRAPH EVOLUTION                               
 │\n   187\t│  
 ┌─────────────────────────────────────────────────────────────────────┐   │\n   
-188\t│  │ • Transaction ledger is append-only (immutable)                     │ 
+188\t│  │ • Transaction ledger is append-only (tamper-evident)                     │ 
 │\n   189\t│  │ • Graph entities/relations need updates (mention_count++)       
 │   │\n   190\t│  │ • Temporal facts can be deprecated (soft delete)            
 │   │\n   191\t│  │                                                             
 │   │\n   192\t│  │ RESOLUTION: Different immutability levels                   
-│   │\n   193\t│  │ • Ledger: fully immutable                                   
+│   │\n   193\t│  │ • Ledger: fully tamper-evident                                   
 │   │\n   194\t│  │ • Facts: soft-delete only                                   
 │   │\n   195\t│  │ • Graph: mutable aggregates                                 
 │   │\n   196\t│  
@@ -1419,7 +1419,7 @@ ports:\n  1360\t  - port: 8484\n  1361\t    targetPort: 8484\n  1362\t    name:
 api\n  1363\t  - port: 9999\n  1364\t    targetPort: 9999\n  1365\t    name: 
 mcp\n  1366\t  type: ClusterIP\n  1367\t```\n  1368\t\n  1369\t---\n  1370\t\n  
 1371\t## 4. Migration Plan\n  1372\t\n  1373\t### 4.1 Wave 5 Timeline\n  
-1374\t\n  1375\t```\n  1376\tWeek 1-2: Immutable Ledger\n  1377\t├── Migration 
+1374\t\n  1375\t```\n  1376\tWeek 1-2: Tamper-Evident Ledger\n  1377\t├── Migration 
 009: Merkle tree schema\n  1378\t├── Implementation: MerkleTree class\n  
 1379\t├── CLI: ledger checkpoint, verify, export\n  1380\t└── Tests: 95% 
 coverage\n  1381\t\n  1382\tWeek 3-4: MCP Optimization\n  1383\t├── 
@@ -1905,7 +1905,7 @@ Transaction Ledger ────────────────────�
 def _log_transaction(\n   767\t        self,\n   768\t        conn: 
 sqlite3.Connection,\n   769\t        project: str,\n   770\t        action: 
 str,\n   771\t        detail: dict,\n   772\t    ) -> None:\n   773\t        
-"""Log an action to the immutable transaction ledger."""\n   774\t        
+"""Log an action to the tamper-evident transaction ledger."""\n   774\t        
 detail_json = json.dumps(detail, default=str)\n   775\t        ts = now_iso()\n 
 776\t\n   777\t        # Get previous hash for chain\n   778\t        prev = 
 conn.execute(\n   779\t            "SELECT hash FROM transactions ORDER BY id 
@@ -2665,7 +2665,7 @@ ToolCall(
     function=FunctionBody(
         name='SetTodoList',
         arguments='{"todos": [{"title": "Analyze current architecture and 
-consensus layer", "status": "done"}, {"title": "Design Wave 5: Immutable Vote 
+consensus layer", "status": "done"}, {"title": "Design Wave 5: Tamper-Evident Vote 
 Logging", "status": "in_progress"}, {"title": "Design Wave 5: HA Ledger 
 Synchronization", "status": "pending"}, {"title": "Design Wave 5: MCP Server 
 Edge Optimization", "status": "pending"}, {"title": "Create comprehensive Wave 5
@@ -2689,7 +2689,7 @@ layer',
                         status='done'
                     ),
                     TodoDisplayItem(
-                        title='Design Wave 5: Immutable Vote Logging',
+                        title='Design Wave 5: Tamper-Evident Vote Logging',
                         status='in_progress'
                     ),
                     TodoDisplayItem(
@@ -2735,7 +2735,7 @@ Production-Ready Consensus Infrastructure\\n\\n**Date:** 2026-02-16
 Summary\\n\\nWave 5 transforms CORTEX from a development-ready system into a 
 **production-grade sovereign memory infrastructure**. Building upon the 
 Reputation-Weighted Consensus (RWC) foundation from Wave 4, this wave delivers 
-three critical capabilities:\\n\\n1. **Immutable Vote Logging** — 
+three critical capabilities:\\n\\n1. **Tamper-Evident Vote Logging** — 
 Cryptographically tamper-evident consensus audit trail\\n2. **High-Availability 
 Ledger Synchronization** — Multi-node consensus with conflict-free 
 replication\\n3. **Edge-Optimized MCP Server** — High-performance Model Context 
@@ -2745,10 +2745,10 @@ Protocol for distributed deployments\\n\\n### Wave Completion Status\\n\\n| Wave
 Transaction Ledger | ✅ Complete |\\n| Wave 3 | REST API, Auth, Dashboard | ✅ 
 Complete |\\n| Wave 4 | Consensus Layer (RWC) | ✅ Complete |\\n| **Wave 5** | 
 **Persistence & Deployment** | 🔄 **Proposed** |\\n| Wave 6 | Swarm Federation &
-Bridge Protocols | 📋 Planned |\\n\\n---\\n\\n## 1. Immutable Vote 
+Bridge Protocols | 📋 Planned |\\n\\n---\\n\\n## 1. Tamper-Evident Vote 
 Logging\\n\\n### 1.1 Problem Statement\\n\\nThe current consensus system has 
 critical audit gaps:\\n\\n```python\\n# Current Implementation (Wave 4)\\n# 
-Votes are stored but NOT linked to the immutable ledger\\nconn.execute(\\n    
+Votes are stored but NOT linked to the tamper-evident ledger\\nconn.execute(\\n    
 \\"INSERT INTO consensus_votes_v2 (fact_id, agent_id, vote, vote_weight) 
 ...\\"\\n)\\n# No cryptographic proof of vote existence\\n# No protection 
 against \\"God Key\\" database admin attacks\\n# No external 
@@ -2795,7 +2795,7 @@ Ledger\\n\\n```\\n┌───────────────────�
 │\\n└───────────────────────────────────────────────────────────────────────────
 ──┘\\n```\\n\\n### 1.4 Database Schema Extensions\\n\\n```sql\\n-- 
 ============================================================\\n-- MIGRATION 010:
-Immutable Vote Ledger\\n-- 
+Tamper-Evident Vote Ledger\\n-- 
 ============================================================\\n\\n-- Vote 
 ledger: Append-only, hash-chained record of all votes\\nCREATE TABLE vote_ledger
 (\\n    id              INTEGER PRIMARY KEY AUTOINCREMENT,\\n    \\n    -- Vote 
@@ -2835,7 +2835,7 @@ INTEGER PRIMARY KEY AUTOINCREMENT,\\n    check_type      TEXT NOT NULL,
 -- \'merkle\', \'chain\', \'full\'\\n    status          TEXT NOT NULL,         
 -- \'ok\', \'violation\', \'error\'\\n    details         TEXT,                 
 -- JSON with findings\\n    started_at      TEXT NOT NULL,\\n    completed_at   
-TEXT NOT NULL\\n);\\n```\\n\\n### 1.5 Implementation: Immutable Vote 
+TEXT NOT NULL\\n);\\n```\\n\\n### 1.5 Implementation: Tamper-Evident Vote 
 Ledger\\n\\n```python\\n# cortex/vote_ledger.py\\n\\"\\"\\"\\nImmutable Vote 
 Ledger — Cryptographic integrity for CORTEX consensus votes.\\n\\nFeatures:\\n- 
 Hash-chained vote entries\\n- Periodic Merkle tree generation\\n- Tamper 
@@ -2861,7 +2861,7 @@ return hashlib.sha256(hash_input.encode()).hexdigest()\\n    \\n    def
 append_vote(\\n        self,\\n        fact_id: int,\\n        agent_id: str,\\n
 vote: int,\\n        vote_weight: float,\\n        signature: Optional[str] = 
 None\\n    ) -> VoteEntry:\\n        \\"\\"\\"\\n        Append a vote to the 
-immutable ledger.\\n        \\n        Args:\\n            fact_id: The fact 
+tamper-evident ledger.\\n        \\n        Args:\\n            fact_id: The fact 
 being voted on\\n            agent_id: The voting agent\\n            vote: +1 
 (verify) or -1 (dispute)\\n            vote_weight: The weight of the vote 
 (reputation-based)\\n            signature: Optional cryptographic signature\\n 
@@ -3683,7 +3683,7 @@ CORTEX_MAX_MEMORY_MB=128\\n      - CORTEX_QUERY_CACHE_SIZE=500\\n      -
 CORTEX_BATCH_SIZE=50\\n    restart: unless-stopped\\n    deploy:\\n      
 resources:\\n        limits:\\n          memory: 128M\\n          cpus: 
 \'0.5\'\\n```\\n\\n---\\n\\n## 5. Migration Plan\\n\\n### 5.1 Wave 5 
-Timeline\\n\\n```\\nWeek 1-2: Immutable Vote Ledger\\n├── Migration 010: Vote 
+Timeline\\n\\n```\\nWeek 1-2: Tamper-Evident Vote Ledger\\n├── Migration 010: Vote 
 ledger schema\\n├── Implementation: VoteLedger class\\n├── Integration: Hook 
 into vote() method\\n├── CLI: vote-ledger commands\\n└── Tests: 95% 
 coverage\\n\\nWeek 3-4: HA Synchronization\\n├── Migration 011: HA schema 
@@ -3716,7 +3716,7 @@ Adoption Metrics\\n\\n| Metric | Target |\\n|--------|--------|\\n| API uptime |
 99.9% |\\n| Error rate | <0.1% |\\n| Mean recovery time | <5 minutes |\\n| Vote 
 tamper detection | 100% |\\n| Consensus consistency | 99.99% |\\n\\n---\\n\\n## 
 7. Security Considerations\\n\\n### 7.1 Threat Model\\n\\n| Threat | Mitigation 
-|\\n|--------|------------|\\n| Vote tampering | Immutable ledger with Merkle 
+|\\n|--------|------------|\\n| Vote tampering | Tamper-Evident ledger with Merkle 
 trees |\\n| Node compromise | Raft consensus requires majority |\\n| Network 
 partition | CRDT merge strategies |\\n| Replay attacks | Vector clocks + 
 timestamps |\\n| Sybil attacks | Reputation-weighted consensus (Wave 4) |\\n| 
@@ -3776,7 +3776,7 @@ Production-Ready Consensus Infrastructure\n\n**Date:** 2026-02-16
 5 transforms CORTEX from a development-ready system into a **production-grade 
 sovereign memory infrastructure**. Building upon the Reputation-Weighted 
 Consensus (RWC) foundation from Wave 4, this wave delivers three critical 
-capabilities:\n\n1. **Immutable Vote Logging** — Cryptographically 
+capabilities:\n\n1. **Tamper-Evident Vote Logging** — Cryptographically 
 tamper-evident consensus audit trail\n2. **High-Availability Ledger 
 Synchronization** — Multi-node consensus with conflict-free replication\n3. 
 **Edge-Optimized MCP Server** — High-performance Model Context Protocol for 
@@ -3786,10 +3786,10 @@ Embeddings) | ✅ Complete |\n| Wave 2 | Temporal Facts & Transaction Ledger | �
 Complete |\n| Wave 3 | REST API, Auth, Dashboard | ✅ Complete |\n| Wave 4 | 
 Consensus Layer (RWC) | ✅ Complete |\n| **Wave 5** | **Persistence & 
 Deployment** | 🔄 **Proposed** |\n| Wave 6 | Swarm Federation & Bridge Protocols
-| 📋 Planned |\n\n---\n\n## 1. Immutable Vote Logging\n\n### 1.1 Problem 
+| 📋 Planned |\n\n---\n\n## 1. Tamper-Evident Vote Logging\n\n### 1.1 Problem 
 Statement\n\nThe current consensus system has critical audit 
 gaps:\n\n```python\n# Current Implementation (Wave 4)\n# Votes are stored but 
-NOT linked to the immutable ledger\nconn.execute(\n    "INSERT INTO 
+NOT linked to the tamper-evident ledger\nconn.execute(\n    "INSERT INTO 
 consensus_votes_v2 (fact_id, agent_id, vote, vote_weight) ..."\n)\n# No 
 cryptographic proof of vote existence\n# No protection against "God Key" 
 database admin attacks\n# No external 
@@ -3836,7 +3836,7 @@ Ledger\n\n```\n┌────────────────────�
 │\n└────────────────────────────────────────────────────────────────────────────
 ─┘\n```\n\n### 1.4 Database Schema Extensions\n\n```sql\n-- 
 ============================================================\n-- MIGRATION 010: 
-Immutable Vote Ledger\n-- 
+Tamper-Evident Vote Ledger\n-- 
 ============================================================\n\n-- Vote ledger: 
 Append-only, hash-chained record of all votes\nCREATE TABLE vote_ledger (\n    
 id              INTEGER PRIMARY KEY AUTOINCREMENT,\n    \n    -- Vote 
@@ -3876,7 +3876,7 @@ PRIMARY KEY AUTOINCREMENT,\n    check_type      TEXT NOT NULL,              --
 \'merkle\', \'chain\', \'full\'\n    status          TEXT NOT NULL,             
 -- \'ok\', \'violation\', \'error\'\n    details         TEXT,                  
 -- JSON with findings\n    started_at      TEXT NOT NULL,\n    completed_at    
-TEXT NOT NULL\n);\n```\n\n### 1.5 Implementation: Immutable Vote 
+TEXT NOT NULL\n);\n```\n\n### 1.5 Implementation: Tamper-Evident Vote 
 Ledger\n\n```python\n# cortex/vote_ledger.py\n"""\nImmutable Vote Ledger — 
 Cryptographic integrity for CORTEX consensus votes.\n\nFeatures:\n- Hash-chained
 vote entries\n- Periodic Merkle tree generation\n- Tamper detection via hash 
@@ -3900,7 +3900,7 @@ f"{prev_hash}:{fact_id}:{agent_id}:{vote}:{vote_weight}:{timestamp}"\n
 return hashlib.sha256(hash_input.encode()).hexdigest()\n    \n    def 
 append_vote(\n        self,\n        fact_id: int,\n        agent_id: str,\n    
 vote: int,\n        vote_weight: float,\n        signature: Optional[str] = 
-None\n    ) -> VoteEntry:\n        """\n        Append a vote to the immutable 
+None\n    ) -> VoteEntry:\n        """\n        Append a vote to the tamper-evident 
 ledger.\n        \n        Args:\n            fact_id: The fact being voted on\n
 agent_id: The voting agent\n            vote: +1 (verify) or -1 (dispute)\n     
 vote_weight: The weight of the vote (reputation-based)\n            signature: 
@@ -4682,7 +4682,7 @@ CORTEX_DB=/data/cortex.db\n      - CORTEX_MAX_MEMORY_MB=128\n      -
 CORTEX_QUERY_CACHE_SIZE=500\n      - CORTEX_BATCH_SIZE=50\n    restart: 
 unless-stopped\n    deploy:\n      resources:\n        limits:\n          
 memory: 128M\n          cpus: \'0.5\'\n```\n\n---\n\n## 5. Migration Plan\n\n###
-5.1 Wave 5 Timeline\n\n```\nWeek 1-2: Immutable Vote Ledger\n├── Migration 010: 
+5.1 Wave 5 Timeline\n\n```\nWeek 1-2: Tamper-Evident Vote Ledger\n├── Migration 010: 
 Vote ledger schema\n├── Implementation: VoteLedger class\n├── Integration: Hook 
 into vote() method\n├── CLI: vote-ledger commands\n└── Tests: 95% 
 coverage\n\nWeek 3-4: HA Synchronization\n├── Migration 011: HA schema (nodes, 
@@ -4714,7 +4714,7 @@ Metrics\n\n| Metric | Target |\n|--------|--------|\n| API uptime | 99.9% |\n|
 Error rate | <0.1% |\n| Mean recovery time | <5 minutes |\n| Vote tamper 
 detection | 100% |\n| Consensus consistency | 99.99% |\n\n---\n\n## 7. Security 
 Considerations\n\n### 7.1 Threat Model\n\n| Threat | Mitigation 
-|\n|--------|------------|\n| Vote tampering | Immutable ledger with Merkle 
+|\n|--------|------------|\n| Vote tampering | Tamper-Evident ledger with Merkle 
 trees |\n| Node compromise | Raft consensus requires majority |\n| Network 
 partition | CRDT merge strategies |\n| Replay attacks | Vector clocks + 
 timestamps |\n| Sybil attacks | Reputation-weighted consensus (Wave 4) |\n| DoS 
@@ -4753,7 +4753,7 @@ ToolCall(
     function=FunctionBody(
         name='SetTodoList',
         arguments='{"todos": [{"title": "Analyze current architecture and 
-consensus layer", "status": "done"}, {"title": "Design Wave 5: Immutable Vote 
+consensus layer", "status": "done"}, {"title": "Design Wave 5: Tamper-Evident Vote 
 Logging", "status": "done"}, {"title": "Design Wave 5: HA Ledger 
 Synchronization", "status": "done"}, {"title": "Design Wave 5: MCP Server Edge 
 Optimization", "status": "done"}, {"title": "Create comprehensive Wave 5 
@@ -4777,7 +4777,7 @@ layer',
                         status='done'
                     ),
                     TodoDisplayItem(
-                        title='Design Wave 5: Immutable Vote Logging',
+                        title='Design Wave 5: Tamper-Evident Vote Logging',
                         status='done'
                     ),
                     TodoDisplayItem(
@@ -4876,7 +4876,7 @@ Votes can be modified by database admins\\n2. **No audit trail** — No external
 verifiability of vote history\\n3. **Single point of failure** — No replication 
 or failover\\n4. **Limited MCP performance** — Blocking operations, no 
 caching\\n\\n---\\n\\n## 2. Wave 5: Three-Pillar Architecture\\n\\n### 2.1 
-Pillar 1: Immutable Vote Logging\\n\\n**Problem:** Current votes are stored in 
+Pillar 1: Tamper-Evident Vote Logging\\n\\n**Problem:** Current votes are stored in 
 standard SQL tables without cryptographic protection.\\n\\n**Solution:** 
 Hash-chained vote ledger with Merkle 
 trees\\n\\n```\\n┌──────────────────────────────────────────────────────────────
@@ -4901,7 +4901,7 @@ trees\\n\\n```\\n┌────────────────────
 │\\n│                                                                           
 │\\n└───────────────────────────────────────────────────────────────────────────
 ──┘\\n```\\n\\n**Key Features:**\\n- Each vote includes `prev_hash` forming an 
-immutable chain\\n- Merkle roots every 1,000 votes for efficient 
+tamper-evident chain\\n- Merkle roots every 1,000 votes for efficient 
 verification\\n- Exportable audit logs with integrity proofs\\n- Tamper 
 detection via hash verification\\n\\n**Schema Additions:**\\n```sql\\nCREATE 
 TABLE vote_ledger (\\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\\n    fact_id 
@@ -5163,7 +5163,7 @@ Cluster
 ──┘\\n```\\n\\n---\\n\\n## 5. Security Analysis\\n\\n### 5.1 Threat Model & 
 Mitigations\\n\\n| Threat | Severity | Mitigation 
 |\\n|--------|----------|------------|\\n| **Vote Tampering** | Critical | 
-Immutable ledger with Merkle trees; any modification breaks hash chain |\\n| 
+Tamper-Evident ledger with Merkle trees; any modification breaks hash chain |\\n| 
 **Node Compromise** | High | Raft consensus requires majority; compromised node 
 can\'t alter consensus |\\n| **Network Partition** | Medium | CRDT merge 
 strategies; automatic conflict resolution when partition heals |\\n| **Replay 
@@ -5173,7 +5173,7 @@ rejected |\\n| **Sybil Attacks** | Medium | Reputation-weighted consensus (Wave
 rate limiting; graceful degradation under load |\\n| **Eavesdropping** | Low | 
 TLS for inter-node communication; encrypted replication |\\n| **Data Loss** | 
 Low | Multi-node replication; automatic failover; regular backups |\\n\\n### 5.2
-Audit & Compliance\\n\\n**Immutable Vote Ledger provides:**\\n- Complete audit 
+Audit & Compliance\\n\\n**Tamper-Evident Vote Ledger provides:**\\n- Complete audit 
 trail of all consensus decisions\\n- Cryptographic proof of vote ordering and 
 timing\\n- Exportable logs for external auditors\\n- Tamper detection with 
 automated alerts\\n- Optional external anchoring (blockchain, timestamp 
@@ -5191,7 +5191,7 @@ N/A | Baseline |\\n\\n### 6.3 Resource Usage\\n\\n| Deployment | Memory | CPU |
 Storage |\\n|------------|--------|-----|---------|\\n| Single-node | 128MB | 
 0.5 cores | 1GB |\\n| HA node | 256MB | 1 core | 5GB |\\n| Edge device | 128MB |
 0.5 cores | 1GB |\\n\\n---\\n\\n## 7. Migration Path\\n\\n### 7.1 From Wave 4 to
-Wave 5\\n\\n```\\nPhase 1: Immutable Vote Ledger (Week 1-2)\\n├── Backup 
+Wave 5\\n\\n```\\nPhase 1: Tamper-Evident Vote Ledger (Week 1-2)\\n├── Backup 
 existing database\\n├── Run migration 010 (vote_ledger schema)\\n├── Deploy 
 VoteLedger class\\n├── Update vote() to append to ledger\\n└── Verify: cortex 
 vote-ledger verify\\n\\nPhase 2: HA Synchronization (Week 3-4)\\n├── Deploy 
@@ -5207,14 +5207,14 @@ votes remain valid\\n- HA cluster can operate with **mixed versions** during
 upgrade\\n- Edge MCP server maintains **same protocol** as standard 
 MCP\\n\\n---\\n\\n## 8. Conclusion\\n\\nWave 5 transforms CORTEX from a 
 development-ready system into a **production-grade sovereign memory 
-infrastructure**:\\n\\n1. **Immutable Vote Logging** ensures cryptographic 
+infrastructure**:\\n\\n1. **Tamper-Evident Vote Logging** ensures cryptographic 
 integrity of all consensus decisions\\n2. **High-Availability Synchronization** 
 provides automatic failover and geographic distribution\\n3. **Edge-Optimized 
 MCP Server** enables deployment on resource-constrained devices\\n\\nTogether, 
 these capabilities enable:\\n- **Sovereign AI deployments** with tamper-evident 
 consensus\\n- **Enterprise-grade availability** with 99.9% uptime\\n- **Edge 
 computing scenarios** with sub-millisecond query latency\\n\\n**Next 
-Steps:**\\n1. Implement Migration 010 (Immutable Vote Ledger)\\n2. Implement 
+Steps:**\\n1. Implement Migration 010 (Tamper-Evident Vote Ledger)\\n2. Implement 
 Migration 011 (HA Synchronization)\\n3. Implement Edge MCP Server\\n4. Load 
 testing with 10k requests/sec\\n5. Security audit and penetration testing\\n6. 
 Documentation and deployment guides\\n\\n---\\n\\n**End of Architecture 
@@ -5300,7 +5300,7 @@ Votes can be modified by database admins\n2. **No audit trail** — No external
 verifiability of vote history\n3. **Single point of failure** — No replication 
 or failover\n4. **Limited MCP performance** — Blocking operations, no 
 caching\n\n---\n\n## 2. Wave 5: Three-Pillar Architecture\n\n### 2.1 Pillar 1: 
-Immutable Vote Logging\n\n**Problem:** Current votes are stored in standard SQL 
+Tamper-Evident Vote Logging\n\n**Problem:** Current votes are stored in standard SQL 
 tables without cryptographic protection.\n\n**Solution:** Hash-chained vote 
 ledger with Merkle 
 trees\n\n```\n┌─────────────────────────────────────────────────────────────────
@@ -5325,7 +5325,7 @@ trees\n\n```\n┌─────────────────────
 │\n│                                                                            
 │\n└────────────────────────────────────────────────────────────────────────────
 ─┘\n```\n\n**Key Features:**\n- Each vote includes `prev_hash` forming an 
-immutable chain\n- Merkle roots every 1,000 votes for efficient verification\n- 
+tamper-evident chain\n- Merkle roots every 1,000 votes for efficient verification\n- 
 Exportable audit logs with integrity proofs\n- Tamper detection via hash 
 verification\n\n**Schema Additions:**\n```sql\nCREATE TABLE vote_ledger (\n    
 id INTEGER PRIMARY KEY AUTOINCREMENT,\n    fact_id INTEGER NOT NULL,\n    
@@ -5580,7 +5580,7 @@ Cluster
 ─┘\n```\n\n---\n\n## 5. Security Analysis\n\n### 5.1 Threat Model & 
 Mitigations\n\n| Threat | Severity | Mitigation 
 |\n|--------|----------|------------|\n| **Vote Tampering** | Critical | 
-Immutable ledger with Merkle trees; any modification breaks hash chain |\n| 
+Tamper-Evident ledger with Merkle trees; any modification breaks hash chain |\n| 
 **Node Compromise** | High | Raft consensus requires majority; compromised node 
 can't alter consensus |\n| **Network Partition** | Medium | CRDT merge 
 strategies; automatic conflict resolution when partition heals |\n| **Replay 
@@ -5590,7 +5590,7 @@ rejected |\n| **Sybil Attacks** | Medium | Reputation-weighted consensus (Wave
 rate limiting; graceful degradation under load |\n| **Eavesdropping** | Low | 
 TLS for inter-node communication; encrypted replication |\n| **Data Loss** | Low
 | Multi-node replication; automatic failover; regular backups |\n\n### 5.2 Audit
-& Compliance\n\n**Immutable Vote Ledger provides:**\n- Complete audit trail of 
+& Compliance\n\n**Tamper-Evident Vote Ledger provides:**\n- Complete audit trail of 
 all consensus decisions\n- Cryptographic proof of vote ordering and timing\n- 
 Exportable logs for external auditors\n- Tamper detection with automated 
 alerts\n- Optional external anchoring (blockchain, timestamp 
@@ -5607,7 +5607,7 @@ entries) | N/A | Baseline |\n\n### 6.3 Resource Usage\n\n| Deployment | Memory |
 CPU | Storage |\n|------------|--------|-----|---------|\n| Single-node | 128MB 
 | 0.5 cores | 1GB |\n| HA node | 256MB | 1 core | 5GB |\n| Edge device | 128MB |
 0.5 cores | 1GB |\n\n---\n\n## 7. Migration Path\n\n### 7.1 From Wave 4 to Wave 
-5\n\n```\nPhase 1: Immutable Vote Ledger (Week 1-2)\n├── Backup existing 
+5\n\n```\nPhase 1: Tamper-Evident Vote Ledger (Week 1-2)\n├── Backup existing 
 database\n├── Run migration 010 (vote_ledger schema)\n├── Deploy VoteLedger 
 class\n├── Update vote() to append to ledger\n└── Verify: cortex vote-ledger 
 verify\n\nPhase 2: HA Synchronization (Week 3-4)\n├── Deploy second node\n├── 
@@ -5622,14 +5622,14 @@ metrics\n└── Document runbooks\n```\n\n### 7.2 Backward Compatibility\n\n-
 **mixed versions** during upgrade\n- Edge MCP server maintains **same protocol**
 as standard MCP\n\n---\n\n## 8. Conclusion\n\nWave 5 transforms CORTEX from a 
 development-ready system into a **production-grade sovereign memory 
-infrastructure**:\n\n1. **Immutable Vote Logging** ensures cryptographic 
+infrastructure**:\n\n1. **Tamper-Evident Vote Logging** ensures cryptographic 
 integrity of all consensus decisions\n2. **High-Availability Synchronization** 
 provides automatic failover and geographic distribution\n3. **Edge-Optimized MCP
 Server** enables deployment on resource-constrained devices\n\nTogether, these 
 capabilities enable:\n- **Sovereign AI deployments** with tamper-evident 
 consensus\n- **Enterprise-grade availability** with 99.9% uptime\n- **Edge 
 computing scenarios** with sub-millisecond query latency\n\n**Next Steps:**\n1. 
-Implement Migration 010 (Immutable Vote Ledger)\n2. Implement Migration 011 (HA 
+Implement Migration 010 (Tamper-Evident Vote Ledger)\n2. Implement Migration 011 (HA 
 Synchronization)\n3. Implement Edge MCP Server\n4. Load testing with 10k 
 requests/sec\n5. Security audit and penetration testing\n6. Documentation and 
 deployment guides\n\n---\n\n**End of Architecture Analysis**\n\n*Prepared for 
@@ -5646,13 +5646,13 @@ TextPart(
 architecture and created a detailed Wave 5 (Persistence & Deployment) proposal. 
 Here's a summary of what was delivered:\n\n## Summary\n\n### Documents 
 Created\n\n1. **`WAVE5_PROPOSAL_PERSISTENCE_DEPLOYMENT.md`** (82KB) — Complete 
-technical specification including:\n   - Immutable Vote Logging with Merkle 
+technical specification including:\n   - Tamper-Evident Vote Logging with Merkle 
 trees\n   - High-Availability Synchronization with Raft + CRDTs\n   - 
 Edge-Optimized MCP Server with multi-tier caching\n\n2. 
 **`WAVE5_ARCHITECTURE_ANALYSIS.md`** (44KB) — Executive summary and integration 
-analysis\n\n### Key Wave 5 Components\n\n#### 1. Immutable Vote Logging\n- 
+analysis\n\n### Key Wave 5 Components\n\n#### 1. Tamper-Evident Vote Logging\n- 
 **Hash-chained vote ledger** — Each vote includes `prev_hash` forming an 
-immutable chain\n- **Merkle tree batching** — Roots every 1,000 votes for 
+tamper-evident chain\n- **Merkle tree batching** — Roots every 1,000 votes for 
 efficient verification\n- **Tamper detection** — Automated integrity 
 verification\n- **Exportable audit logs** — JSON/CSV with cryptographic 
 proofs\n\n#### 2. High-Availability Synchronization\n- **Raft consensus** — 
@@ -5669,7 +5669,7 @@ Targets\n\n| Metric | Current | Target | Improvement
 **50x** |\n| Batch store (100) | 2300ms | 450ms | **5x** |\n| Throughput | 100 
 req/s | 1000 req/s | **10x** |\n| Memory usage | Unbounded | <256MB | 
 **Bounded** |\n| HA Failover | N/A | <5s | **New** |\n\n### Migration Timeline 
-(8 Weeks)\n- Weeks 1-2: Immutable Vote Ledger\n- Weeks 3-4: HA Synchronization  
+(8 Weeks)\n- Weeks 1-2: Tamper-Evident Vote Ledger\n- Weeks 3-4: HA Synchronization  
 \n- Weeks 5-6: Edge MCP Optimization\n- Weeks 7-8: Integration & Testing"
 )
 StatusUpdate(

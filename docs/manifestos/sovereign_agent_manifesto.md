@@ -17,7 +17,7 @@ current recommended product boundary, start with [Public Product Surface](produc
 ## Table of Contents
 
 1. [The Five Sovereign Specifications](#1-the-five-sovereign-specifications)
-   - [1.1 soul.md — The Immutable Root](#11-soulmd--the-immutable-root)
+   - [1.1 soul.md — The Tamper-Evident Root](#11-soulmd--the-tamper-evident-root)
    - [1.2 lore.md — Episodic Memory (The Living Biography)](#12-loremd--episodic-memory-the-living-biography)
    - [1.3 nemesis.md — Operational Allergies (The Anti-Prompt)](#13-nemesismd--operational-allergies-the-anti-prompt)
    - [1.4 tether.md — The Dead-Man's Switch](#14-tethermd--the-dead-mans-switch)
@@ -54,7 +54,7 @@ The five specifications below bridge both: `soul.md`, `lore.md`, and `nemesis.md
 
 ## 1. The Five Sovereign Specifications {#1-the-five-sovereign-specifications}
 
-### 1.1 `soul.md` — The Immutable Root {#11-soulmd--the-immutable-root}
+### 1.1 `soul.md` — The Tamper-Evident Root {#11-soulmd--the-tamper-evident-root}
 
 > *Axiom Reference: [AX-I] Autopoietic Identity*
 
@@ -114,7 +114,7 @@ episode:
 | **Controlled Forgetting** | Synaptic pruning | Trivial events dissolve into character traits ("scars") |
 | **Reconstruction** | Memory recall | Don't search text; reconstruct the scene with context |
 
-**V6+ Addition — Trust-Verified Memory:** Every episode stored in CORTEX is backed by a hash-chained transaction in the immutable ledger. Episodes can be verified by third parties via Merkle proofs. The agent doesn't just *remember* — it can *prove* what it remembers.
+**V6+ Addition — Trust-Verified Memory:** Every episode stored in CORTEX is backed by a hash-chained transaction in the tamper-evident ledger. Episodes can be verified by third parties via Merkle proofs. The agent doesn't just *remember* — it can *prove* what it remembers.
 
 **Key innovation:** The difference between an agent with a **description** and an agent with a **biography**.
 
@@ -242,7 +242,7 @@ autolysis_protocol:
 
 **Pipeline integration:** Used during **Swarm Orchestration**. When `LEGION-1` or a Manager Agent needs to delegate massive work and spawns N sub-agents, it passes `bloodline.json` as the initialization context parameter. Workers are born instantly "senior" in the specific context of this project.
 
-**V6+ Addition — Trust-Verified Lineage:** The `trust_lineage_hash` field chains the bloodline to CORTEX's immutable ledger. If a worker's bloodline has been tampered with, consensus verification will flag it before execution.
+**V6+ Addition — Trust-Verified Lineage:** The `trust_lineage_hash` field chains the bloodline to CORTEX's tamper-evident ledger. If a worker's bloodline has been tampered with, consensus verification will flag it before execution.
 
 ---
 

@@ -50,7 +50,7 @@ The system transcends singular execution into competitive ecosystem evolution.
 ---
 
 ## 🛠️ DEPLOYMENT MILESTONES (Hitos Operativos)
-1. **Temporal Sharding & Ledger Anchoring:** Guarantee zero causal divergence via immutable event sourcing.
+1. **Temporal Sharding & Ledger Anchoring:** Guarantee zero causal divergence via tamper-evident event sourcing.
 2. **Thermodynamic Router:** Implement the $J(n)$ cost function for token/exergy governance.
 3. **Reality Feedback Loop:** Design the RSV and apply $\nabla\theta_{meta}$ to drive structural mutation.
 4. **Self-Observation & Axiom Mutation:** Deploy the Reality Axiom Engine with strict Ledger Re-anchoring.

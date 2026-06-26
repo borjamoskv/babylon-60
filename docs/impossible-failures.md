@@ -106,7 +106,7 @@ Downstream: architecture built on fictional foundation
 Every decision is stored with:
 - Content (what was decided)
 - Source (`agent:gemini`, `user:borjamoskv`)
-- Timestamp (immutable, wall-clock)
+- Timestamp (tamper-evident, wall-clock)
 - Encryption (`v6_aesgcm` — AES-256-GCM, authenticated)
 - Hash chain (SHA-256 linked to previous entry)
 

@@ -34,6 +34,9 @@ import asyncio
 import logging
 import os
 import sqlite3
+import uuid
+import secrets
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any, Final
@@ -47,11 +50,69 @@ except ImportError:  # pragma: no cover - sqlite-vec is a base dependency in rel
 
 # Python 3.12 deprecates the default datetime adapter. We register our own to prevent DeprecationWarning.
 import datetime
+import uuid
+import secrets
 
 from cortex.utils.errors import DBLockError
 
 sqlite3.register_adapter(datetime.datetime, lambda val: val.isoformat())
 sqlite3.register_adapter(datetime.date, lambda val: val.isoformat())
+
+
+
+class CortexConnection(sqlite3.Connection):
+    """
+    [C5-REAL] State-Bound Connection Kernel.
+    Token and authority are physically bound to the connection state,
+    annihilating ContextVar drift and Thread pool leaks.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._connection_id = uuid.uuid4().hex
+        self._mtk_nonce = secrets.token_hex(16)
+        self._causal_write_authorized = False
+        
+        # Inyectar el authorizer atado al estado físico de esta conexión
+        self.set_authorizer(self._physical_authorizer_bound)
+        
+        # Engine Lockdown - Cerrar superficie VFS y PRAGMA
+        self.execute("PRAGMA trusted_schema = OFF")
+        self.execute("PRAGMA writable_schema = OFF")
+        self.execute("PRAGMA cell_size_check = ON")
+        
+        if hasattr(self, "enable_load_extension"):
+            self.enable_load_extension(False)
+            
+    def _physical_authorizer_bound(self, action: int, table: str | None, column: str | None, sql_location: str | None, ignore: str | None) -> int:
+        if action in (sqlite3.SQLITE_INSERT, sqlite3.SQLITE_UPDATE, sqlite3.SQLITE_DELETE):
+            if table and table.startswith("sqlite_"):
+                return sqlite3.SQLITE_OK
+            
+            if not self._causal_write_authorized:
+                return sqlite3.SQLITE_DENY
+        return sqlite3.SQLITE_OK
+        
+    def authorize_causal_writes(self) -> str:
+        """Grants causal write authority to this specific handle."""
+        self._causal_write_authorized = True
+        return self._mtk_nonce
+
+    def revoke_causal_writes(self) -> None:
+        self._causal_write_authorized = False
+
+_original_sqlite3_connect = sqlite3.connect
+
+def _secure_sqlite3_connect(*args, **kwargs):
+    """
+    [C5-REAL] Kernel-owned Connection Allocator Hook.
+    Blocks any raw sqlite3.connect() calls that do not use the CortexConnection factory.
+    """
+    factory = kwargs.get("factory")
+    if factory is not CortexConnection:
+        raise RuntimeError("[C5-REAL] FATAL: Direct sqlite3.connect() is structurally forbidden. Use MTK Allocator (cortex.database.core.connect).")
+    return _original_sqlite3_connect(*args, **kwargs)
+
+sqlite3.connect = _secure_sqlite3_connect
 
 __all__ = [
     "apply_pragmas_async",
@@ -61,6 +122,7 @@ __all__ = [
     "connect_async_ctx",
     "connect_writer",
     "load_sqlite_vec_async",
+    "CortexConnection",
 ]
 
 logger = logging.getLogger("cortex.db")
@@ -168,6 +230,7 @@ def connect(
             check_same_thread=check_same_thread,
             uri=uri,
             isolation_level=isolation_level,  # type: ignore[type-error]
+            factory=CortexConnection,
         )
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
@@ -206,6 +269,7 @@ def connect_writer(
             timeout=timeout,
             check_same_thread=check_same_thread,
             uri=uri,
+            factory=CortexConnection,
         )
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
@@ -236,7 +300,7 @@ async def connect_async(
     """
     is_uri = uri or db_path.startswith("file:")
     try:
-        conn = await aiosqlite.connect(db_path, timeout=5.0, uri=is_uri)
+        conn = await aiosqlite.connect(db_path, timeout=5.0, uri=is_uri, factory=CortexConnection)
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
             raise DBLockError(f"Async database lock timeout: {e}") from e

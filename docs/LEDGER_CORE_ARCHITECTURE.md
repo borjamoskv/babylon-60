@@ -5,9 +5,9 @@
 > **Aesthetic:** `Industrial Noir 2026`
 > **Core Definition:** CORTEX is an event-sourced execution ledger with deterministic replay and causal billing for autonomous agent systems.
 
-## 1. EXECUTION LEDGER (The Immutable Source of Truth)
+## 1. EXECUTION LEDGER (The Tamper-Evident Source of Truth)
 
-This is not logging; it is **immutable causal state**. The system contracts verifiable reality.
+This is not logging; it is **tamper-evident causal state**. The system contracts verifiable reality.
 
 ```typescript
 type ExecutionEvent = {

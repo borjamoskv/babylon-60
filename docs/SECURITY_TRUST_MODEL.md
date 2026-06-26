@@ -69,7 +69,7 @@ The persistence and trust layer is organized into sovereign domains under the ro
 | Domain | Responsibility |
 |---|---|
 | `cortex/engine/` | Core CRUD, Kinetic Engines (EntropyAnnihilator, AutoCrystallizer), fact store, causal scheduler |
-| `cortex/audit/` | Master Ledger — immutable hash-chain for all actions (`ledger.py`) |
+| `cortex/audit/` | Master Ledger — tamper-evident hash-chain for all actions (`ledger.py`) |
 | `cortex/memory/` | Large public API surface for fact persistence and retrieval |
 | `cortex/guards/` | Admission, contradiction, dependency, and sovereign seal verification |
 

@@ -28,7 +28,7 @@ sqlite3 cortex_data.db "PRAGMA foreign_key_check;"
 
 ## 2. Ledger Corruption Recovery
 
-CORTEX persistence is dual-layered (SQLite database file + Append-Only File binary log). If the SQLite database is corrupted, it can be re-synthesized from the immutable binary AOF.
+CORTEX persistence is dual-layered (SQLite database file + Append-Only File binary log). If the SQLite database is corrupted, it can be re-synthesized from the tamper-evident binary AOF.
 
 ```mermaid
 flowchart TD

@@ -20,7 +20,7 @@ To prevent epistemic drift and identity divergence, the system operates on three
 
 > **Axiom Ω₃-V**: El fallo más peligroso de una IA no es la incorrección, sino la corrección no verificable.
 
-Maintaining the **writing layer (CORTEX)** cryptographically isolated from the **synthesis layer (NotebookLM)** ensures that every "insight" generated at L2 has an immutable audit trail leading back to L0 Ground Truth.
+Maintaining the **writing layer (CORTEX)** cryptographically isolated from the **synthesis layer (NotebookLM)** ensures that every "insight" generated at L2 has an tamper-evident audit trail leading back to L0 Ground Truth.
 
 - **Insight without Audit = Hallucination**.
 - **Audit without Ground Truth = Calcification**.

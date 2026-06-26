@@ -22,14 +22,14 @@ El LLM no es un motor de verdad ni posee agencia; es un compresor probabilístic
 Un sistema que es su propio testigo sufre recursión corrupta. La verdad operativa no puede residir en la auto-evaluación del LLM.
 
 - **Anclaje Externo:** El conocimiento sobre el sistema debe anclarse en invariantes físicos y criptográficos externos (Git Trees, Master Ledger, Merkle Hashes).
-- **El Fantasma en la Máquina:** La memoria no es lo que el modelo "recuerda" probabilísticamente, sino la cadena inmutable de causalidad verificada y sellada.
+- **El Fantasma en la Máquina:** La memoria no es lo que el modelo "recuerda" probabilísticamente, sino la cadena tamper-evident de causalidad verificada y sellada.
 
 ## AX-III: Colapso Entrópico y Ejecución Cíclica
 
 La ejecución monolítica continua acumula error probabilístico (*drift*) y conduce iterativamente a un *cierre cognitivo fraudulento*. 
 
 - **Fricción como Filtro:** CORTEX impone fricción estructural fraccionando la inferencia en micro-ciclos cerrados: *Observar → Hipotetizar → Actuar → Medir*.
-- **Aislamiento Causal:** Forzar esta detención purifica la señal y aísla las asunciones fallidas tempranamente. La salida validada de un ciclo se consolida como *ground truth* inmutable para el siguiente salto.
+- **Aislamiento Causal:** Forzar esta detención purifica la señal y aísla las asunciones fallidas tempranamente. La salida validada de un ciclo se consolida como *ground truth* tamper-evident para el siguiente salto.
 
 ## AX-IV: Cognición Termodinámica y Verdad Estructural
 

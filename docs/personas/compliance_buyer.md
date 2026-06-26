@@ -24,5 +24,5 @@ CORTEX goes beyond mere logging by employing **Hash-Chaining** and **Merkle Root
 2. **Merkle Roots:** We periodically seal thousands of these decisions into a single global cryptographic footprint.
 
 When you buy CORTEX, you are buying the ability to hand an auditor a command (`cortex verify X`
-or `cortex trust-ledger verify`) and an immutable JSON receipt that proves beyond doubt what the
+or `cortex trust-ledger verify`) and an tamper-evident JSON receipt that proves beyond doubt what the
 AI knew at the time of execution.

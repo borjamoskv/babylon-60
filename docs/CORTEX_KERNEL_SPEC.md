@@ -21,7 +21,7 @@ Agent Action
    ↓
 Event Emission
    ↓
-Ledger Append (Immutable)
+Ledger Append (Tamper-Evident)
    ↓
 Causal Ordering Layer
    ↓

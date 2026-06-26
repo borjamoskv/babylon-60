@@ -29,7 +29,7 @@ your existing memory stack. It doesn't replace Mem0/Zep/Letta —
 it certifies them.
 
 HOW IT WORKS:
-  - SHA-256 hash-chained immutable ledger (every fact verifiable)
+  - SHA-256 hash-chained tamper-evident ledger (every fact verifiable)
   - Merkle tree checkpoints (batch integrity, tamper-evident)
   - WBFT consensus (multi-agent Byzantine fault tolerance)
   - Privacy Shield (11-pattern secret detection before any INSERT)
@@ -99,7 +99,7 @@ verification engine. It doesn't replace Mem0, Zep, LangChain memory,
 or SQLite — it wraps them in a trust layer.
 
 THE STACK (all open source, local-first):
-  ├── SHA-256 hash-chained ledger    ← every fact immutable + verifiable
+  ├── SHA-256 hash-chained ledger    ← every fact tamper-evident + verifiable
   ├── Merkle tree checkpoints        ← tamper-evident batch verification
   ├── WBFT consensus                 ← multi-agent Byzantine fault tolerance
   ├── Privacy Shield (11 patterns)   ← secrets never hit the DB

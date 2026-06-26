@@ -52,7 +52,7 @@ This creates `~/.cortex/cortex.db` with the core ledger/fact schema plus optiona
 
 ## 3. Store Facts
 
-Every fact is automatically hash-chained into an immutable ledger.
+Every fact is automatically hash-chained into an tamper-evident ledger.
 
 ```bash
 # Store knowledge (Alias `cortex store` preferred for DX speed)

@@ -53,7 +53,7 @@ By separating the error registry from the operational surface, we establish a st
 | Code | Category | Severity | Triggers When | Remediation |
 | :--- | :--- | :--- | :--- | :--- |
 | `ERR_HASH_MISMATCH` | `integrity` | `critical` | Checkpoint or ledger hash fails verification against content payload. | Halt operation. Investigate memory corruption or manual tampering. |
-| `ERR_LEDGER_SEALED` | `integrity` | `high` | Attempted to modify or backdate a fact in a sealed ledger block. | Use explicit tombstoning and append new fact. The ledger is immutable. |
+| `ERR_LEDGER_SEALED` | `integrity` | `high` | Attempted to modify or backdate a fact in a sealed ledger block. | Use explicit tombstoning and append new fact. The ledger is tamper-evident. |
 
 ### 3.3 Policy & Compliance
 | Code | Category | Severity | Triggers When | Remediation |

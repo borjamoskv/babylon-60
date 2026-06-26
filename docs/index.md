@@ -42,7 +42,7 @@ Traditional logging and standard vector stores fail the epistemic containment te
 
 | Capability | What It Does |
 |:---|:---|
-| 🔗 **Immutable Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. |
+| 🔗 **Tamper-Evident Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. |
 | 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity |
 | 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant fact verification |
 | 🔐 **Privacy Shield** | Zero-leakage ingress guard — 11 secret detection patterns |

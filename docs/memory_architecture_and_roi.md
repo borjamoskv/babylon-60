@@ -36,14 +36,14 @@ El agente Antigravity viene de serie con **7 tipos de memoria**, ninguna con bú
 
 | Fact Type | Descripción | Uso | Mutabilidad |
 |:---|:---|:---|:---:|
-| `axiom` | Reglas fundamentales. Leyes del sistema. | Gobernanza inmutable | 🔒 Inmutable |
+| `axiom` | Reglas fundamentales. Leyes del sistema. | Gobernanza tamper-evident | 🔒 Tamper-Evident |
 | `knowledge` | Hechos generales, documentación, world-knowledge | Datos de referencia | ✏️ Appendable |
 | `decision` | Registro de decisiones — *por qué X y no Y* | ADRs, arquitectura | 🔒 Append-only |
 | `error` | Post-mortem de fallos | Prevención de recurrencia | 🔒 Append-only |
 | `ghost` | Trazas no resueltas con decaimiento semántico | Tracking de intención pendiente | ✏️ Resolvable |
 | `bridge` | Patrones transferidos entre proyectos | Aprendizaje cross-proyecto | 🔒 Append-only |
 | `meta_learning` | Insights sobre el proceso del propio agente | Eficiencia de sesión | ✏️ Appendable |
-| `report` | Output estructurado de auditorías | MEJORAlo, compliance | 🔒 Inmutable |
+| `report` | Output estructurado de auditorías | MEJORAlo, compliance | 🔒 Tamper-Evident |
 | `rule` | Reglas de sesión y constraints comportamentales | Directivas activas | ✏️ Mutable |
 | `evolution` | Registros de upgrades del sistema | Arqueología de cambios | 🔒 Append-only |
 | `world-model` | Insights contrafactuales y retrospectivos | Inteligencia retrospectiva | ✏️ Appendable |
@@ -74,7 +74,7 @@ El agente Antigravity viene de serie con **7 tipos de memoria**, ninguna con bú
 
 | Componente | Función |
 |:---|:---|
-| `soul.md` | *QUIÉN* eres — identidad inmutable + `transcendence_vector` |
+| `soul.md` | *QUIÉN* eres — identidad tamper-evident + `transcendence_vector` |
 | `lore.md` | *QUÉ* has sobrevivido — historia acumulada entre sesiones |
 | `nemesis` | *QUÉ* rechazas — anti-patrones explícitos |
 | `tether.md` | *DÓNDE* no puedes ir — dead-man switch a nivel OS |

@@ -14,7 +14,7 @@ La unidad atómica es el **Belief Object**.
 *   **Identidad**: UUIDv7 (garantiza ordenación lexicográfica nativa).
 *   **Epistemic State**: Probabilidad Bayesiana Condicional ($P(H|E)$) y una varianza (incertidumbre).
 *   **Decay Rate**: Decaimiento logarítmico para olvido biológico simulado.
-*   **Procedencia (PROV-AGENT)**: Trazabilidad inmutable criptográfica (quién, cómo y cuándo se derivó la creencia).
+*   **Procedencia (PROV-AGENT)**: Trazabilidad tamper-evident criptográfica (quién, cómo y cuándo se derivó la creencia).
 *   **Dependencias Lógicas**: Vectores `entails` ($\vdash$) y `discards` ($\ll$) para mantener la consistencia del grafo. Si una premisa colapsa, todas sus dependencias caducan mecánicamente en $O(1)$.
 
 ## 3. El Core API
@@ -42,7 +42,7 @@ La arquitectura destrona al frágil GIL (Global Interpreter Lock) asimilando una
 *   **L0/L1 Hot Storage (Zero-Copy SHM)**: Elimina el letal peaje del IPC/JSON Serialization. Usa el patrón Blackboard (Memoria Compartida de S.O.) propulsado por **`iceoryx2`**. Esto permite comunicación sub-milisegundo lock-free directa con motores paralelos como **vLLM** o **SGLang**.
 *   **L3/L4 Swarm Sync**: Usa **`Zenoh`** (Pub/Sub descentralizado). Aniquila el overhead de sistemas JVM masivos como Kafka o arquitecturas Go como NATS. Permite inyectar deltas CRDT asíncronamente en redes inestables Edge con un throughput superior a los 50 Gbps en redes físicas 100GbE locales.
 *   **L2/L5 Episodic Data Log**: Inmersión puramente transaccional sobre **RocksDB** (o infraestructuras LVS PostgreSQL/SurrealDB) para absorber los inmensos torrentes episódicos (append-only) y proteger las consolidaciones nocturnas del hipervisor.
-*   **Integrity Layer (Árboles Merkle - mssmt)**: Almacenamiento matemáticamente inmutable de estado ($O(\log N)$). Proporciona los cimientos estructurales descentralizados donde descansar la confianza normativa.
+*   **Integrity Layer (Árboles Merkle - mssmt)**: Almacenamiento matemáticamente tamper-evident de estado ($O(\log N)$). Proporciona los cimientos estructurales descentralizados donde descansar la confianza normativa.
 
 ## 7. Memory Consolidation (El "Sueño" del Enjambre)
 Cortex-Persist abstrae la red topológicamente en 3 subgrafos ($G_e$: Episódico, $G_s$: Semántica de Entidades, $G_c$: Entidades Comunitarias / Memoria Procedimental). 

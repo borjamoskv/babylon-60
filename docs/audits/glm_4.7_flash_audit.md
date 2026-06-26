@@ -77,7 +77,7 @@ Vamos a analizar específicamente cómo se comportaría CORTEX-PERSIST en tu har
 | Dimension | LangGraph | Mem0 | CORTEX-PERSIST |
 | :--- | :---: | :---: | :---: |
 | **Persistence unit** | Estado del gráfico | Hechos semánticos | Trace + Hash-chain |
-| **Source of truth** | Último checkpoint | Memoria relevante | Ledger Merkle inmutable |
+| **Source of truth** | Último checkpoint | Memoria relevante | Ledger Merkle tamper-evident |
 | **Divergence detection** | ❌ | ❌ | ✅ DivergenceMap + EntropyDrift |
 | **Deterministic replay** | Parcial | ❌ | ✅ ReplayEngine (CI-verified) |
 | **Multi-run topology** | ❌ | ❌ | ✅ Equivalence classes + fork map |

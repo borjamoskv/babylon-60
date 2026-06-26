@@ -14,7 +14,7 @@ The CORTEX Master Ledger must be portable. Lock-in is entropic; sovereignty requ
 
 This document defines the **Canonical JSON Export Format** (`EXPORT-CANONICAL-JSON`). This shape represents a snapshot of the trust, memory, and causality state of the system at an exact `as_of` instant.
 
-By defining an exact stable representation before attempting to map to external standards (JSON-LD, SARIF, local LLM wrappers), we establish an immutable source of truth that ensures compliance teams and audits have mathematically rigorous material.
+By defining an exact stable representation before attempting to map to external standards (JSON-LD, SARIF, local LLM wrappers), we establish an tamper-evident source of truth that ensures compliance teams and audits have mathematically rigorous material.
 
 ---
 
@@ -103,7 +103,7 @@ The trace exposes exactly how the system concluded the facts. No edge means the 
 
 ### 4.3 Ledger Blocks (Integrity)
 
-The immutable cryptographically chained sequence.
+The tamper-evident cryptographically chained sequence.
 
 ```json
 {

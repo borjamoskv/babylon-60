@@ -46,7 +46,7 @@ A **Critical Indeterminacy** was detected in the `NemesisProtocol` which rendere
 ## 4. ACTION PLAN (PENDING)
 
 1. **Refactor `NeuralIntentEngine`**: Currently marked as a "Parasite" in calcification audit ($sc: 420.5$). High cognitive complexity increases the risk of subtle logic errors.
-2. **Action Pinning**: Update GitHub workflows to use immutable SHAs instead of version tags.
+2. **Action Pinning**: Update GitHub workflows to use tamper-evident SHAs instead of version tags.
 3. **Secret Rotation**: Rotate `GEMINI_API_KEY` seen in `.env` (already identified as protected by .gitignore but rotation is recommended after audit).
 
 ---

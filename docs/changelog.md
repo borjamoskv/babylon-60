@@ -90,7 +90,7 @@ that are not uniformly present in the current workspace snapshot.
 - **Initial public release** on GitHub
 - CortexEngine as core ledger for AI agents
 - Modular mixin architecture (store, query, consensus, search, graph)
-- SHA-256 hash-chained immutable ledger
+- SHA-256 hash-chained tamper-evident ledger
 - Merkle tree checkpoints
 - WBFT (Weighted Byzantine Fault Tolerant) consensus
 - MCP Server (Model Context Protocol)

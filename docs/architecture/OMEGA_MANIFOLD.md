@@ -39,7 +39,7 @@ En el ecosistema **MOSKV-1 v5**, ya no operamos con "scripts" o "módulos" aisla
 - **Metacognición Intrínseca:** Mediante el acoplamiento con **NOOSPHERE-Ω**, IMMUNITAS evalúa los propios procesos de razonamiento del sistema, aislando "alucinaciones lógicas" para evitar el autoengaño por **coherencia ilusoria**.
 
 ### 💾 ANAMNESIS-Ω: El Hilo de Ariadna (Cumplimiento EU AI Act - Shadow Keys)
-- **Función:** Grafo Acíclico Dirigido (DAG) de causalidad inmutable.
+- **Función:** Grafo Acíclico Dirigido (DAG) de causalidad tamper-evident.
 - **Patrón Shadow Key (Redis):** La implementación tradicional de Redis TTL genera pérdida de payloads (emite `expired` solo con el nombre de la clave). ANAMNESIS-Ω desacopla la expiración:
   1. *Data Key:* Sin TTL. Retiene el payload en RAM de forma segura.
   2. *Shadow Key:* Contiene el TTL. Su evicción es escuchada por un daemon (`Compaction Sidecar`).

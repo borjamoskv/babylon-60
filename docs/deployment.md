@@ -121,7 +121,7 @@ Target architecture:
 |:---|:---|:---|
 | **L1** (Working) | Cloud Memorystore (Redis) | Sliding window working memory |
 | **L2** (Vector) | Qdrant Cloud | 384-dim semantic search |
-| **L3** (Ledger) | AlloyDB PostgreSQL | Hash-chained immutable ledger |
+| **L3** (Ledger) | AlloyDB PostgreSQL | Hash-chained tamper-evident ledger |
 | **API** | Cloud Run | Auto-scaling stateless API |
 | **Orchestration** | GKE | Daemon and background services |
 

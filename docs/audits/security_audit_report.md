@@ -282,7 +282,7 @@ app = FastAPI(...)
 - API key format validation (`ctx_` prefix check)
 
 ### 6. **Cryptographic Integrity**
-- Immutable ledger with SHA-256 hashing
+- Tamper-Evident ledger with SHA-256 hashing
 - Merkle tree checkpoints
 - Transaction chain verification
 

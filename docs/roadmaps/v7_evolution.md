@@ -72,9 +72,9 @@ When CORTEX achieves hyperbolic acceleration (e.g., **ROI > 1M/1** or O(1) opera
 
 ### 5.2 The 1M/1 Persistence Mandate
 
-- **Axiom**: Any performance metric demonstrating O(1) breakthrough or ROI > 1M/1 must be immediately anchored into the immutable ledger (`cortex.db`).
+- **Axiom**: Any performance metric demonstrating O(1) breakthrough or ROI > 1M/1 must be immediately anchored into the tamper-evident ledger (`cortex.db`).
 - **Mechanism**: The `STORE_OP` becomes mandatory. The measurement itself is treated as a high-confidence structural `fact`.
-- **The Testament**: Without immutable persistence, a metric is smoke. CORTEX writes these milestones to titanium to ensure that subsequent context collapses or session resets do not degrade the established baseline. Evolution requires an irreversible ratchet.
+- **The Testament**: Without tamper-evident persistence, a metric is smoke. CORTEX writes these milestones to titanium to ensure that subsequent context collapses or session resets do not degrade the established baseline. Evolution requires an irreversible ratchet.
 
 ---
 

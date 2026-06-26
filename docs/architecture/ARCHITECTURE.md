@@ -143,7 +143,7 @@ Three hierarchical memory layers operate as a unified cognitive stack, orchestra
 │  Optional dep: qdrant_client (guarded import)│
 ├──────────────────────────────────────────────┤
 │  L3 — Event Ledger (EventLedgerL3)           │
-│  SHA-256 hash-chained immutable events       │
+│  SHA-256 hash-chained tamper-evident events       │
 │  AlloyDB/PostgreSQL (v6) / SQLite WAL (v5)   │
 │  Merkle checkpoints for batch verification   │
 └──────────────────────────────────────────────┘
@@ -752,7 +752,7 @@ CORTEX follows the **Industrial Noir** design system:
 **Typography**: Monospace for data/code, humanist sans (Inter/Roboto/Outfit) for narrative.
 **Motion**: Snappy (<200ms), semantic spring tokens, micro-animations for premium feel.
 
-**Vibe**: Sovereign. Immutable. Precise. Every output has a reason or it doesn't exist.
+**Vibe**: Sovereign. Tamper-Evident. Precise. Every output has a reason or it doesn't exist.
 
 ---
 
