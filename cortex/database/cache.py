@@ -158,6 +158,11 @@ class TieredCache(Generic[T]):
             del self.l1[k]
 
         # Remove from L2
+        await self._invalidate_l2(pattern)
+
+        await self._notify(CacheEvent.INVALIDATE, pattern)
+
+    async def _invalidate_l2(self, pattern: str):
         client = await self._get_redis()
         if client is not None:
             try:
@@ -172,7 +177,6 @@ class TieredCache(Generic[T]):
             except Exception as exc:
                 logger.warning("Redis invalidate failed for pattern %s: %s", pattern, exc)
 
-        await self._notify(CacheEvent.INVALIDATE, pattern)
 
     async def clear(self):
         """Clear all cache entries."""

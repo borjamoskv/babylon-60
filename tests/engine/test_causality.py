@@ -2,11 +2,11 @@
 import pytest
 import aiosqlite
 import json
+from cortex.engine._causality_helpers import propagate_refutation
 from cortex.engine.causality import (
     CausalGraph,
     LedgerEvent,
     EpistemicStatus,
-    propagate_refutation,
     AsyncCausalGraph,
     TaintStatus,
     Confidence,

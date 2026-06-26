@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Protocol, TypeAlias
 
 from cortex.guards._seal_printer import SealPrinter
+from cortex.guards._seals_cache import GlobalSourceCache  # noqa: F401
 
 # ── Type Definitions ──
 # Result: (Success, Reason/Status)

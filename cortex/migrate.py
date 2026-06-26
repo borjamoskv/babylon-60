@@ -82,13 +82,27 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
         return
 
     project = "__system__"
-
     facts_to_store = []
 
-    # Preferences
+    _extract_system_preferences(data, project, facts_to_store)
+    _extract_system_operator(data, project, facts_to_store)
+    _extract_system_decisions(data, project, facts_to_store)
+    _extract_system_knowledge(data, project, facts_to_store)
+
+    if facts_to_store:
+        try:
+            engine.store_many_sync(facts_to_store)
+            stats["facts_imported"] += len(facts_to_store)
+        except Exception as e:
+            stats["errors"].append(f"System facts import failed: {e}")
+
+    _import_sessions(engine, data, stats)
+
+
+def _extract_system_preferences(data: dict, project: str, facts: list) -> None:
     prefs = data.get("preferences", {})
     if prefs:
-        facts_to_store.append(
+        facts.append(
             {
                 "project": project,
                 "content": json.dumps(prefs, ensure_ascii=False),
@@ -99,10 +113,11 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
             }
         )
 
-    # Operator info
+
+def _extract_system_operator(data: dict, project: str, facts: list) -> None:
     operator = data.get("operator", {})
     if operator:
-        facts_to_store.append(
+        facts.append(
             {
                 "project": project,
                 "content": json.dumps(operator, ensure_ascii=False),
@@ -113,9 +128,10 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
             }
         )
 
-    # Global decisions
+
+def _extract_system_decisions(data: dict, project: str, facts: list) -> None:
     for decision in data.get("global_decisions", []):
-        facts_to_store.append(
+        facts.append(
             {
                 "project": project,
                 "content": decision.get("decision", str(decision)),
@@ -127,9 +143,10 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
             }
         )
 
-    # Knowledge items
+
+def _extract_system_knowledge(data: dict, project: str, facts: list) -> None:
     for ki in data.get("knowledge", []):
-        facts_to_store.append(
+        facts.append(
             {
                 "project": project,
                 "content": ki.get("content", str(ki)),
@@ -142,14 +159,8 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
             }
         )
 
-    if facts_to_store:
-        try:
-            engine.store_many_sync(facts_to_store)
-            stats["facts_imported"] += len(facts_to_store)
-        except Exception as e:
-            stats["errors"].append(f"System facts import failed: {e}")
 
-    # Sessions
+def _import_sessions(engine: CortexEngine, data: dict, stats: dict) -> None:
     conn = engine._get_sync_conn()
     for session in data.get("sessions_log", []):
         try:
@@ -169,7 +180,6 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
             stats["sessions_imported"] += 1
         except sqlite3.Error as e:
             stats["errors"].append(f"Session import failed: {e}")
-
     conn.commit()
 
 

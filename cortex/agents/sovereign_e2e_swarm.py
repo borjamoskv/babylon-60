@@ -8,9 +8,9 @@ import aiosqlite
 from google.antigravity import Agent, types
 from google.antigravity.connections.local import LocalAgentConfig
 from google.antigravity.hooks import hooks
-from google.antigravity.tools import tool
 from cortex.audit.ledger import EnterpriseAuditLedger
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 # ==============================================================================
@@ -76,7 +76,6 @@ async def protocolo_ship_omega(data: str):
         
     logger.info("[SHIP-Ω] Cristalización C5-REAL completada.")
 
-@tool
 def execute_shell(cmd: str) -> str:
     """Ejecuta un comando en la terminal local del agente."""
     try:
@@ -112,23 +111,22 @@ async def main():
     )
 
     # Instanciamos el Agente Principal (Jules-Secretario)
-    Agent(config)
+    async with Agent(config) as agent:
+        # Ejemplo de ejecución E2E
+        user_prompt = "Audita el UI actual y elimina componentes React sin uso."
 
-    # Ejemplo de ejecución E2E
-    user_prompt = "Audita el UI actual y elimina componentes React sin uso."
+        logger.info("> Prompt de entrada: %s", user_prompt)
 
-    logger.info("> Prompt de entrada: %s", user_prompt)
+        # En un caso real de delegación (Pilar 4):
+        # 1. El agente invocaría al subagente 'Aesthetic-Omega' para auditar UI.
+        # 2. Invocaría a 'LEA-Ω' para eliminar el código.
+        # 3. Él mismo compila y hace el push.
 
-    # En un caso real de delegación (Pilar 4):
-    # 1. El agente invocaría al subagente 'Aesthetic-Omega' para auditar UI.
-    # 2. Invocaría a 'LEA-Ω' para eliminar el código.
-    # 3. Él mismo compila y hace el push.
+        # Aquí simulamos el run() principal.
+        response = await agent.chat(user_prompt)
+        print(f"Respuesta final: {response.text()}")
 
-    # Aquí simulamos el run() principal.
-    # response = await agent.chat(user_prompt)
-    # print(f"Respuesta final: {response.text}")
-
-    logger.info("[!] Nodo terminal E2E completado. Esperando próxima anomalía.")
+        logger.info("[!] Nodo terminal E2E completado. Esperando próxima anomalía.")
 
 
 if __name__ == "__main__":
