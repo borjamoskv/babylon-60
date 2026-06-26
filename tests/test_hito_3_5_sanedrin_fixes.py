@@ -18,12 +18,24 @@ async def setup_db(db_path: str) -> aiosqlite.Connection:
             id TEXT PRIMARY KEY,
             statement TEXT,
             probability REAL,
+            svi REAL,
             evi REAL,
             cost REAL,
             impact REAL,
             status TEXT,
             created_at TEXT,
             owner_id TEXT
+        )
+    ''')
+    await db.execute('''
+        CREATE TABLE IF NOT EXISTS hypothesis_edges (
+            parent_id TEXT NOT NULL,
+            child_id TEXT NOT NULL,
+            edge_weight REAL NOT NULL DEFAULT 1.0,
+            relation_type TEXT NOT NULL DEFAULT 'requires',
+            confidence REAL NOT NULL DEFAULT 1.0,
+            created_at TEXT NOT NULL,
+            PRIMARY KEY(parent_id, child_id)
         )
     ''')
     await db.execute('''
@@ -53,8 +65,8 @@ async def test_2pc_atomic_commit():
     # Insert 1 task
     now = datetime.now(timezone.utc).isoformat()
     await db.execute(
-        "INSERT INTO system_hypotheses (id, statement, probability, evi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        ("hyp-test-2pc", "Stmt", 1.0, 1.0, 1.0, 1.0, 'ACTIVE', now)
+        "INSERT INTO system_hypotheses (id, statement, probability, svi, evi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        ("hyp-test-2pc", "Stmt", 1.0, 1.0, 1.0, 1.0, 1.0, 'ACTIVE', now)
     )
     await db.commit()
     await db.close()
@@ -109,8 +121,8 @@ async def test_lease_locks_and_ghost_recovery():
     now = datetime.now(timezone.utc).isoformat()
     old_lease = "OLD_LEASE_123"
     await db.execute(
-        "INSERT INTO system_hypotheses (id, statement, probability, evi, cost, impact, status, created_at, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("hyp-test-lease", "Stmt", 1.0, 1.0, 1.0, 1.0, 'IN_FLIGHT', now, old_lease)
+        "INSERT INTO system_hypotheses (id, statement, probability, svi, evi, cost, impact, status, created_at, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        ("hyp-test-lease", "Stmt", 1.0, 1.0, 1.0, 1.0, 1.0, 'IN_FLIGHT', now, old_lease)
     )
     await db.commit()
     await db.close()

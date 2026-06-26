@@ -1,4 +1,8 @@
-import cortex.database.core
+import asyncio
+import sqlite3
+import os
+from cortex.database.core import connect
 
-print(dir(cortex.database.core))
-print("CortexConnection" in dir(cortex.database.core))
+db_path = "test_ledger.db"
+# Just print what happens
+print("debug")

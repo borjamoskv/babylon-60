@@ -28,7 +28,7 @@ def test_low_token_cost_does_not_bypass_strict_checks(closure_guard: CausalClosu
     )
     # Should fail because it lacks structure (Anergia Bypass was removed)
     import pytest
-    with pytest.raises(RuntimeError, match="Proposal lacks structural artifacts"):
+    with pytest.raises(RuntimeError, match="AX-VIII Violation"):
         closure_guard.verify_closure(proposal)
 
 

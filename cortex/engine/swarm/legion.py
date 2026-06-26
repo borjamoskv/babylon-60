@@ -65,6 +65,27 @@ class AsyncSignalBus:
         
         Empty payloads are considered semantically empty and are downgraded to VOID.
         """
+        import aiosqlite
+        import sys
+        
+        db_path = getattr(sys.modules.get('cortex.engine.swarm.legion'), 'DB_PATH', None)
+        if not db_path:
+            try:
+                from cortex.config import DB_PATH
+                db_path = DB_PATH
+            except ImportError:
+                pass
+                
+        if db_path:
+            try:
+                async with aiosqlite.connect(db_path) as db:
+                    async with db.execute("SELECT status FROM system_hypotheses WHERE id = ?", (signal.target,)) as cursor:
+                        row = await cursor.fetchone()
+                        if row and row[0] == "INVALIDATED":
+                            return
+            except Exception:
+                pass
+
         if not signal.payload and signal.status == "SUCCESS":
             raise ValueError("P0 Violation: SUCCESS signal emitted with empty payload.")
         

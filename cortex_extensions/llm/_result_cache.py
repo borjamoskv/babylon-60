@@ -31,6 +31,8 @@ _DEFAULT_TTL: int = 86400
 def _db(path: Path, exclusive: bool = False) -> Generator[sqlite3.Connection, None, None]:
     """Sovereign context manager for SQLite via CORTEX factory."""
     conn = db_connect(str(path), timeout=5)
+    if hasattr(conn, "authorize_causal_writes"):
+        conn.authorize_causal_writes()
     try:
         if exclusive:
             conn.execute("BEGIN EXCLUSIVE")

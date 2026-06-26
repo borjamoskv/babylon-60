@@ -22,6 +22,7 @@ async def test_ledger_tamper_evident_corruption_detection():
         id3 = await asyncio.wait_for(ledger.log_action("tenant_1", "system", "actor_1", "DELETE", "fact:1001"), timeout=5.0)
         
         # Force flush and close
+        await conn.commit()
         await asyncio.sleep(0.1)
         await ledger.close()
     
