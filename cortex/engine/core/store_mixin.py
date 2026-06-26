@@ -205,7 +205,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return dedupe_id
 
         with causal_write(conn):
-            tx_id = await self._resolve_tx_id(tx_id, conn, project, content, fact_type, tenant_id)
+            tx_id = await self._resolve_tx_id(tx_id, conn, project, content, fact_type, tenant_id, actor_id=actor_id)
             fact_id = await insert_fact_record(
                 conn,
                 tenant_id,
@@ -256,6 +256,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         content: str,
         fact_type: str,
         tenant_id: str,
+        actor_id: str | None = None,
     ) -> int:
         if tx_id is not None:
             return tx_id

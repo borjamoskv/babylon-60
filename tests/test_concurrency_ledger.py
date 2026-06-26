@@ -37,14 +37,16 @@ async def run_concurrent_appends(engine, n_writers: int) -> list[int]:
     """Spawn concurrent appends to log transactions under stress."""
 
     async def append_one(i: int) -> int:
+        from cortex.engine.core.store_mixin import causal_write
         async with engine.session() as conn:
-            tx_id = await engine._log_transaction(
-                conn,
-                project="concurrency_test",
-                action="append",
-                detail={"writer_index": i},
-                tenant_id="default",
-            )
+            with causal_write(conn):
+                tx_id = await engine._log_transaction(
+                    conn,
+                    project="concurrency_test",
+                    action="append",
+                    detail={"writer_index": i, "actor_id": "test_actor"},
+                    tenant_id="default",
+                )
             await conn.commit()
             return tx_id
 

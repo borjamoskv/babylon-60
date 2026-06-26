@@ -208,7 +208,7 @@ class EvolutionLedger:
         )
         # Replay and verify
         for record in ledger.replay():
-            print(record.hash)
+            log.info(record.hash)
     """
 
     GENESIS_HASH = "GENESIS"
