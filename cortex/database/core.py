@@ -109,15 +109,11 @@ class CortexConnection(sqlite3.Connection):
 _original_sqlite3_connect = sqlite3.connect
 
 
-<<<<<<< Updated upstream
 def _secure_sqlite3_connect(*args: Any, **kwargs: Any) -> sqlite3.Connection:
     """
     [C5-REAL] Kernel-owned Connection Allocator Hook.
     Blocks any raw sqlite3.connect() calls that do not use the CortexConnection factory.
     """
-=======
-def _secure_sqlite3_connect(*args, **kwargs):
->>>>>>> Stashed changes
     factory = kwargs.get("factory")
     print(f"DEBUG: _secure_sqlite3_connect called with factory={factory}")
     if factory is not CortexConnection:
@@ -132,19 +128,19 @@ def _secure_sqlite3_connect(*args, **kwargs):
         )
         if "PYTEST_CURRENT_TEST" in os.environ and not is_security_test:
             print(f"DEBUG: bypassing security check for test {pytest_test}")
-            return _original_sqlite3_connect(*args, **kwargs)
+            return __import__("typing").cast(sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs))
             
         if args and isinstance(args[0], (str, bytes)) and ".coverage" in str(args[0]):
-            return _original_sqlite3_connect(*args, **kwargs)
+            return __import__("typing").cast(sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs))
             
         raise RuntimeError(
             "[C5-REAL] FATAL: Direct sqlite3.connect() is structurally forbidden. Use MTK Allocator (cortex.database.core.connect)."
         )
     print("DEBUG: returning original with factory")
-    return _original_sqlite3_connect(*args, **kwargs)
+    return __import__("typing").cast(sqlite3.Connection, _original_sqlite3_connect(*args, **kwargs))
 
 
-sqlite3.connect = _secure_sqlite3_connect
+sqlite3.connect = __import__("typing").cast(Any, _secure_sqlite3_connect)
 
 
 @contextmanager
@@ -282,7 +278,7 @@ def connect(
             timeout=timeout,
             check_same_thread=check_same_thread,
             uri=uri,
-            isolation_level=isolation_level,  # type: ignore[arg-type]
+            isolation_level=isolation_level,
             factory=CortexConnection,
         )
     except sqlite3.OperationalError as e:
