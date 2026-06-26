@@ -103,7 +103,12 @@ class EventLedgerL3:
         from cortex.engine.causal.taint_engine import enforce_taint_check
 
         await self.ensure_table()
-        token = event.metadata.get("cortex_taint") if event.metadata else None
+        token = (
+            event.metadata.get("cortex_taint")
+            or event.metadata.get("CORTEX-TAINT")
+            or event.metadata.get("cortex-taint")
+            or event.metadata.get("CORTEX_TAINT")
+        ) if event.metadata else None
         await enforce_taint_check(self._conn, token, event.content)
 
         prev_hash = await self._get_last_hash(event.tenant_id)

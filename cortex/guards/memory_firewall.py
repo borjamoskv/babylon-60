@@ -74,7 +74,12 @@ class MemoryFirewallGuard:
 
         # 2. Taint Verification (CORTEX-TAINT)
         if self.require_taint:
-            taint = meta.get("CORTEX-TAINT")
+            taint = (
+                meta.get("CORTEX-TAINT")
+                or meta.get("cortex_taint")
+                or meta.get("cortex-taint")
+                or meta.get("CORTEX_TAINT")
+            )
             if not taint:
                 raise ValueError(
                     f"[P0] Memory Firewall: Fact from source '{source}' lacks CORTEX-TAINT. "

@@ -25,6 +25,7 @@ from cortex.mcp.mega_tools import register_mega_tools
 from cortex.mcp.music_tools import register_music_tools
 from cortex.mcp.singularity_tools import register_singularity_tools
 from cortex.mcp.trust_tools import register_trust_tools
+from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
 from cortex.mcp.utils import (
     AsyncConnectionPool,
     MCPMetrics,
@@ -319,6 +320,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         register_health_tools(mcp, ctx)
         register_music_tools(mcp)
         register_singularity_tools(mcp)
+        register_rustchain_tools(mcp)
 
         from cortex.mcp.pipeline_tools import register_pipeline_tools
 

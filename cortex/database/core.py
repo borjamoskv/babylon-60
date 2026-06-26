@@ -162,7 +162,7 @@ def causal_write(conn: Any) -> Any:
     """Context manager to temporarily authorize causal writes on a connection."""
     # aiosqlite connection has _conn, while raw sqlite3/CortexConnection does not
     underlying = conn._conn if hasattr(conn, "_conn") else conn
-    is_cortex_conn = hasattr(underlying, "authorize_causal_writes")
+    is_cortex_conn = isinstance(underlying, CortexConnection)
     
     # Only try to mutate the connection if it's a CortexConnection that supports dynamic attributes
     if is_cortex_conn:
