@@ -298,6 +298,37 @@ class SwarmCommander:
             )
         return self.legions[domain]
 
+    async def dispatch_optimal_hypotheses(self, count: int = 100) -> None:
+        """Pulls optimal tasks from TopologyIndex based on CBR and dispatches them."""
+        import aiosqlite
+
+        from cortex.config import DB_PATH
+        from cortex.engine.causal.topological_arbitrage import TopologyIndex
+
+        async with aiosqlite.connect(DB_PATH) as db:
+            topo = await TopologyIndex.create(db)
+            optimal_tasks = []
+            in_flight = set()
+
+            for _ in range(count):
+                task = topo.get_next_optimal_task(in_flight)
+                if not task:
+                    break
+                optimal_tasks.append(
+                    {
+                        "domain": "causal",
+                        "type": "falsify_hypothesis",
+                        "hypothesis_id": task["id"],
+                        "statement": task["statement"],
+                        "cbr": task["boosted_cbr"],
+                    }
+                )
+                in_flight.add(task["id"])
+
+            if optimal_tasks:
+                logger.info("Dispatching %d optimal hypotheses (CBR-based).", len(optimal_tasks))
+                await self.execute_global_dispatch(optimal_tasks)
+
     async def execute_global_dispatch(self, tasks: list[dict], parallel: bool = True) -> None:
         """Route massive workload across the Sharded hierarchy."""
         if parallel:

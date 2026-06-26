@@ -129,8 +129,8 @@ async def hybrid_search(
     w_vec = vector_weight / total_w
     w_txt = text_weight / total_w
 
-    rrf_scores: dict[int, float] = {}
-    result_map: dict[int, SearchResult] = {}
+    rrf_scores: dict[str, float] = {}
+    result_map: dict[str, SearchResult] = {}
 
     # Standardize Semantic Results
     for rank, res in enumerate(sem_results):
@@ -168,7 +168,7 @@ async def hybrid_search(
         contexts = await _expand_graph_context(conn, fact_ids, graph_depth)
         for r in merged:
             if str(r.fact_id) in contexts:
-                r.context = {"edges": contexts[str(r.fact_id)]}
+                r.graph_context = {"edges": contexts[str(r.fact_id)]}
 
     # 🔥 Fire-and-forget BM25 feedback loop
     if merged:
@@ -209,8 +209,8 @@ def hybrid_search_sync(
     w_vec = vector_weight / total_w
     w_txt = text_weight / total_w
 
-    rrf_scores: dict[int, float] = {}
-    result_map: dict[int, SearchResult] = {}
+    rrf_scores: dict[str, float] = {}
+    result_map: dict[str, SearchResult] = {}
 
     for rank, res in enumerate(sem_results):
         score = w_vec / (RRF_K + rank + 1)

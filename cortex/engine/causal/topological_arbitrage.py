@@ -81,7 +81,7 @@ class TopologyIndex:
 
         # Load nodes
         async with self.db.execute(
-            "SELECT id, statement, probability, svi, evi, cost, impact, status FROM system_hypotheses"
+            "SELECT id, statement, probability, svi, evi, cost, impact, status, created_at FROM system_hypotheses"
         ) as cursor:
             async for row in cursor:
                 self.nodes[row[0]] = {
@@ -92,6 +92,7 @@ class TopologyIndex:
                     "cost": row[5],
                     "impact": row[6],
                     "status": row[7],
+                    "created_at": row[8],
                 }
 
         # Load edges
@@ -239,6 +240,52 @@ class TopologyIndex:
                     }
                 )
         return sorted(active, key=lambda x: x["cbr"], reverse=True)
+
+    def get_next_optimal_task(self, in_flight: set[str]) -> dict[str, Any] | None:
+        """Returns the optimal task based on CBR, bypassing in-flight tasks and applying a starvation boost."""
+        import time
+        from datetime import datetime, timezone
+
+        active = []
+        now = time.time()
+        for u, data in self.nodes.items():
+            if data["status"] == "ACTIVE" and u not in in_flight:
+                m = self.metrics[u]
+                cbr = m["cbr"]
+
+                # Default age if parsing fails
+                age_seconds = 1.0
+                try:
+                    # created_at is typically ISO 8601 or SQLite format
+                    dt = datetime.fromisoformat(
+                        data.get("created_at", datetime.now(timezone.utc).isoformat()).replace(
+                            "Z", "+00:00"
+                        )
+                    )
+                    age_seconds = max(1.0, now - dt.timestamp())
+                except Exception:
+                    pass
+
+                import math
+
+                # Starvation boost: CBR scales logarithmically with age
+                boosted_cbr = cbr * (1.0 + math.log1p(age_seconds / 3600.0))
+
+                active.append(
+                    {
+                        "id": u,
+                        "statement": data["statement"],
+                        "cbr": cbr,
+                        "boosted_cbr": boosted_cbr,
+                        "w_h": m["w_h"],
+                    }
+                )
+
+        if not active:
+            return None
+
+        active.sort(key=lambda x: x["boosted_cbr"], reverse=True)
+        return active[0]
 
     def descendants(self, node_id: str) -> set[str]:
         """Returns all transitive descendants."""
