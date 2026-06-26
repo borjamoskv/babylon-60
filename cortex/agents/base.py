@@ -57,6 +57,10 @@ class BaseAgent:
 
     # ── Abstract methods (subclasses implement) ──────────────────
 
+    async def _dispatch(self, op: str, payload: dict[str, Any]) -> Any:
+        """Dispatch a control message operation."""
+        raise NotImplementedError(f"Agent {self.__class__.__name__} does not implement _dispatch")
+
     async def handle_message(self, message: AgentMessage) -> None:
         """Process an incoming message. Subclasses MUST override."""
         raise NotImplementedError(f"{self.__class__.__name__} must implement handle_message()")

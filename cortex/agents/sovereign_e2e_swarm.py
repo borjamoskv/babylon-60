@@ -5,9 +5,9 @@ import os
 import subprocess
 
 import aiosqlite
-from google.antigravity import Agent, types
-from google.antigravity.connections.local import LocalAgentConfig
-from google.antigravity.hooks import hooks
+from google.antigravity import Agent, types  # type: ignore
+from google.antigravity.connections.local import LocalAgentConfig  # type: ignore
+from google.antigravity.hooks import hooks  # type: ignore
 
 from cortex.audit.ledger import EnterpriseAuditLedger
 
