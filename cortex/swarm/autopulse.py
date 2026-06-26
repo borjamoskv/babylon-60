@@ -7,6 +7,7 @@ import time
 
 from cortex.config import DB_PATH
 from cortex.crypto.provider import HashProvider
+from cortex.swarm.gossip_bus import GossipBus
 from cortex.swarm.tensor_glial import TensorGlialLegion
 from cortex_extensions.signals.bus import AsyncSignalBus
 
@@ -255,12 +256,25 @@ async def _process_single_task(agent: str, payload: dict, anti_limerence, umap) 
         raise EntropySpikeException(f"Entropy Circuit Breaker tripped for {agent}")
 
     await _append_state_ledger(agent, payload)
+    
+    # [P2] Emit to Gossip Protocol for decentralized consensus
+    from cortex.swarm.autopulse import _gossip_bus
+    if _gossip_bus:
+        await _gossip_bus.broadcast(signal_type="AutopulseTask", payload={"agent": agent, **payload})
 
+
+_gossip_bus: GossipBus | None = None
 
 async def process_queue() -> None:
     """Background loop to consume and execute pending swarm tasks."""
     logger.info("Autopulse Engine: Ignited. Watching swarm queue...")
     anti_limerence, umap = _load_anti_limerence_runtime()
+
+    global _gossip_bus
+    if os.environ.get("CORTEX_GOSSIP_ENABLED") == "1":
+        node_id = os.environ.get("CORTEX_ACTOR_ID", "borjamoskv")
+        _gossip_bus = GossipBus(node_id=node_id)
+        await _gossip_bus.start(bus=None)
 
     last_pulse = time.monotonic()
 
@@ -293,6 +307,8 @@ async def process_queue() -> None:
 
     except asyncio.CancelledError:
         logger.info("Autopulse Engine: Cancelled signal received. Shutting down cleanly.")
+        if _gossip_bus:
+            await _gossip_bus.stop()
         raise
 
 
