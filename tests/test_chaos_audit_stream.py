@@ -25,13 +25,13 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from cortex_extensions.red_team.hydra_chaos import (
+from cortex.extensions.red_team.hydra_chaos import (
     ChaosResult,
     ChaosScenario,
     HydraChaosEngine,
     MockRedisClient,
 )
-from cortex_extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
 # ── Fixtures ──────────────────────────────────────────────────────────
 

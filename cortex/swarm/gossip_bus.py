@@ -13,9 +13,9 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
-from cortex_extensions.federation.gossip import GossipNode
-from cortex_extensions.ha.gossip import GossipProtocol
-from cortex_extensions.signals.bus import AsyncSignalBus
+from cortex.extensions.federation.gossip import GossipNode
+from cortex.extensions.ha.gossip import GossipProtocol
+from cortex.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.swarm.gossip_bus")
 

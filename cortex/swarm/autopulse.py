@@ -7,9 +7,9 @@ import time
 
 from cortex.config import DB_PATH
 from cortex.crypto.provider import HashProvider
+from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.swarm.gossip_bus import GossipBus
 from cortex.swarm.tensor_glial import TensorGlialLegion
-from cortex_extensions.signals.bus import AsyncSignalBus
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.autopulse")
@@ -93,7 +93,6 @@ async def _consume_next_task() -> tuple[str, dict] | None:
 def _trigger_umap_hormones(agent: str, umap) -> None:
     """Triggers hormonal stress response in adjacent agents."""
     agent_hash = int(HashProvider.sha256(agent)[:16], 16)
-    agent_hash % umap.capacity
     x = agent_hash % 1000 / 10.0
     y = (agent_hash >> 4) % 1000 / 10.0
     z = (agent_hash >> 8) % 1000 / 10.0

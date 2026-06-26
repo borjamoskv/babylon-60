@@ -20,7 +20,7 @@ def auth() -> None:
 def submit_vote(req_id: str) -> None:
     """Submits a cryptographic vote for a pending consensus request."""
     async def _run() -> None:
-        from cortex_extensions.security.signatures import get_default_signer
+        from cortex.extensions.security.signatures import get_default_signer
 
         engine = CortexEngine()
         auth_gw = QuorumGateway(engine)

@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex_extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
 
 @pytest.fixture(autouse=True)

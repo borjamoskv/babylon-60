@@ -7,7 +7,7 @@ from rich.table import Table
 
 from cortex.cli.common import _run_async, console, get_engine
 from cortex.engine.evo.decalcifier import SovereignDecalcifier
-from cortex_extensions.songlines.sensor import TopographicSensor
+from cortex.extensions.songlines.sensor import TopographicSensor
 
 
 @click.group(name="radar")

@@ -10,8 +10,8 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from cortex.extensions.signals.bus import SignalBus
     from cortex.gateway.router import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
-    from cortex_extensions.signals.bus import SignalBus
 
 __all__ = [
     "GatewayIntent",

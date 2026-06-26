@@ -81,7 +81,10 @@ class KeyManager:
         )
 
         try:
-            keyring.set_password(self.service_name, actor_id, private_bytes.decode("utf-8"))
+            if keyring is not None:
+                keyring.set_password(self.service_name, actor_id, private_bytes.decode("utf-8"))
+            else:
+                raise ImportError("keyring package is not installed")
         except Exception as e:
             logger.warning(f"Keyring set_password failed, falling back to in-memory storage: {e}")
             if self.service_name not in self._fallback_keyring:
@@ -109,7 +112,10 @@ class KeyManager:
 
         if not private_pem:
             try:
-                private_pem = keyring.get_password(self.service_name, actor_id)
+                if keyring is not None:
+                    private_pem = keyring.get_password(self.service_name, actor_id)
+                else:
+                    logger.warning("OS Keyring is not available (keyring package is not installed).")
             except Exception as e:
                 logger.warning("Fallo en OS Keyring (get_password) para actor %s: %s", actor_id, e, exc_info=True)
 
@@ -134,7 +140,10 @@ class KeyManager:
             self._metadata[actor_id]["revoked"] = True
             self._save_metadata()
             try:
-                keyring.delete_password(self.service_name, actor_id)
+                if keyring is not None:
+                    keyring.delete_password(self.service_name, actor_id)
+                else:
+                    logger.warning("OS Keyring is not available (keyring package is not installed).")
             except Exception as e:
                 logger.warning("Fallo en OS Keyring (delete_password) para actor %s: %s", actor_id, e, exc_info=True)
             if self.service_name in self._fallback_keyring:

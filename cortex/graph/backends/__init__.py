@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.graph.backends.base import GraphBackend
+    from cortex.graph.backends.neo4j_backend import Neo4jBackend
     from cortex.graph.backends.sqlite import SQLiteBackend
 
 __all__ = ["GraphBackend", "SQLiteBackend", "Neo4jBackend"]

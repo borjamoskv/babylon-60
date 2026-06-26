@@ -238,7 +238,7 @@ class KeterEngine:
     """
 
     def __init__(self) -> None:
-        from cortex_extensions.skills.router import SkillRouter
+        from cortex.extensions.skills.router import SkillRouter
 
         self.router = SkillRouter()
         self.phases: list[SovereignPhase] = [

@@ -224,8 +224,8 @@ class ChronosROI:
         """
         from cortex.database.core import connect_async_ctx
         from cortex.engine.core.fact_store_core import insert_fact_record
+        from cortex.extensions.signals.bus import AsyncSignalBus
         from cortex.memory.temporal import now_iso
-        from cortex_extensions.signals.bus import AsyncSignalBus
 
         try:
             async with connect_async_ctx(db_path) as conn:

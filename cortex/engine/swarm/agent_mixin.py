@@ -61,7 +61,7 @@ class AgentMixin(EngineMixinBase):
             try:
                 import random
 
-                from cortex_extensions.moltbook.client import MoltbookClient
+                from cortex.extensions.moltbook.client import MoltbookClient
 
                 enetipos = [
                     "8w7 (The Sovereign Challenger)",

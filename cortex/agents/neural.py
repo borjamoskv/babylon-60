@@ -2,13 +2,13 @@
 """
 Neural-Bandwidth Sync (Zero-Latency Intent Ingestion).
 
-Re-exports the neural agent implementation from cortex_extensions.agents.neural
+Re-exports the neural agent implementation from cortex.extensions.agents.neural
 to eliminate duplication.
 """
 
 from __future__ import annotations
 
-from cortex_extensions.agents.neural import (
+from cortex.extensions.agents.neural import (
     BaseClipboardSensor,
     BaseWindowSensor,
     LinuxClipboardSensor,

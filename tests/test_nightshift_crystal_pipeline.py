@@ -13,14 +13,14 @@ from unittest.mock import patch
 
 import pytest
 
-from cortex_extensions.swarm.knowledge_radar import (
+from cortex.extensions.swarm.knowledge_radar import (
     CrystalTarget,
     deduplicate_targets,
     merge_and_prioritize,
     scan_curated_queue,
 )
-from cortex_extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
-from cortex_extensions.swarm.nightshift_pipeline import (
+from cortex.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
+from cortex.extensions.swarm.nightshift_pipeline import (
     ExecutorNode,
     NightShiftPipeline,
     PersisterNode,
