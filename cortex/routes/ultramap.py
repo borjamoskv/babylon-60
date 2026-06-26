@@ -28,8 +28,8 @@ async def get_epistemic_dependency_graph(request: Request) -> dict[str, Any]:
 
     # Query the Ledger directly
     query = """
-        SELECT resource, timestamp, hash
-        FROM audit_ledger
+        SELECT resource, timestamp, audit_id as hash
+        FROM security_audit_log
         WHERE action = 'inject_axiom' AND actor_role = 'autodidact'
         ORDER BY timestamp ASC
     """
