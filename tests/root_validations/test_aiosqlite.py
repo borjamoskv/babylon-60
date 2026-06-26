@@ -8,8 +8,6 @@ _orig = sqlite3.connect
 def _patched(*args, **kwargs):
     raise RuntimeError("Forbidden")
 
-sqlite3.connect = _patched
-
 async def main():
     try:
         async with aiosqlite.connect(":memory:") as db:
@@ -17,4 +15,6 @@ async def main():
     except Exception as e:
         print("aiosqlite failed:", e)
 
-asyncio.run(main())
+if __name__ == "__main__":
+    sqlite3.connect = _patched
+    asyncio.run(main())
