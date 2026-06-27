@@ -322,7 +322,7 @@ def run_cmd(instruction: tuple[str, ...]):
     async def _run():
         from cortex.extensions.agents.mac_maestro import MacMaestroAgent
 
-        agent = MacMaestroAgent()
+        agent = MacMaestroAgent(engine=get_engine())
         console.print(f"Maestro Ω procesando: '{text}'...")
         res = await agent.execute(text)
 
