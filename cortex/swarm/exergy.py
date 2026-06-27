@@ -78,6 +78,23 @@ class ExergyBank:
             wallet.successful_commits += 1
             logger.info(f"Agent {agent_id} REWARDED (+{reward} exergy).")
 
+    def dissipate_agent(self, agent_id: str, registry: 'Any') -> None:
+        """
+        Entropic Dissipation (Weaponized Forgetting).
+        Bankrupts the agent and physically removes it from the Swarm Registry (Apoptosis).
+        """
+        from typing import Any
+        wallet = self.wallets.get(agent_id)
+        if wallet:
+            wallet.is_alive = False
+            wallet.balance = 0.0
+            logger.warning(f"[C5-REAL] Agent {agent_id} DISSIPATED (Entropy Purge). Apoptosis executed.")
+        
+        if hasattr(registry, "_agents"):
+            keys_to_remove = [k for k, v in registry._agents.items() if getattr(v, "agent_id", None) == agent_id]
+            for k in keys_to_remove:
+                del registry._agents[k]
+
     def get_state(self) -> dict[str, dict]:
         return {
             aid: {

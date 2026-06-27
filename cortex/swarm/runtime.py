@@ -137,6 +137,14 @@ class SubagentRunner:
         from cortex.swarm.router import SwarmRouter
 
         self.router = SwarmRouter(registry)
+        self.torque_event = asyncio.Event()
+
+    def exert_torque(self) -> None:
+        """Gravitational Torque: Trigger a P0 singularity preemption across the swarm."""
+        self.torque_event.set()
+
+    def clear_torque(self) -> None:
+        self.torque_event.clear()
 
     def register_handler(self, name: str, handler: AgentHandler, max_concurrent: int = 1) -> None:
         self._handlers[name] = handler
@@ -214,10 +222,39 @@ class SubagentRunner:
             for attempt in range(req.max_retries + 1):
                 t0 = time.monotonic()
                 try:
+                    momentum = decision.get("angular_momentum", 0.5) if 'decision' in locals() else 0.5
+                    
                     async with lock:
-                        output = await asyncio.wait_for(
-                            handler.run(req), timeout=req.timeout_ms / 1000
+                        run_task = asyncio.create_task(handler.run(req))
+                        torque_task = asyncio.create_task(self.torque_event.wait())
+                        
+                        done, pending = await asyncio.wait(
+                            [run_task, torque_task], 
+                            timeout=req.timeout_ms / 1000, 
+                            return_when=asyncio.FIRST_COMPLETED
                         )
+                        
+                        if torque_task in done:
+                            # P0 Torque Event detected
+                            if momentum < 0.9:
+                                run_task.cancel()
+                                last_error = "GRAVITATIONAL_TORQUE_PREEMPTION"
+                                span.set_attribute("swarm.preempted", True)
+                                break  # Abort all retries, Torque is absolute
+                            else:
+                                # High momentum protects the task from torque unless it's catastrophic
+                                # Let it finish, but torque remains active
+                                pass
+                        
+                        if not done:
+                            run_task.cancel()
+                            torque_task.cancel()
+                            raise asyncio.TimeoutError()
+                            
+                        torque_task.cancel()
+                        if run_task.exception():
+                            raise run_task.exception()
+                        output = run_task.result()
 
                     if self.audit_callback:
                         await self.audit_callback(
