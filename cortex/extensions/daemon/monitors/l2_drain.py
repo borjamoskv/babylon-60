@@ -65,7 +65,15 @@ class L2DrainMonitor:
         try:
             conn = await self._engine.get_conn()
             
-            # Select facts that are HOT and updated_at is older than 7 days
+            # Support Ouroboros dynamic threshold
+            threshold_seconds = MAX_AGE_SECONDS
+            try:
+                from cortex.extensions.evolution.ouroboros_hook import get_dynamic_threshold
+                threshold_seconds = await get_dynamic_threshold(conn, project)
+            except Exception:
+                pass
+            
+            # Select facts that are HOT and updated_at is older than threshold
             query = """
                 SELECT f.id, f.tenant_id, v.embedding
                 FROM facts f
@@ -76,7 +84,7 @@ class L2DrainMonitor:
                   AND strftime('%s', 'now') - strftime('%s', f.updated_at) > ?
                 LIMIT 1000
             """
-            cursor = await conn.execute(query, (project, MAX_AGE_SECONDS))
+            cursor = await conn.execute(query, (project, threshold_seconds))
             rows = await cursor.fetchall()
             
             if not rows:
