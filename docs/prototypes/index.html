@@ -537,18 +537,150 @@
         </div>
     </footer>
 
+    <!-- Fast Checkout Modal -->
+    <div class="checkout-overlay" id="checkout-overlay">
+        <div class="checkout-modal">
+            <div class="checkout-header">
+                <div class="checkout-title">Complete your Subscription</div>
+                <button class="checkout-close" id="checkout-close">&times;</button>
+            </div>
+            <div class="checkout-plan">
+                <div class="checkout-plan-name" id="checkout-plan-name">Pro Plan</div>
+                <div class="checkout-plan-price" id="checkout-plan-price">$49</div>
+            </div>
+            <div class="checkout-form">
+                <input type="email" class="checkout-input" placeholder="Email Address" required>
+                <input type="text" class="checkout-input" placeholder="Card Number" required>
+                <div style="display:flex; gap:16px;">
+                    <input type="text" class="checkout-input" placeholder="MM/YY" style="flex:1" required>
+                    <input type="text" class="checkout-input" placeholder="CVC" style="flex:1" required>
+                </div>
+            </div>
+            <button class="btn btn-primary checkout-btn" id="checkout-submit">Pay Securely →</button>
+            <div class="checkout-footer">
+                <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:green; margin-right:4px;"></span>
+                Encrypted & Secured by CORTEX Privacy Shield
+            </div>
+        </div>
+    </div>
+
     <!-- Payment Integration -->
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
+        let stripeCheckoutInstance = null;
+        const checkoutOverlay = document.getElementById('checkout-overlay');
+        const checkoutClose = document.getElementById('checkout-close');
+        const checkoutName = document.getElementById('checkout-plan-name');
+        const checkoutPrice = document.getElementById('checkout-plan-price');
+        const checkoutSubmit = document.getElementById('checkout-submit');
+
         document.querySelectorAll('[data-plan]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const plan = btn.dataset.plan;
-                const amount = plan === 'pro' ? '29' : '99';
-                btn.innerText = "Redirecting...";
-                btn.style.opacity = "0.7";
-                btn.style.pointerEvents = "none";
-                globalThis.location.href = `https://bunq.me/cortex/${amount}`;
+                const amount = plan === 'pro' ? '49' : '0';
+                const name = plan === 'pro' ? 'Pro Plan' : 'Custom';
+                
+                checkoutName.innerText = name;
+                checkoutPrice.innerText = '$' + amount;
+                checkoutOverlay.classList.add('active');
             });
+        });
+
+        checkoutClose.addEventListener('click', () => {
+            checkoutOverlay.classList.remove('active');
+            setTimeout(() => {
+                if (stripeCheckoutInstance) {
+                    stripeCheckoutInstance.destroy();
+                    stripeCheckoutInstance = null;
+                }
+                document.querySelector('.checkout-form').style.display = 'block';
+                checkoutSubmit.style.display = 'block';
+                checkoutSubmit.innerText = "Pay Securely →";
+                checkoutSubmit.style.opacity = "1";
+                checkoutSubmit.style.pointerEvents = "auto";
+                document.querySelector('.checkout-footer').style.display = 'block';
+                const embedded = document.getElementById('stripe-checkout-container');
+                if (embedded) embedded.remove();
+            }, 300);
+        });
+
+        checkoutOverlay.addEventListener('click', (e) => {
+            if (e.target === checkoutOverlay) {
+                checkoutOverlay.classList.remove('active');
+            }
+        });
+
+        checkoutSubmit.addEventListener('click', async () => {
+            const emailInput = document.querySelector('.checkout-input[type="email"]');
+            const plan = checkoutName.innerText.toLowerCase().includes('pro') ? 'pro' : 'enterprise';
+            
+            if (!emailInput.value || !emailInput.checkValidity()) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+
+            checkoutSubmit.innerHTML = "Processing... <span class='spinner'></span>";
+            checkoutSubmit.style.opacity = "0.7";
+            checkoutSubmit.style.pointerEvents = "none";
+            
+            try {
+                const response = await fetch('/v1/stripe/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        plan: plan,
+                        customer_email: emailInput.value,
+                        success_url: globalThis.location.origin + "/docs/prototypes/success.html",
+                        cancel_url: globalThis.location.origin + "/docs/prototypes/cancel.html"
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Stripe initialization failed.');
+                }
+                
+                const data = await response.json();
+                if (data.client_secret) {
+                    const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
+                    
+                    document.querySelector('.checkout-form').style.display = 'none';
+                    checkoutSubmit.style.display = 'none';
+                    document.querySelector('.checkout-footer').style.display = 'none';
+                    
+                    const checkoutContainer = document.createElement('div');
+                    checkoutContainer.id = 'stripe-checkout-container';
+                    document.querySelector('.checkout-modal').appendChild(checkoutContainer);
+                    
+                    stripeCheckoutInstance = await stripe.initEmbeddedCheckout({
+                        clientSecret: data.client_secret,
+                        appearance: {
+                            theme: 'night',
+                            variables: {
+                                colorPrimary: '#CCFF00',
+                                colorBackground: '#0F0F0F',
+                                colorText: '#E0E0E0',
+                                colorDanger: '#FF5252',
+                                fontFamily: 'Inter, system-ui, sans-serif',
+                                borderRadius: '12px'
+                            }
+                        }
+                    });
+                    
+                    stripeCheckoutInstance.mount('#stripe-checkout-container');
+                } else if (data.url) {
+                    globalThis.location.href = data.url;
+                } else {
+                    throw new Error('No checkout session received.');
+                }
+            } catch (error) {
+                console.error("Stripe Checkout Error:", error);
+                alert("Payment gateway connection failed. Error: " + error.message);
+                checkoutSubmit.innerText = "Pay Securely →";
+                checkoutSubmit.style.opacity = "1";
+                checkoutSubmit.style.pointerEvents = "auto";
+            }
         });
 
         // Nav scroll effect

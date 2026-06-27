@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="saas.css">
     <style>
         /* ─── Additions beyond saas.css ─── */
@@ -20,18 +21,15 @@
         /* Urgency Banner */
         .urgency-banner {
             position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-            background: linear-gradient(90deg, #0A0A0A, #2E5090, #0A0A0A);
+            background: linear-gradient(90deg, #2E5090, #6600FF, #2E5090);
             background-size: 200% 100%;
-            animation: urgencyShift 6s ease-in-out infinite;
-            padding: 12px 24px; text-align: center;
+            animation: urgencyShift 4s ease infinite;
+            padding: 10px 24px; text-align: center;
             font-family: var(--mono); font-size: 0.75rem;
-            color: #fff; letter-spacing: 1.5px;
-            border-bottom: 1px solid rgba(204,255,0,0.2);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-            text-transform: uppercase;
+            color: #fff; letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .urgency-banner a { color: var(--accent); font-weight: 800; text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 1px;}
-        .urgency-banner a:hover { color: #fff; border-color: #fff; }
+        .urgency-banner a { color: var(--accent); font-weight: 700; text-decoration: underline; }
         @keyframes urgencyShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
         #nav { top: 38px; }
@@ -226,22 +224,7 @@
             .metric-item { border-right: none; border-bottom: 1px solid var(--border); }
             .metric-item:last-child { border-bottom: none; }
         }
-
-        /* Loading Spinner */
-        .spinner {
-            display: inline-block;
-            width: 1em;
-            height: 1em;
-            border: 2px solid rgba(204,255,0,0.3);
-            border-radius: 50%;
-            border-top-color: var(--accent);
-            animation: spin 0.8s linear infinite;
-            vertical-align: text-bottom;
-            margin-left: 8px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
-    <!-- <script src="https://js.stripe.com/v3/"></script> Removed for CodeQL compliance (SRI not supported by Stripe) -->
 </head>
 <body>
     <canvas id="cortex-particles"></canvas>
@@ -265,8 +248,8 @@
                 <a href="#forense">FORENSE</a>
                 <a href="#trust">TRUST</a>
                 <a href="#soundtrack">SOUNDTRACK</a>
-                <a href="#blog">BLOG</a>
-                <a href="site/" class="nav-docs">Docs</a>
+                <a href="blog/">BLOG</a>
+                <a href="https://github.com/borjamoskv/Cortex-Persist/tree/main/docs" class="nav-docs">Docs</a>
             </div>
             <a href="#pricing" class="nav-cta">Get Started</a>
         </div>
@@ -274,9 +257,9 @@
 
     <!-- Hero -->
     <section id="hero">
-        <div class="hero-badge">SOVEREIGN PROTOCOL v5 · EU AI ACT IMMUNITY · 130/100 STANDARD</div>
-        <h1>AI Memory Without<br>Sovereignty is<br><span style="background: linear-gradient(135deg, var(--accent), #54D62C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Auditable Failure.</span></h1>
-        <p class="hero-sub">CORTEX is the <strong>Immutable Pulse</strong> of your agent swarm. Cryptographic verification, zero-leakage privacy, and EU AI Act compliance. <strong>Don't just store; prove.</strong></p>
+        <div class="hero-badge">OPEN SOURCE · EU AI ACT READY · ZERO CLOUD DEPENDENCY</div>
+        <h1>Your AI Makes<br>Thousands of Decisions.<br><span style="background: linear-gradient(135deg, var(--accent), #54D62C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Prove One.</span></h1>
+        <p class="hero-sub">CORTEX is to AI memory what <strong>SSL/TLS is to web communications</strong> — cryptographic verification, immutable audit trails, and EU AI Act compliance. In-process. <5ms.</p>
 
         <!-- Terminal Demo -->
         <div class="terminal-demo" id="terminal-demo">
@@ -291,7 +274,8 @@
 
         <div class="hero-actions">
             <a href="#pricing" class="btn btn-primary" id="hero-cta-start">Start Free →</a>
-            <a href="site/quickstart/" class="btn btn-outline" id="hero-cta-docs">Read the Docs</a>
+            <a href="compliance-check/" class="btn btn-outline" id="hero-cta-compliance" style="border-color: rgba(204,255,0,0.3); color: var(--accent);">🔍 Check Your Compliance</a>
+            <a href="https://github.com/borjamoskv/Cortex-Persist/tree/main/docs" class="btn btn-outline" id="hero-cta-docs">Read the Docs</a>
         </div>
 
         <!-- Metrics Bar -->
@@ -370,13 +354,15 @@
         <h2>How It Works</h2>
         <p class="section-sub">CORTEX doesn't replace your memory layer — it <strong>certifies</strong> it. Drop-in trust for any AI stack.</p>
         <div class="arch-visual">
-            <div class="layer"><span class="layer-label">L0 — Operational Ground Truth</span> — CORTEX Local Memory Chain</div>
+            <div class="layer"><span class="layer-label">Your Stack</span> — Mem0 / Zep / Letta / Custom</div>
             <div class="arrow">↓</div>
-            <div class="layer"><span class="layer-label">Bicameral Sync (L1)</span> — Relational Export to NotebookLM</div>
+            <div class="layer"><span class="layer-label">CORTEX Trust Engine v8</span></div>
             <div class="arrow">↓</div>
-            <div class="layer"><span class="layer-label">L2 — Synthetic Intelligence</span> — NotebookLM Deep Insights & Audits</div>
+            <div class="layer">🔗 SHA-256 Hash Chain → 🌳 Merkle Checkpoints → 🤝 WBFT Consensus</div>
             <div class="arrow">↓</div>
-            <div class="layer">🔗 Cryptographic Proof (L0) + Narrative Synthesis (L2)</div>
+            <div class="layer">🔐 AES-256-GCM Encryption  ·  🛡️ Privacy Shield (11 patterns)  ·  🧬 Biological Core</div>
+            <div class="arrow">↓</div>
+            <div class="layer"><span class="layer-label">Output</span> — Audit Trails · Compliance Reports · Verified Memory</div>
         </div>
     </section>
 
@@ -539,14 +525,14 @@
         <div class="footer-inner">
             <div class="footer-brand">
                 <span class="logo-icon">⚡</span> CORTEX
-                <span class="footer-copy">© 2026 <a href="https://borjamoskv.com">borjamoskv.com</a> · Apache 2.0</span>
+                <span class="footer-copy">© 2026 borjamoskv.com · Apache 2.0</span>
             </div>
             <div class="footer-links">
-                <a href="site/">Docs</a>
-                <a href="site/api/">API Reference</a>
-                <a href="site/security/">Security</a>
+                <a href="https://github.com/borjamoskv/Cortex-Persist/tree/main/docs">Docs</a>
+                <a href="https://github.com/borjamoskv/Cortex-Persist/blob/main/docs/api.md">API Reference</a>
+                <a href="https://github.com/borjamoskv/Cortex-Persist/blob/main/docs/security.md">Security</a>
                 <a href="https://github.com/borjamoskv/Cortex-Persist">GitHub</a>
-                <a href="site/quickstart/">Quickstart</a>
+                <a href="compliance-check/">Compliance Check</a>
             </div>
         </div>
     </footer>
@@ -560,7 +546,7 @@
             </div>
             <div class="checkout-plan">
                 <div class="checkout-plan-name" id="checkout-plan-name">Pro Plan</div>
-                <div class="checkout-plan-price" id="checkout-plan-price">$29</div>
+                <div class="checkout-plan-price" id="checkout-plan-price">$49</div>
             </div>
             <div class="checkout-form">
                 <input type="email" class="checkout-input" placeholder="Email Address" required>
@@ -578,28 +564,9 @@
         </div>
     </div>
 
-    <!-- Payment Integration & 1-Click Install -->
+    <!-- Payment Integration -->
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
-        // 1-Click Install function
-        function copyInstallCmd(btn) {
-            navigator.clipboard.writeText('pip install cortex-persist').then(() => {
-                const textSpan = btn.querySelector('.copy-text');
-                const iconSpan = btn.querySelector('.copy-icon');
-                const originalText = textSpan.innerText;
-                textSpan.innerText = 'Copied!';
-                iconSpan.innerText = '✓';
-                btn.style.borderColor = 'var(--accent)';
-                btn.style.color = 'var(--accent)';
-                setTimeout(() => {
-                    textSpan.innerText = originalText;
-                    iconSpan.innerText = '📋';
-                    btn.style.borderColor = '';
-                    btn.style.color = '';
-                }, 2000);
-            });
-        }
-
-        // Fast Checkout Logic
         let stripeCheckoutInstance = null;
         const checkoutOverlay = document.getElementById('checkout-overlay');
         const checkoutClose = document.getElementById('checkout-close');
@@ -627,7 +594,6 @@
                     stripeCheckoutInstance.destroy();
                     stripeCheckoutInstance = null;
                 }
-                // Reset checkout form if closed
                 document.querySelector('.checkout-form').style.display = 'block';
                 checkoutSubmit.style.display = 'block';
                 checkoutSubmit.innerText = "Pay Securely →";
@@ -659,7 +625,6 @@
             checkoutSubmit.style.pointerEvents = "none";
             
             try {
-                // Connect to CORTEX Sovereign Stripe Bridge
                 const response = await fetch('/v1/stripe/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -678,8 +643,7 @@
                 
                 const data = await response.json();
                 if (data.client_secret) {
-                    // Initialize Stripe Embedded Checkout natively without redirect
-                    const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx'); // Replace with real site PK
+                    const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
                     
                     document.querySelector('.checkout-form').style.display = 'none';
                     checkoutSubmit.style.display = 'none';
@@ -713,7 +677,6 @@
             } catch (error) {
                 console.error("Stripe Checkout Error:", error);
                 alert("Payment gateway connection failed. Error: " + error.message);
-                
                 checkoutSubmit.innerText = "Pay Securely →";
                 checkoutSubmit.style.opacity = "1";
                 checkoutSubmit.style.pointerEvents = "auto";
@@ -811,8 +774,7 @@
     </script>
 
     <!-- Cortex Particles (Fixed) -->
-    <!-- Load Three.js with SRI hash for security compliance (CodeQL #63) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
     (function() {
         const canvas = document.getElementById('cortex-particles');
