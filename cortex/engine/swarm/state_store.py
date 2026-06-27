@@ -54,6 +54,11 @@ class CausalStateStore:
             except aiosqlite.OperationalError:
                 pass # Column already exists
             
+            try:
+                await self._db.execute("ALTER TABLE system_hypotheses ADD COLUMN lease_expires_at TEXT;")
+            except aiosqlite.OperationalError:
+                pass # Column already exists
+            
             await self._db.commit()
             
     async def close(self):
@@ -156,13 +161,34 @@ class CausalStateStore:
                 
             if count > 0:
                 logger.info(f"Recovering {count} IN_FLIGHT tasks to ACTIVE status.")
-                update_q = "UPDATE system_hypotheses SET status = 'ACTIVE' WHERE status = 'IN_FLIGHT'"
+                update_q = "UPDATE system_hypotheses SET status = 'ACTIVE', owner_id = NULL, lease_expires_at = NULL WHERE status = 'IN_FLIGHT'"
                 if lease_id:
-                    update_q += " AND owner_id = ?"
+                    update_q += f" AND owner_id = '{lease_id}'"
                 with causal_write(self._db):
-                    await self._db.execute(update_q, params)
+                    await self._db.execute(update_q)
                     await self._db.execute(
                         "UPDATE cortex_meta SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = 'hypothesis_graph_version'"
                     )
                     await self._db.commit()
+            return count
+
+    async def sweep_expired_leases(self) -> int:
+        """SANEDRIN VECTOR 3: Sweeps expired lease locks to prevent orphan task deadlocks."""
+        await self.connect()
+        async with self._lock:
+            if not self._db:
+                return 0
+            
+            now_iso = datetime.now(timezone.utc).isoformat()
+            query = "UPDATE system_hypotheses SET status = 'ACTIVE', owner_id = NULL, lease_expires_at = NULL WHERE status = 'IN_FLIGHT' AND lease_expires_at IS NOT NULL AND lease_expires_at < ?"
+            
+            from cortex.database.core import causal_write
+            with causal_write(self._db):
+                async with self._db.execute(query, (now_iso,)) as cur:
+                    count = cur.rowcount
+                    
+                if count > 0:
+                    logger.warning(f"[SANEDRIN] Swept {count} expired lease locks. Ghost tasks recovered.")
+                    await self._db.commit()
+                
             return count
