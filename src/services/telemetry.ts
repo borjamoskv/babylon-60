@@ -25,7 +25,7 @@ export interface TelemetryData {
 type TelemetryCallback = (data: TelemetryData) => void;
 
 let sse: EventSource | null = null;
-const API_URL = import.meta.env.PUBLIC_CORTEX_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.PUBLIC_CORTEX_API_URL || 'https://api.cortexpersist.com';
 const listeners = new Set<TelemetryCallback>();
 let retryTimeout: ReturnType<typeof setTimeout> | null = null;
 let simulationInterval: ReturnType<typeof setInterval> | null = null;
