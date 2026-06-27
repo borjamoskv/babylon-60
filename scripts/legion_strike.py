@@ -27,6 +27,7 @@ async def main():
             "SENTINEL",
             "SPECTRE",
             "GHOST",
+            "TESTUDO",
         ],
         help="Tactical formation to deploy",
     )

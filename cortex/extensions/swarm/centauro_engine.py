@@ -59,6 +59,7 @@ class Formation:
     SENTINEL = "SENTINEL"  # Security/Infra monitoring
     SPECTRE = "SPECTRE"  # OSINT/Intel stealth
     GHOST = "GHOST"  # Single specialized agent
+    TESTUDO = "TESTUDO"  # 15 agents, proactive defensive shell
 
 
 class VirtualAgent:
@@ -169,6 +170,7 @@ class CentauroEngine:
         Formation.SENTINEL: 4,
         Formation.SPECTRE: 3,
         Formation.GHOST: 1,
+        Formation.TESTUDO: 15,
     }
 
     def __init__(self, tolerance: float = 0.67, router: Any | None = None):
@@ -194,6 +196,9 @@ class CentauroEngine:
         """Determines agent specialty based on formation and index. (O(1) Selection)"""
         if formation == Formation.PHALANX:
             return "SECURITY" if index % 2 == 0 else "CODE"
+        if formation == Formation.TESTUDO:
+            _roles = ["SECURITY", "INFRA", "CODE"]
+            return _roles[index % 3]
         if formation == Formation.GHOST:
             return "CODE"
         return self.SPECIALISTS[index % len(self.SPECIALISTS)]
