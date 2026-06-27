@@ -1,8 +1,8 @@
 use num_bigint::BigInt;
 use num_integer::Integer;
-use num_traits::{Zero, One, ToPrimitive, Pow};
+use num_traits::{One, Pow, ToPrimitive, Zero};
 use serde::{Deserialize, Serialize};
-use sha2::{Sha256, Digest};
+use sha2::{Digest, Sha256};
 use std::collections::{HashMap, VecDeque};
 use std::env;
 use std::fs;
@@ -61,7 +61,7 @@ struct Register {
 #[derive(Clone, Debug)]
 enum CoroutineState {
     Ready,
-    Waiting(String), // AWAIT symbol
+    Waiting(String),   // AWAIT symbol
     WaitingTimer(u64), // AFTER tick
     Running,
     Completed,
@@ -121,21 +121,28 @@ struct Machine {
 }
 
 fn parse_b60_digit(token: &str) -> i64 {
-    if token == "-" { return 0; }
+    if token == "-" {
+        return 0;
+    }
     let tens = token.chars().filter(|&c| c == '<').count() as i64;
-    let ones = token.chars().filter(|&c| c == 'Y' || c == 'v' || c == 'T').count() as i64;
+    let ones = token
+        .chars()
+        .filter(|&c| c == 'Y' || c == 'v' || c == 'T')
+        .count() as i64;
     tens * 10 + ones
 }
 
 fn parse_b60_number(b60_str: &str) -> F60 {
     let inner = b60_str.trim_matches(|c| c == '[' || c == ']' || c == ' ');
-    if inner.is_empty() { return F60::new(BigInt::zero(), 0); }
+    if inner.is_empty() {
+        return F60::new(BigInt::zero(), 0);
+    }
     let places: Vec<&str> = inner.split_whitespace().collect();
     let mut total = BigInt::zero();
     let mut power = (places.len() - 1) as u32;
     for p in places {
         total += BigInt::from(parse_b60_digit(p)) * BigInt::from(60u64).pow(power);
-        if power > 0 { power -= 1; }
+        power = power.saturating_sub(1);
     }
     F60::new(total, 0)
 }
@@ -184,21 +191,33 @@ impl Machine {
 
         let artifact = ExportSchema {
             initial_state_hash: initial_hash,
-            tick_sequence: self.l.iter().map(|t| TickSequence {
-                tick: t.tick,
-                opcode: t.opcode.clone(),
-                registers_snapshot: t.registers_snapshot.clone(),
-            }).collect(),
-            op_trace: self.op_trace.iter().map(|o| OpTrace {
-                action: o.action.clone(),
-                symbol: o.symbol.clone(),
-                status: o.status.clone(),
-            }).collect(),
-            f60_deltas: self.f60_deltas.iter().map(|f| F60Delta {
-                cell_id: f.cell_id.clone(),
-                delta_numerator: f.delta_numerator.clone(),
-                delta_scale: f.delta_scale,
-            }).collect(),
+            tick_sequence: self
+                .l
+                .iter()
+                .map(|t| TickSequence {
+                    tick: t.tick,
+                    opcode: t.opcode.clone(),
+                    registers_snapshot: t.registers_snapshot.clone(),
+                })
+                .collect(),
+            op_trace: self
+                .op_trace
+                .iter()
+                .map(|o| OpTrace {
+                    action: o.action.clone(),
+                    symbol: o.symbol.clone(),
+                    status: o.status.clone(),
+                })
+                .collect(),
+            f60_deltas: self
+                .f60_deltas
+                .iter()
+                .map(|f| F60Delta {
+                    cell_id: f.cell_id.clone(),
+                    delta_numerator: f.delta_numerator.clone(),
+                    delta_scale: f.delta_scale,
+                })
+                .collect(),
             energy_vector: vec!["EXERGY: 1.0".to_string()],
             replay_hash,
             theorem_prover_payload: "inductive B60State where ...".to_string(),
@@ -212,7 +231,7 @@ impl Machine {
     fn run(&mut self) {
         while !self.q.is_empty() {
             let mut coro = self.q.pop_front().unwrap();
-            
+
             match coro.state {
                 CoroutineState::Completed | CoroutineState::Halted => continue,
                 CoroutineState::Waiting(ref sym) => {
@@ -244,7 +263,8 @@ impl Machine {
             }
 
             let line = self.lines[coro.pc].trim().to_string();
-            if line.is_empty() || line == "DUB" || line.starts_with("MUB ") || line.starts_with('#') {
+            if line.is_empty() || line == "DUB" || line.starts_with("MUB ") || line.starts_with('#')
+            {
                 coro.pc += 1;
                 coro.state = CoroutineState::Ready;
                 self.q.push_back(coro);
@@ -280,11 +300,11 @@ impl Machine {
             if !cur.is_empty() {
                 tokens.push(cur);
             }
-            if tokens.is_empty() { 
-                coro.pc += 1; 
+            if tokens.is_empty() {
+                coro.pc += 1;
                 coro.state = CoroutineState::Ready;
                 self.q.push_back(coro);
-                continue; 
+                continue;
             }
 
             let cmd = tokens[0].as_str();
@@ -309,22 +329,23 @@ impl Machine {
                 "BA.EXACT" => {
                     let idx1 = get_reg_index(&tokens[1]);
                     let val2 = self.eval_expr(&tokens[2], &coro.r);
-                    
+
                     if val2.num.is_zero() {
                         self.critical_halt("DIVIDE_BY_ZERO");
                     }
 
                     let mut num = coro.r[idx1].val.num.clone();
                     let mut scale = coro.r[idx1].val.scale;
-                    
+
                     while (&num % &val2.num) != BigInt::zero() {
                         num *= 60u64;
                         scale += 1;
-                        if scale > 20 { // Saturation limit
+                        if scale > 20 {
+                            // Saturation limit
                             self.critical_halt("FALSATION_ERROR: TRUNCATION (Blowup de Numerador excedió límite de Escala F60)");
                         }
                     }
-                    
+
                     coro.r[idx1].val = F60::new(num / val2.num, scale);
                 }
                 "FORK" => {
@@ -338,7 +359,7 @@ impl Machine {
                         };
                         self.next_cid += 1;
                         self.q.push_back(new_coro);
-                        
+
                         self.op_trace.push(OpTrace {
                             action: "FORK".to_string(),
                             symbol: label.clone(),
@@ -386,7 +407,10 @@ impl Machine {
                 }
                 "SAR.B60" => {
                     let idx = get_reg_index(&tokens[1]);
-                    println!("SAR (B60): num={} scale={}", coro.r[idx].val.num, coro.r[idx].val.scale);
+                    println!(
+                        "SAR (B60): num={} scale={}",
+                        coro.r[idx].val.num, coro.r[idx].val.scale
+                    );
                 }
                 "GIN" => {
                     let label = &tokens[1];
@@ -434,7 +458,7 @@ fn main() {
 
     let code = fs::read_to_string(&args[1]).expect("Failed to read script");
     let lines: Vec<String> = code.lines().map(|l| l.trim().to_string()).collect();
-    
+
     let mut labels = HashMap::new();
     for (i, line) in lines.iter().enumerate() {
         if line.starts_with("MUB ") {
@@ -443,7 +467,13 @@ fn main() {
         }
     }
 
-    let initial_r = vec![Register { val: F60::new(BigInt::zero(), 0), typ: B60Type::UNALLOCATED }; 64];
+    let initial_r = vec![
+        Register {
+            val: F60::new(BigInt::zero(), 0),
+            typ: B60Type::UNALLOCATED
+        };
+        64
+    ];
     let root_coro = Coroutine {
         id: 0,
         pc: 0,

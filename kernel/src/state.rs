@@ -1,6 +1,6 @@
-use crate::time::{SimulationClock, LogicalClock};
+use crate::isa::{Reg, TypeTag, Value};
 use crate::ledger::DAGLedger;
-use crate::isa::{TypeTag, Value, Reg};
+use crate::time::{LogicalClock, SimulationClock};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RegisterCell {
@@ -28,6 +28,12 @@ pub struct MachineState {
     pub sim_clock: SimulationClock,
     pub logical_clock: LogicalClock,
     pub ledger: DAGLedger,
+}
+
+impl Default for MachineState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl MachineState {

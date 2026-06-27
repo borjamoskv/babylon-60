@@ -1,5 +1,5 @@
-use crate::state::{MachineState, RegisterCell};
 use crate::isa::{Instruction, Opcode, Value};
+use crate::state::MachineState;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HaltReason {
@@ -11,7 +11,7 @@ pub enum HaltReason {
 /// Dynamic array out-of-bounds are irrepresentable.
 pub fn step(mut state: MachineState, instr: &Instruction) -> Result<MachineState, HaltReason> {
     state.logical_clock = state.logical_clock.tick();
-    
+
     match &instr.opcode {
         Opcode::Alloc(reg, tag) => {
             let mut cell = state.read_reg(*reg).clone();
@@ -32,7 +32,7 @@ pub fn step(mut state: MachineState, instr: &Instruction) -> Result<MachineState
         // Additional pure operations here
         _ => {}
     }
-    
+
     state.pc = state.pc.saturating_add(1);
     Ok(state)
 }

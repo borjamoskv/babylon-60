@@ -1,7 +1,7 @@
-use alloc::vec::Vec;
-use alloc::string::String;
-use alloc::collections::BTreeMap;
 use crate::time::SimulationClock;
+use alloc::collections::BTreeMap;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 pub type Hash = [u8; 32];
 pub type EventId = u64;
@@ -22,6 +22,12 @@ pub struct DAGLedger {
     next_id: EventId,
 }
 
+impl Default for DAGLedger {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DAGLedger {
     pub fn new() -> Self {
         Self {
@@ -30,10 +36,16 @@ impl DAGLedger {
         }
     }
 
-    pub fn append(&mut self, parents: Vec<EventId>, timestamp: SimulationClock, payload: String, hash: Hash) -> EventId {
+    pub fn append(
+        &mut self,
+        parents: Vec<EventId>,
+        timestamp: SimulationClock,
+        payload: String,
+        hash: Hash,
+    ) -> EventId {
         let id = self.next_id;
         self.next_id += 1;
-        
+
         let event = Event {
             id,
             parents,
@@ -42,7 +54,7 @@ impl DAGLedger {
             signature: None,
             hash,
         };
-        
+
         self.events.insert(id, event);
         id
     }

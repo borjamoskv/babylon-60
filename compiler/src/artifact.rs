@@ -1,7 +1,6 @@
-use serde::{Serialize, Deserialize};
-use std::collections::BTreeMap;
-use kernel::ledger::{Event, DAGLedger};
-use sha2::{Sha256, Digest};
+use kernel::ledger::DAGLedger;
+use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::string::String;
 use std::vec::Vec;
 
@@ -21,7 +20,8 @@ pub struct CanonicalEvent {
 
 /// Serialize the DAG to a strictly canonical representation
 pub fn serialize_canonical_dag(ledger: &DAGLedger) -> String {
-    let mut canonical_events: Vec<CanonicalEvent> = ledger.events()
+    let mut canonical_events: Vec<CanonicalEvent> = ledger
+        .events()
         .map(|e| CanonicalEvent {
             id: e.id,
             parents: e.parents.clone(),
@@ -29,10 +29,10 @@ pub fn serialize_canonical_dag(ledger: &DAGLedger) -> String {
             payload: e.payload.clone(),
         })
         .collect();
-    
+
     // Sort topologically, using ID as tie-breaker (already satisfied if IDs are sequential)
     canonical_events.sort_by_key(|e| e.id);
-    
+
     serde_json::to_string(&canonical_events).expect("Canonical serialization failed")
 }
 

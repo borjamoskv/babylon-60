@@ -29,21 +29,21 @@ pub enum Opcode {
     Alloc(Reg, TypeTag),
     LoadImm(Reg, i64),
     Mov(Reg, Reg),
-    
+
     /// Math (Strict bounds checked)
     Add(Reg, Value),
     Sub(Reg, Value),
     Mul(Reg, Value),
     Div(Reg, Value),
-    
+
     /// Causal Control
     Fork(String),
     Await(String),
     After(Reg, String),
-    
+
     /// Ledger Mutation
     Emit(String, Reg),
-    
+
     /// Termination
     Halt,
     CriticalHalt,
