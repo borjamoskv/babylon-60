@@ -24,7 +24,8 @@ async def setup_db(db_path: str) -> aiosqlite.Connection:
             impact REAL,
             status TEXT,
             created_at TEXT,
-            owner_id TEXT
+            owner_id TEXT,
+            lease_expires_at TEXT
         )
     ''')
     await db.execute('''
@@ -121,8 +122,8 @@ async def test_lease_locks_and_ghost_recovery():
     now = datetime.now(timezone.utc).isoformat()
     old_lease = "OLD_LEASE_123"
     await db.execute(
-        "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("hyp-test-lease", "Stmt", 1.0, 1.0, 1.0, 1.0, 'IN_FLIGHT', now, old_lease)
+        "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at, owner_id, lease_expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        ("hyp-test-lease", "Stmt", 1.0, 1.0, 1.0, 1.0, 'IN_FLIGHT', now, old_lease, "2020-01-01T00:00:00Z")
     )
     await db.commit()
     await db.close()
@@ -131,20 +132,21 @@ async def test_lease_locks_and_ghost_recovery():
     supervisor = SwarmSupervisor(db_path=db_path)
     await supervisor.initialize()
     
-    # Verify task was recovered to ACTIVE
-    verify_db = await aiosqlite.connect(db_path)
-    async with verify_db.execute("SELECT status, owner_id FROM system_hypotheses WHERE id = 'hyp-test-lease'") as cur:
-        row = await cur.fetchone()
-        assert row[0] == "ACTIVE"
-        assert row[1] == old_lease  # Owner id remains but status is ACTIVE
+    try:
+        # Verify task was recovered to ACTIVE
+        verify_db = await aiosqlite.connect(db_path)
+        async with verify_db.execute("SELECT status, owner_id FROM system_hypotheses WHERE id = 'hyp-test-lease'") as cur:
+            row = await cur.fetchone()
+            assert row[0] == "ACTIVE"
+            assert row[1] is None  # Owner id is cleared by new sweep
+            
+        # Now Supervisor dispatch it, it should acquire new lease
+        await supervisor.dispatch_optimal_hypotheses(1)
         
-    # Now Supervisor dispatch it, it should acquire new lease
-    await supervisor.dispatch_optimal_hypotheses(1)
-    
-    async with verify_db.execute("SELECT status, owner_id FROM system_hypotheses WHERE id = 'hyp-test-lease'") as cur:
-        row = await cur.fetchone()
-        assert row[0] == "IN_FLIGHT"
-        assert row[1] == supervisor.supervisor_id  # New lease acquired
-        
-    await supervisor.shutdown()
-    await verify_db.close()
+        async with verify_db.execute("SELECT status, owner_id FROM system_hypotheses WHERE id = 'hyp-test-lease'") as cur:
+            row = await cur.fetchone()
+            assert row[0] == "IN_FLIGHT"
+            assert row[1] == supervisor.supervisor_id  # New lease acquired
+    finally:
+        await supervisor.shutdown()
+        await verify_db.close()

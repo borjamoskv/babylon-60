@@ -97,6 +97,7 @@ class SwarmSupervisor:
         if not self._topo or not self._db:
             raise RuntimeError("Supervisor not initialized")
             
+        await self.state_store.sweep_expired_leases()
         await self._topo.sync()
         dispatched = 0
         in_flight = set()
@@ -107,12 +108,14 @@ class SwarmSupervisor:
                 break
                 
             try:
-                # SANEDRIN VECTOR 3: Lease lock task using supervisor_id
+                # SANEDRIN VECTOR 3: Lease lock task using supervisor_id and 5-min TTL
                 from cortex.database.core import causal_write
+                from datetime import datetime, timezone, timedelta
+                expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
                 with causal_write(self._db):
                     await self._db.execute(
-                        "UPDATE system_hypotheses SET status = 'IN_FLIGHT', owner_id = ? WHERE id = ?", 
-                        (self.supervisor_id, task["id"])
+                        "UPDATE system_hypotheses SET status = 'IN_FLIGHT', owner_id = ?, lease_expires_at = ? WHERE id = ?", 
+                        (self.supervisor_id, expires_at, task["id"])
                     )
                     await self._db.commit()
                 
