@@ -74,6 +74,9 @@ class SearchMixin(EngineMixinBase):
                 embedder = self._get_embedder()
                 embedding = embedder.embed(query)
 
+                from cortex.embeddings.obfuscation import obfuscate_vector
+                embedding = obfuscate_vector(embedding, tenant_id=tenant_id, project=project or "")
+
                 results = await hybrid_search(
                     conn=conn,
                     query=query,

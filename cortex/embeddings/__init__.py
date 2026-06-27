@@ -9,6 +9,7 @@ from __future__ import annotations
 from cortex.embeddings import local as _local
 from cortex.embeddings.manager import EmbeddingManager
 from cortex.embeddings.provider import EmbeddingProvider
+from cortex.embeddings.obfuscation import obfuscate_vector
 
 _DEVICE = _local._DEVICE
 EMBEDDING_DIM = _local.EMBEDDING_DIM
@@ -29,6 +30,7 @@ __all__ = [
     "EmbeddingProvider",
     "LocalEmbedder",
     "_resolve_device",
+    "obfuscate_vector",
 ]
 
 # Wave 6: Default dimensions for standard CORTEX memory
