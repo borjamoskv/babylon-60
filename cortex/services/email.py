@@ -6,13 +6,13 @@ Integra EgressGuard y firma los envíos en el Ledger antes de despachar
 a la red pública para asegurar confinamiento termodinámico.
 """
 
-import os
 import logging
-from typing import Any
+import os
+
 import httpx
 
-from cortex.guards.egress_guard import EgressGuard
 from cortex.audit.ledger import EnterpriseAuditLedger
+from cortex.guards.egress_guard import EgressGuard
 
 logger = logging.getLogger("cortex.services.email")
 
