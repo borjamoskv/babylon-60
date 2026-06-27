@@ -151,6 +151,9 @@ def _dispatch(candidates: list[dict], request: dict, entropy_score: float) -> di
 
     selected_agents = sorted([c.get("agent_id") for c in candidates if "agent_id" in c])  # type: ignore
 
+    # Angular Momentum (L) = 1.0 - Entropy. High inertia for routine tasks.
+    angular_momentum = max(0.1, 1.0 - entropy_score)
+
     if entropy_score >= 0.5 and len(candidates) >= 3:
         # ZK-Swarm Consensus: dispatch to Quorum (N=3)
         quorum = candidates[:3]
@@ -160,6 +163,7 @@ def _dispatch(candidates: list[dict], request: dict, entropy_score: float) -> di
             "quorum_agents": quorum_ids,
             "selected_agents": selected_agents,
             "entropy_score": entropy_score,
+            "angular_momentum": angular_momentum,
         }
         # Merge traits from the first candidate as a baseline representation
         for k, v in quorum[0].items():
@@ -173,6 +177,7 @@ def _dispatch(candidates: list[dict], request: dict, entropy_score: float) -> di
             "quorum_agents": None,
             "selected_agents": selected_agents,
             "entropy_score": entropy_score,
+            "angular_momentum": angular_momentum,
         }
         payload.update(candidates[0])
         return payload
