@@ -41,6 +41,7 @@ Cuando invocas LEGIØN-1, el Nucleus selecciona o tú fuerzas:
 | **LEVIATHAN** | `--formation LEVIATHAN` | 20-50 | El enjambre completo. Solo para asedios totales. |
 | **ORACLE** | `--formation ORACLE` | 3-5 | Predicción de tendencias y análisis estratégico. |
 | **OUROBOROS** | `--formation OUROBOROS` | 3-7 | Auto-mejora del propio código del enjambre. |
+| **TESTUDO** | `--formation TESTUDO` | 15 | Caparazón de defensa proactiva (Infraestructura, Seguridad, Código). |
 
 ---
 
