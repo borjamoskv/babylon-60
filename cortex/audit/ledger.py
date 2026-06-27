@@ -415,6 +415,11 @@ class EnterpriseAuditLedger:
         except (InvalidSignature, ValueError):
             return False
 
+    def generate_ouroboros_seal(self, payload: str) -> str:
+        """[C5-REAL] Generate an Ouroboros-specific cryptographic seal for autonomous L2/L3 mutations."""
+        seal_payload = f"OUROBOROS-∞:{payload}"
+        return self.private_key.sign(seal_payload.encode()).hex()
+
     def verify_batch(self, batch_audit_ids: list[str], prev_hash: str, signature_hex: str) -> bool:
         """Verifies the cryptographic seal of a batch against the public key using entry_hash."""
         try:
