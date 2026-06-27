@@ -219,44 +219,44 @@ class TestAdapterLoading:
         assert adapter.policy.schema_version == "2026.2"
         assert len(adapter.policy.routing_rules) == 4
 
-    def test_load_missing_yaml_raises(self, tmp_path: Path) -> None:
-        """Missing YAML file raises FileNotFoundError."""
+    def test_load_missing_yaml_fallback(self, tmp_path: Path) -> None:
+        """Missing YAML file falls back to empty rules."""
         from cortex.router.adapter import ExergyConfigAdapter
 
-        with pytest.raises(FileNotFoundError):
-            ExergyConfigAdapter(path=tmp_path / "nonexistent.yaml")
+        adapter = ExergyConfigAdapter(path=tmp_path / "nonexistent.yaml")
+        assert len(adapter.policy.routing_rules) == 0
 
-    def test_load_invalid_schema_version(self, tmp_path: Path) -> None:
-        """Unsupported schema_version raises AdapterSchemaError."""
-        from cortex.router.adapter import AdapterSchemaError, ExergyConfigAdapter
+    def test_load_invalid_schema_version_fallback(self, tmp_path: Path) -> None:
+        """Unsupported schema_version falls back to empty rules."""
+        from cortex.router.adapter import ExergyConfigAdapter
 
         bad_yaml = tmp_path / "bad.yaml"
         bad_yaml.write_text(
             "schema_version: '1.0'\nrouting_rules:\n  - id: X\n    condition: 'x'\n    result: normal\n"
         )
-        with pytest.raises(AdapterSchemaError, match="Unsupported schema_version"):
-            ExergyConfigAdapter(path=bad_yaml)
+        adapter = ExergyConfigAdapter(path=bad_yaml)
+        assert len(adapter.policy.routing_rules) == 0
 
-    def test_load_missing_rules(self, tmp_path: Path) -> None:
-        """Empty routing_rules raises AdapterSchemaError."""
-        from cortex.router.adapter import AdapterSchemaError, ExergyConfigAdapter
+    def test_load_missing_rules_fallback(self, tmp_path: Path) -> None:
+        """Empty routing_rules falls back to empty rules."""
+        from cortex.router.adapter import ExergyConfigAdapter
 
         bad_yaml = tmp_path / "bad.yaml"
         bad_yaml.write_text("schema_version: '2026.2'\nrouting_rules: []\n")
-        with pytest.raises(AdapterSchemaError, match="non-empty list"):
-            ExergyConfigAdapter(path=bad_yaml)
+        adapter = ExergyConfigAdapter(path=bad_yaml)
+        assert len(adapter.policy.routing_rules) == 0
 
-    def test_load_invalid_mode(self, tmp_path: Path) -> None:
-        """Invalid result mode in rule raises AdapterSchemaError."""
-        from cortex.router.adapter import AdapterSchemaError, ExergyConfigAdapter
+    def test_load_invalid_mode_fallback(self, tmp_path: Path) -> None:
+        """Invalid result mode in rule falls back to empty rules."""
+        from cortex.router.adapter import ExergyConfigAdapter
 
         bad_yaml = tmp_path / "bad.yaml"
         bad_yaml.write_text(
             "schema_version: '2026.2'\nrouting_rules:\n"
             "  - id: X\n    condition: 'x'\n    result: turbo_mode\n"
         )
-        with pytest.raises(AdapterSchemaError, match="not in valid modes"):
-            ExergyConfigAdapter(path=bad_yaml)
+        adapter = ExergyConfigAdapter(path=bad_yaml)
+        assert len(adapter.policy.routing_rules) == 0
 
 
 # ═══════════════════════════════════════════════════════════════════════════

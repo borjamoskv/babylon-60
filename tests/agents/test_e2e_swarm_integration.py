@@ -179,9 +179,16 @@ async def test_e2e_concurrent_message_bus_routing():
                     
     await asyncio.gather(*send_tasks)
     
-    # Wait for processing
-    await asyncio.sleep(2.0)
-    
+    # Wait for processing (with timeout)
+    for _ in range(15):
+        all_empty = True
+        for agent in agents:
+            if await bus.pending_count(agent.agent_id) > 0:
+                all_empty = False
+                break
+        if all_empty:
+            break
+        await asyncio.sleep(1.0)
     # Assertions
     total_pings = 0
     total_pongs = 0

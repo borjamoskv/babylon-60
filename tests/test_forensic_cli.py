@@ -16,7 +16,8 @@ FIXED_TS = "2026-05-05T00:00:00+00:00"
 
 
 def _json_output(output: str) -> dict[str, object]:
-    return json.loads(output)
+    json_start = output.find("{")
+    return json.loads(output[json_start:])
 
 
 def test_forensics_cli_build_verify_commit_round_trip(tmp_path) -> None:

@@ -15,6 +15,8 @@ async def test_deprecate_impl_logic_success():
     mock_conn = MagicMock(spec=aiosqlite.Connection)
     mock_conn.execute = AsyncMock()
     mock_conn.commit = AsyncMock()
+    del mock_conn._conn
+    mock_conn._causal_write_auth_count = 0
 
     mock_mixin = MagicMock()
     mock_mixin._log_transaction = AsyncMock()
@@ -25,6 +27,7 @@ async def test_deprecate_impl_logic_success():
             return_value=(1, "knowledge", None, 0, 0),
         ) as mock_fetch,
         patch("cortex.engine.core.store_mutation.AsyncCausalGraph") as mock_graph,
+        patch("time.time_ns", return_value=1000),
     ):
         mock_graph_instance = mock_graph.return_value
         mock_graph_instance.propagate_taint = AsyncMock()
@@ -48,6 +51,8 @@ async def test_invalidate_impl_logic_success():
     mock_conn = MagicMock(spec=aiosqlite.Connection)
     mock_conn.execute = AsyncMock()
     mock_conn.commit = AsyncMock()
+    del mock_conn._conn
+    mock_conn._causal_write_auth_count = 0
 
     mock_mixin = MagicMock()
     mock_mixin._log_transaction = AsyncMock()
@@ -58,6 +63,7 @@ async def test_invalidate_impl_logic_success():
             return_value=(1, "knowledge", None, 0, 0),
         ) as mock_fetch,
         patch("cortex.engine.core.store_mutation.AsyncCausalGraph") as mock_graph,
+        patch("time.time_ns", return_value=1000),
     ):
         mock_graph_instance = mock_graph.return_value
         mock_graph_instance.propagate_taint = AsyncMock()
@@ -80,6 +86,8 @@ async def test_invalidate_impl_logic_success():
 async def test_purge_logic_success():
     mock_conn = MagicMock(spec=aiosqlite.Connection)
     mock_conn.commit = AsyncMock()
+    del mock_conn._conn
+    mock_conn._causal_write_auth_count = 0
     mock_cursor = MagicMock()
     mock_cursor.rowcount = 1
     mock_cursor.fetchone = AsyncMock(side_effect=[(0,), ("hash123", "tx456")])
@@ -100,9 +108,12 @@ async def test_purge_logic_success():
     mock_mixin.session.return_value = MockContext()
     mock_mixin._log_transaction = AsyncMock()
 
-    with patch(
-        "cortex.engine.core.store_mutation._fetch_fact_state", return_value=(1, "knowledge", None, 0, 0)
-    ) as mock_fetch:
+    with (
+        patch(
+            "cortex.engine.core.store_mutation._fetch_fact_state", return_value=(1, "knowledge", None, 0, 0)
+        ) as mock_fetch,
+        patch("time.time_ns", return_value=1000),
+    ):
         result = await purge_logic(
             mixin_instance=mock_mixin, fact_id=1, tenant_id="tenant1", force=False
         )

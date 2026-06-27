@@ -22,7 +22,11 @@ def judge(monkeypatch, km):
     yield j
 
 @pytest.fixture
-def km():
+def km(monkeypatch):
+    mock_dict = {}
+    monkeypatch.setattr("keyring.set_password", lambda s, u, p: mock_dict.update({(s, u): p}))
+    monkeypatch.setattr("keyring.get_password", lambda s, u: mock_dict.get((s, u)))
+    monkeypatch.setattr("keyring.delete_password", lambda s, u: mock_dict.pop((s, u), None))
     manager = KeyManager(service_name="test_swarm_judge")
     yield manager
 

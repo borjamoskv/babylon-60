@@ -1,6 +1,6 @@
 {
     "version": "1.1.409",
-    "time": "1782469384603",
+    "time": "1782609099393",
     "generalDiagnostics": [
         {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/ANTI_GRAVITY/01_ACTIVE/memory/run_audit_pipeline.py",
@@ -629,11 +629,11 @@
             "message": "Import \"cortex.engine.checkpoint\" could not be resolved",
             "range": {
                 "start": {
-                    "line": 20,
+                    "line": 21,
                     "character": 9
                 },
                 "end": {
-                    "line": 20,
+                    "line": 21,
                     "character": 33
                 }
             },
@@ -645,11 +645,11 @@
             "message": "Import \"cortex.engine.evolution_ledger\" could not be resolved",
             "range": {
                 "start": {
-                    "line": 21,
+                    "line": 22,
                     "character": 9
                 },
                 "end": {
-                    "line": 21,
+                    "line": 22,
                     "character": 39
                 }
             },
@@ -661,11 +661,11 @@
             "message": "\"UltramapSubstrate\" is not a known attribute of module \"cortex_rs\"",
             "range": {
                 "start": {
-                    "line": 64,
+                    "line": 65,
                     "character": 33
                 },
                 "end": {
-                    "line": 64,
+                    "line": 65,
                     "character": 50
                 }
             },
@@ -677,11 +677,11 @@
             "message": "Object of type \"None\" cannot be called",
             "range": {
                 "start": {
-                    "line": 89,
+                    "line": 90,
                     "character": 41
                 },
                 "end": {
-                    "line": 89,
+                    "line": 90,
                     "character": 69
                 }
             },
@@ -693,11 +693,11 @@
             "message": "Object of type \"None\" cannot be called",
             "range": {
                 "start": {
-                    "line": 90,
+                    "line": 91,
                     "character": 43
                 },
                 "end": {
-                    "line": 90,
+                    "line": 91,
                     "character": 101
                 }
             },
@@ -709,11 +709,11 @@
             "message": "Argument of type \"memoryview[int] | None\" cannot be assigned to parameter \"buffer\" of type \"ReadableBuffer\" in function \"unpack_from\"\n  Type \"memoryview[int] | None\" is not assignable to type \"ReadableBuffer\"\n    \"None\" is incompatible with protocol \"Buffer\"\n      \"__buffer__\" is not present",
             "range": {
                 "start": {
-                    "line": 221,
+                    "line": 222,
                     "character": 20
                 },
                 "end": {
-                    "line": 221,
+                    "line": 222,
                     "character": 32
                 }
             },
@@ -725,11 +725,11 @@
             "message": "Object of type \"None\" cannot be called",
             "range": {
                 "start": {
-                    "line": 274,
+                    "line": 275,
                     "character": 32
                 },
                 "end": {
-                    "line": 274,
+                    "line": 275,
                     "character": 69
                 }
             },
@@ -741,11 +741,11 @@
             "message": "Argument of type \"memoryview[int] | None\" cannot be assigned to parameter \"buffer\" of type \"WriteableBuffer\" in function \"pack_into\"\n  Type \"memoryview[int] | None\" is not assignable to type \"WriteableBuffer\"\n    \"None\" is incompatible with protocol \"Buffer\"\n      \"__buffer__\" is not present",
             "range": {
                 "start": {
-                    "line": 280,
+                    "line": 281,
                     "character": 20
                 },
                 "end": {
-                    "line": 280,
+                    "line": 281,
                     "character": 32
                 }
             },
@@ -757,11 +757,11 @@
             "message": "Object of type \"None\" cannot be called",
             "range": {
                 "start": {
-                    "line": 303,
+                    "line": 304,
                     "character": 27
                 },
                 "end": {
-                    "line": 303,
+                    "line": 304,
                     "character": 91
                 }
             },
@@ -773,11 +773,11 @@
             "message": "\"record_mutation\" is not a known attribute of \"None\"",
             "range": {
                 "start": {
-                    "line": 304,
+                    "line": 305,
                     "character": 35
                 },
                 "end": {
-                    "line": 304,
+                    "line": 305,
                     "character": 50
                 }
             },
@@ -805,11 +805,11 @@
             "message": "\"ZeroCopyRingBuffer\" is not a known attribute of module \"cortex_rs\"",
             "range": {
                 "start": {
-                    "line": 200,
+                    "line": 194,
                     "character": 30
                 },
                 "end": {
-                    "line": 200,
+                    "line": 194,
                     "character": 48
                 }
             },
@@ -864,6 +864,22 @@
             "rule": "reportMissingImports"
         },
         {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/api/analysis.py",
+            "severity": "error",
+            "message": "\"host\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 48,
+                    "character": 81
+                },
+                "end": {
+                    "line": 48,
+                    "character": 85
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/api/middleware.py",
             "severity": "error",
             "message": "Cannot access attribute \"create_usage_record\" for class \"type[SubscriptionItem]\"\n  Attribute \"create_usage_record\" is unknown",
@@ -878,6 +894,54 @@
                 }
             },
             "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/audit/compliance_verifier.py",
+            "severity": "error",
+            "message": "Arguments missing for parameters \"padding\", \"algorithm\"",
+            "range": {
+                "start": {
+                    "line": 125,
+                    "character": 16
+                },
+                "end": {
+                    "line": 125,
+                    "character": 65
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/audit/compliance_verifier.py",
+            "severity": "error",
+            "message": "Argument missing for parameter \"algorithm\"",
+            "range": {
+                "start": {
+                    "line": 125,
+                    "character": 16
+                },
+                "end": {
+                    "line": 125,
+                    "character": 65
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/audit/compliance_verifier.py",
+            "severity": "error",
+            "message": "Argument missing for parameter \"signature_algorithm\"",
+            "range": {
+                "start": {
+                    "line": 125,
+                    "character": 16
+                },
+                "end": {
+                    "line": 125,
+                    "character": 65
+                }
+            },
+            "rule": "reportCallIssue"
         },
         {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/benchmark/meta_mutation_task_benchmark.py",
@@ -960,6 +1024,86 @@
             "rule": "reportMissingImports"
         },
         {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/crypto/shredder.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"_shredded_facts\" for class \"CortexEncrypter\"\n  Attribute \"_shredded_facts\" is unknown",
+            "range": {
+                "start": {
+                    "line": 358,
+                    "character": 20
+                },
+                "end": {
+                    "line": 358,
+                    "character": 35
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/crypto/shredder.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"_shredded_facts\" for class \"CortexEncrypter\"\n  Attribute \"_shredded_facts\" is unknown",
+            "range": {
+                "start": {
+                    "line": 359,
+                    "character": 47
+                },
+                "end": {
+                    "line": 359,
+                    "character": 62
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/crypto/vault.py",
+            "severity": "error",
+            "message": "Object of type \"None\" cannot be called",
+            "range": {
+                "start": {
+                    "line": 58,
+                    "character": 17
+                },
+                "end": {
+                    "line": 58,
+                    "character": 34
+                }
+            },
+            "rule": "reportOptionalCall"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/crypto/vault.py",
+            "severity": "error",
+            "message": "Object of type \"None\" cannot be called",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 21
+                },
+                "end": {
+                    "line": 76,
+                    "character": 38
+                }
+            },
+            "rule": "reportOptionalCall"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/crypto/vault.py",
+            "severity": "error",
+            "message": "\"generate_key\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 87,
+                    "character": 21
+                },
+                "end": {
+                    "line": 87,
+                    "character": 33
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/causal/anomaly_bridge.py",
             "severity": "warning",
             "message": "Import \"cortex_topology_anomaly_detector\" could not be resolved",
@@ -981,11 +1125,11 @@
             "message": "Argument of type \"str\" cannot be assigned to parameter \"object\" of type \"int\" in function \"append\"\n  \"str\" is not assignable to \"int\"",
             "range": {
                 "start": {
-                    "line": 136,
+                    "line": 138,
                     "character": 30
                 },
                 "end": {
-                    "line": 136,
+                    "line": 138,
                     "character": 39
                 }
             },
@@ -1264,6 +1408,22 @@
             "rule": "reportArgumentType"
         },
         {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/swarm/legion.py",
+            "severity": "error",
+            "message": "Argument of type \"None\" cannot be assigned to parameter \"item\" of type \"str\" in function \"put_nowait\"\n  \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 307,
+                    "character": 29
+                },
+                "end": {
+                    "line": 307,
+                    "character": 33
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/swarm/omega_daemon.py",
             "severity": "error",
             "message": "Cannot access attribute \"deploy\" for class \"SwarmCommander\"\n  Attribute \"deploy\" is unknown",
@@ -1278,6 +1438,22 @@
                 }
             },
             "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/swarm/state_store.py",
+            "severity": "error",
+            "message": "Object of type \"None\" is not subscriptable",
+            "range": {
+                "start": {
+                    "line": 143,
+                    "character": 24
+                },
+                "end": {
+                    "line": 143,
+                    "character": 46
+                }
+            },
+            "rule": "reportOptionalSubscript"
         },
         {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/uncategorized/chronos_roi.py",
@@ -1344,6 +1520,150 @@
             "rule": "reportAttributeAccessIssue"
         },
         {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/uncategorized/reporterd.py",
+            "severity": "error",
+            "message": "Variable not allowed in type expression",
+            "range": {
+                "start": {
+                    "line": 36,
+                    "character": 48
+                },
+                "end": {
+                    "line": 36,
+                    "character": 62
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/uncategorized/reporterd.py",
+            "severity": "error",
+            "message": "Variable not allowed in type expression",
+            "range": {
+                "start": {
+                    "line": 71,
+                    "character": 41
+                },
+                "end": {
+                    "line": 71,
+                    "character": 48
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/uncategorized/reporterd.py",
+            "severity": "error",
+            "message": "Variable not allowed in type expression",
+            "range": {
+                "start": {
+                    "line": 71,
+                    "character": 53
+                },
+                "end": {
+                    "line": 71,
+                    "character": 67
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/uncategorized/reporterd.py",
+            "severity": "error",
+            "message": "\"Any\" cannot be instantiated",
+            "range": {
+                "start": {
+                    "line": 73,
+                    "character": 19
+                },
+                "end": {
+                    "line": 82,
+                    "character": 9
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/uncategorized/reporterd.py",
+            "severity": "error",
+            "message": "\"Application\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 105,
+                    "character": 18
+                },
+                "end": {
+                    "line": 105,
+                    "character": 29
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/uncategorized/reporterd.py",
+            "severity": "error",
+            "message": "\"AppRunner\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 108,
+                    "character": 21
+                },
+                "end": {
+                    "line": 108,
+                    "character": 30
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/uncategorized/reporterd.py",
+            "severity": "error",
+            "message": "\"TCPSite\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 110,
+                    "character": 19
+                },
+                "end": {
+                    "line": 110,
+                    "character": 26
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/evm/topography.py",
+            "severity": "error",
+            "message": "\"ClientSession\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 95,
+                    "character": 27
+                },
+                "end": {
+                    "line": 95,
+                    "character": 40
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/evm/topography.py",
+            "severity": "error",
+            "message": "Variable not allowed in type expression",
+            "range": {
+                "start": {
+                    "line": 103,
+                    "character": 40
+                },
+                "end": {
+                    "line": 103,
+                    "character": 47
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/graph/backends/__init__.py",
             "severity": "warning",
             "message": "\"Neo4jBackend\" is specified in __all__ but is not present in module",
@@ -1374,6 +1694,70 @@
                 }
             },
             "rule": "reportMissingImports"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/guards/health_guard.py",
+            "severity": "error",
+            "message": "Type \"type[cortex_extensions.health.health_mixin.HealthMixin]\" is not assignable to declared type \"type[cortex.guards.health_guard.HealthMixin]\"\n  \"cortex_extensions.health.health_mixin.HealthMixin\" is not assignable to \"cortex.guards.health_guard.HealthMixin\"\n  Type \"type[cortex_extensions.health.health_mixin.HealthMixin]\" is not assignable to type \"type[cortex.guards.health_guard.HealthMixin]\"",
+            "range": {
+                "start": {
+                    "line": 17,
+                    "character": 54
+                },
+                "end": {
+                    "line": 17,
+                    "character": 65
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/guards/health_guard.py",
+            "severity": "error",
+            "message": "Type \"type[cortex_extensions.health.models.Grade]\" is not assignable to declared type \"type[cortex.guards.health_guard.Grade]\"\n  \"cortex_extensions.health.models.Grade\" is not assignable to \"cortex.guards.health_guard.Grade\"\n  Type \"type[cortex_extensions.health.models.Grade]\" is not assignable to type \"type[cortex.guards.health_guard.Grade]\"",
+            "range": {
+                "start": {
+                    "line": 18,
+                    "character": 48
+                },
+                "end": {
+                    "line": 18,
+                    "character": 53
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/guards/health_guard.py",
+            "severity": "error",
+            "message": "Type \"type[cortex_extensions.health.models.HealthSLA]\" is not assignable to declared type \"type[cortex.guards.health_guard.HealthSLA]\"\n  \"cortex_extensions.health.models.HealthSLA\" is not assignable to \"cortex.guards.health_guard.HealthSLA\"\n  Type \"type[cortex_extensions.health.models.HealthSLA]\" is not assignable to type \"type[cortex.guards.health_guard.HealthSLA]\"",
+            "range": {
+                "start": {
+                    "line": 18,
+                    "character": 55
+                },
+                "end": {
+                    "line": 18,
+                    "character": 64
+                }
+            },
+            "rule": "reportAssignmentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/guards/health_guard.py",
+            "severity": "error",
+            "message": "Type \"type[cortex_extensions.health.models.HealthSLAViolation]\" is not assignable to declared type \"type[cortex.guards.health_guard.HealthSLAViolation]\"\n  \"cortex_extensions.health.models.HealthSLAViolation\" is not assignable to \"cortex.guards.health_guard.HealthSLAViolation\"\n  Type \"type[cortex_extensions.health.models.HealthSLAViolation]\" is not assignable to type \"type[cortex.guards.health_guard.HealthSLAViolation]\"",
+            "range": {
+                "start": {
+                    "line": 18,
+                    "character": 66
+                },
+                "end": {
+                    "line": 18,
+                    "character": 84
+                }
+            },
+            "rule": "reportAssignmentType"
         },
         {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/hooks/zero_debt.py",
@@ -1445,11 +1829,11 @@
             "message": "Object of type \"None\" is not subscriptable",
             "range": {
                 "start": {
-                    "line": 380,
+                    "line": 382,
                     "character": 30
                 },
                 "end": {
-                    "line": 380,
+                    "line": 382,
                     "character": 60
                 }
             },
@@ -2032,6 +2416,326 @@
             "rule": "reportUnusedExpression"
         },
         {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"actor_id\" of type \"str\" in function \"get_public_key_b64\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 60,
+                    "character": 53
+                },
+                "end": {
+                    "line": 60,
+                    "character": 61
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"actor_id\" of type \"str\" in function \"generate_and_store_key\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 63,
+                    "character": 61
+                },
+                "end": {
+                    "line": 63,
+                    "character": 69
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "\"encode\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 67,
+                    "character": 47
+                },
+                "end": {
+                    "line": 67,
+                    "character": 53
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"timestamp\" of type \"str\" in function \"verify_signature\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 69,
+                    "character": 80
+                },
+                "end": {
+                    "line": 69,
+                    "character": 89
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"signature_b64\" of type \"str\" in function \"verify_signature\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 69,
+                    "character": 91
+                },
+                "end": {
+                    "line": 69,
+                    "character": 104
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"agent_id\" of type \"str\" in function \"register_agent\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 76,
+                    "character": 50
+                },
+                "end": {
+                    "line": 76,
+                    "character": 58
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"agent_id\" of type \"str\" in function \"register_agent\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 81,
+                    "character": 46
+                },
+                "end": {
+                    "line": 81,
+                    "character": 54
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"agent_id\" of type \"str\" in function \"stake\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 82,
+                    "character": 35
+                },
+                "end": {
+                    "line": 82,
+                    "character": 43
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"code_str\" of type \"str\" in function \"execute\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 88,
+                    "character": 50
+                },
+                "end": {
+                    "line": 88,
+                    "character": 54
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"agent_id\" of type \"str\" in function \"reward\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 90,
+                    "character": 33
+                },
+                "end": {
+                    "line": 90,
+                    "character": 41
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"agent_id\" of type \"str\" in function \"slash\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 103,
+                    "character": 32
+                },
+                "end": {
+                    "line": 103,
+                    "character": 40
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"agent_id\" of type \"str\" in function \"slash\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 106,
+                    "character": 32
+                },
+                "end": {
+                    "line": 106,
+                    "character": 40
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "\"encode\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 117,
+                    "character": 56
+                },
+                "end": {
+                    "line": 117,
+                    "character": 62
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/byzantine_judge.py",
+            "severity": "error",
+            "message": "Argument of type \"str | Unknown | None\" cannot be assigned to parameter \"private_key_b64\" of type \"str\" in function \"sign_payload\"\n  Type \"str | Unknown | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 119,
+                    "character": 48
+                },
+                "end": {
+                    "line": 119,
+                    "character": 58
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/gatekeeper.py",
+            "severity": "error",
+            "message": "Expression of type \"None\" cannot be assigned to parameter of type \"KeyManager\"\n  \"None\" is not assignable to \"KeyManager\"",
+            "range": {
+                "start": {
+                    "line": 27,
+                    "character": 40
+                },
+                "end": {
+                    "line": 27,
+                    "character": 44
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/gatekeeper.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"actor_id\" of type \"str\" in function \"get_public_key_b64\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 53,
+                    "character": 55
+                },
+                "end": {
+                    "line": 53,
+                    "character": 63
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/gatekeeper.py",
+            "severity": "error",
+            "message": "\"encode\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 59,
+                    "character": 47
+                },
+                "end": {
+                    "line": 59,
+                    "character": 53
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/gatekeeper.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"timestamp\" of type \"str\" in function \"verify_signature\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 61,
+                    "character": 82
+                },
+                "end": {
+                    "line": 61,
+                    "character": 91
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/gatekeeper.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"signature_b64\" of type \"str\" in function \"verify_signature\"\n  Type \"Any | None\" is not assignable to type \"str\"\n    \"None\" is not assignable to \"str\"",
+            "range": {
+                "start": {
+                    "line": 61,
+                    "character": 93
+                },
+                "end": {
+                    "line": 61,
+                    "character": 106
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/gatekeeper.py",
+            "severity": "error",
+            "message": "Argument of type \"Any | None\" cannot be assigned to parameter \"source\" of type \"str | ReadableBuffer | Module | Expression | Interactive\" in function \"compile\"\n  Type \"Any | None\" is not assignable to type \"str | ReadableBuffer | Module | Expression | Interactive\"\n    Type \"None\" is not assignable to type \"str | ReadableBuffer | Module | Expression | Interactive\"\n      \"None\" is not assignable to \"str\"\n      \"None\" is incompatible with protocol \"Buffer\"\n        \"__buffer__\" is not present\n      \"None\" is not assignable to \"Module\"\n      \"None\" is not assignable to \"Expression\"\n      \"None\" is not assignable to \"Interactive\"",
+            "range": {
+                "start": {
+                    "line": 81,
+                    "character": 20
+                },
+                "end": {
+                    "line": 81,
+                    "character": 28
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/swarm/router.py",
             "severity": "error",
             "message": "Type \"dict[Unknown, dict[Unknown, Unknown] | list[dict[Unknown, Unknown] | list[Unknown] | Unknown] | list[Unknown] | Unknown] | list[dict[Unknown, dict[Unknown, Unknown] | list[Unknown] | Unknown] | list[Unknown] | Unknown] | list[Unknown] | Unknown\" is not assignable to return type \"dict[Unknown, Unknown]\"\n  Type \"dict[Unknown, dict[Unknown, Unknown] | list[dict[Unknown, Unknown] | list[Unknown] | Unknown] | list[Unknown] | Unknown] | list[dict[Unknown, dict[Unknown, Unknown] | list[Unknown] | Unknown] | list[Unknown] | Unknown] | list[Unknown] | Unknown\" is not assignable to type \"dict[Unknown, Unknown]\"\n    \"list[dict[Unknown, dict[Unknown, Unknown] | list[Unknown] | Unknown] | list[Unknown] | Unknown]\" is not assignable to \"dict[Unknown, Unknown]\"",
@@ -2245,11 +2949,11 @@
             "message": "Import \"cortex.engine.auth\" could not be resolved",
             "range": {
                 "start": {
-                    "line": 14,
+                    "line": 13,
                     "character": 5
                 },
                 "end": {
-                    "line": 14,
+                    "line": 13,
                     "character": 23
                 }
             },
@@ -2261,11 +2965,11 @@
             "message": "Import \"cortex.engine.decalcifier\" could not be resolved",
             "range": {
                 "start": {
-                    "line": 15,
+                    "line": 14,
                     "character": 5
                 },
                 "end": {
-                    "line": 15,
+                    "line": 14,
                     "character": 30
                 }
             },
@@ -2277,11 +2981,11 @@
             "message": "Import \"cortex.engine.endocrine\" could not be resolved",
             "range": {
                 "start": {
-                    "line": 16,
+                    "line": 15,
                     "character": 5
                 },
                 "end": {
-                    "line": 16,
+                    "line": 15,
                     "character": 28
                 }
             },
@@ -2309,11 +3013,11 @@
             "message": "Import \"ouroboros_prune\" could not be resolved",
             "range": {
                 "start": {
-                    "line": 89,
+                    "line": 90,
                     "character": 17
                 },
                 "end": {
-                    "line": 89,
+                    "line": 90,
                     "character": 32
                 }
             },
@@ -2325,11 +3029,11 @@
             "message": "Import \"ouroboros_absorb_runner\" could not be resolved",
             "range": {
                 "start": {
-                    "line": 104,
+                    "line": 105,
                     "character": 17
                 },
                 "end": {
-                    "line": 104,
+                    "line": 105,
                     "character": 40
                 }
             },
@@ -2485,11 +3189,11 @@
             "message": "\"AuthGateway\" is unknown import symbol",
             "range": {
                 "start": {
-                    "line": 165,
+                    "line": 166,
                     "character": 61
                 },
                 "end": {
-                    "line": 165,
+                    "line": 166,
                     "character": 72
                 }
             },
@@ -2670,6 +3374,22 @@
                 }
             },
             "rule": "reportMissingImports"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_extensions/llm/_result_cache.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"authorize_causal_writes\" for class \"Connection\"\n  Attribute \"authorize_causal_writes\" is unknown",
+            "range": {
+                "start": {
+                    "line": 34,
+                    "character": 13
+                },
+                "end": {
+                    "line": 34,
+                    "character": 36
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
         },
         {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_extensions/llm/vllm_edge.py",
@@ -3072,38 +3792,6 @@
             "rule": "reportMissingImports"
         },
         {
-            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/debug_schema.py",
-            "severity": "error",
-            "message": "Cannot access attribute \"authorize_causal_writes\" for class \"Connection\"\n  Attribute \"authorize_causal_writes\" is unknown",
-            "range": {
-                "start": {
-                    "line": 7,
-                    "character": 19
-                },
-                "end": {
-                    "line": 7,
-                    "character": 42
-                }
-            },
-            "rule": "reportAttributeAccessIssue"
-        },
-        {
-            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/debug_schema.py",
-            "severity": "error",
-            "message": "Cannot access attribute \"_causal_write_authorized\" for class \"Connection\"\n  Attribute \"_causal_write_authorized\" is unknown",
-            "range": {
-                "start": {
-                    "line": 9,
-                    "character": 40
-                },
-                "end": {
-                    "line": 9,
-                    "character": 64
-                }
-            },
-            "rule": "reportAttributeAccessIssue"
-        },
-        {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/examples/langchain_cortex_persist_example.py",
             "severity": "warning",
             "message": "Import \"langchain.chains\" could not be resolved",
@@ -3182,86 +3870,6 @@
                 }
             },
             "rule": "reportCallIssue"
-        },
-        {
-            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/inject_educational_primitives.py",
-            "severity": "error",
-            "message": "\"UltramapSubstrate\" is not a known attribute of module \"cortex_rs\"",
-            "range": {
-                "start": {
-                    "line": 19,
-                    "character": 29
-                },
-                "end": {
-                    "line": 19,
-                    "character": 46
-                }
-            },
-            "rule": "reportAttributeAccessIssue"
-        },
-        {
-            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/inject_evi_ledger.py",
-            "severity": "error",
-            "message": "\"UltramapSubstrate\" is not a known attribute of module \"cortex_rs\"",
-            "range": {
-                "start": {
-                    "line": 19,
-                    "character": 29
-                },
-                "end": {
-                    "line": 19,
-                    "character": 46
-                }
-            },
-            "rule": "reportAttributeAccessIssue"
-        },
-        {
-            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/inject_evi_ledger.py",
-            "severity": "error",
-            "message": "Cannot access attribute \"authorize_causal_writes\" for class \"Connection\"\n  Attribute \"authorize_causal_writes\" is unknown",
-            "range": {
-                "start": {
-                    "line": 48,
-                    "character": 23
-                },
-                "end": {
-                    "line": 48,
-                    "character": 46
-                }
-            },
-            "rule": "reportAttributeAccessIssue"
-        },
-        {
-            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/inject_evi_ledger.py",
-            "severity": "error",
-            "message": "Cannot access attribute \"revoke_causal_writes\" for class \"Connection\"\n  Attribute \"revoke_causal_writes\" is unknown",
-            "range": {
-                "start": {
-                    "line": 68,
-                    "character": 23
-                },
-                "end": {
-                    "line": 68,
-                    "character": 43
-                }
-            },
-            "rule": "reportAttributeAccessIssue"
-        },
-        {
-            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/inject_maldacena.py",
-            "severity": "error",
-            "message": "\"UltramapSubstrate\" is not a known attribute of module \"cortex_rs\"",
-            "range": {
-                "start": {
-                    "line": 19,
-                    "character": 29
-                },
-                "end": {
-                    "line": 19,
-                    "character": 46
-                }
-            },
-            "rule": "reportAttributeAccessIssue"
         },
         {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/scratch/check_permissions.py",
@@ -4352,32 +4960,16 @@
             "rule": "reportMissingImports"
         },
         {
-            "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/smoke_test.py",
-            "severity": "warning",
-            "message": "Import \"cortex.engine.cascade_router\" could not be resolved",
-            "range": {
-                "start": {
-                    "line": 56,
-                    "character": 13
-                },
-                "end": {
-                    "line": 56,
-                    "character": 41
-                }
-            },
-            "rule": "reportMissingImports"
-        },
-        {
             "file": "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/tools/ignite_swarm.py",
             "severity": "warning",
             "message": "Import \"cortex.engine.swarm_10k\" could not be resolved",
             "range": {
                 "start": {
-                    "line": 16,
+                    "line": 15,
                     "character": 5
                 },
                 "end": {
-                    "line": 16,
+                    "line": 15,
                     "character": 28
                 }
             },
@@ -4389,11 +4981,11 @@
             "message": "Import \"cortex.extensions.swarm.auto_fix\" could not be resolved",
             "range": {
                 "start": {
-                    "line": 17,
+                    "line": 16,
                     "character": 5
                 },
                 "end": {
-                    "line": 17,
+                    "line": 16,
                     "character": 37
                 }
             },
@@ -4405,11 +4997,11 @@
             "message": "Cannot access attribute \"initialize\" for class \"CortexEngine\"\n  Attribute \"initialize\" is unknown",
             "range": {
                 "start": {
-                    "line": 31,
+                    "line": 32,
                     "character": 17
                 },
                 "end": {
-                    "line": 31,
+                    "line": 32,
                     "character": 27
                 }
             },
@@ -4417,11 +5009,11 @@
         }
     ],
     "summary": {
-        "filesAnalyzed": 1695,
-        "errorCount": 181,
-        "warningCount": 95,
+        "filesAnalyzed": 1669,
+        "errorCount": 219,
+        "warningCount": 94,
         "informationCount": 0,
-        "timeInSec": 48.877
+        "timeInSec": 30.632
     }
 }
 

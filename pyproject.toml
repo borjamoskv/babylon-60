@@ -233,6 +233,7 @@ exclude = [
     "tests/",
     "scripts/",
     "cortex_mev_base/",
+    ".scratch/",
 ]
 
 [tool.bumpversion]

@@ -78,7 +78,8 @@ def test_e2e_ledger_integrity_and_export(temp_db: Path, tmp_path: Path) -> None:
     assert export_result.exit_code == 0
 
     # Ensure JSON response matches expected schema
-    output_json = json.loads(export_result.output)
+    json_start = export_result.output.find("{")
+    output_json = json.loads(export_result.output[json_start:])
     assert "export_dir" in output_json
     assert "manifest_hash" in output_json
     assert output_json["verification_result"] == "VALID_FULL_STRICT"

@@ -189,7 +189,7 @@ async def test_scheduler_determinism():
     await db.close()
 
 @pytest.mark.asyncio
-async def test_cascade_death_concurrent_drops():
+async def test_cascade_death_concurrent_drops(tmp_path):
     """Test that SwarmSignal for an INVALIDATED hypothesis is dropped (VOID)."""
     db = await setup_test_db()
     now = datetime.now(timezone.utc).isoformat()
@@ -213,7 +213,7 @@ async def test_cascade_death_concurrent_drops():
     
     # Let's use a real file DB for this specific test to ensure connection sharing works.
     import cortex.engine.swarm.legion
-    test_db_path = "/tmp/test_cascade.db"
+    test_db_path = str(tmp_path / "test_cascade.db")
     if os.path.exists(test_db_path):
         os.remove(test_db_path)
         
