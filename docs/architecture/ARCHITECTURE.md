@@ -46,10 +46,10 @@ graph TB
         ConsensusManager["ConsensusManager"]
     end
 
-    subgraph Memory["Tripartite Memory"]
-        L1["L1: Working Memory<br/>Redis / In-Memory"]
-        L2["L2: Vector Memory<br/>sqlite-vec / Qdrant"]
-        L3["L3: Episodic Ledger<br/>SQLite / AlloyDB"]
+    subgraph Memory["Tripartite Memory (v10.5+)"]
+        L1["L1: Working Memory<br/>Redis / In-Memory (HOT)"]
+        L2["L2: Vector Sink<br/>sqlite-vec (WARM) / Turbopuffer (COLD)"]
+        L3["L3: Episodic Ledger<br/>SQLite WAL (TRUTH)"]
     end
 
     subgraph Trust["Trust Layer"]
@@ -155,16 +155,26 @@ CORTEX implements **Weighted Byzantine Fault Tolerance**:
 
 ---
 
-## Engine Evolution: The Omega Manifold (Ω)
+## Architecture v10.5+: Sovereignty & Scale
 
-En la transición hacia las **v7 y v8**, CORTEX introduce el **Manifold Omega**, una capa de orquestación 4D que unifica percepción, decisión y acción.
+En la transición hacia **v10.5+**, CORTEX consolida su arquitectura descentralizada (C5-REAL) mediante tres avances estructurales mayores:
 
-Los pilares fundamentales:
+### 1. Tripartite Memory (L1 / L2 / L3)
+El ecosistema separa el ciclo de vida de los datos según su termodinámica de acceso:
+- **L1 (Working Memory):** Capa estocástica e in-memory (Redis / Dicts) para retención de corto plazo y ventanas de contexto de enjambre.
+- **L2 (Vector Sink):** Almacenamiento semántico. Utiliza **sqlite-vec** para embeddings calientes (WARM). Un monitor autónomo (`L2DrainMonitor`) drena periódicamente los vectores fríos (COLD) hacia **Turbopuffer**, un backend serverless de alta capacidad, liberando la presión del nodo local.
+- **L3 (Episodic Ledger):** La fuente criptográfica de la verdad. Almacenamiento estrictamente relacional y append-only en SQLite WAL. Ningún hecho existe si no se cristaliza aquí.
+
+### 2. Formación TESTUDO (Swarm)
+El Motor de Enjambre (Centauro) incluye la formación topológica **TESTUDO (LEGIØN-10k)**. Compuesta por un quórum de 15 agentes, balancea asimétricamente tareas de Seguridad, Infraestructura y Código. Proporciona un escudo de defensa proactiva (Proactive Infrastructure Defense) para rechazar mutaciones entrópicas en el repositorio sin requerir delegación manual.
+
+### 3. The Omega Manifold (Ω)
+Capa de orquestación 4D que unifica percepción, decisión y acción:
 - **KETER-Ω**: Meta-orquestación soberana. (`engine/keter.py`)
 - **TESSERACT-Ω**: Convergencia sincrónica de ciclos de vida.
 - **APOTHEOSIS-∞**: Autonomía proactiva de Nivel 5. (`engine/apotheosis.py`)
 
-Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](https://github.com/borjamoskv/Cortex-Persist/blob/main/docs/architecture/OMEGA_MANIFOLD.md).
+Para más detalles sobre los operadores Omega, consulta: [**OMEGA_MANIFOLD.md**](https://github.com/borjamoskv/Cortex-Persist/blob/main/docs/architecture/OMEGA_MANIFOLD.md).
 
 ---
 
