@@ -9,11 +9,13 @@ and executing AppleScript via the LLM.
 import json
 import logging
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.llm.manager import LLMManager
-from cortex.extensions.llm.router import IntentProfile
+from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from cortex.extensions.ui_control.maestro import MaestroUI
+
+if TYPE_CHECKING:
+    from cortex.engine.core.cortex_engine import CortexEngine
 
 logger = logging.getLogger("cortex_extensions.agents.mac_maestro")
 
@@ -33,31 +35,49 @@ Ensure the AppleScript is robust, uses System Events where needed, and avoids sy
 class MacMaestroAgent:
     """Agent that translates natural language to AppleScript and executes it."""
 
-    def __init__(self) -> None:
-        self.llm = LLMManager()
-        self.maestro = MaestroUI()
+    def __init__(self, engine: "CortexEngine | None" = None) -> None:
+        self.engine = engine
+        self.maestro = MaestroUI(engine)
+        self.router: CortexLLMRouter | None = None
+        
+        if engine and hasattr(engine, "llm_router"):
+            self.router = engine.llm_router
+        else:
+            try:
+                from cortex.pipeline.provider_factory import build_executor_stack
+                _, router = build_executor_stack()
+                self.router = router
+            except Exception as e:
+                logger.warning("Could not initialize CortexLLMRouter: %s", e)
 
     async def execute(self, instruction: str) -> dict[str, Any]:
         """
         Translates instruction, runs the script, and returns the result.
         """
-        if not self.llm.available:
+        if not self.router:
             return {
                 "success": False,
-                "error": "No LLM provider configured. Mac Maestro requires an active LLM.",
+                "error": "No LLM router configured. Mac Maestro requires an active LLM.",
             }
 
         logger.info("Mac Maestro processing instruction: %s", instruction)
 
-        response = await self.llm.complete(
-            prompt=instruction,
+        prompt = CortexPrompt(
             system=SYSTEM_PROMPT,
-            temperature=0.1,
+            prompt=instruction,
             intent=IntentProfile.CODE,
+            temperature=0.1,
         )
 
-        if not response:
-            return {"success": False, "error": "LLM returned empty response."}
+        response_result = await self.router.execute_resilient(prompt)
+
+        if not response_result or not response_result.is_ok():
+            return {
+                "success": False,
+                "error": f"LLM returned error or empty response: {response_result.error if response_result else 'Unknown error'}",
+            }
+            
+        response = response_result.unwrap()
 
         # Parse JSON
         script_data = self._parse_json_response(response)
