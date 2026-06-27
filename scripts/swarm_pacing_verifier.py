@@ -11,7 +11,7 @@ import os
 import sys
 from pathlib import Path
 
-from cortex.engine.swarm_10k import SwarmCommander
+from cortex.engine.swarm.swarm_10k import SwarmCommander
 
 
 async def verify_pacing():
