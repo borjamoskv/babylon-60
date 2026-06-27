@@ -242,40 +242,87 @@ class CortexLLMRouter:
 
         # Phase 2: Fallback cascade
         fallbacks = self._ordered_fallbacks(prompt)
+        
+        is_fast_reject = False
+        if not primary_valid:
+            # Primary was skipped, not a fast reject
+            pass
+        elif res_primary.error and ("Fast-Reject" in res_primary.error or "429" in res_primary.error):
+            is_fast_reject = True
 
-        for i, provider in enumerate(fallbacks, start=2):
+        valid_fallbacks = []
+        for provider in fallbacks:
             if provider.provider_name in self._evicted:
                 errors.append(f"{provider.provider_name}: Skip (Evicted via 401)")
                 continue
-
             if self._cascade.is_nxdomain_cached(provider.provider_name):
                 errors.append(f"{provider.provider_name}: Skip (NXDOMAIN cached)")
                 continue
+            valid_fallbacks.append(provider)
 
+        # Si el primario tuvo un Fast-Reject, corremos los fallbacks en paralelo (Zero-Wait tuning)
+        if is_fast_reject and valid_fallbacks:
+            logger.warning(
+                "🚀 [ZERO-WAIT FAILOVER] Primary Fast-Rejected. Racing %d fallbacks simultaneously...",
+                len(valid_fallbacks),
+            )
+            from cortex.extensions.llm._hedging import HedgedRequestStrategy
+            
             fb_start = time.monotonic()
-            res_fb = await self._try_provider(provider, prompt)
+            hedged_res, hedge_errors = await HedgedRequestStrategy.race(valid_fallbacks, prompt)
             fb_latency = (time.monotonic() - fb_start) * 1000
-
-            if res_fb.is_ok():
-                tier = classify_tier(provider, prompt.intent)
-                self._cascade.set_a_record(provider.provider_name, fb_latency)
+            
+            if hedged_res:
+                winner_provider = next(p for p in valid_fallbacks if p.provider_name == hedged_res.winner)
+                tier = classify_tier(winner_provider, prompt.intent)
+                self._cascade.set_a_record(hedged_res.winner, fb_latency)
                 self._telemetry.emit(
                     CascadeEvent(
                         intent=prompt.intent,
-                        resolved_by=provider.provider_name,
+                        resolved_by=hedged_res.winner,
                         project=prompt.project,
                         tier=tier,
-                        depth=i,
+                        depth=2,  # Represents a fallback
                         latency_ms=fb_latency,
                         errors=errors,
                         prompt_tokens=prompt.prompt_tokens,
                         completion_tokens=prompt.completion_tokens,
                     )
                 )
-                return res_fb
+                return Ok(hedged_res.response)
+            
+            # If the race failed, all fallbacks failed
+            for err in hedge_errors:
+                errors.append(err)
+            for provider in valid_fallbacks:
+                self._cascade.set_nx_record(provider.provider_name)
+        else:
+            # Fallback cascade secuencial tradicional
+            for i, provider in enumerate(valid_fallbacks, start=2):
+                fb_start = time.monotonic()
+                res_fb = await self._try_provider(provider, prompt)
+                fb_latency = (time.monotonic() - fb_start) * 1000
 
-            errors.append(f"{provider.provider_name}: {res_fb.error}")  # type: ignore
-            self._cascade.set_nx_record(provider.provider_name)
+                if res_fb.is_ok():
+                    tier = classify_tier(provider, prompt.intent)
+                    self._cascade.set_a_record(provider.provider_name, fb_latency)
+                    self._telemetry.emit(
+                        CascadeEvent(
+                            intent=prompt.intent,
+                            resolved_by=provider.provider_name,
+                            project=prompt.project,
+                            tier=tier,
+                            depth=i,
+                            latency_ms=fb_latency,
+                            errors=errors,
+                            prompt_tokens=prompt.prompt_tokens,
+                            completion_tokens=prompt.completion_tokens,
+                        )
+                    )
+                    return res_fb
+
+                errors.append(f"{provider.provider_name}: {res_fb.error}")  # type: ignore
+                self._cascade.set_nx_record(provider.provider_name)
 
         self._telemetry.emit(
             CascadeEvent(
