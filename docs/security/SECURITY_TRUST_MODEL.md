@@ -135,7 +135,7 @@ State mutation emits audit-relevant trace data through:
 ### 5. Deterministic Structural Rejection
 
 Inputs that fail required syntax, type, schema, or guard conditions are rejected.
-The guard layer includes 14+ specialized guards:
+The guard layer includes 15+ specialized guards:
 
 | Guard | Function |
 |---|---|
@@ -153,6 +153,26 @@ The guard layer includes 14+ specialized guards:
 | `sovereign_seals.py` | Sovereign seal verification pipeline |
 | `heuristic_seals.py` | Heuristic-based seal generation |
 | `virgo.py` | Formal verification integration |
+| `haiku.py` (HaikuGuard) | Enforces 5-7-5 syllable metric for axioms (Ω₄) |
+
+#### ZK-Swarm Guard Integration (ZKSwarmGuard)
+
+The `ZKSwarmGuard` (implemented in [`cortex/guards/zk_guard.py`](file:///Users/borjafernandezangulo/30_CORTEX/cortex/guards/zk_guard.py)) validates cryptographic proofs of consensus on high-risk topological fact types: `decision`, `rule`, and `code`. 
+
+To write/inject a fact of these types, the committing agent must sign the payload:
+1. **Key Generation / Identity:** The subagent loads its `ZKSwarmIdentity` public/private keypair.
+2. **Payload Signing:** The agent signs the raw fact content using Ed25519, producing a Base64-encoded signature.
+3. **Fact Submission:** The agent adds `agent_public_key` and `zk_proof_signature` to the metadata (`meta` dictionary) of the fact proposal:
+   ```json
+   {
+     "meta": {
+       "agent_public_key": "MIIB...",
+       "zk_proof_signature": "dGVzd..."
+     }
+   }
+   ```
+If the signature is missing or fails verification, the `ZKSwarmGuard` raises a `VoidStateSecurityError` and aborts the SAGA transaction.
+
 
 ### 6. Tenant-Aware Isolation
 
