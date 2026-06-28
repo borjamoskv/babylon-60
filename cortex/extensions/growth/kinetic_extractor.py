@@ -91,3 +91,32 @@ def execute_extraction(filepath: str) -> List[ExergyNote]:
         content = f.read()
     extractor = KineticExtractor()
     return extractor.extract_notes(content)
+
+if __name__ == "__main__":
+    import argparse
+    import os
+
+    parser = argparse.ArgumentParser(description="Kinetic Extractor: Exergy-Maximized Notes")
+    parser.add_argument("filepath", help="Path to the markdown newsletter")
+    parser.add_argument("--outdir", default="queue/notes", help="Output directory for extracted notes")
+    args = parser.parse_args()
+
+    notes = execute_extraction(args.filepath)
+    os.makedirs(args.outdir, exist_ok=True)
+    
+    saved_count = 0
+    for i, note in enumerate(notes):
+        # Strict thermodynamic cutoff (only save top-tier exergy)
+        if note.shannon_entropy_score < 75.0:
+            continue
+        
+        safe_score = str(note.shannon_entropy_score).replace('.', '_')
+        filename = f"note_exergy_{safe_score}_{i}.md"
+        outpath = os.path.join(args.outdir, filename)
+        
+        with open(outpath, 'w', encoding='utf-8') as f:
+            f.write(f"<!-- Exergy Score: {note.shannon_entropy_score} | Source: {os.path.basename(args.filepath)} -->\n")
+            f.write(f"{note.content}\n")
+        saved_count += 1
+        
+    print(f"[C5-REAL] Extracted and crystallized {saved_count} High-Exergy Notes to {args.outdir}/")
