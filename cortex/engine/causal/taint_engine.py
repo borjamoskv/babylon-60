@@ -264,6 +264,18 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         logger.error("[TaintEngine] P0 SINGULARITY: Host Identity Bleed detected in Taint payload.")
         raise TaintValidationError("SAGA-1 Rejection: Payload contains prohibited Host Identity PII.")
 
+    # -- SaaS Bot Inflation Firewall (Substack Crawler Guard) --
+    try:
+        data = json.loads(content)
+        if isinstance(data, dict) and 'Email' in data and 'Emails opened (6mo)' in data:
+            from cortex.guards.substack_crawler_guard import SubstackCrawlerGuard
+            try:
+                SubstackCrawlerGuard().enforce_saga_contract(data)
+            except ValueError as guard_err:
+                raise TaintValidationError(f"SAGA-1 Rejection by SaaS Firewall: {guard_err}")
+    except (json.JSONDecodeError, TypeError):
+        pass  # Not a SaaS JSON payload
+
     if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
         return
 

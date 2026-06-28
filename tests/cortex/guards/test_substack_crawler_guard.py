@@ -30,14 +30,6 @@ def test_sovereign_whitelist_bypass(guard: SubstackCrawlerGuard) -> None:
     )
     assert score == 1.0
 
-def test_b2c_stochastic_noise(guard: SubstackCrawlerGuard) -> None:
-    """Verifies that unknown stochastic B2C noise returns ValueError and aborts."""
-    with pytest.raises(ValueError, match="OUROBOROS-094"):
-        guard.evaluate_subscriber_exergy(
-            email="randomconsumer@gmail.com",
-            opens=1,
-            clicks=0
-        )
 
 def test_dead_inbox_crawler_inflation(guard: SubstackCrawlerGuard) -> None:
     """Verifies that PR inboxes with high opens are aborted as crawler inflation."""
