@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
-"""Causal Scheduler - Función de presión temporal y estabilidad del DAG.
+"""Causal Scheduler - Time pressure function and DAG stability.
 
-Árbitro de ejecución. Decide cuándo el sistema evoluciona y cuándo se
-congela el estado (mediante macro-rewinds o micro-repairs) basándose
-en el 'permission_to_exist_score'.
+Execution arbiter. Decides when the system evolves and when the
+state freezes (via macro-rewinds or micro-repairs) based on
+the 'permission_to_exist_score'.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ logger = logging.getLogger("cortex.engine.flow.causal_scheduler")
 
 
 class CausalScheduler:
-    """Orquestador de termodinámica viva. Dicta el execution_mode global."""
+    """Living thermodynamics orchestrator. Dictates the global execution_mode."""
 
     def __init__(
         self,
@@ -47,8 +47,8 @@ class CausalScheduler:
         self.base_entropy_budget = 1000.0
 
     async def _get_entropy_budget(self, tenant_id: str) -> float:
-        """Obtiene el EB histórico. Si no existe, lo inicializa."""
-        # Se almacena en la db de trazas por conveniencia de este MVP
+        """Gets historical EB. If it does not exist, initializes it."""
+        # Stored in the trace db for MVP convenience
         init_query = "CREATE TABLE IF NOT EXISTS thermodynamics_state (tenant_id TEXT PRIMARY KEY, entropy_budget REAL)"
         async with connect_async_ctx(self.ledger.db_path) as conn:
             await conn.execute(init_query)
@@ -76,7 +76,7 @@ class CausalScheduler:
     async def evaluate_tick(
         self, window_seconds: int = 3600, tenant_id: str = "default"
     ) -> dict[str, Any]:
-        """Evalúa el estado del sistema y la continuidad ontológica global (GCC)."""
+        """Evaluates system state and global ontological continuity (GCC)."""
         drift = await self.graph.compute_global_drift(window_seconds, tenant_id)
         cf = await self.graph.compute_coherence_field(window_seconds, tenant_id)
         eb = await self._get_entropy_budget(tenant_id)
@@ -94,11 +94,11 @@ class CausalScheduler:
         # 1. Entropy Exhaustion (Chaos breakdown)
         if eb < 0.0:
             mode = "chaotic_irreversible"
-            candidates = []  # Se prohíben operaciones defensivas, el sistema entero arde
+            candidates = []  # Defensive operations forbidden, the whole system burns
         # 2. Coherence collapse (Fragmentación de realidad)
         elif cf < self.cf_threshold:
             mode = "coherence_lock"
-            candidates = []  # Bloquear nuevos rollbacks para reconciliar primero
+            candidates = []  # Block new rollbacks to reconcile first
         # 3. Structural runaway
         elif drift > 50.0 and len(candidates) >= 3:
             mode = "collapse_prevent"
@@ -110,7 +110,7 @@ class CausalScheduler:
             mode = "stable"
 
         # Update EB roughly based on drift vs rollback costs (drift gain adds to budget)
-        # Un drift manejable añade presupuesto, un drift alto consume entropía
+        # A manageable drift adds budget, a high drift consumes entropy
         drift_gain = (20.0 - drift) * 0.1
         # EB mutation applies immediately to reflect thermodynamic time
         new_eb = eb + drift_gain
@@ -136,7 +136,7 @@ class CausalScheduler:
     async def tick_and_act(
         self, window_seconds: int = 3600, tenant_id: str = "default"
     ) -> dict[str, Any]:
-        """Evalúa el tick y ejecuta acciones si hay permiso global."""
+        """Evaluates the tick and executes actions if global permission exists."""
         tick_state = await self.evaluate_tick(window_seconds, tenant_id)
 
         mode = tick_state["execution_mode"]
@@ -144,12 +144,12 @@ class CausalScheduler:
 
         if mode == "chaotic_irreversible":
             logger.critical(
-                "[Causal Scheduler] ENTROPY BUDGET < 0. Sistema en caos irreversible. Rollbacks suspendidos."
+                "[Causal Scheduler] ENTROPY BUDGET < 0. System in irreversible chaos. Rollbacks suspended."
             )
 
         elif mode == "coherence_lock":
             logger.warning(
-                f"[Causal Scheduler] COHERENCE FIELD < {self.cf_threshold}. Bloqueando mutaciones hasta reconciliación causal."
+                f"[Causal Scheduler] COHERENCE FIELD < {self.cf_threshold}. Blocking mutations until causal reconciliation."
             )
 
         elif mode == "collapse_prevent":
@@ -160,7 +160,7 @@ class CausalScheduler:
             total_rollback_cost = 0.0
             for c in candidates:
                 logger.warning(
-                    f"[Causal Scheduler] Macro-Rewind defensivo para {c['id']} "
+                    f"[Causal Scheduler] Defensive Macro-Rewind for {c['id']} "
                     f"(permission_to_exist={c['permission_to_exist_score']:.3f})"
                 )
                 res = await self.rollback.apply_rollback(c["id"], tenant_id=tenant_id)
@@ -169,7 +169,7 @@ class CausalScheduler:
                 if res.get("status") == "success":
                     total_rollback_cost += res.get("freed_energy", 0.0)
 
-            # Restar costo de rollback del Entropy Budget
+            # Subtract rollback cost from Entropy Budget
             if total_rollback_cost > 0:
                 eb = tick_state["eb"]
                 await self._update_entropy_budget(tenant_id, eb - total_rollback_cost)
@@ -177,7 +177,7 @@ class CausalScheduler:
         elif mode == "pressure":
             # Micro-repair / Logging / Allow Ley2Loop to handle it via future bias
             logger.info(
-                "[Causal Scheduler] Estado de Presión. Confiando en Ley2Loop para drift shaping."
+                "[Causal Scheduler] Pressure state. Relying on Ley2Loop for drift shaping."
             )
 
         return {"tick_state": tick_state, "actions": actions_taken}
