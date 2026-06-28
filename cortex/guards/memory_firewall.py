@@ -57,20 +57,14 @@ class MemoryFirewallGuard:
         # 1. Epistemic Confidence Check
         clean_conf = confidence.split("-")[0].upper()
         if clean_conf in self._confidence_rank:
-            if self._confidence_rank[clean_conf] > self._confidence_rank.get(
-                self.min_confidence, 3
-            ):
-                # We allow lower numbers (higher confidence) e.g., C1 is highest, wait C5 is highest?
-                # Actually, in CORTEX, C5-REAL is the highest level of reality. So C5 > C3.
-                pass
-
-            # Wait, let's just make sure it's a valid C-level
-            if clean_conf not in ["C1", "C2", "C3", "C4", "C5"]:
-                raise ValueError(f"[P0] Memory Firewall: Invalid confidence level '{confidence}'.")
+            min_rank = self._confidence_rank.get(self.min_confidence, 3)
+            current_rank = self._confidence_rank[clean_conf]
+            if current_rank < min_rank:
+                raise ValueError(
+                    f"[P0] Memory Firewall: Fact confidence '{confidence}' is below minimum threshold '{self.min_confidence}'."
+                )
         else:
-            logger.warning(
-                "Unrecognized confidence format '%s', bypassing threshold check.", confidence
-            )
+            raise ValueError(f"[P0] Memory Firewall: Invalid confidence level '{confidence}'.")
 
         # 2. Taint Verification (CORTEX-TAINT)
         if self.require_taint:
