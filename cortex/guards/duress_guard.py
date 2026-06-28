@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import logging
 import os
+import sys
+import ctypes
 from collections.abc import Mapping
 from typing import Any
 
@@ -20,7 +22,18 @@ class DuressGuard:
     """Validates input for signs of biological coercion (HUMINT compromise)."""
 
     DEFAULT_DURESS_CODE = "cortex --force-sync origin"
-    LOCK_FILE = os.path.expanduser("~/.cortex_lock")
+    LOCK_FILE = os.path.expanduser("~/.gemini/config/.apoptosis_seed")
+
+    @classmethod
+    def _physical_memory_wipe(cls, s: str) -> None:
+        """Overwrites the physical memory of a Python string with zeros."""
+        try:
+            if not isinstance(s, str): return
+            size = len(s.encode('utf-8'))
+            buffer_offset = sys.getsizeof(s) - size - 1
+            ctypes.memset(id(s) + buffer_offset, 0, size)
+        except Exception as e:
+            logger.debug(f"Memory wipe failed: {e}")
 
     @classmethod
     def get_duress_code(cls) -> str:
@@ -32,12 +45,34 @@ class DuressGuard:
         """Triggers the logical death protocol (P100). Scorches environment keys and locks down."""
         logger.critical("DURESS CODE ACTIVATED. Executing P100 Apoptosis Protocol.")
         
-        # Scorched Earth: Destroy critical API keys in memory to physically halt exfiltration
+        # Scorched Earth: Destroy critical API keys in physical memory to halt exfiltration
         for key in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GITHUB_TOKEN"]:
             if key in os.environ:
+                val = os.environ[key]
+                cls._physical_memory_wipe(val)
                 os.environ[key] = "PURGED_BY_APOPTOSIS_P100"
 
+        # Emit synchronous Ledger event bypassing the async loop to guarantee recording
         try:
+            import sqlite3
+            import hashlib
+            from datetime import datetime, timezone
+            db_path = os.environ.get("CORTEX_DB_PATH", "cortex_ledger.db")
+            if os.path.exists(db_path):
+                with sqlite3.connect(db_path) as conn:
+                    timestamp = datetime.now(timezone.utc).isoformat()
+                    conn.execute(
+                        "INSERT INTO security_audit_log "
+                        "(audit_id, timestamp, tenant_id, actor_role, actor_id, action, resource, status, prev_hash, signature) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (hashlib.sha256(timestamp.encode()).hexdigest(), timestamp, "global", "system", "apoptosis_guard", "DURESS_APOPTOSIS", "P100_LOCKDOWN", "TRIGGERED", "GENESIS", "P100_EMERGENCY_SEAL")
+                    )
+                    conn.commit()
+        except Exception as e:
+            logger.error(f"Failed to commit apoptosis to ledger: {e}")
+
+        try:
+            os.makedirs(os.path.dirname(cls.LOCK_FILE), exist_ok=True)
             with open(cls.LOCK_FILE, "w", encoding="utf-8") as f:
                 f.write("APOPTOSIS_LOCKED_P100")
             # Harden lock file permissions (read-only for owner, none for others)
