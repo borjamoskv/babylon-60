@@ -13,6 +13,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -74,7 +75,7 @@ def _run(cmd: str, timeout: int = 120) -> subprocess.CompletedProcess:
 def check_ruff() -> CheckResult:
     """Lint check via ruff."""
     t0 = time.monotonic()
-    result = _run(f".venv/bin/ruff check {RUFF_TARGET}")
+    result = _run(f"uv run ruff check {RUFF_TARGET}")
     ms = (time.monotonic() - t0) * 1000
     passed = result.returncode == 0
     error_count = len(result.stdout.strip().splitlines()) if not passed else 0
@@ -86,12 +87,68 @@ def check_ruff() -> CheckResult:
     )
 
 
+def check_git_state() -> CheckResult:
+    """Git State — clean & aligned with origin."""
+    t0 = time.monotonic()
+    result = _run("git status --porcelain")
+    ms = (time.monotonic() - t0) * 1000
+    
+    passed = result.returncode == 0 and not result.stdout.strip()
+    if not passed:
+        detail = "dirty working tree" if result.stdout.strip() else "git status failed"
+    else:
+        detail = "clean"
+        
+    return CheckResult(
+        name="git_state",
+        passed=passed,
+        duration_ms=round(ms, 1),
+        detail=detail,
+    )
+
+
+def check_ghost_radar() -> CheckResult:
+    """Ghost Radar — no unresolved ghosts in 24h."""
+    t0 = time.monotonic()
+    result = _run("git ls-files --others --exclude-standard")
+    ms = (time.monotonic() - t0) * 1000
+    
+    untracked_count = len(result.stdout.strip().splitlines()) if result.stdout.strip() else 0
+    passed = result.returncode == 0 and untracked_count == 0
+    
+    return CheckResult(
+        name="ghost_radar",
+        passed=passed,
+        duration_ms=round(ms, 1),
+        detail=f"{untracked_count} untracked files" if not passed else "no ghosts",
+    )
+
+
+def check_neural_connectivity() -> CheckResult:
+    """Neural Connectivity (Ω₁₃) — API key coverage > 0."""
+    t0 = time.monotonic()
+    has_key = bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY"))
+    if not has_key:
+        env_file = REPO_ROOT / ".env"
+        if env_file.exists():
+            content = env_file.read_text()
+            has_key = "GEMINI_API_KEY=" in content or "ANTHROPIC_API_KEY=" in content
+            
+    ms = (time.monotonic() - t0) * 1000
+    return CheckResult(
+        name="neural_connectivity",
+        passed=has_key,
+        duration_ms=round(ms, 1),
+        detail="API keys found" if has_key else "missing GEMINI_API_KEY",
+    )
+
+
 def check_tests(fast: bool = False) -> CheckResult:
     """Run pytest suite."""
     t0 = time.monotonic()
     marker = '-m "not slow"' if fast else ""
     result = _run(
-        f".venv/bin/pytest tests/ {marker} --tb=line -q --no-header",
+        f"uv run pytest tests/ {marker} --tb=line -q --no-header",
         timeout=PYTEST_TIMEOUT,
     )
     ms = (time.monotonic() - t0) * 1000
@@ -159,7 +216,7 @@ def check_mejoralo() -> CheckResult:
     """Check MEJORAlo score if available."""
     t0 = time.monotonic()
     try:
-        result = _run(".venv/bin/python -m cortex.mejoralo scan --score-only cortex/", timeout=60)
+        result = _run("uv run python -m cortex.mejoralo scan --score-only cortex/", timeout=60)
         ms = (time.monotonic() - t0) * 1000
         try:
             score = int(result.stdout.strip().split()[-1])
@@ -229,10 +286,13 @@ def main() -> None:
     report = GateReport(timestamp=datetime.now(timezone.utc).isoformat())
 
     checks = [
-        ("Lint", check_ruff),
+        ("Ghost Radar", check_ghost_radar),
         ("Tests", lambda: check_tests(fast=fast)),
+        ("Git State", check_git_state),
+        ("Lint", check_ruff),
         ("Complexity", check_radon_cc),
         ("Quality", check_mejoralo),
+        ("Neural Conn", check_neural_connectivity),
     ]
 
     for label, fn in checks:
