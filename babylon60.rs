@@ -350,7 +350,7 @@ fn divide_exact(numerator: i128, scale: u32, divisor: i128) -> (i128, u32) {
     if divisor == 0 { return (0, scale); }
     let mut num = numerator;
     let mut sc = scale;
-    while num % divisor != 0 && sc < 5 {
+    while num % divisor != 0 && sc < u32::MAX / 60 {
         num *= 60;
         sc += 1;
     }
