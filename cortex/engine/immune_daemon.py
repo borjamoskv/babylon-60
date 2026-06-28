@@ -55,7 +55,7 @@ class ImmuneDaemon:
                 logger.error(f"[Φ4] Fallo interno en fagocitosis: {e}")
             
             # Descanso termodinámico para no colapsar la RAM (Bucle asintótico)
-            time.sleep(10)
+            time.sleep(10)  # noqa: TID251 # Threaded loop
 
     def _execute_shadow_mutation(self):
         """
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     
     # Simula el proceso principal corriendo durante 60s antes de detenerse
     try:
-        time.sleep(60)
+        time.sleep(60)  # noqa: TID251 # Main process loop
     except KeyboardInterrupt:
         pass
     finally:

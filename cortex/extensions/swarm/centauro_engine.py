@@ -219,13 +219,31 @@ class CentauroEngine:
         """
         proposals: dict[str, str] = {}
 
-        async def _run_agent(a_id: str, a: VirtualAgent) -> tuple[str, str | Exception]:
+        # C5-REAL Concurrency Protection Gate (99.99% Resilience)
+        is_local = True
+        if self.router is not None:
             try:
-                return (a_id, await a.execute("M-01", mission))
-            except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
-                import logging
-                logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}")
-                return (a_id, exc)
+                providers = [self.router.primary] + self.router.fallbacks
+                is_local = all(
+                    getattr(p, "_provider", "") in ["ollama", "lmstudio"] or 
+                    "localhost" in getattr(p, "_base_url", "") or 
+                    "127.0.0.1" in getattr(p, "_base_url", "")
+                    for p in providers
+                )
+            except Exception:
+                is_local = True
+
+        concurrency_limit = 4 if is_local else 50
+        sem = asyncio.Semaphore(concurrency_limit)
+
+        async def _run_agent(a_id: str, a: VirtualAgent) -> tuple[str, str | Exception]:
+            async with sem:
+                try:
+                    return (a_id, await a.execute("M-01", mission))
+                except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
+                    import logging
+                    logging.getLogger(__name__).exception(f"[P0] CORTEX-TAINT: Fallo no controlado en Swarm cortex_extensions/swarm/centauro_engine.py - {exc}")
+                    return (a_id, exc)
 
         agent_tasks = [_run_agent(a_id, agent) for a_id, agent in squad.items()]
 

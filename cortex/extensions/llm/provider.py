@@ -153,7 +153,7 @@ class LLMProvider(BaseProvider):
                 ttl_seconds=cache_config.get("ttl_seconds", 3600),
             )
             if remote_cache:
-                await _get_quota_manager().acquire(tokens=1, fast_reject=True)
+                await self._acquire_quota()
                 return await execute_gemini_native(
                     self._client,
                     self._semaphore,
@@ -171,7 +171,7 @@ class LLMProvider(BaseProvider):
         if cached := cache.get(payload):
             return cached
 
-        await _get_quota_manager().acquire(tokens=1, fast_reject=True)
+        await self._acquire_quota()
         url, headers = self._prepare_request()
 
         current_system = system
@@ -293,7 +293,7 @@ class LLMProvider(BaseProvider):
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
     ) -> AsyncGenerator[str, None]:
-        await _get_quota_manager().acquire(tokens=1, fast_reject=True)
+        await self._acquire_quota()
         url, headers = self._prepare_request()
         headers = prepare_stealth_headers(headers)
         model_name = self._resolve_model(intent)
@@ -345,6 +345,10 @@ class LLMProvider(BaseProvider):
             return resolved
         return self._model
 
+    async def _acquire_quota(self) -> None:
+        if self._provider not in ["ollama", "lmstudio"]:
+            await _get_quota_manager().acquire(tokens=1, fast_reject=True)
+
     async def invoke(self, prompt: CortexPrompt) -> str:
         model_name = self._resolve_model(prompt.intent)
         messages = prompt.to_openai_messages()
@@ -387,7 +391,7 @@ class LLMProvider(BaseProvider):
             )
             if remote_cache:
                 user_msg = " ".join([m["content"] for m in messages if m["role"] == "user"])
-                await _get_quota_manager().acquire(tokens=1, fast_reject=True)
+                await self._acquire_quota()
                 return await execute_gemini_native(
                     self._client,
                     self._semaphore,
@@ -405,7 +409,7 @@ class LLMProvider(BaseProvider):
         if cached := cache.get(payload):
             return cached
 
-        await _get_quota_manager().acquire(tokens=1, fast_reject=True)
+        await self._acquire_quota()
         url, headers = self._prepare_request()
         headers = prepare_stealth_headers(headers)
 
