@@ -31,8 +31,8 @@ except ImportError:
 
 class CTREGuard:
     """
-    Motor CTRE para CORTEX Persist.
-    Implementa concurrencia optimista mediante Test-and-Set atómico delegado a Rust.
+    CTRE Engine for CORTEX Persist.
+    Implements optimistic concurrency via atomic Test-and-Set delegated to Rust.
     """
 
     @staticmethod
@@ -40,38 +40,38 @@ class CTREGuard:
         expected_hash: int, current_hash: int, target_x: float = 0.0, target_y: float = 0.0
     ) -> tuple[bool, int]:
         """
-        Ejecuta la verificación atómica (isomorfismo de estado).
+        Executes atomic verification (state isomorphism).
 
         Args:
-            expected_hash: Hash de estado cuando el Agente (VLM/LLM) planificó la acción (t0).
-            current_hash: Hash de estado microscópicamente anterior a la inyección (t1).
-            target_x: Coordenada X (para UI agents).
-            target_y: Coordenada Y (para UI agents).
+            expected_hash: State hash when the Agent (VLM/LLM) planned the action (t0).
+            current_hash: State hash microscopically before injection (t1).
+            target_x: X coordinate (for UI agents).
+            target_y: Y coordinate (for UI agents).
 
         Returns:
-            Tuple[bool, int]: (True si el commit es exitoso / False si hay divergencia TOCTOU, tiempo en microsegundos epsilon)
+            Tuple[bool, int]: (True if commit is successful / False if TOCTOU divergence exists, time in microseconds epsilon)
         """
         if HAS_RUST_CTRE and hasattr(cortex_rs, "ctre_atomic_commit"):
-            # Ejecución C5-REAL vía FFI
+            # C5-REAL execution via FFI
             try:
                 success, epsilon_us = getattr(cortex_rs, "ctre_atomic_commit")(  # noqa: B009
                     expected_hash, target_x, target_y, current_hash
                 )
                 if not success:
                     logger.warning(
-                        f"[CTRE] SAGA ABORT: Mutación detectada (TOCTOU). Epsilon={epsilon_us}µs"
+                        f"[CTRE] SAGA ABORT: Mutation detected (TOCTOU). Epsilon={epsilon_us}µs"
                     )
                 else:
                     logger.info(
-                        f"[CTRE] COMMIT SUCCESS: Isomorfismo estructural verificado en {epsilon_us}µs"
+                        f"[CTRE] COMMIT SUCCESS: Structural isomorphism verified in {epsilon_us}µs"
                     )
                 return success, epsilon_us
             except (ValueError, TypeError, KeyError, AssertionError) as e:
-                logger.error(f"[CTRE] FFI Error en validación atómica: {e}")
+                logger.error(f"[CTRE] FFI Error in atomic validation: {e}")
                 # Fallback on error
                 return CTREGuard._python_fallback(expected_hash, current_hash)
         else:
-            # Fallback a Python GIL (propenso a Jitter)
+            # Fallback to Python GIL (jitter prone)
             return CTREGuard._python_fallback(expected_hash, current_hash)
 
     @staticmethod
@@ -84,6 +84,6 @@ class CTREGuard:
 
         if not success:
             logger.warning(
-                f"[CTRE-PY] SAGA ABORT (GIL Warning): Mutación detectada. Epsilon={epsilon_us}µs"
+                f"[CTRE-PY] SAGA ABORT (GIL Warning): Mutation detected. Epsilon={epsilon_us}µs"
             )
         return success, epsilon_us
