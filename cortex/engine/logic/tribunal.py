@@ -5,6 +5,7 @@ from typing import Any
 from cortex.agents.primitives.dispatcher import apex_dispatcher
 from cortex.engine.logic.atms import AtmsAdapter
 from cortex.engine.logic.sanedrin import sanedrin_council
+from cortex.engine.logic.z3_solver import z3_engine
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +27,12 @@ class TribunalEngine:
     def detect_collision(self, fact_a: dict[str, Any], fact_b: dict[str, Any]) -> bool:
         """
         Detects if two facts contradict each other structurally.
-        (Placeholder for SMT/Z3 solvers in future phases).
+        Uses Z3 SMT logic theorem prover to eradicate stochastic LLM fallibility.
         """
-        # In C5-REAL, a collision is reported by the ContradictionGuard.
-        logger.info(f"[Tribunal] Collision detected between {fact_a.get('id')} and {fact_b.get('id')}")
-        return True
+        has_collision = z3_engine.prove_contradiction(fact_a, fact_b)
+        if has_collision:
+            logger.info(f"[Tribunal] Z3 Collision detected between {fact_a.get('id')} and {fact_b.get('id')}")
+        return has_collision
 
     def suspend_subgraph(self, root_node_id: str) -> list[str]:
         """
