@@ -315,15 +315,36 @@ class OmegaDaemon:
                         logger.warning("Entropía Crítica detectada. Enganchando Ouroboros a Turbopuffer para Prune.")
                         try:
                             import os
-
+                            import keyring
                             from cortex.storage.turbopuffer import TurbopufferVectorBackend
-                            # Injecting taint signature for L2 autopoietic bypass
+                            from cortex.engine.causal.taint_engine import generate_secure_taint_token
+                            
+                            priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
+                            if not priv_b64:
+                                try:
+                                    priv_b64 = keyring.get_password("cortex_v6", "ed25519_private_key")
+                                except Exception:
+                                    pass
+                            
+                            ns = f"cortex_omega_daemon"
+                            content = f"prune:{ns}:0.99"
+                            
+                            if priv_b64:
+                                taint_signature = generate_secure_taint_token(
+                                    agent_id="omega_daemon",
+                                    session_id="ouroboros_p1.2",
+                                    content=content,
+                                    private_key_b64=priv_b64,
+                                )
+                            else:
+                                taint_signature = "CORTEX-TAINT:OUROBOROS_P1.2_FALLBACK"
+
                             backend = TurbopufferVectorBackend(api_key=os.environ.get("TURBOPUFFER_API_KEY", "dummy"))
                             await backend.connect()
                             await backend.autonomous_prune_by_entropy(
                                 tenant_id="omega_daemon", 
                                 entropy_threshold=0.99, 
-                                taint_signature="CORTEX-TAINT:OUROBOROS_P1.2"
+                                taint_signature=taint_signature
                             )
                             await backend.close()
                         except Exception as bp_exc:
