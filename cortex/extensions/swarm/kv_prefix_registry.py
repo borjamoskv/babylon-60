@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 """
-KV Prefix Registry para SwarmManager.
-Implementa RadixAttention-style prefix sharing a nivel de aplicación.
-AX-042 compliance: elimina recompute de system_prompt por agente.
-AGENTS.md Tenant Isolation: cache_key siempre incluye tenant_id.
+KV Prefix Registry for SwarmManager.
+Implements RadixAttention-style prefix sharing at the application level.
+AX-042 compliance: eliminates system_prompt recompute per agent.
+AGENTS.md Tenant Isolation: cache_key always includes tenant_id.
 """
 
 from __future__ import annotations
@@ -18,26 +18,26 @@ from typing import Any
 
 @lru_cache(maxsize=1024)
 def hash_prompt(system_prompt: str) -> str:
-    """O(1) SHA-256 para prompts recurrentes (Azkartu Optimization)."""
+    """O(1) SHA-256 for recurring prompts (Azkartu Optimization)."""
     return hashlib.sha256(system_prompt.encode()).hexdigest()
 
 
 @dataclass
 class PrefixSlot:
-    """Un slot de KV prefix compartido entre agentes del mismo mission."""
+    """A shared KV prefix slot between agents of the same mission."""
 
     mission_id: str
     tenant_id: str
-    prefix_hash: str  # sha256 del system_prompt
-    prefix_tokens: int  # longitud del prefix
-    provider_name: str  # Proveedor físico donde reside el prefix (EJ: 'gemini', 'anthropic')
-    model_name: str  # Modelo físico (EJ: 'gemini-1.5-pro')
+    prefix_hash: str  # sha256 of system_prompt
+    prefix_tokens: int  # length of prefix
+    provider_name: str  # Physical provider where the prefix resides (e.g. 'gemini', 'anthropic')
+    model_name: str  # Physical model (e.g. 'gemini-1.5-pro')
     created_at: str = field(
         default_factory=lambda: datetime.fromtimestamp(
             time.monotonic(), tz=timezone.utc
         ).isoformat()
     )
-    hits: int = 0  # agentes que reutilizaron este slot
+    hits: int = 0  # agents that reused this slot
 
     @property
     def cache_key(self) -> str:
@@ -67,7 +67,7 @@ class KVPrefixRegistry:
         provider_name: str,
         model_name: str,
     ) -> PrefixSlot:
-        """Registra un nuevo prefix slot para una misión."""
+        """Registers a new prefix slot for a mission."""
         prefix_hash = hash_prompt(system_prompt)
         slot = PrefixSlot(
             mission_id=mission_id,
@@ -87,7 +87,7 @@ class KVPrefixRegistry:
         return slot
 
     def get_slot(self, mission_id: str, tenant_id: str, system_prompt: str) -> PrefixSlot | None:
-        """Recupera slot existente (cache hit) o None (cache miss)."""
+        """Retrieves existing slot (cache hit) or None (cache miss)."""
         prefix_hash = hash_prompt(system_prompt)
         key = hashlib.sha256(f"{tenant_id}:{mission_id}:{prefix_hash}".encode()).hexdigest()
         slot = self._slots.get(key)
@@ -104,7 +104,7 @@ class KVPrefixRegistry:
         return list(self._prefix_providers.get(prefix_hash, set()))
 
     def exergy_report(self) -> dict[str, Any]:
-        """Informe de exergía recuperada (AX-042)."""
+        """Recovered exergy report (AX-042)."""
         return {
             "total_slots": len(self._slots),
             "total_hits": sum(s.hits for s in self._slots.values()),
