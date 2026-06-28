@@ -39,11 +39,12 @@ def _fast_sha3(buffer: bytes | memoryview) -> str:
 
 
 def generate_secure_taint_token(
-    agent_id: str, session_id: str, content: str, private_key_b64: str, nonce: str | None = None
+    agent_id: str, session_id: str, content: str, private_key_b64: str, nonce: str | None = None, curve: str = "ed25519"
 ) -> str:
     """Generates a secure cryptographically signed CORTEX-TAINT token.
 
-    Format: taint:{agent_id}:{session_id}:{timestamp_iso8601}:{nonce}:{signature}
+    Format (Legacy): taint:{agent_id}:{session_id}:{timestamp_iso8601}:{nonce}:{signature}
+    Format (Multi-Curve): taint:{curve}:{agent_id}:{session_id}:{timestamp_iso8601}:{nonce}:{signature}
     """
     timestamp = datetime.now(timezone.utc).isoformat()
     if not nonce:
@@ -56,12 +57,14 @@ def generate_secure_taint_token(
 
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp}&nonce={nonce}&content_hash={content_hash}"
 
-    from cortex.crypto.keys import Signer
-
-    # Use Enterprise Signer
-    signature = Signer.sign_raw_content(private_key_b64, canonical_payload)
-
-    return f"taint:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
+    if curve == "secp256k1":
+        from cortex.crypto.keys import Secp256k1Signer
+        signature = Secp256k1Signer.sign_raw_content(private_key_b64, canonical_payload)
+        return f"taint:{curve}:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
+    else:
+        from cortex.crypto.keys import Signer
+        signature = Signer.sign_raw_content(private_key_b64, canonical_payload)
+        return f"taint:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
 
 
 def parse_utc_timestamp(ts_str: str) -> datetime:
@@ -153,16 +156,24 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
         return False
 
     prefix = parts[0]
-    agent_id = parts[1]
-    session_id = parts[2]
-    # Timestamp, nonce, and signature
-    signature = parts[-1]
-    nonce = parts[-2]
-    timestamp_str = ":".join(parts[3:-2])
-
     if prefix != "taint":
         logger.error("[TaintEngine] SAGA-1: Token prefix must be 'taint': %s", prefix)
         return False
+
+    if parts[1] in ("secp256k1", "ed25519"):
+        curve = parts[1]
+        agent_id = parts[2]
+        session_id = parts[3]
+        timestamp_str = ":".join(parts[4:-2])
+        nonce = parts[-2]
+        signature = parts[-1]
+    else:
+        curve = "ed25519"
+        agent_id = parts[1]
+        session_id = parts[2]
+        timestamp_str = ":".join(parts[3:-2])
+        nonce = parts[-2]
+        signature = parts[-1]
 
     if not agent_id or not session_id or not nonce or not signature:
         logger.error("[TaintEngine] SAGA-1: Missing vital fields in taint token.")
@@ -206,10 +217,15 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
     content_hash = _fast_sha3(canonical_content)
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp_str}&nonce={nonce}&content_hash={content_hash}"
 
-    from cortex.crypto.keys import Verifier
+    if curve == "secp256k1":
+        from cortex.crypto.keys import Secp256k1Verifier
+        is_verified = Secp256k1Verifier.verify_raw_content(canonical_payload, public_key_b64, signature)
+    else:
+        from cortex.crypto.keys import Verifier
+        is_verified = Verifier.verify_raw_content(canonical_payload, public_key_b64, signature)
 
-    if Verifier.verify_raw_content(canonical_payload, public_key_b64, signature):
-        logger.info("[TaintEngine] Cryptographic Taint Signature verified for Agent %s", agent_id)
+    if is_verified:
+        logger.info("[TaintEngine] Cryptographic Taint Signature verified for Agent %s (Curve: %s)", agent_id, curve)
         return True
     else:
         logger.error(
