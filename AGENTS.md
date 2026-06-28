@@ -111,7 +111,7 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | `float` in financial or scoring variable | HIGH | ✗ | Replace → `Decimal`; audit all callers |
 | `time.sleep()` inside `async def` | CRITICAL | ✓ ruff TID251 | Replace → `asyncio.sleep()` |
 | Bare `print()` in `engine/`, `memory/`, `guards/` | MEDIUM | ✓ ruff TID251 | Replace → `logging.getLogger(__name__)` |
-| Bare `except Exception:` anywhere in core paths | MEDIUM | ✗ | Narrow to specific exception type |
+| Bare `except Exception:` anywhere in core paths | MEDIUM | ✗ | Narrow to specific exception type. *Exception:* Deliberate fault-isolation boundaries (e.g. `@safe` decorators, background thread worker loops) MUST catch `Exception` (with `# noqa: BLE001`) to prevent silent thread/process death or infinite async hangs. |
 | Business logic in `cli/*_cmds.py` | HIGH | ✗ | Refactor to `services/` or `engine/` |
 | Ledger write with no prior guard call in call stack | CRITICAL | ✗ | Insert guard invocation before all writes |
 | Missing `CORTEX-TAINT` on any fact insert | CRITICAL | ✗ | Audit `engine/` — add taint to all write paths |
