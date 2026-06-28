@@ -14,9 +14,45 @@ import logging
 import re
 from typing import Final
 
-__all__ = ["SECRET_PATTERNS", "DataSensitivity", "classify_content"]
+__all__ = [
+    "SECRET_PATTERNS",
+    "DataSensitivity",
+    "classify_content",
+    "CORRELATION_PATTERNS",
+    "COMPOSITION_RULES",
+    "detect_correlation_signals",
+]
 
 logger = logging.getLogger("cortex.storage.classifier")
+
+# ── Correlation Patterns ──────────────────────────────────────────────
+CORRELATION_PATTERNS: Final[dict[str, str]] = {
+    "eth_address": r"0x[a-fA-F0-9]{40}",
+    "salt": r"(?i)(salt|nonce)\s*[=:]\s*['\"]?[a-fA-F0-9]{32,64}['\"]?",
+    "pubkey": r"(?i)(public[_-]?key|pubkey)\s*[=:]\s*['\"]?[a-fA-F0-9]{64,130}['\"]?",
+    "session_id": r"(?i)(session[_-]?id|session[_-]?nonce)\s*[=:]\s*['\"]?[a-fA-F0-9]{32,64}['\"]?",
+    "merkle_root": r"(?i)(merkle[_-]?root|root[_-]?hash)\s*[=:]\s*['\"]?[a-fA-F0-9]{64}['\"]?",
+    "api_prefix": r"ctx_[a-zA-Z0-9]{4,10}",
+}
+
+COMPOSITION_RULES: Final[list[tuple[frozenset[str], str]]] = [
+    (frozenset({"eth_address", "salt"}), "contract_deploy_composition"),
+    (frozenset({"pubkey", "session_id"}), "agent_session_composition"),
+    (frozenset({"merkle_root", "api_prefix"}), "ledger_topology_composition"),
+]
+
+
+def detect_correlation_signals(content: str) -> dict[str, str]:
+    """Scans content for partial keys or parameters that form a composite secret.
+
+    Returns a dict mapping pattern name to the matched string.
+    """
+    signals: dict[str, str] = {}
+    for name, pattern in CORRELATION_PATTERNS.items():
+        if match := re.search(pattern, content):
+            signals[name] = match.group(0)
+    return signals
+
 
 # ── Pattern Registry ──────────────────────────────────────────────────
 # Tier 1 (Critical, score=1.0): private keys, connection strings, SSH

@@ -143,7 +143,7 @@ async def run_store_validation_logic(
         if fid := await _apply_semantic_dedup(mixin_instance, conn, project, content, tenant_id):
             return fid, meta, content, fact_type
 
-    meta = mixin_instance._apply_privacy_shield(content, project, meta)
+    meta = await mixin_instance._apply_privacy_shield(conn, content, project, tenant_id, meta)
     content, meta = _sanitize_engram(content, fact_type, source, project, meta)
 
     from cortex.engine.core.fact_store_core import resolve_causality_async
