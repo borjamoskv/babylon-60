@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """
-C5-REAL OmegaDaemon — Macro-organismo que reside en memoria y evalúa termodinámica del sistema.
-Claim: Zero-Prompt Operation mediante ExergyGuard + EntropySensor.
+C5-REAL OmegaDaemon — Macro-organism residing in memory and evaluating system thermodynamics.
+Claim: Zero-Prompt Operation via ExergyGuard + EntropySensor.
 """
 
 import asyncio
@@ -17,9 +17,9 @@ logger = logging.getLogger(__name__)
 # ==================== ExergyGuard ====================
 class ExergyGuard:
     """
-    Termodinámica restrictiva: Mantiene el balance de Exergía del sistema.
-    Si el costo de entropía supera la exergía disponible, frena el sistema.
-    También monitorea exergía física (RAM libre + CPU load).
+    Restrictive thermodynamics: Maintains system Exergy balance.
+    If entropy cost exceeds available exergy, throttles the system.
+    Also monitors physical exergy (free RAM + CPU load).
     """
 
     def __init__(
@@ -35,7 +35,7 @@ class ExergyGuard:
 
     def evaluate(self, entropy_cost: Decimal) -> bool:
         """
-        Devuelve True si hay suficiente Exergía para afrontar el costo de entropía.
+        Returns True if there is enough Exergy to face the entropy cost.
         """
         if self.current_exergy >= entropy_cost:
             return True
@@ -47,7 +47,7 @@ class ExergyGuard:
             self.current_exergy = Decimal("0.0")
 
     def check_ram_free_mb(self) -> float:
-        """RAM libre en MB (macOS vm_stat)."""
+        """Free RAM in MB (macOS vm_stat)."""
         try:
             result = subprocess.run(["vm_stat"], capture_output=True, text=True, timeout=5)
             pages_free = 0
@@ -60,7 +60,7 @@ class ExergyGuard:
             return 0.0
 
     def get_ram_pressure(self) -> str:
-        """RAM pressure de macOS (memory_pressure)."""
+        """macOS RAM pressure (memory_pressure)."""
         try:
             result = subprocess.run(["memory_pressure"], capture_output=True, text=True, timeout=5)
             for line in result.stdout.splitlines():
@@ -71,7 +71,7 @@ class ExergyGuard:
             return "unknown"
 
     def check(self) -> dict:
-        """Ciclo de exergía: RAM libre + presión."""
+        """Exergy cycle: free RAM + pressure."""
         ram_free = self.check_ram_free_mb()
         pressure = self.get_ram_pressure()
 
@@ -84,7 +84,7 @@ class ExergyGuard:
         }
 
     def reclaim(self) -> tuple[float, str]:
-        """Reclaim RAM con purge (macOS)."""
+        """Reclaim RAM via purge (macOS)."""
         try:
             before = self.check_ram_free_mb()
             subprocess.run(["purge"], capture_output=True, timeout=10)
@@ -98,7 +98,7 @@ class ExergyGuard:
 # ==================== EntropySensor ====================
 class EntropySensor:
     """
-    Sensa entropía del sistema (código + CPU load + swap).
+    Senses system entropy (code + CPU load + swap).
     """
 
     def __init__(self):
@@ -163,7 +163,7 @@ class EntropySensor:
         return entropy
 
     def check_cpu_load(self) -> float:
-        """CPU load promedio (top -l 1)."""
+        """Average CPU load (top -l 1)."""
         try:
             result = subprocess.run(
                 ["top", "-l", "1", "-o", "cpu"], capture_output=True, text=True, timeout=5
@@ -178,7 +178,7 @@ class EntropySensor:
             return 0.0
 
     def check_swap_mb(self) -> float:
-        """Swap usado en MB (sysctl vm.swapusage)."""
+        """Used swap in MB (sysctl vm.swapusage)."""
         try:
             result = subprocess.run(
                 ["sysctl", "vm.swapusage"], capture_output=True, text=True, timeout=5
@@ -193,7 +193,7 @@ class EntropySensor:
             return 0.0
 
     def sense(self) -> dict:
-        """Sensado de entropía física: CPU + swap."""
+        """Physical entropy sensing: CPU + swap."""
         cpu = self.check_cpu_load()
         swap = self.check_swap_mb()
         return {
@@ -207,7 +207,7 @@ class EntropySensor:
 class OmegaDaemon:
     """
     C6-SOVEREIGN Autopoietic Daemon.
-    El metabolismo de CORTEX. Un bucle infinito que respira, escanea, y evoluciona.
+    The metabolism of CORTEX. An infinite loop that breathes, scans, and evolves.
     """
 
     def __init__(
@@ -247,7 +247,7 @@ class OmegaDaemon:
 
     async def _metabolize(self):
         """
-        El núcleo de un latido metabólico.
+        The core of a metabolic heartbeat.
         """
         from datetime import datetime
 
@@ -256,7 +256,7 @@ class OmegaDaemon:
         self.last_entropy = entropy
         timestamp = datetime.now().strftime("%H:%M:%S")
 
-        self.events.append(f"[{timestamp}] Iniciando ciclo... Entropía código: {entropy:.2f} J")
+        self.events.append(f"[{timestamp}] Initiating cycle... Code entropy: {entropy:.2f} J")
 
         # Monitor physical telemetry
         ex = self.guard.check()
@@ -266,25 +266,25 @@ class OmegaDaemon:
         total_entropy = entropy + physical_entropy
 
         self.events.append(
-            f"[{timestamp}] Telemetría RAM: {ex['ram_free_mb']:.1f} MB | CPU: {ent['cpu_load']:.2f}"
+            f"[{timestamp}] RAM Telemetry: {ex['ram_free_mb']:.1f} MB | CPU: {ent['cpu_load']:.2f}"
         )
 
         # Trigger Purge/Reclaim if RAM is critical
         if ex["critical"] and self.reclaim_on_critical:
             reclaimed, status = self.guard.reclaim()
             self.events.append(
-                f"[{timestamp}] [bold red]⚠️ RAM CRÍTICA[/] - Liberado: {reclaimed:.1f} MB ({status})"
+                f"[{timestamp}] [bold red]⚠️ CRITICAL RAM[/] - Reclaimed: {reclaimed:.1f} MB ({status})"
             )
 
         if total_entropy > Decimal("0.0"):
-            logger.info("Entropía total detectada: %s J", total_entropy)
+            logger.info("Total entropy detected: %s J", total_entropy)
             if self.guard.evaluate(total_entropy):
-                logger.info("Exergía suficiente. Desatando Enjambre (Swarm)...")
+                logger.info("Sufficient exergy. Unleashing Swarm...")
                 self.events.append(
-                    f"[{timestamp}] [bold green]✔ Exergía suficiente.[/] Desatando Enjambre (Swarm)..."
+                    f"[{timestamp}] [bold green]✔ Sufficient exergy.[/] Unleashing Swarm..."
                 )
 
-                # Integración Causal: Swarm 10k y Ouroboros AST Mutation
+                # Causal Integration: Swarm 10k and Ouroboros AST Mutation
                 try:
                     from pathlib import Path
 
@@ -295,16 +295,16 @@ class OmegaDaemon:
                     commander = SwarmCommander(bus_path=bus_path, tenant_id="omega_daemon")
                     ouroboros = AutopoiesisEngine(observation_window_ms=100)
 
-                    logger.debug("Desplegando formación PHOENIX vía SwarmCommander...")
-                    # Dispatch asíncrono para sanación técnica
+                    logger.debug("Deploying PHOENIX formation via SwarmCommander...")
+                    # Asynchronous dispatch for technical healing
                     if hasattr(commander, "deploy"):
                         res_deploy = commander.deploy(  # type: ignore
-                            formation="PHOENIX", mission="Sanar Entropía", cycles=1
+                            formation="PHOENIX", mission="Heal Entropy", cycles=1
                         )
                         if asyncio.iscoroutine(res_deploy):
                             await res_deploy
 
-                    logger.debug("Iniciando mutación recursiva vía AutopoiesisEngine...")
+                    logger.debug("Initiating recursive mutation via AutopoiesisEngine...")
                     if hasattr(ouroboros, "mutate"):
                         res_mutate = ouroboros.mutate(target="entropy_resolution")
                         if asyncio.iscoroutine(res_mutate):
@@ -313,7 +313,7 @@ class OmegaDaemon:
                     # [C5-REAL] Vector P1.2 Ouroboros Hooks
                     if total_entropy > Decimal("50.0"):
                         logger.warning(
-                            "Entropía Crítica detectada. Enganchando Ouroboros a Turbopuffer para Prune."
+                            "Critical entropy detected. Hooking Ouroboros to Turbopuffer for Prune."
                         )
                         try:
                             import os
@@ -358,28 +358,28 @@ class OmegaDaemon:
                             )
                             await backend.close()
                         except Exception as bp_exc:
-                            logger.error("Fallo al ejecutar bypass autopoietico en L2: %s", bp_exc)
+                            logger.error("Failed to execute autopoietic bypass in L2: %s", bp_exc)
 
                 except (ImportError, RuntimeError, ValueError) as e:
-                    logger.exception("Fallo al desatar el Enjambre o Ouroboros: %s", e)
-                    self.events.append(f"[{timestamp}] [bold red]✗ Fallo Swarm/Ouroboros:[/] {e}")
+                    logger.exception("Failed to unleash Swarm or Ouroboros: %s", e)
+                    self.events.append(f"[{timestamp}] [bold red]✗ Swarm/Ouroboros failure:[/] {e}")
 
                 self.guard.consume(total_entropy)
-                logger.info("Evolución estructural completada. Auto-commit ejecutado.")
+                logger.info("Structural evolution completed. Auto-commit executed.")
                 self.events.append(
-                    f"[{timestamp}] [bold green]★ Evolución completada.[/] Auto-commit ejecutado."
+                    f"[{timestamp}] [bold green]★ Evolution completed.[/] Auto-commit executed."
                 )
             else:
-                logger.warning("Fallo Exergético. Hibernando para conservar recursos.")
+                logger.warning("Exergetic failure. Hibernating to conserve resources.")
                 self.events.append(
-                    f"[{timestamp}] [bold red]⚠️ Fallo Exergético.[/] Presupuesto insuficiente. Hibernando..."
+                    f"[{timestamp}] [bold red]⚠️ Exergetic failure.[/] Insufficient budget. Hibernating..."
                 )
         else:
-            logger.debug("Homeostasis mantenida. Sistema estable.")
-            self.events.append(f"[{timestamp}] Homeostasis mantenida. Sistema estable.")
+            logger.debug("Homeostasis maintained. System stable.")
+            self.events.append(f"[{timestamp}] Homeostasis maintained. System stable.")
 
     async def start(self, interval_s: float | None = None):
-        """OmegaDaemon ciclo continuo."""
+        """OmegaDaemon continuous cycle."""
         if interval_s is not None:
             self.tick_rate = int(interval_s)
         self._running = True
@@ -387,18 +387,18 @@ class OmegaDaemon:
 
         while self._running:
             self._cycle_count += 1
-            logger.debug("Omega Ciclo #%s", self._cycle_count)
+            logger.debug("Omega Cycle #%s", self._cycle_count)
             try:
                 await self._metabolize()
             except asyncio.CancelledError:
                 logger.info("Omega Daemon terminating gracefully...")
                 break
             except (OSError, RuntimeError, ValueError) as e:
-                logger.exception("Error cataclísmico en el metabolismo: %s", e)
+                logger.exception("Cataclysmic error in metabolism: %s", e)
                 from datetime import datetime
 
                 timestamp = datetime.now().strftime("%H:%M:%S")
-                self.events.append(f"[{timestamp}] [bold red]💥 Error metabólico:[/] {e}")
+                self.events.append(f"[{timestamp}] [bold red]💥 Metabolic error:[/] {e}")
 
             await asyncio.sleep(self.tick_rate)
 
