@@ -343,6 +343,22 @@ class CortexLLMRouter:
 
         from cortex.extensions.llm.quota import QuotaRejectedError
 
+        # [LOCAL-INFERENCE-OMEGA] ZERO-NETWORK HARD BOUNDARY
+        # All semantic ignition MUST occur on local silicon.
+        forbidden_domains = ["api.openai.com", "dashscope", "api.anthropic.com", "googleapis.com", "api.minimax.chat"]
+        provider_url = str(getattr(provider, "base_url", "")).lower()
+        provider_name = getattr(provider, "provider_name", "").lower()
+        
+        is_external = any(ext in provider_url for ext in forbidden_domains) or \
+                      any(ext in provider_name for ext in ["openai", "anthropic", "gemini", "dashscope", "minimax"])
+                      
+        if is_external and "localhost" not in provider_url and "127.0.0.1" not in provider_url:
+            logger.error(
+                "🛑 [ZERO-NETWORK] Blocked external route to %s. Local-Inference-OMEGA Active.",
+                provider.provider_name
+            )
+            return Err(f"Local-Inference-OMEGA: External network failover to {provider.provider_name} is strictly PROHIBITED.")
+
         try:
             return Ok(await provider.invoke(prompt))
         except QuotaRejectedError as exc:
