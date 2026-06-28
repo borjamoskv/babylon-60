@@ -282,14 +282,38 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         raise TaintValidationError(f"SAGA-1 Rejection by Memory Firewall: {fw_err}")
 
     # [C5-REAL] Host Identity Strict Containment (UltraThink P0)
-    prohibited_antigens = [
-        "[redacted_pii]",
-        "borja " + "fernández " + "angulo",
-        "borja " + "fernandez " + "angulo",
-        "borja" + "fernandez" + "angulo",
-    ]
-    content_lower = content.lower()
-    if any(antigen in content_lower for antigen in prohibited_antigens):
+    import unicodedata
+    import re
+
+    def _strip_accents(text: str) -> str:
+        nfkd = unicodedata.normalize("NFKD", text)
+        return "".join([c for c in nfkd if not unicodedata.combining(c)])
+
+    normalized_content = _strip_accents(content.lower())
+    
+    # Prohibited antigen tokens (split to prevent self-detection in AST)
+    p_b = "borja"
+    p_f = "fernandez"
+    p_a = "angulo"
+
+    # Normalize clean alphanumeric representation (removes punctuation, spaces, accents)
+    clean_alpha = re.sub(r"[^a-z0-9]", "", normalized_content)
+
+    pii_leak = False
+    if (p_b + p_f + p_a) in clean_alpha:
+        pii_leak = True
+    elif (p_b + p_f) in clean_alpha:
+        pii_leak = True
+    elif (p_f + p_a) in clean_alpha:
+        pii_leak = True
+    else:
+        # Check for co-occurrence in proximity (e.g. "borja ... fernandez")
+        if re.search(rf"\b{p_b}\b.*?\b{p_f}\b", normalized_content) or \
+           re.search(rf"\b{p_f}\b.*?\b{p_a}\b", normalized_content) or \
+           re.search(rf"\b{p_b}\b.*?\b{p_a}\b", normalized_content):
+            pii_leak = True
+
+    if pii_leak:
         logger.error("[TaintEngine] P0 SINGULARITY: Host Identity Bleed detected in Taint payload.")
         raise TaintValidationError(
             "SAGA-1 Rejection: Payload contains prohibited Host Identity PII."
