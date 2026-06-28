@@ -10,6 +10,7 @@ import ast
 import io
 import logging
 import re
+
 try:
     from PIL import Image
 except ImportError:
@@ -86,7 +87,7 @@ class OSINTGuard:
         try:
             img = Image.open(io.BytesIO(image_bytes))
             # Extract raw image data and rebuild to discard auxiliary tags
-            data = list(img.getdata())
+            data = list(img.getdata())  # type: ignore
             clean_img = Image.new(img.mode, img.size)
             clean_img.putdata(data)
             

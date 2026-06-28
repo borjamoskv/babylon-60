@@ -90,8 +90,8 @@ class UltramapSubstrate:
         if HAS_EVOLUTION_LEDGER:
             ledger_path = os.path.join(os.path.dirname(self.bin_path), "evolution_ledger.jsonl")
             try:
-                self._evolution_ledger = EvolutionLedger(ledger_path)
-                self._checkpoint_manager = CheckpointManager(self._evolution_ledger, chunk_size=1000)
+                self._evolution_ledger = EvolutionLedger(ledger_path)  # type: ignore[misc]
+                self._checkpoint_manager = CheckpointManager(self._evolution_ledger, chunk_size=1000)  # type: ignore[misc]
                 logger.info(
                     f"EVO-LEDGER Active. Head: {self._evolution_ledger.head_hash[:12]}… Seq: {self._evolution_ledger.sequence}"
                 )
@@ -176,6 +176,7 @@ class UltramapSubstrate:
             return self._rs.update_agent_position(agent_idx, x, y, z, target, entropy)
 
         offset = agent_idx * self.node_size
+        assert self._buffer is not None
 
         struct.pack_into("ddd", self._buffer, offset, x, y, z)  # pyright: ignore[reportArgumentType]
         target_bytes = target.encode("utf-8")[:64].ljust(64, b"\x00")
@@ -197,6 +198,7 @@ class UltramapSubstrate:
             return self._rs.calculate_exergy_distance(agent_idx, target_hash)
 
         offset = agent_idx * self.node_size
+        assert self._buffer is not None
         x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
         current_entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]  # pyright: ignore[reportArgumentType]
 
@@ -217,6 +219,7 @@ class UltramapSubstrate:
             return self._rs.get_agent_state(agent_idx)
 
         offset = agent_idx * self.node_size
+        assert self._buffer is not None
         x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
         target_bytes = bytes(self._buffer[offset + 24 : offset + 88]).rstrip(b"\x00")  # pyright: ignore[reportOptionalSubscript]
         entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]  # pyright: ignore[reportArgumentType]
@@ -270,6 +273,7 @@ class UltramapSubstrate:
             return False
 
         offset = agent_idx * self.node_size
+        assert self._buffer is not None
         x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
         if x == 0.0 and y == 0.0 and z == 0.0:
             return False
@@ -279,7 +283,7 @@ class UltramapSubstrate:
         if self._evolution_ledger is not None:
             try:
                 qd_b, er_b, ce_b, cl_b = struct.unpack_from("dddd", self._buffer, offset + 96)  # pyright: ignore[reportArgumentType]
-                vector_before = ControlVector(qd_b, er_b, ce_b, cl_b)
+                vector_before = ControlVector(qd_b, er_b, ce_b, cl_b)  # type: ignore[misc]
             except (struct.error, TypeError):
                 pass
 
@@ -308,8 +312,8 @@ class UltramapSubstrate:
     ) -> None:
         """Emit a mutation record to the Evolution Ledger. Non-fatal on error."""
         try:
-            vector_after = ControlVector(queue_depth, error_rate, causal_entropy, cpu_load)
-            self._evolution_ledger.record_mutation(
+            vector_after = ControlVector(queue_depth, error_rate, causal_entropy, cpu_load)  # type: ignore[misc]
+            self._evolution_ledger.record_mutation(  # type: ignore[misc,attr-defined]
                 agent_idx=agent_idx,
                 vector_before=vector_before,
                 vector_after=vector_after,

@@ -7,7 +7,7 @@ Extracts empirical structural invariants from PCM audio using librosa.
 
 import logging
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 try:
     import librosa
@@ -29,7 +29,7 @@ class AltozanoAnalyzer:
         # Map chroma indices to note names (0 = C, 1 = C#, etc.)
         self.chroma_map = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
-    def deconstruct_track(self, filepath: str | Path) -> Dict[str, Any]:
+    def deconstruct_track(self, filepath: str | Path) -> dict[str, Any]:
         """
         Loads the PCM waveform and extracts mathematical acoustic features.
         """
@@ -38,6 +38,9 @@ class AltozanoAnalyzer:
             raise FileNotFoundError(f"Track not found: {path}")
             
         logger.info(f"[Altozano] Extracting structural invariants from: {path.name}")
+        
+        if librosa is None or np is None:
+            raise RuntimeError("Missing librosa or numpy")
         
         # 1. Extraction
         y, sr = librosa.load(path)

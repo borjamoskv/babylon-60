@@ -143,18 +143,20 @@ class BeliefEngine:
             await self._quarantine_belief(candidate, verdict)
 
             # Epistemic Slashing (Axiom Ω₃) - Punish source if Supreme Court (Opus/Fable) confirmed quarantine
-            if verdict.model in ("opus", "fable", "architect") and candidate.provenance.source_id:
+            has_source = bool(candidate.provenance.entries and candidate.provenance.entries[-1].source_id)
+            if verdict.model in ("opus", "fable", "architect") and has_source:
+                source_id = candidate.provenance.entries[-1].source_id
                 try:
                     from cortex.engine.forensic.slashing import SlashingEngine, SlashingPenalty
                     conn = getattr(self._engine, "conn", None) or getattr(self._engine, "_conn", None)
                     if conn:
                         logger.error(
                             "⚔️ [Ω₃] EPISTEMIC SLASHING: %s quarantined by %s", 
-                            candidate.provenance.source_id, verdict.model
+                            source_id, verdict.model
                         )
                         await SlashingEngine.slash(
                             conn=conn,
-                            agent_id=candidate.provenance.source_id,
+                            agent_id=str(source_id),
                             penalty_type=SlashingPenalty.CRYPTOGRAPHIC_TAINT,
                             reason=f"Hallucination/Contradiction caught by {verdict.model}: {verdict.reason}",
                             tenant_id=candidate.tenant_id
@@ -162,7 +164,7 @@ class BeliefEngine:
                     else:
                         logger.warning(
                             "⚔️ [Ω₃] EPISTEMIC SLASHING DEFERRED: %s caught by %s (No direct DB conn available)", 
-                            candidate.provenance.source_id, verdict.model
+                            source_id, verdict.model
                         )
                 except Exception as exc:
                     logger.error("Failed to execute Epistemic Slashing: %s", exc)
@@ -319,6 +321,9 @@ class BeliefEngine:
         """Recursively quarantine any active beliefs that depend on the root_id (Graph Orphan)."""
         # Load all current beliefs in the graph UNBOUNDED to prevent Silent Epistemic Corruption (P0)
         # Avoid _load_context which is bounded by _max_context.
+        if self._engine is None:
+            return
+            
         try:
             facts = await self._engine.recall(
                 project=project,

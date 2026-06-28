@@ -38,10 +38,8 @@ class MacMaestroAgent:
     def __init__(self, engine: "CortexEngine | None" = None) -> None:
         self.engine = engine
         self.maestro = MaestroUI(engine)
-        self.router: CortexLLMRouter | None = None
-        
         if engine and hasattr(engine, "llm_router"):
-            self.router = engine.llm_router
+            self.router = getattr(engine, "llm_router")
         else:
             try:
                 from cortex.pipeline.provider_factory import build_executor_stack
@@ -62,9 +60,9 @@ class MacMaestroAgent:
 
         logger.info("Mac Maestro processing instruction: %s", instruction)
 
-        prompt = CortexPrompt(
-            system=SYSTEM_PROMPT,
-            prompt=instruction,
+        prompt = CortexPrompt(  # type: ignore[call-arg]
+            system=SYSTEM_PROMPT,  # type: ignore[call-arg]
+            prompt=instruction,  # type: ignore[call-arg]
             intent=IntentProfile.CODE,
             temperature=0.1,
         )
@@ -74,7 +72,7 @@ class MacMaestroAgent:
         if not response_result or not response_result.is_ok():
             return {
                 "success": False,
-                "error": f"LLM returned error or empty response: {response_result.error if response_result else 'Unknown error'}",
+                "error": f"LLM returned error or empty response: {getattr(response_result, 'error', 'Unknown error')}",
             }
             
         response = response_result.unwrap()

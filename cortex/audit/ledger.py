@@ -11,6 +11,7 @@ import logging
 import os
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 import aiosqlite
@@ -228,8 +229,24 @@ class EnterpriseAuditLedger:
                 return {
                     "status": "tampered",
                     "corrupted_audit_id": batch_rows[0][1],
-                    "reason": "chain_broken",
+                    "reason": f"chain_broken (expected {expected_prev_hash}, got {prev_hash})",
                 }
+
+            # Check if this batch is a COMPACTION_NODE
+            if len(batch_rows) == 1 and batch_rows[0][6] == "COMPACTION_NODE":
+                row = batch_rows[0]
+                # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature
+                compaction_payload = f"COMPACTION:{row[9]}:{row[8]}:{row[7]}"
+                try:
+                    self.public_key.verify(bytes.fromhex(signature), compaction_payload.encode())
+                except InvalidSignature:
+                    return {
+                        "status": "tampered",
+                        "corrupted_audit_id": row[1],
+                        "reason": "invalid_compaction_signature",
+                    }
+                expected_prev_hash = row[8]
+                continue
 
             batch_audit_ids = [r[1] for r in batch_rows]
             for aid in batch_audit_ids:
@@ -459,3 +476,10 @@ class EnterpriseAuditLedger:
             return True
         except (InvalidSignature, ValueError):
             return False
+
+    async def compact_ledger(self, max_rows: int = 10000, snapshot_dir: Path | None = None) -> dict[str, Any]:
+        """[C5-REAL] Compacts historical ledger events into a cryptographic snapshot.
+        Delegates to ledger_compactor to preserve the SMT hash chain via COMPACTION_NODE.
+        """
+        from cortex.audit.ledger_compactor import compact_ledger as run_compaction
+        return await run_compaction(self._conn, self, max_rows, snapshot_dir)

@@ -66,8 +66,8 @@ class MejoraloOmegaAgent(EngineAwareMixin):
         """Lazy-initialize CortexEngine and MejoraloEngine."""
         if self._engine is not None:
             return
-        super()._ensure_engine()
         from cortex.extensions.mejoralo.engine import MejoraloEngine
+        assert self._engine is not None
         self._mejoralo = MejoraloEngine(engine=self._engine)
 
     def _load_agent_definition(self) -> None:

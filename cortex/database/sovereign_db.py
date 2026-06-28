@@ -13,7 +13,7 @@ import logging
 import queue
 import sqlite3
 import threading
-from collections.abc import Sequence
+from collections.abc import Sequence, Iterator
 from typing import Any
 
 logger = logging.getLogger("cortex.database.sovereign_db")
@@ -67,7 +67,7 @@ class SovereignCursor:
         except StopIteration:
             return None
 
-    def __iter__(self) -> iter[tuple[Any, ...]]:
+    def __iter__(self) -> Iterator[tuple[Any, ...]]:
         return iter(self._rows)
 
     def __aiter__(self) -> Any:
@@ -87,7 +87,7 @@ class SovereignCursor:
 class SovereignDB:
     """Thread-isolated SQLite engine for async workflows."""
 
-    def __init__(self, database_path: str, isolation_level: str | None = "DEFERRED") -> None:
+    def __init__(self, database_path: str, isolation_level: Any = "DEFERRED") -> None:
         """Initialize SovereignDB and start the background worker thread.
 
         Args:

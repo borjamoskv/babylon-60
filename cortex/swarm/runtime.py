@@ -252,8 +252,9 @@ class SubagentRunner:
                             raise asyncio.TimeoutError()
                             
                         torque_task.cancel()
-                        if run_task.exception():
-                            raise run_task.exception()
+                        exc = run_task.exception()
+                        if exc is not None:
+                            raise exc
                         output = run_task.result()
 
                     if self.audit_callback:

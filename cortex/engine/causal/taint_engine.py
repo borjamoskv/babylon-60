@@ -58,7 +58,7 @@ def generate_secure_taint_token(
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp}&nonce={nonce}&content_hash={content_hash}"
 
     if curve == "secp256k1":
-        from cortex.crypto.keys import Secp256k1Signer
+        from cortex.crypto.keys import Secp256k1Signer  # type: ignore[attr-defined]
         signature = Secp256k1Signer.sign_raw_content(private_key_b64, canonical_payload)
         return f"taint:{curve}:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
     else:
@@ -218,7 +218,7 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
     canonical_payload = f"agent_id={agent_id}&session_id={session_id}&timestamp={timestamp_str}&nonce={nonce}&content_hash={content_hash}"
 
     if curve == "secp256k1":
-        from cortex.crypto.keys import Secp256k1Verifier
+        from cortex.crypto.keys import Secp256k1Verifier  # type: ignore[attr-defined]
         is_verified = Secp256k1Verifier.verify_raw_content(canonical_payload, public_key_b64, signature)
     else:
         from cortex.crypto.keys import Verifier

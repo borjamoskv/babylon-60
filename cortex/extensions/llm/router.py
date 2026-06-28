@@ -249,10 +249,11 @@ class CortexLLMRouter:
         fallbacks = self._ordered_fallbacks(prompt)
         
         is_fast_reject = False
+        res_error = str(getattr(res_primary, "error", "")) if not primary_valid or res_primary.is_err() else ""
         if not primary_valid:
             # Primary was skipped, not a fast reject
             pass
-        elif res_primary.error and ("Fast-Reject" in res_primary.error or "429" in res_primary.error):
+        elif res_error and ("Fast-Reject" in res_error or "429" in res_error):
             is_fast_reject = True
 
         valid_fallbacks = []
