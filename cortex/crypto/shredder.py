@@ -292,30 +292,6 @@ class CryptoShredder:
                 error=str(e),
             )
 
-    async def shred_by_source(
-        self,
-        source: str,
-        tenant_id: str = "default",
-        reason: str = "gdpr_erasure",
-        shredded_by: str | None = None,
-    ) -> ShredBatchResult:
-        """Shred all facts from a specific source (e.g., a user agent).
-
-        GDPR use case: user requests erasure of all their data.
-        """
-        cursor = (
-            await __import__("typing")
-            .cast(__import__("typing").Any, self._conn)
-            .execute(
-                "SELECT id FROM facts WHERE source = ? AND tenant_id = ?",
-                (source, tenant_id),
-            )
-        )
-        rows = await cursor.fetchall()
-        fact_ids = [row[0] for row in rows]
-
-        return await self._shred_batch(fact_ids, tenant_id, reason, shredded_by)
-
     async def shred_by_project(
         self,
         project: str,
