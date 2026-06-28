@@ -35,7 +35,7 @@ tell application "Safari"
         repeat with t in every tab
             try
                 set u to URL of t
-                if u contains "details?email=" or u contains "details" then
+                if u contains "publish/subscribers" then
                     set URL of t to "{url}"
                     delay 4.5
                     
