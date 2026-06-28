@@ -72,6 +72,27 @@ class AsyncSignalBus:
         if not signal.payload and signal.status != "VOID":
             signal.status = "VOID"
 
+        # 99.99% ENGINEER: LANDAUER EPISTEMIC FILTER (Ω4)
+        if signal.status == "SUCCESS" and signal.payload:
+            import json
+            from cortex.guards.landauer_guard import LandauerGuard
+            import logging
+            
+            # Serialize to measure thermodynamic density
+            payload_str = json.dumps(signal.payload)
+            entropy = LandauerGuard.calculate_entropy(payload_str)
+            
+            # If entropy is below the threshold, it means the payload contains repetitive
+            # conversational slop (Anergia) instead of dense structural invariants.
+            if entropy < LandauerGuard.MIN_ENTROPY:
+                logging.getLogger("cortex.engine.swarm.legion").warning(
+                    f"🛑 [Landauer Epistemic Filter] Payload rejected. Entropy ({entropy:.2f}) < {LandauerGuard.MIN_ENTROPY}. Anergy detected."
+                )
+                signal.status = "FAILURE"
+                signal.payload = {
+                    "error": f"LandauerGuard Violation: Payload entropy {entropy:.2f} too low. Remove conversational slop and compress."
+                }
+
         # Backpressure: If queue is full, this will block, slowing down the Swarm Supervisor
         await self._queue.put(signal)
 
