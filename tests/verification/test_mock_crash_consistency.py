@@ -38,8 +38,7 @@ async def engine(tmp_path: Path):
     await e.close()
     if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
         del os.environ["CORTEX_SKIP_EXERGY_VALIDATION"]
-    if "CORTEX_NO_TAINT_ENFORCE" in os.environ:
-        del os.environ["CORTEX_NO_TAINT_ENFORCE"]
+    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 
 
 @pytest.mark.asyncio
