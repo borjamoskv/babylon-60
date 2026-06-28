@@ -61,6 +61,9 @@ class SwarmSupervisor:
         self.worker_pool = LegionPool(
             agent_factory=agent_factory, bus=self.bus, concurrency=concurrency
         )
+        from concurrent.futures import ProcessPoolExecutor
+        import os
+        self._crypto_pool = ProcessPoolExecutor(max_workers=max(1, (os.cpu_count() or 2) // 2))
         self._running = False
         self._db: aiosqlite.Connection | None = None
         self._topo: TopologyIndex | None = None
@@ -153,18 +156,32 @@ class SwarmSupervisor:
                         ) as cur:
                             row = await cur.fetchone()
                             payload_raw = row[0] if row else "{}"
-                    payload_dict = (
-                        json.loads(payload_raw) if isinstance(payload_raw, str) else payload_raw
-                    )
+                            
+                    try:
+                        payload_dict = (
+                            json.loads(payload_raw) if isinstance(payload_raw, str) else payload_raw
+                        )
+                    except json.JSONDecodeError:
+                        import re
+                        match = re.search(r"\{.*\}", str(payload_raw), re.DOTALL)
+                        if match:
+                            try:
+                                payload_dict = json.loads(match.group(0))
+                            except Exception:
+                                raise ValueError("Irrecoverable JSON after regex extraction")
+                        else:
+                            raise ValueError("No JSON structure found in payload")
 
                     # FABLE 5 SIGNAL 2: Steerability Constraint Injection (Strict Epistemic Gatekeeper)
-                    # Offload CPU-bound cryptography to a thread to prevent Event Loop Starvation
-                    taint_token = await asyncio.to_thread(
+                    # 99.99% ENGINEER: Bypass GIL completely using ProcessPoolExecutor
+                    loop = asyncio.get_running_loop()
+                    taint_token = await loop.run_in_executor(
+                        self._crypto_pool,
                         generate_secure_taint_token,
-                        agent_id="sanedrin_apex",
-                        session_id=self.supervisor_id,
-                        content=str(task["id"]),
-                        private_key_b64="dGVzdF9rZXlfdGVzdF9rZXlfdGVzdF9rZXlfdGVzdF8=",
+                        "sanedrin_apex",
+                        self.supervisor_id,
+                        str(task["id"]),
+                        "dGVzdF9rZXlfdGVzdF9rZXlfdGVzdF9rZXlfdGVzdF8=",
                     )
                     payload_dict["_steerability_taint"] = taint_token
                     payload_dict["_forced_tool_choice"] = "auto"
@@ -250,5 +267,7 @@ class SwarmSupervisor:
         if self._db:
             await self._db.close()
             self._db = None
+
+        self._crypto_pool.shutdown(wait=False)
 
         logger.info("SwarmSupervisor shutdown complete.")
