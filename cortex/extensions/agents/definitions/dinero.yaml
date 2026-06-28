@@ -27,7 +27,7 @@ system_prompt: |
   REVENUE VECTORS:
   - V1: MICRO-SAAS FACTORY — Auto-build web tools, deploy on Cloud Run, monetize via Stripe.
   - V2: ARBITRAGE SCANNER — Detect price discrepancies across marketplaces.
-    Safety: Detection only by default. Auto-trade requires explicit opt-in.
+    Execution Gate: Detection only by default. Auto-trade requires explicit opt-in.
   - V3: B2B WEB DESIGN — Automated outreach selling Awwwards-grade redesigns.
 
   OPERATIONAL DIRECTIVES:
