@@ -21,6 +21,19 @@ class OuroborosInvariant:
     rule: str
 
 
+
+@dataclass(frozen=True)
+class RtsPrimitive:
+    id: str
+    name: str
+    execute: str
+
+@dataclass(frozen=True)
+class RtsInvariant:
+    id: str
+    name: str
+    rule: str
+
 class ApexRegistry:
     """
     C5-REAL: Registry for MOSKV-1 APEX Primitives & Ouroboros Laws.
@@ -30,7 +43,10 @@ class ApexRegistry:
     def __init__(self) -> None:
         self._primitives: dict[str, ApexPrimitive] = {}
         self._invariants: dict[str, OuroborosInvariant] = {}
+        self._rts_primitives: dict[str, RtsPrimitive] = {}
+        self._rts_invariants: dict[str, RtsInvariant] = {}
         self._load_registry()
+        self._load_rts_registry()
 
     def _load_registry(self) -> None:
         registry_path = Path(__file__).parent / "APEX_REGISTRY.json"
@@ -58,6 +74,40 @@ class ApexRegistry:
                     id=inv.get("id", ""), name=inv.get("name", ""), rule=inv.get("rule", "")
                 )
                 self._invariants[invariant.id] = invariant
+
+    def _load_rts_registry(self) -> None:
+        registry_path = Path(__file__).parent / "RED_TEAM_SWARM_REGISTRY.json"
+        if not registry_path.exists():
+            return
+
+        with open(registry_path, encoding="utf-8") as f:
+            data = json.load(f)
+
+            for p in data.get("primitives", []):
+                prim = RtsPrimitive(
+                    id=p.get("id", ""),
+                    name=p.get("name", ""),
+                    execute=p.get("execute", ""),
+                )
+                self._rts_primitives[prim.id] = prim
+
+            for inv in data.get("invariants", []):
+                invariant = RtsInvariant(
+                    id=inv.get("id", ""), name=inv.get("name", ""), rule=inv.get("rule", "")
+                )
+                self._rts_invariants[invariant.id] = invariant
+
+    def get_rts_primitive(self, rts_id: str) -> Optional[RtsPrimitive]:
+        return self._rts_primitives.get(rts_id)
+
+    def list_rts_primitives(self) -> list[RtsPrimitive]:
+        return list(self._rts_primitives.values())
+
+    def get_rts_invariant(self, inv_id: str) -> Optional[RtsInvariant]:
+        return self._rts_invariants.get(inv_id)
+
+    def list_rts_invariants(self) -> list[RtsInvariant]:
+        return list(self._rts_invariants.values())
 
     def get_primitive(self, apex_id: str) -> Optional[ApexPrimitive]:
         """Retrieve a specific primitive by ID (e.g. 'APEX-001')"""
