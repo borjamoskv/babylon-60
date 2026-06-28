@@ -128,6 +128,47 @@ class CortexEngine(
         self._system_state = state
         logger.warning("🛡️ [SOVEREIGN-STATE] CORTEX Engine state changed to: %s", state)
 
+    async def report_anomaly(self, epicenter_node: str, dependency_graph: dict[str, Any], execution_time: float = 1.0) -> bool:
+        """
+        Ingest an anomaly report and automatically trigger UltraThink P0 if thermodynamic conditions are met.
+        (Blast Radius >= 3)
+        """
+        try:
+            from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
+            
+            radius = UltrathinkPhysicsEngine.measure_blast_radius(dependency_graph, epicenter_node)
+            
+            # Default exergy values for anomaly detection (High stochasticity)
+            stochastic_entropy = 0.9
+            deterministic_output = 1.0
+            
+            authorized, reason, formation = UltrathinkPhysicsEngine.authorize_ultrathink(
+                stochastic_entropy, deterministic_output, execution_time, radius, epicenter_node
+            )
+            
+            if authorized and formation:
+                logger.critical("🚨 [ULTRATHINK P0] Anomaly threshold breached. Triggering automatic P0 protocol.")
+                logger.critical("Reason: %s", reason)
+                self.set_system_state("APEX_STATE")
+                
+                # Emit system-wide critical alert to the Ledger
+                try:
+                    from cortex.agents.primitives.dispatcher import apex_dispatcher
+                    apex_dispatcher.execute(
+                        "OP_GIT_SENTINEL",
+                        commit_msg=f"CORTEX-ULTRATHINK: P0 Singularity Auto-Triggered at {epicenter_node} ({formation.value})",
+                        force=False,
+                    )
+                except ImportError:
+                    pass
+                return True
+            else:
+                logger.debug("Anomaly reported at %s, but UltraThink not authorized: %s", epicenter_node, reason)
+                return False
+        except Exception as e:
+            logger.error("Failed to process anomaly report: %s", e)
+            return False
+
     def _synthesize_skill(self, skill_name: str) -> None:
         """JIT skill synthesis (Axiom Ω₄)."""
         if skill_name in self._skills_verified:
