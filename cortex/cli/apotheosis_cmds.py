@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 """
 APOTHEOSIS-∞ Daemon CLI commands.
-El nivel 5 de autonomía Soberana en CORTEX.
+Level 5 Sovereign autonomy in CORTEX.
 
 Connected to real CORTEX subsystems - zero simulation.
 """
@@ -28,24 +28,24 @@ from cortex.cli.common import cli, console
 PROGRESS_DESC_FMT = "[progress.description]{task.description}"
 
 
-@cli.group(name="apotheosis", help="👁️  APOTHEOSIS-∞: El Daemon Autárquico de Nivel 5.")
+@cli.group(name="apotheosis", help="👁️  APOTHEOSIS-∞: The Level 5 Autarchic Daemon.")
 def apotheosis_cmds() -> None:
-    """El motor de manifestación y erradicación proactiva de MOSKV-1."""
+    """The proactive manifestation and eradication engine of MOSKV-1."""
 
 
 @apotheosis_cmds.command("manifest")
 @click.argument("intent", required=True)
 def manifest_cmd(intent: str) -> None:
     """
-    La singularidad de creación. Materializa un ecosistema desde una intención corta.
+    The singularity of creation. Materializes an ecosystem from a short intent.
     """
     if not intent.strip():
-        console.print("[bold red]Error: La intención no puede estar vacía.[/]")
+        console.print("[bold red]Error: Intent cannot be empty.[/]")
         raise click.Abort()
 
     console.print(
         Panel(
-            f"[bold #06d6a0]APOTHEOSIS-MANIFEST[/]\nMaterializando intención: [italic]{intent}[/]",
+            f"[bold #06d6a0]APOTHEOSIS-MANIFEST[/]\nMaterializing intent: [italic]{intent}[/]",
             border_style="#06d6a0",
         )
     )
@@ -55,7 +55,7 @@ def manifest_cmd(intent: str) -> None:
         TextColumn(PROGRESS_DESC_FMT),
         transient=False,
     ) as progress:
-        t_id = progress.add_task("[bold #6600FF]Conectando a CORTEX Engine...[/]", total=None)
+        t_id = progress.add_task("[bold #6600FF]Connecting to CORTEX Engine...[/]", total=None)
 
         # Real: Connect to CortexEngine and store intent
         try:
@@ -63,7 +63,7 @@ def manifest_cmd(intent: str) -> None:
 
             engine = CortexEngine()
             progress.update(
-                t_id, description="[bold #6600FF]CORTEX Engine conectado. Almacenando intent...[/]"
+                t_id, description="[bold #6600FF]CORTEX Engine connected. Storing intent...[/]"
             )
             engine.store(  # type: ignore[reportUnusedCoroutine]
                 content=f"APOTHEOSIS-MANIFEST: {intent}",
@@ -72,41 +72,41 @@ def manifest_cmd(intent: str) -> None:
                 source="cli:apotheosis:manifest",
             )
             progress.update(
-                t_id, description="[bold #06d6a0]Intent almacenado en CORTEX. Verificando...[/]"
+                t_id, description="[bold #06d6a0]Intent stored in CORTEX. Verifying...[/]"
             )
 
             # Verify storage
             results = engine.search(intent, limit=1, project="apotheosis")
             verified = len(results) > 0  # type: ignore[reportArgumentType]
-            status = "✅ Verificado" if verified else "⚠️ Sin verificación"
+            status = "✅ Verified" if verified else "⚠️ Unverified"
             progress.update(
-                t_id, description=f"[bold #D4AF37]{status} - Intent registrado en ledger[/]"
+                t_id, description=f"[bold #D4AF37]{status} - Intent registered in ledger[/]"
             )
         except ImportError:
             progress.update(
-                t_id, description="[dim]CortexEngine no disponible - intent no persistido[/]"
+                t_id, description="[dim]CortexEngine unavailable - intent not persisted[/]"
             )
 
     console.print(
-        "\n[bold green]💠 APOTHEOSIS-MANIFIESTO COMPLETADO[/]\n"
-        "El intent ha sido registrado y verificado en el ledger.\n"
+        "\n[bold green]💠 APOTHEOSIS-MANIFEST COMPLETED[/]\n"
+        "The intent has been registered and verified in the ledger.\n"
     )
 
 
 @apotheosis_cmds.command("guard")
 def guard_cmd() -> None:
     """
-    El Sueño Demiúrgico: Vigilancia de entropía y purga real de deuda técnica.
+    The Demiurgic Sleep: Nightly vigilance and real technical debt purge.
     """
     console.print(
         Panel(
             "[bold #2E5090]APOTHEOSIS-GUARD[/]\n"
-            "Iniciando vigilancia nocturna y aniquilación de deuda técnica.",
+            "Initiating nightly vigilance and technical debt annihilation.",
             border_style="#2E5090",
         )
     )
 
-    report_lines = ["# 👁️ Reporte del Sueño Demiúrgico\n"]
+    report_lines = ["# 👁️ Demiurgic Sleep Report\n"]
     target = Path(os.getcwd()).resolve()
 
     with Progress(
@@ -115,16 +115,16 @@ def guard_cmd() -> None:
         transient=False,
     ) as progress:
         t_id = progress.add_task(
-            "[dim]Escaneando entropía en el directorio actual (ENTROPY-0)...[/]", total=None
+            "[dim]Scanning entropy in current directory (ENTROPY-0)...[/]", total=None
         )
 
         # Real: Run radon CC scan
         cc_results = _scan_entropy(target)
-        report_lines.append(f"- Archivos escaneados: {cc_results['total']}")
-        report_lines.append(f"- Archivos con entropía alta: {cc_results['critical']}")
-        report_lines.append(f"- Max complejidad ciclomática: {cc_results['max_cc']}")
+        report_lines.append(f"- Scanned files: {cc_results['total']}")
+        report_lines.append(f"- High entropy files: {cc_results['critical']}")
+        report_lines.append(f"- Max cyclomatic complexity: {cc_results['max_cc']}")
 
-        progress.update(t_id, description="[dim]Ejecutando auto-fix de lint (ruff --fix)...[/]")
+        progress.update(t_id, description="[dim]Executing lint auto-fix (ruff --fix)...[/]")
 
         # Real: Run ruff autofix
         ruff_result = subprocess.run(
@@ -136,10 +136,10 @@ def guard_cmd() -> None:
         fixed_count = ruff_result.stdout.count("Fixed")
         report_lines.append(f"- Lint violations auto-fixed: {fixed_count}")
 
-        progress.update(t_id, description="[dim]Generando reporte de operaciones...[/]")
+        progress.update(t_id, description="[dim]Generating operations report...[/]")
 
         # Real: Check daemon status
-        daemon_status = "desconocido"
+        daemon_status = "unknown"
         try:
             from cortex.extensions.daemon.core import MoskvDaemon
 
@@ -147,16 +147,16 @@ def guard_cmd() -> None:
             if status:
                 daemon_status = "healthy" if status.get("all_healthy") else "degraded"
         except ImportError:
-            daemon_status = "no disponible"
+            daemon_status = "unavailable"
 
         report_lines.append(f"- Daemon status: {daemon_status}")
-        report_lines.append("\n*Apotheosis vigila.*")
+        report_lines.append("\n*Apotheosis watches.*")
 
         try:
             report_path = target / "apotheosis_night_report.md"
             report_path.write_text("\n".join(report_lines), encoding="utf-8")
         except OSError as e:
-            console.print(f"\n[bold red]Error al escribir el reporte: {e}[/]")
+            console.print(f"\n[bold red]Error writing report: {e}[/]")
             raise click.Abort() from e
 
     pct = (
@@ -165,9 +165,9 @@ def guard_cmd() -> None:
         else (100 - round(cc_results["critical"] / cc_results["total"] * 100))
     )
     console.print(
-        f"\n[bold #D4AF37]👁️ EL SUEÑO DEMIÚRGICO FINALIZÓ[/]\n"
-        f"Salud arquitectónica: {pct}% archivos sanos. "
-        f"Reporte en apotheosis_night_report.md.\n"
+        f"\n[bold #D4AF37]👁️ THE DEMIURGIC SLEEP HAS ENDED[/]\n"
+        f"Architectural health: {pct}% healthy files. "
+        f"Report saved to apotheosis_night_report.md.\n"
     )
 
 
@@ -175,14 +175,14 @@ def guard_cmd() -> None:
 @click.argument("target_path", type=click.Path(exists=True), required=False, default=".")
 def nirvana_cmd(target_path: str) -> None:
     """
-    Petición destructiva. Purifica un archivo/dir aniquilando toda complejidad.
+    Destructive request. Purifies a file/dir by annihilating all complexity.
     """
     path_resolved = Path(target_path).resolve()
 
     console.print(
         Panel(
             f"[bold #f72585]APOTHEOSIS-NIRVANA[/]\n"
-            f"Abriendo horizonte de eventos en: {path_resolved.name}",
+            f"Opening event horizon at: {path_resolved.name}",
             border_style="#f72585",
         )
     )
@@ -192,7 +192,7 @@ def nirvana_cmd(target_path: str) -> None:
         TextColumn(PROGRESS_DESC_FMT),
         transient=False,
     ) as progress:
-        t_id = progress.add_task("[bold #f72585]Ejecutando ruff autofix agresivo...[/]", total=None)
+        t_id = progress.add_task("[bold #f72585]Executing aggressive ruff autofix...[/]", total=None)
 
         # Real: Aggressive ruff fix
         subprocess.run(
@@ -202,7 +202,7 @@ def nirvana_cmd(target_path: str) -> None:
             timeout=60,
         )
 
-        progress.update(t_id, description="[bold #f72585]Aplicando formatting canónico...[/]")
+        progress.update(t_id, description="[bold #f72585]Applying canonical formatting...[/]")
 
         # Real: ruff format
         subprocess.run(
@@ -212,23 +212,23 @@ def nirvana_cmd(target_path: str) -> None:
             timeout=60,
         )
 
-        progress.update(t_id, description="[bold #f72585]Midiendo complejidad post-purga...[/]")
+        progress.update(t_id, description="[bold #f72585]Measuring post-purge complexity...[/]")
 
         # Real: Post-purge scan
         results = _scan_entropy(path_resolved)
         max_cc = results["max_cc"]
 
     console.print(
-        f"\n[bold white on #f72585] N I R V A N A   A L C A N Z A D O [/]\n"
-        f"Post-purga: max CC={max_cc}, {results['critical']} archivos aún críticos "
-        f"de {results['total']} escaneados.\n"
+        f"\n[bold white on #f72585] N I R V A N A   R E A C H E D [/]\n"
+        f"Post-purge: max CC={max_cc}, {results['critical']} critical files remain "
+        f"out of {results['total']} scanned.\n"
     )
 
 
 @apotheosis_cmds.command("aix")
 def aix_cmd() -> None:
     """
-    Métrica de Deificación (AIx). Cuantifica la eficiencia y soberanía del sistema.
+    Deification Metric (AIx). Quantifies system efficiency and sovereignty.
     """
     import asyncio
 

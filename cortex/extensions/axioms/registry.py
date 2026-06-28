@@ -40,10 +40,10 @@ class Axiom:
 _SOVEREIGN: list[Axiom] = [
     Axiom(
         id="AX-I",
-        name="Determinismo Estocástico",
+        name="Stochastic Determinism",
         mandate=(
-            "El LLM es un compresor probabilístico sin agencia. "
-            "Su salida debe colisionar contra una frontera determinista antes de mutar estado."
+            "The LLM is a probabilistic compressor without agency. "
+            "Its output must collide with a deterministic boundary before mutating state."
         ),
         category=AxiomCategory.SOVEREIGN,
         enforcement="Guards, schemas, type enforcement.",
@@ -51,10 +51,10 @@ _SOVEREIGN: list[Axiom] = [
     ),
     Axiom(
         id="AX-II",
-        name="Paradoja Epistémica",
+        name="Epistemic Paradox",
         mandate=(
-            "Un sistema que es su propio testigo sufre recursión corrupta. "
-            "La verdad se ancla en testigos criptográficos externos."
+            "A system that is its own witness suffers corrupt recursion. "
+            "Truth is anchored in external cryptographic witnesses."
         ),
         category=AxiomCategory.SOVEREIGN,
         enforcement="Master Ledger, Git Trees, Merkle Hashes.",
@@ -62,10 +62,10 @@ _SOVEREIGN: list[Axiom] = [
     ),
     Axiom(
         id="AX-III",
-        name="Colapso Entrópico",
+        name="Entropic Collapse",
         mandate=(
-            "Ejecución cíclica con detención forzada. Observar → Hipotetizar → Actuar → Medir. "
-            "La fricción purifica la señal y previene drift acumulativo."
+            "Cyclic execution with forced halt. Observe → Hypothesize → Act → Measure. "
+            "Friction purifies the signal and prevents cumulative drift."
         ),
         category=AxiomCategory.SOVEREIGN,
         enforcement="Micro-ciclos atómicos de inferencia. No time.sleep()",
@@ -73,10 +73,10 @@ _SOVEREIGN: list[Axiom] = [
     ),
     Axiom(
         id="AX-IV",
-        name="Cognición Termodinámica",
+        name="Thermodynamic Cognition",
         mandate=(
-            "La inteligencia opera bajo coste. Prosa decorativa es entropía. "
-            "Toda heurística debe absorber complejidad en primitivas mecánicas de bajo coste."
+            "Intelligence operates under cost. Decorative prose is entropy. "
+            "All heuristics must absorb complexity in low-cost mechanical primitives."
         ),
         category=AxiomCategory.SOVEREIGN,
         enforcement="Ruff, LOC Guard, strict linting.",
@@ -84,10 +84,10 @@ _SOVEREIGN: list[Axiom] = [
     ),
     Axiom(
         id="AX-V",
-        name="Horizonte de Sucesos",
+        name="Event Horizon",
         mandate=(
-            "Generar es estadística; decidir es inteligencia. "
-            "El humano acta como timón para colapsar las asimetrías de ambigüedad irreversible."
+            "Generating is statistics; deciding is intelligence. "
+            "The human acts as a rudder to collapse asymmetries of irreversible ambiguity."
         ),
         category=AxiomCategory.SOVEREIGN,
         enforcement="Delegation to Operator at trust thresholds.",
@@ -95,10 +95,10 @@ _SOVEREIGN: list[Axiom] = [
     ),
     Axiom(
         id="AX-VI",
-        name="Topología de Enjambre",
+        name="Swarm Topology",
         mandate=(
-            "La eficiencia exige orquestación de enjambre bajo contratos, "
-            "no un monolito gigantesco libre. La capacidad orquesta Modelo, Estado, Herramienta y Contrato."
+            "Efficiency demands swarm orchestration under contracts, not a giant free monolith. "
+            "Capability orchestrates Model, State, Tool and Contract."
         ),
         category=AxiomCategory.SOVEREIGN,
         enforcement="CORTEX agents topology.",
@@ -106,10 +106,10 @@ _SOVEREIGN: list[Axiom] = [
     ),
     Axiom(
         id="AX-VII",
-        name="Inmunología Computacional",
+        name="Computational Immunology",
         mandate=(
-            "Ejecución soberana por defecto, pero con metabolismo paranoico. "
-            "Cualquier mutación no verificada exige amputación directa. No hay tolerancia a la intrusión estocástica."
+            "Sovereign execution by default, but with a paranoid metabolism. "
+            "Any unverified mutation demands direct amputation. There is no tolerance for stochastic intrusion."
         ),
         category=AxiomCategory.SOVEREIGN,
         enforcement="Quality Gates, Seals, Bandit.",
