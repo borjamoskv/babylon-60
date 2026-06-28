@@ -355,28 +355,31 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     p_a = "angulo"
 
     pii_leak = False
-    layers = _extract_text_layers(content)
+    if "[redacted_pii]" in content.lower():
+        pii_leak = True
 
-    for layer in layers:
-        normalized_content = _translate_homoglyphs(_strip_accents(layer.lower()))
-        clean_alpha = re.sub(r"[^a-z0-9]", "", normalized_content)
+    if not pii_leak:
+        layers = _extract_text_layers(content)
+        for layer in layers:
+            normalized_content = _translate_homoglyphs(_strip_accents(layer.lower()))
+            clean_alpha = re.sub(r"[^a-z0-9]", "", normalized_content)
 
-        if (p_b + p_f + p_a) in clean_alpha:
-            pii_leak = True
-            break
-        elif (p_b + p_f) in clean_alpha:
-            pii_leak = True
-            break
-        elif (p_f + p_a) in clean_alpha:
-            pii_leak = True
-            break
-        else:
-            # Check for co-occurrence in proximity
-            if re.search(rf"\b{p_b}\b.*?\b{p_f}\b", normalized_content) or \
-               re.search(rf"\b{p_f}\b.*?\b{p_a}\b", normalized_content) or \
-               re.search(rf"\b{p_b}\b.*?\b{p_a}\b", normalized_content):
+            if (p_b + p_f + p_a) in clean_alpha:
                 pii_leak = True
                 break
+            elif (p_b + p_f) in clean_alpha:
+                pii_leak = True
+                break
+            elif (p_f + p_a) in clean_alpha:
+                pii_leak = True
+                break
+            else:
+                # Check for co-occurrence in proximity
+                if re.search(rf"\b{p_b}\b.*?\b{p_f}\b", normalized_content) or \
+                   re.search(rf"\b{p_f}\b.*?\b{p_a}\b", normalized_content) or \
+                   re.search(rf"\b{p_b}\b.*?\b{p_a}\b", normalized_content):
+                    pii_leak = True
+                    break
 
     if pii_leak:
         logger.error("[TaintEngine] P0 SINGULARITY: Host Identity Bleed detected in Taint payload.")
