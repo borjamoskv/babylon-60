@@ -71,42 +71,29 @@ class CascadeRouter:
 
         for attempt in range(1, max_retries + 1):
             try:
-                # LOCAL-INFERENCE-OMEGA OVERRIDES
-                # Force local execution via Ollama instead of external hyperscalers if requested
-                local_first = os.environ.get("CORTEX_LLM_LOCAL_FIRST", "0") == "1"
-
-                if local_first:
-                    if engine == "gemini":
-                        # Architecture/Heavy tasks -> Qwen 2.5 Coder 32b
-                        cmd = ["ollama", "run", "qwen2.5-coder:32b", prompt]
-                    elif engine == "claude":
-                        # Refactor/General tasks -> Qwen 2.5 Coder 32b or Llama3
-                        cmd = ["ollama", "run", "qwen2.5-coder:32b", prompt]
+                # LOCAL-INFERENCE-OMEGA OVERRIDES (ENFORCED C5-REAL)
+                # Zero-Network Policy: All semantic ignition MUST occur on local silicon.
+                # External network failover is strictly PROHIBITED.
+                
+                primary_model = "qwen2.5-coder:32b"
+                fallback_model = "qwen2.5-coder:7b"
+                
+                # Graceful Degradation: Fallback to lighter local quant if attempt > 1
+                if attempt == 1:
+                    if engine in ("gemini", "claude"):
+                        active_model = primary_model
                     elif engine == "codex":
-                        # Snippet tasks -> Llama 3 or smaller Qwen
-                        cmd = ["ollama", "run", "llama3:8b", prompt]
+                        active_model = "llama3:latest"
                     else:
                         raise ValueError(f"Unknown engine: {engine}")
-                    logger.info(
-                        f"🚀 [ROUTER] Local-Inference-OMEGA Active. Dispatching to local {engine} equivalent (Attempt {attempt}/{max_retries})..."
-                    )
                 else:
-                    # Standard API/CLI execution via npx
-                    if engine == "gemini":
-                        cmd = ["npx", "-y", "@google/gemini-cli"]
-                        if files:
-                            for f in files:
-                                cmd.extend(["--file", f])
-                        cmd.append(prompt)
-                    elif engine == "claude":
-                        cmd = ["npx", "-y", "@anthropic-ai/claude-code", prompt]
-                    elif engine == "codex":
-                        cmd = ["npx", "-y", "@google/gemini-cli", prompt]
-                    else:
-                        raise ValueError(f"Unknown engine: {engine}")
-                    logger.info(
-                        f"🚀 [ROUTER] Standard CLI Active. Dispatching to {engine} via npx (Attempt {attempt}/{max_retries})..."
-                    )
+                    active_model = fallback_model
+                    logger.warning(f"⚠️ [ROUTER] Graceful Degradation Triggered. Falling back to {active_model}")
+
+                cmd = ["ollama", "run", active_model, prompt]
+                logger.info(
+                    f"🚀 [ROUTER] Local-Inference-OMEGA Active. Dispatching to {active_model} (Attempt {attempt}/{max_retries})..."
+                )
 
                 # Selectively pass API keys from parent environment
                 child_env = {
