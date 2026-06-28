@@ -221,6 +221,7 @@ exclude = [
     "scripts",
     "cortex.agents",
     ".scratch",
+    "scratch",
     ".venv"
 ]
 reportMissingImports = "warning"
