@@ -181,10 +181,24 @@ class TurbopufferVectorBackend(VectorBackend):
         Allows Ouroboros to prune noisy semantic vectors directly from L2 storage.
         Requires valid CORTEX-TAINT signature to bypass standard restrictions.
         """
-        if "CORTEX-TAINT:" not in taint_signature:
-            raise PermissionError("L2 Vector prune rejected: Missing cryptographic taint signature.")
-            
+        import os
+        from cortex.config import DEFAULT_DB_PATH
+        from cortex.database.core import connect_async
+        from cortex.engine.causal.taint_engine import verify_taint_token
+        
         ns = self._namespace(tenant_id)
+        content = f"prune:{ns}:{entropy_threshold}"
+
+        if not taint_signature.startswith("taint:"):
+            if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1" and "CORTEX-TAINT:" in taint_signature:
+                pass # Fallback permitted
+            else:
+                raise PermissionError("L2 Vector prune rejected: Missing cryptographic taint signature.")
+        else:
+            async with connect_async(DEFAULT_DB_PATH) as conn:
+                is_valid = await verify_taint_token(conn, taint_signature, content)
+                if not is_valid:
+                    raise PermissionError("L2 Vector prune rejected: Cryptographic taint signature is invalid.")
         
         logger.warning(
             "OUROBOROS-∞: Autonomous L2 Prune triggered for '%s' (threshold=%f)", 
