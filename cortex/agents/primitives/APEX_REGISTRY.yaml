@@ -849,6 +849,69 @@ primitives:
   signature: sys.exit(0)
   complexity: O(1)
   mutation: Kernel. Destrucción entrópica exitosa; fin del ciclo C5.
+- id: APEX-101
+  name: OP_MCTS_SELECT
+  execute: Selección del nodo con mayor balance Exploración/Explotación.
+  trigger: Thermodynamic state mutation requested.
+  verify: Hash matches deterministic output.
+  fail: Abort SAGA. Fallback to Ouroboros.
+  signature: argmax(UCT)
+  complexity: O(b)
+  mutation: RAM. Recorrido de hijos activos.
+- id: APEX-102
+  name: OP_MCTS_EXPAND
+  execute: Instanciación topológica de una nueva mutación.
+  trigger: Thermodynamic state mutation requested.
+  verify: Hash matches deterministic output.
+  fail: Abort SAGA. Fallback to Ouroboros.
+  signature: add_child(prompt)
+  complexity: O(1)
+  mutation: RAM. Asignación de memoria.
+- id: APEX-103
+  name: OP_GIT_MULTIVERSE
+  execute: Aislamiento físico de la línea temporal principal.
+  trigger: Thermodynamic state mutation requested.
+  verify: Hash matches deterministic output.
+  fail: Abort SAGA. Fallback to Ouroboros.
+  signature: checkout -b <node>
+  complexity: O(1)
+  mutation: Disco I/O (Inodes).
+- id: APEX-104
+  name: OP_MUTATION_INJECT
+  execute: Inyección estocástica divergente.
+  trigger: Thermodynamic state mutation requested.
+  verify: Hash matches deterministic output.
+  fail: Abort SAGA. Fallback to Ouroboros.
+  signature: LLM_eval(temp=0.8)
+  complexity: O(T)
+  mutation: Red I/O.
+- id: APEX-105
+  name: OP_DETERMINISTIC_SIM
+  execute: Aserción física (Reward = 1.0 o 0.0).
+  trigger: Thermodynamic state mutation requested.
+  verify: Hash matches deterministic output.
+  fail: Abort SAGA. Fallback to Ouroboros.
+  signature: Popen(pytest)
+  complexity: O(T_exec)
+  mutation: OS Process.
+- id: APEX-106
+  name: OP_BACKPROPAGATE
+  execute: Actualización del linaje causal.
+  trigger: Thermodynamic state mutation requested.
+  verify: Hash matches deterministic output.
+  fail: Abort SAGA. Fallback to Ouroboros.
+  signature: node.value += W
+  complexity: O(d)
+  mutation: RAM. Recorrido inverso d niveles.
+- id: APEX-107
+  name: OP_LOCAL_EXTINCTION
+  execute: Erradicación termodinámica de la rama fallida.
+  trigger: Thermodynamic state mutation requested.
+  verify: Hash matches deterministic output.
+  fail: Abort SAGA. Fallback to Ouroboros.
+  signature: git reset --hard
+  complexity: O(N)
+  mutation: Disco I/O.
 invariants:
 - id: OUROBOROS-001
   name: INV_C5_ONLY
@@ -1366,6 +1429,22 @@ invariants:
     P0 y pruebas BFT. Prohibido su uso para tareas O(1) rutinarias.
   logic: IF task == O(1) AND model == o1 THEN return ANERGIA
   risk: P0
+- id: OUROBOROS-101
+  name: INV_REWARD_BINARY
+  rule: El simulador de entorno asume Reward 0.0 o 1.0. No existe recompensa parcial.
+- id: OUROBOROS-102
+  name: INV_CAUSAL_ISOLATION
+  rule: Toda mutación MCTS ocurre exclusivamente en ramas chronos/node-XXX.
+- id: OUROBOROS-103
+  name: INV_FORCED_DIVERGENCE
+  rule: La temperatura del enrutador LLM en fase de Expansión debe ser >= 0.7.
+- id: OUROBOROS-104
+  name: INV_CLEAN_SLATE
+  rule: Cada paso de simulación requiere una purga atómica de archivos sin trackear
+    antes del checkout.
+- id: OUROBOROS-105
+  name: INV_EXPLOITATION_COLLAPSE
+  rule: La decisión final recae estrictamente en la rama con mayor W_i / N_i.
 anti_patterns:
 - id: AP-01
   name: Green Theater
