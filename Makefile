@@ -56,6 +56,9 @@ clean: ## Clean build artifacts
 	rm -rf dist/ build/ *.egg-info site/ .pytest_cache .ruff_cache
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
+reclaim: ## Reclaim system resources, kill stale processes, clear locked shm/wal db files
+	./scripts/reclaim_resources.sh
+
 bench: ## Run benchmarks
 	.venv/bin/python tests/bench_search.py
 
