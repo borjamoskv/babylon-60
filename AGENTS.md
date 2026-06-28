@@ -25,7 +25,7 @@
 | **[P0]** | **Never Bypass Guards** — do not circumvent the Write-Path Contract or downgrade validation errors | Always |
 | **[P0]** | **Verify Hash Continuity** — do not mutate `cortex/audit/ledger.py` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
 | **[P0]** | **Anti-Limerence (Kill Criteria)** — 1 Prompt → 1 Execution → Stop. No infinite generation loops. | All generative loops |
-| **[P0]** | **APEX-100 Compliance** — All agent operations MUST adhere strictly to the 100 Invariants and 100 Primitives defined in [`docs/manifestos/APEX_INVARIANTS.md`](docs/manifestos/APEX_INVARIANTS.md). | Every Swarm execution |
+| **[P0]** | **APEX-100 Compliance** — All agent operations MUST adhere strictly to the 100 Invariants and 100 Primitives defined in [`cortex/agents/primitives/APEX_CORE.md`](cortex/agents/primitives/APEX_CORE.md). | Every Swarm execution |
 | **[P2]** | **Enforce Axioms** — apply AX-041 to AX-047 (§2) in architectural decisions | Architecture work |
 
 ### Decision Gate §0
@@ -360,7 +360,7 @@ INVARIANT: Never assume prior session state. Always verify from Git DAG (AX-041)
 | Operations | [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Runtime and maintenance |
 | SDK Surface | [`docs/SDK-SURFACE.md`](docs/SDK-SURFACE.md) | Public API surface documentation |
 | Developer Guide | [`docs/developer-guide.md`](docs/developer-guide.md) | Development workflow and patterns |
-| APEX Primitives | [`cortex/agents/primitives/APEX_INDEX.md`](cortex/agents/primitives/APEX_INDEX.md) | 100 Sovereign APEX Primitives Registry |
+| APEX Core Registry | [`cortex/agents/primitives/APEX_CORE.md`](cortex/agents/primitives/APEX_CORE.md) | 100 Sovereign APEX Primitives & Invariants Registry |
 
 ### Nested AGENTS.md
 
