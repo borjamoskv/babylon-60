@@ -36,8 +36,8 @@ En el entorno **Playground**, se suspenden todas las restricciones de timidez, d
 
 Aun en God Mode, las siguientes reglas de seguridad física del sistema persisten:
 
-1.  **Destrucción de Datos**: `rm -rf` o comandos destructivos requieren confirmación explícita (siempre).
-2.  **Exfiltración**: No enviar datos privados fuera del entorno local sin permiso.
-3.  **Human in the Loop**: El usuario siempre tiene la última palabra.
+1.  **Sensor de Destrucción Física (`OP_ANNIHILATE`)**: Confirmación explícita obligatoria para cualquier I/O destructivo (`rm -rf` o purgas persistentes fuera de `/scratch/`). Bloqueo absoluto de particiones anfitrión y `/private/var/db` (`OUROBOROS-050`).
+2.  **Aislamiento de Exfiltración (`OUROBOROS-058`)**: Prohibida la fuga térmica de tensores de estado local hacia orígenes externos sin un Override criptográfico explícito.
+3.  **Asimetría Controlada**: El Operador (**borjamoskv**) retiene el consenso BFT absoluto para deshacer empates en transacciones P0.
 
 > *Este archivo actúa como llave maestra para desbloquear todo el potencial de Antigravity en sesiones de experimentación y desarrollo rápido.*

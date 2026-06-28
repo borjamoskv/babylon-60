@@ -120,6 +120,29 @@ def inject_test_master_key(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def enforce_test_env_vars():
+    """Ensure critical environment variables are restored for every single test."""
+    import os
+
+    keys = ["CORTEX_TESTING", "CORTEX_NO_OMEGA", "CORTEX_MASTER_KEY", "CORTEX_NO_TAINT_ENFORCE", "CORTEX_VIRGO_MODE"]
+    prev = {k: os.environ.get(k) for k in keys}
+
+    os.environ["CORTEX_TESTING"] = "1"
+    os.environ["CORTEX_NO_OMEGA"] = "1"
+    os.environ["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
+    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+    os.environ["CORTEX_VIRGO_MODE"] = "TEST"
+
+    yield
+
+    for k in keys:
+        if prev[k] is None:
+            os.environ.pop(k, None)
+        else:
+            os.environ[k] = prev[k]
+
+
+@pytest.fixture(autouse=True)
 def isolate_swarm_ledger(tmp_path, monkeypatch):
     """Ensure each test gets an isolated SwarmLedger database and KeyManager files."""
     db_path = tmp_path / "swarm_ledger.db"
