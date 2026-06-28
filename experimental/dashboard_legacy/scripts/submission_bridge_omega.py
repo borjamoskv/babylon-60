@@ -42,7 +42,7 @@ class SubmissionBridge:
             "verdict": "C5-REAL"
         }
         # Save to local ledger
-        ledger_path = "~/10_PROJECTS/Cortex-Persist/ledger/strikes.json"
+        ledger_path = os.path.expanduser("~/10_PROJECTS/Cortex-Persist/ledger/strikes.json")
         os.makedirs(os.path.dirname(ledger_path), exist_ok=True)
         
         try:
