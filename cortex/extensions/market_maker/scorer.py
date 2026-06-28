@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 class OpportunityScorer:
-    """Motor de evaluación multidimensional de oportunidades."""
+    """Multidimensional opportunity evaluation engine."""
 
     EXECUTE_THRESHOLD = Decimal("70")
     MONITOR_THRESHOLD = Decimal("40")
@@ -27,9 +27,9 @@ class OpportunityScorer:
 
     async def score(self, signal: TrendSignal) -> Opportunity:
         """
-        Evalúa 4 ejes hasta 25 ptos c/u: TAM, Competición, Ventaja CORTEX, y TTM.
+        Evaluates 4 axes up to 25 pts each: TAM, Competition, CORTEX Advantage, and TTM.
         """
-        # Simulamos la evaluación de cada eje de forma determinista para la demostración automátizada.
+        # Simulate the evaluation of each axis deterministically for automated demonstration.
         tam = Decimal(str(round(self._rng.uniform(5, 25), 2)))
         comp = Decimal(str(round(self._rng.uniform(5, 25), 2)))
         adv = Decimal(str(round(self._rng.uniform(5, 25), 2)))
