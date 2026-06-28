@@ -100,7 +100,6 @@ class SwarmSupervisor:
 
     async def _state_consumer_loop(self) -> None:
         """Consumes signals from Event Bus and writes them to the State Store."""
-        self._state_lock = asyncio.Lock()
         signal_buffer = []
         while self._running:
             try:
@@ -109,37 +108,36 @@ class SwarmSupervisor:
 
                 # FABLE 5 SIGNAL 3: Context Checkpointing (Transaction Isolation)
                 if len(signal_buffer) >= 100:
-                    async with self._state_lock:
-                        logger.info(
-                            "[Sanedrin] Fable 5 Context Checkpointing: Compressing 100 signals atomically."
-                        )
-                        voids = sum(1 for s in signal_buffer if s.status == "VOID")
-                        compressed_payload = {
-                            "summary": f"Checkpoint of {len(signal_buffer)} signals",
-                            "voids_dropped": voids,
-                            "invariant_preserved": True,
-                        }
-                        checkpoint_signal = SwarmSignal(
-                            agent_id=self.supervisor_id,
-                            target="checkpoint_horizon",
-                            status="SUCCESS",
-                            payload=compressed_payload,
-                            metrics={"exergy_saved": len(signal_buffer)},
-                        )
+                    logger.info(
+                        "[Sanedrin] Fable 5 Context Checkpointing: Compressing 100 signals into State Store."
+                    )
+                    voids = sum(1 for s in signal_buffer if s.status == "VOID")
+                    compressed_payload = {
+                        "summary": f"Checkpoint of {len(signal_buffer)} signals",
+                        "voids_dropped": voids,
+                        "invariant_preserved": True,
+                    }
+                    checkpoint_signal = SwarmSignal(
+                        agent_id=self.supervisor_id,
+                        target="checkpoint_horizon",
+                        status="SUCCESS",
+                        payload=compressed_payload,
+                        metrics={"exergy_saved": len(signal_buffer)},
+                    )
 
-                        await self.state_store.process_signal(checkpoint_signal)
+                    # Process signal writes atomically based on aiosqlite WAL engine
+                    await self.state_store.process_signal(checkpoint_signal)
 
-                        # Only after successful DB write, we mark tasks as done.
-                        for _ in signal_buffer:
-                            self.bus.task_done()
-                        signal_buffer.clear()
+                    # Only after successful DB write, we mark tasks as done in the async bus
+                    for _ in signal_buffer:
+                        self.bus.task_done()
+                    signal_buffer.clear()
                     continue
 
                 # Single signal processing
-                async with self._state_lock:
-                    await self.state_store.process_signal(signal)
-                    self.bus.task_done()
-                    signal_buffer.remove(signal)
+                await self.state_store.process_signal(signal)
+                self.bus.task_done()
+                signal_buffer.remove(signal)
             except asyncio.TimeoutError:
                 continue
             except asyncio.CancelledError:
@@ -178,8 +176,9 @@ class SwarmSupervisor:
                     )
 
                     # FABLE 5 SIGNAL 2: Steerability Constraint Injection (Strict Epistemic Gatekeeper)
-                    # Zero Trust: No try-except. If crypto fails, hypothesis dies immediately.
-                    taint_token = generate_secure_taint_token(
+                    # Offload CPU-bound cryptography to a thread to prevent Event Loop Starvation
+                    taint_token = await asyncio.to_thread(
+                        generate_secure_taint_token,
                         agent_id="sanedrin_apex",
                         session_id=self.supervisor_id,
                         content=str(task["id"]),
@@ -218,15 +217,33 @@ class SwarmSupervisor:
                     )
                     await self._db.commit()
 
-                # Push to worker pool
-                await self.worker_pool.dispatch(task["id"])
-                in_flight.add(task["id"])
-                dispatched += 1
-            except asyncio.QueueFull:
-                logger.warning("Thermodynamic Pause: Worker Queue is full. Backpressure applied.")
-                break
+                try:
+                    # Push to worker pool
+                    await self.worker_pool.dispatch(task["id"])
+                    in_flight.add(task["id"])
+                    dispatched += 1
+                except asyncio.QueueFull:
+                    logger.warning("Thermodynamic Pause: Worker Queue is full. Rolling back lease.")
+                    # Phantom Lease Rollback
+                    with causal_write(self._db):
+                        await self._db.execute(
+                            "UPDATE system_hypotheses SET status = 'PENDING', owner_id = NULL, lease_expires_at = NULL WHERE id = ?",
+                            (task["id"],),
+                        )
+                        await self._db.commit()
+                    break
+                except Exception as e:
+                    logger.error(
+                        f"Dispatch failed for task {task['id']}. Rolling back lease. Error: {e}"
+                    )
+                    with causal_write(self._db):
+                        await self._db.execute(
+                            "UPDATE system_hypotheses SET status = 'PENDING', owner_id = NULL, lease_expires_at = NULL WHERE id = ?",
+                            (task["id"],),
+                        )
+                        await self._db.commit()
             except Exception as e:
-                logger.error(f"Dispatch failed for task {task['id']}: {e}")
+                logger.error(f"Critical dispatch loop failure for task {task['id']}: {e}")
 
         if dispatched > 0:
             logger.info(f"Dispatched {dispatched} optimal hypotheses with Fable 5 Steerability.")
