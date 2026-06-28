@@ -717,7 +717,7 @@
     "date": "2026-04-05T12:10:06.305Z",
     "wordcount": 7,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 193249420,
@@ -741,7 +741,7 @@
     "date": "2026-04-06T21:56:05.167Z",
     "wordcount": 7,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 193406672,
@@ -749,7 +749,7 @@
     "date": "2026-04-06T22:14:34.679Z",
     "wordcount": 9,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 193408419,
@@ -757,7 +757,7 @@
     "date": "2026-04-06T22:34:26.144Z",
     "wordcount": 2,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 193422766,
@@ -781,7 +781,7 @@
     "date": "2026-04-07T05:07:24.924Z",
     "wordcount": 5924,
     "exergy_score": 450,
-    "status": "APOPTOSIS_PENDING"
+    "status": "DELETED"
   },
   {
     "post_id": 194217911,
@@ -789,7 +789,7 @@
     "date": "2026-04-14T18:50:18.303Z",
     "wordcount": 3364,
     "exergy_score": 450,
-    "status": "APOPTOSIS_PENDING"
+    "status": "DELETED"
   },
   {
     "post_id": 194221943,
@@ -797,7 +797,7 @@
     "date": "2026-04-14T19:09:11.069Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194258051,
@@ -813,7 +813,7 @@
     "date": "2026-04-15T04:09:28.463Z",
     "wordcount": 6,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194275967,
@@ -821,7 +821,7 @@
     "date": "2026-04-15T09:05:35.686Z",
     "wordcount": 6,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194328100,
@@ -853,7 +853,7 @@
     "date": "2026-04-15T21:42:50.872Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194383932,
@@ -861,7 +861,7 @@
     "date": "2026-04-16T08:27:55.212Z",
     "wordcount": 12,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194391819,
@@ -869,7 +869,7 @@
     "date": "2026-04-16T10:37:48.828Z",
     "wordcount": 21,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194395054,
@@ -885,7 +885,7 @@
     "date": "2026-04-16T13:24:54.656Z",
     "wordcount": 5,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194428349,
@@ -893,7 +893,7 @@
     "date": "2026-04-16T16:58:12.432Z",
     "wordcount": 19,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194446040,
@@ -901,7 +901,7 @@
     "date": "2026-04-16T20:01:06.754Z",
     "wordcount": 54,
     "exergy_score": 400,
-    "status": "APOPTOSIS_PENDING"
+    "status": "DELETED"
   },
   {
     "post_id": 194447065,
@@ -909,7 +909,7 @@
     "date": "2026-04-16T20:09:41.504Z",
     "wordcount": 50,
     "exergy_score": 400,
-    "status": "APOPTOSIS_PENDING"
+    "status": "DELETED"
   },
   {
     "post_id": 194461188,
@@ -917,7 +917,7 @@
     "date": "2026-04-16T23:03:26.344Z",
     "wordcount": 48,
     "exergy_score": 450,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194464560,
@@ -933,7 +933,7 @@
     "date": "2026-04-17T20:18:20.490Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194859056,
@@ -949,7 +949,7 @@
     "date": "2026-04-21T01:31:43.258Z",
     "wordcount": 3,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194897387,
@@ -957,7 +957,7 @@
     "date": "2026-04-21T10:16:17.468Z",
     "wordcount": 21,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194991374,
@@ -965,7 +965,7 @@
     "date": "2026-04-22T03:21:55.605Z",
     "wordcount": 14,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 194999228,
@@ -1005,7 +1005,7 @@
     "date": "2026-04-23T00:49:21.993Z",
     "wordcount": 8,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195189802,
@@ -1013,7 +1013,7 @@
     "date": "2026-04-23T00:57:05.537Z",
     "wordcount": 9,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195252938,
@@ -1053,7 +1053,7 @@
     "date": "2026-04-29T16:12:03.887Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195913326,
@@ -1077,7 +1077,7 @@
     "date": "2026-04-29T23:55:36.770Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195938401,
@@ -1085,7 +1085,7 @@
     "date": "2026-04-30T00:21:40.441Z",
     "wordcount": 12,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195948514,
@@ -1093,7 +1093,7 @@
     "date": "2026-04-30T02:52:01.428Z",
     "wordcount": 20,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195966916,
@@ -1101,7 +1101,7 @@
     "date": "2026-04-30T07:27:51.495Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195974036,
@@ -1109,7 +1109,7 @@
     "date": "2026-04-30T09:13:24.376Z",
     "wordcount": 17,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195976115,
@@ -1117,7 +1117,7 @@
     "date": "2026-04-30T09:44:41.688Z",
     "wordcount": 7,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195980868,
@@ -1125,7 +1125,7 @@
     "date": "2026-04-30T10:50:21.715Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195981360,
@@ -1133,7 +1133,7 @@
     "date": "2026-04-30T10:57:32.109Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195991291,
@@ -1141,7 +1141,7 @@
     "date": "2026-04-30T12:26:22.723Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 195999329,
@@ -1149,7 +1149,7 @@
     "date": "2026-04-30T13:40:36.031Z",
     "wordcount": 25,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 196008245,
@@ -1165,7 +1165,7 @@
     "date": "2026-04-30T16:45:20.029Z",
     "wordcount": 29,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 196030301,
@@ -1173,7 +1173,7 @@
     "date": "2026-04-30T18:15:47.913Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 196052658,
@@ -1181,7 +1181,7 @@
     "date": "2026-04-30T22:05:26.183Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 196055923,
@@ -1189,7 +1189,7 @@
     "date": "2026-04-30T22:55:45.512Z",
     "wordcount": 7,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 196060725,
@@ -1197,7 +1197,7 @@
     "date": "2026-05-01T00:06:46.420Z",
     "wordcount": 9,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 196571673,
@@ -1245,7 +1245,7 @@
     "date": "2026-05-06T20:21:00.603Z",
     "wordcount": 22,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 196709499,
@@ -1253,7 +1253,7 @@
     "date": "2026-05-06T21:10:21.163Z",
     "wordcount": 4,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 196723430,
@@ -1365,7 +1365,7 @@
     "date": "2026-05-17T22:32:56.855Z",
     "wordcount": 3422,
     "exergy_score": 475,
-    "status": "APOPTOSIS_PENDING"
+    "status": "DELETED"
   },
   {
     "post_id": 198193109,
@@ -1389,7 +1389,7 @@
     "date": "2026-05-19T20:04:34.394Z",
     "wordcount": 1,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 198474179,
@@ -1397,7 +1397,7 @@
     "date": "2026-05-19T21:09:18.522Z",
     "wordcount": 7,
     "exergy_score": 400,
-    "status": "TERMINAL_ANERGY"
+    "status": "DELETED"
   },
   {
     "post_id": 198499647,
@@ -1796,8 +1796,8 @@
     "title": "El Mapeo del Hype",
     "date": "2026-06-07T22:26:48.668Z",
     "wordcount": 466,
-    "exergy_score": 675,
-    "status": "C5-REAL_RETAIN"
+    "exergy_score": 1000,
+    "status": "C5-REAL_SINGULARITY"
   },
   {
     "post_id": 201086043,
