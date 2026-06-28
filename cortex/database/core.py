@@ -5,7 +5,7 @@ Sovereign Connection Factory (KETER-∞ Metal-Level).
 Single source of truth for ALL SQLite connections in the CORTEX ecosystem.
 Every connection created through this module is guaranteed to have:
 - WAL journal mode (concurrent reads during writes)
-- busy_timeout of 5000ms (retry on lock instead of instant failure)
+- busy_timeout of 2000ms (thermodynamic asphyxia limit / Landauer penalty)
 - NORMAL synchronous mode (performance without data loss)
 - Foreign key enforcement
 - mmap I/O (bypasses read() syscalls via kernel page cache)
@@ -201,12 +201,12 @@ __all__ = [
 # How long to wait (ms) for a locked database before raising OperationalError.
 # Raised to 30s to handle bursts of >10 concurrent CLI processes competing
 # for SQLite write lock (WAL allows concurrent reads but only 1 writer).
-# Reduced to 5000ms to allow the immune system to raise actionable errors
-# instead of hanging indefinitely, making lock contention visible.
-BUSY_TIMEOUT_MS: Final[int] = 5000
+# Reduced to 2000ms (2.0s) strict limit to enforce thermodynamic 
+# asphyxia limit (Landauer Penalty) for critical P0 failure detection.
+BUSY_TIMEOUT_MS: Final[int] = 2000
 
 # Python-level timeout (seconds) for the sqlite3.connect() call itself.
-CONNECT_TIMEOUT_S: Final[int] = 5
+CONNECT_TIMEOUT_S: Final[int] = 2
 
 # Memory-mapped I/O size (~20 GB). SQLite reads via kernel page cache
 # instead of userspace read() syscalls. Zero-copy for hot paths.
