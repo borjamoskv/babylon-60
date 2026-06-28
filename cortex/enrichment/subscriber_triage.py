@@ -84,7 +84,7 @@ if __name__ == "__main__":
     # Test collapse
     test_set = [
         "demos@ninjatune.net",
-        "borjamoskv@gmail.com",
+        "borja@borjamoskv.com",
         "jeff@amazon.com",
         "sierra@iiia.csic.es",
         "Matt@blocknative.com"
