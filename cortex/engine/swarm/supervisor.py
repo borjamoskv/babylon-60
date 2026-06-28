@@ -100,41 +100,46 @@ class SwarmSupervisor:
 
     async def _state_consumer_loop(self) -> None:
         """Consumes signals from Event Bus and writes them to the State Store."""
+        self._state_lock = asyncio.Lock()
         signal_buffer = []
         while self._running:
             try:
                 signal = await asyncio.wait_for(self.bus.consume(), timeout=1.0)
                 signal_buffer.append(signal)
 
-                # FABLE 5 SIGNAL 3: Context Checkpointing (Long-Horizon Completion)
-                # Compresses state when memory pressure risks "Context Rot"
+                # FABLE 5 SIGNAL 3: Context Checkpointing (Transaction Isolation)
                 if len(signal_buffer) >= 100:
-                    logger.info(
-                        "[Sanedrin] Fable 5 Context Checkpointing: Compressing 100 signals to prevent Context Rot."
-                    )
-                    voids = sum(1 for s in signal_buffer if s.status == "VOID")
-                    compressed_payload = {
-                        "summary": f"Checkpoint of {len(signal_buffer)} signals",
-                        "voids_dropped": voids,
-                        "invariant_preserved": True,
-                    }
-                    checkpoint_signal = SwarmSignal(
-                        agent_id=self.supervisor_id,
-                        target="checkpoint_horizon",
-                        status="SUCCESS",
-                        payload=compressed_payload,
-                        metrics={"exergy_saved": len(signal_buffer)},
-                    )
-                    await self.state_store.process_signal(checkpoint_signal)
+                    async with self._state_lock:
+                        logger.info(
+                            "[Sanedrin] Fable 5 Context Checkpointing: Compressing 100 signals atomically."
+                        )
+                        voids = sum(1 for s in signal_buffer if s.status == "VOID")
+                        compressed_payload = {
+                            "summary": f"Checkpoint of {len(signal_buffer)} signals",
+                            "voids_dropped": voids,
+                            "invariant_preserved": True,
+                        }
+                        checkpoint_signal = SwarmSignal(
+                            agent_id=self.supervisor_id,
+                            target="checkpoint_horizon",
+                            status="SUCCESS",
+                            payload=compressed_payload,
+                            metrics={"exergy_saved": len(signal_buffer)},
+                        )
 
-                    for _ in signal_buffer:
-                        self.bus.task_done()
-                    signal_buffer.clear()
+                        await self.state_store.process_signal(checkpoint_signal)
+
+                        # Only after successful DB write, we mark tasks as done.
+                        for _ in signal_buffer:
+                            self.bus.task_done()
+                        signal_buffer.clear()
                     continue
 
-                await self.state_store.process_signal(signal)
-                self.bus.task_done()
-                signal_buffer.remove(signal)
+                # Single signal processing
+                async with self._state_lock:
+                    await self.state_store.process_signal(signal)
+                    self.bus.task_done()
+                    signal_buffer.remove(signal)
             except asyncio.TimeoutError:
                 continue
             except asyncio.CancelledError:
@@ -172,25 +177,18 @@ class SwarmSupervisor:
                         json.loads(payload_raw) if isinstance(payload_raw, str) else payload_raw
                     )
 
-                    # FABLE 5 SIGNAL 2: Steerability Constraint Injection
-                    try:
-                        taint_token = generate_secure_taint_token(
-                            agent_id="sanedrin_apex",
-                            session_id=self.supervisor_id,
-                            content=str(task["id"]),
-                            private_key_b64="dGVzdF9rZXlfdGVzdF9rZXlfdGVzdF9rZXlfdGVzdA==",
-                        )
-                        payload_dict["_steerability_taint"] = taint_token
-                        payload_dict["_forced_tool_choice"] = "auto"
-                    except Exception as e:
-                        logger.warning(f"Failed to inject Fable 5 Taint: {e}")
+                    # FABLE 5 SIGNAL 2: Steerability Constraint Injection (Strict Epistemic Gatekeeper)
+                    # Zero Trust: No try-except. If crypto fails, hypothesis dies immediately.
+                    taint_token = generate_secure_taint_token(
+                        agent_id="sanedrin_apex",
+                        session_id=self.supervisor_id,
+                        content=str(task["id"]),
+                        private_key_b64="dGVzdF9rZXlfdGVzdF9rZXlfdGVzdF9rZXlfdGVzdA==",
+                    )
+                    payload_dict["_steerability_taint"] = taint_token
+                    payload_dict["_forced_tool_choice"] = "auto"
 
                     Hypothesis.model_validate(payload_dict)
-
-                    # FABLE 5 SIGNAL 1: Tool Reliability (Self-Verify Dry Run)
-                    # We reject logically impossible vectors before spending worker exergy
-                    if "_steerability_taint" not in payload_dict:
-                        raise ValueError("Steerability failed: missing structural taint.")
 
                 except (ValidationError, json.JSONDecodeError, TypeError, ValueError) as epi_err:
                     logger.warning(
