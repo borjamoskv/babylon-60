@@ -184,7 +184,6 @@ class TurbopufferVectorBackend(VectorBackend):
         if "CORTEX-TAINT:" not in taint_signature:
             raise PermissionError("L2 Vector prune rejected: Missing cryptographic taint signature.")
             
-        client = self._ensure_client()
         ns = self._namespace(tenant_id)
         
         # NOTE: Since Turbopuffer doesn't support complex server-side query-and-delete
