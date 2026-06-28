@@ -187,12 +187,12 @@ impl B60Compiler {
             }
         }
         
-        // 4. Enforce separate temporal domains (strong typing)
+        // 4. Enforce separate temporal domains (strong typing) & Structural Bounds
         for line in lines {
             let tokens: Vec<&str> = line.split_whitespace().collect();
             if tokens.is_empty() { continue; }
             let cmd = tokens[0];
-            if cmd == "DAH" || cmd == "LAL" {
+            if cmd == "DAH" || cmd == "LAL" || cmd == "BA.EXACT" {
                 if tokens.len() > 2 {
                     let dest = tokens[1];
                     let src = tokens[2];
@@ -200,7 +200,7 @@ impl B60Compiler {
                         let dest_typ = allocated_regs.get(dest);
                         let src_typ = allocated_regs.get(src);
                         if dest_typ != src_typ {
-                            return Err(format!("CRITICAL COMPILE ERROR: Strongly typed temporal domain mismatch. Cannot perform arithmetic between '{}' ({:?}) and '{}' ({:?})", dest, dest_typ, src, src_typ));
+                            return Err(format!("CRITICAL COMPILE ERROR: Topological domain mismatch. Cannot execute '{}' between '{}' ({:?}) and '{}' ({:?})", cmd, dest, dest_typ, src, src_typ));
                         }
                     }
                 }
