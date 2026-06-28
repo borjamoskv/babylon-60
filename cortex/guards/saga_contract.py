@@ -165,8 +165,8 @@ class SagaWriteProposal(BaseModel):
     @field_validator("tenant_id")
     @classmethod
     def _validate_tenant_id(cls, v: str) -> str:
-        """Prevent path traversal and injection in tenant_id."""
-        if re.search(r"[/\\;\x00]", v):
+        """Strict whitelist for tenant_id (PHALANX Remediation)."""
+        if not re.match(r"^[a-zA-Z0-9_-]+$", v):
             raise ValueError(
                 f"[SAGA-1] tenant_id contains forbidden characters: '{v}'"
             )
@@ -192,9 +192,8 @@ class SagaWriteProposal(BaseModel):
     @model_validator(mode="after")
     def _check_taint_presence(self) -> SagaWriteProposal:
         """Verify CORTEX-TAINT token is present when required."""
-        # Telemetry and mafia_node types are authenticated via other channels
-        exempt_types = {"telemetry_batch", "mafia_node"}
-        if self.taint_already_verified or self.fact_type in exempt_types:
+        # Taint tokens are ALWAYS required (PHALANX Doomsday remediation)
+        if self.taint_already_verified:
             return self
 
         taint = self.resolve_taint_token()

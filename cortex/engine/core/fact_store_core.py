@@ -122,8 +122,8 @@ async def insert_fact_record(
         meta=meta
     )
 
-    # Edge sensor telemetry is authenticated via X-Cortex-Source header, not taint tokens
-    if not taint_already_verified and fact_type not in ("telemetry_batch", "mafia_node"):
+    # Taint tokens are STRICTLY ENFORCED for all fact types (PHALANX Doomsday remediation)
+    if not taint_already_verified:
         token = (
             meta.get("cortex_taint")
             or meta.get("CORTEX-TAINT")
