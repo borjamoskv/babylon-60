@@ -163,7 +163,7 @@ def _is_anomalous_word(w: str) -> bool:
     has_vowel = any(c in vowels for c in w)
     if not has_vowel:
         # Allow common acronyms without vowels if short
-        if len(w) <= 3 and w in {
+        if len(w) <= 4 and w in {
             "xml",
             "cnn",
             "ssh",
@@ -177,6 +177,13 @@ def _is_anomalous_word(w: str) -> bool:
             "sh",
             "fs",
             "git",
+            "hdc",
+            "bft",
+            "mcts",
+            "dag",
+            "ast",
+            "pii",
+            "wal",
         }:
             return False
         return True
