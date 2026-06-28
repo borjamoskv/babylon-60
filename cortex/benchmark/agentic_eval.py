@@ -182,7 +182,8 @@ class AsyncAgenticEvaluator:
         logger.info(f"Scanning directory: {self.transcripts_dir} for transcript.jsonl files...")
         paths = list(self.transcripts_dir.rglob("transcript.jsonl"))
         
-        async with aiosqlite.connect(self.db_path) as conn:
+        from cortex.database.core import connect_async_ctx
+        async with connect_async_ctx(self.db_path) as conn:
             ledger = EnterpriseAuditLedger(conn)
             await ledger.ensure_table()
             
