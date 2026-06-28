@@ -1,5 +1,6 @@
 {
   "version": "1.0",
   "components": ["trace.bin", "graph.canonical", "proof.ir", "metadata.json", "hashes/", "signature/"],
-  "global_hash": "22aee700c61a82fa"
+  "global_hash": "977237af5c14f80e",
+  "theorem_of_babylon_compliance": true
 }

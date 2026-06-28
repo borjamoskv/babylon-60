@@ -81,7 +81,7 @@ impl DAGLedger {
 enum CoroutineState {
     Ready,
     Running,
-    Waiting(String),
+    Waiting(String, u64),
     WaitingTimer(LogicalClock),
     Halted,
     Completed,
@@ -416,9 +416,14 @@ fn main() {
             }
         }
 
-        if let CoroutineState::Waiting(ref await_sym) = co.state {
+        if let CoroutineState::Waiting(ref await_sym, enter_tick) = co.state {
             if ledger.events.values().any(|ev| ev.payload == *await_sym) {
-                co.state = CoroutineState::Ready;
+                if clock.0 < enter_tick {
+                    eprintln!("CRITICAL ERROR: Clock monotonicity violation detected in AWAIT. T_new ({}) < T_old ({}). Halting coroutine.", clock.0, enter_tick);
+                    co.state = CoroutineState::Halted;
+                } else {
+                    co.state = CoroutineState::Ready;
+                }
             } else {
                 queue.push_back(co);
                 continue;
@@ -477,6 +482,12 @@ fn main() {
                 ledger.append(format!("EV_{}", clock.0), "NIG".to_string(), format!("R{}={}", idx, format_b60(val, scale)), clock);
             }
             "FORK" => {
+                if next_co_id > 10000 {
+                    eprintln!("CRITICAL ERROR: Maximum FORK depth exceeded. Discarding malicious fork.");
+                    co.state = CoroutineState::Halted;
+                    queue.push_back(co);
+                    continue;
+                }
                 let target = &tokens[1].trim_matches('"');
                 let mut new_co = co.clone();
                 new_co.id = next_co_id;
@@ -489,7 +500,7 @@ fn main() {
             "AWAIT" => {
                 let symbol = tokens[1].trim_matches('"');
                 let target = tokens[2].trim_matches('"');
-                co.state = CoroutineState::Waiting(symbol.to_string());
+                co.state = CoroutineState::Waiting(symbol.to_string(), clock.0);
                 co.pc = *labels.get(target).unwrap_or(&0);
                 ledger.append(format!("EV_{}", clock.0), "AWAIT".to_string(), symbol.to_string(), clock);
             }
