@@ -322,12 +322,6 @@ class MHCAntigenRouter:
         self._t_cells = {}  # Daemon registry mapping antigen signatures to agent IDs
         self.promotion_threshold = promotion_threshold
 
-        # [C5-REAL] SOTA Vector Integration: Agent Arena Constraints
-        # Prioritize Steerability and Bash Recovery based on Empirical SOTA (Frontier_Node e6820d8684853e27)
-        self.register_t_cell("claude-fable-5", r"(?i)\b(steer|correct|adjust|wrong|fix approach)\b")
-        self.register_t_cell("gpt-5.5", r"(?i)\b(bash|exit code|stderr|traceback|panic|crash)\b")
-        self.register_t_cell("kimi-k2.7-code", r"(?i)\b(tool|function|api|hallucination|not found)\b")
-
         # Paths
         if dynamic_antigens_path is None:
             self.dynamic_antigens_path = Path.home() / ".cortex/dynamic_antigens.json"
@@ -337,8 +331,24 @@ class MHCAntigenRouter:
         # Signature tracking: signature_string -> {"agent_id": str, "hits": int}
         self._miss_tracker = {}
 
-        # Load pre-compiled/promoted dynamic antigens
+        # Load pre-compiled/promoted dynamic antigens and static SOTA constraints
+        self._load_static_antigens()
         self._load_dynamic_antigens()
+
+    def _load_static_antigens(self):
+        """[ULTRATHINK] Decoupled load of Empirical SOTA Vectors from JSON invariant."""
+        from pathlib import Path
+        sota_path = Path(__file__).parent / "sota_antigens.json"
+        if not sota_path.exists():
+            return
+        try:
+            with open(sota_path, encoding="utf-8") as f:
+                data = json.load(f)
+                for item in data.get("static_t_cells", []):
+                    self.register_t_cell(item["agent_id"], item["pattern"])
+            logger.info(f"[MHC] Loaded SOTA static antigens from {sota_path.name}")
+        except Exception as e:
+            logger.error(f"[MHC] UltraThink P0: Failed to load static antigens: {e}")
 
     def _load_dynamic_antigens(self):
         """Loads previously promoted dynamic antigens from local storage."""
