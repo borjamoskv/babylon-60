@@ -56,7 +56,7 @@ async def test_sanedrin_geometric_slashing(mock_router):
             assert res["proof_density"] == 0.95
             
             # Verify N2 was slashed
-            mock_slash.assert_called_once_with("N2-Logician", "Failed Proof-of-Logic audit in Sanhedrin")
+            mock_slash.assert_called_once_with("N2-Logician", "Failed Proof-of-Logic audit: Voted against BFT Quorum in Sanhedrin")
             
             # Verify git sentinel was called
             mock_dispatch.assert_called_once()
