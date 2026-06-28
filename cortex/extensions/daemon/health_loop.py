@@ -148,7 +148,7 @@ class HealthLoop:
                 check=False,
                 capture_output=True,
             )
-        except Exception:
+        except OSError:
             logger.debug("macOS notifications unavailable")
 
     def persist_snapshot(

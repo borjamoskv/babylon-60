@@ -11,7 +11,7 @@ import logging
 import re
 from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from cortex.extensions.llm.router import CortexPrompt, IntentProfile
 from cortex.extensions.ui_control.maestro import MaestroUI
 
 if TYPE_CHECKING:
@@ -39,7 +39,7 @@ class MacMaestroAgent:
         self.engine = engine
         self.maestro = MaestroUI(engine)
         if engine and hasattr(engine, "llm_router"):
-            self.router = getattr(engine, "llm_router")
+            self.router = engine.llm_router
         else:
             try:
                 from cortex.pipeline.provider_factory import build_executor_stack

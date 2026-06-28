@@ -38,13 +38,13 @@ from cortex.engine.speculative.genesis import (
     AgentSpecies,
     GenesisEngine,
 )
-from cortex.engine.swarm.autopoietic_agent import (
-    AutopoieticAgent,
-    EvolutionConfig,
-)
 from cortex.isa.builder import (
     dispatch_targets,
     node_count,
+)
+from cortex.swarm.autopoietic_agent import (
+    AutopoieticAgent,
+    EvolutionConfig,
 )
 
 # ─── Mock Executor ───────────────────────────────────────────────

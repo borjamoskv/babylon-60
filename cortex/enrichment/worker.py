@@ -68,7 +68,7 @@ class EnrichmentWorker:
                 else:
                     await asyncio.sleep(poll_interval)
                     poll_interval = min(5.0, poll_interval + 0.5)  # Backoff
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 logger.exception("Error in EnrichmentWorker loop")
                 await asyncio.sleep(5)
 

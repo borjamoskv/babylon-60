@@ -11,13 +11,11 @@ from cortex.cli.common import cli
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
 
 __all__ = [
-    "NEXUS_SKILL_PATH",
-    "bridge",
-    "ghosts",
-    "nexus_cmds",
+    "auto_sync_cmd",
+    "bind_cmd",
+    "init_cmd",
     "pulse",
     "run_nexus_skill",
-    "sync",
 ]
 
 console = Console()
@@ -94,8 +92,9 @@ def skill_sync():
 @click.option("--artifact", required=True, help="Artifact path relative to CORTEX root")
 def bind_cmd(target: str, artifact: str):
     """Force a physical symlink to a CORTEX artifact."""
-    from cortex.extensions.nexus.symlink_engine import SymlinkEngine
     import os
+
+    from cortex.extensions.nexus.symlink_engine import SymlinkEngine
     
     # Assumes CORTEX root is current directory or predefined
     cortex_root = os.path.abspath(os.getcwd())
@@ -112,9 +111,10 @@ def bind_cmd(target: str, artifact: str):
 @click.option("--config", default="cortex_nexus_map.yaml", help="Path to Nexus configuration file")
 def auto_sync_cmd(config: str):
     """Automatically propagate symlinks across all projects defined in configuration."""
-    from cortex.extensions.nexus.symlink_engine import SymlinkEngine
-    from cortex.extensions.nexus.config import load_nexus_config
     import os
+
+    from cortex.extensions.nexus.config import load_nexus_config
+    from cortex.extensions.nexus.symlink_engine import SymlinkEngine
     
     cortex_root = os.path.abspath(os.getcwd())
     engine = SymlinkEngine(canonical_root=cortex_root)
@@ -138,9 +138,10 @@ def auto_sync_cmd(config: str):
 @click.option("--config", default="cortex_nexus_map.yaml", help="Path to Nexus configuration file")
 def audit_cmd(config: str):
     """Audit the physical filesystem for INV_NEXUS_LINK violations."""
-    from cortex.extensions.nexus.symlink_engine import SymlinkEngine
-    from cortex.extensions.nexus.config import load_nexus_config
     import os
+
+    from cortex.extensions.nexus.config import load_nexus_config
+    from cortex.extensions.nexus.symlink_engine import SymlinkEngine
     
     cortex_root = os.path.abspath(os.getcwd())
     engine = SymlinkEngine(canonical_root=cortex_root)

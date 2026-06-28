@@ -5,7 +5,6 @@ CORTEX Nexus v8.1 - The Einstein-Rosen Bridge (Production Grade).
 Legacy shim for backward compatibility. Use `cortex.nexus` directly.
 """
 
-from cortex.engine.swarm.swarm_10k import SwarmCommander
 from cortex.extensions.nexus import (
     DomainOrigin,
     IntentType,
@@ -18,6 +17,7 @@ from cortex.extensions.nexus import (
     moltbook_shadowban_alert,
     sap_anomaly_detected,
 )
+from cortex.swarm.swarm_10k import SwarmCommander
 
 __all__ = [
     "DomainOrigin",

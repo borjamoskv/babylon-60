@@ -66,7 +66,7 @@ class TaskQueue:
         try:
             yield conn
             conn.commit()
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             conn.rollback()
             raise
         finally:

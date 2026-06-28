@@ -153,7 +153,7 @@ class SchemaTrait:
                     conn.execute(alter_query)  # nosec B608
             conn.commit()
             self._conn = conn
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             try:
                 conn.close()
             except Exception as exc:

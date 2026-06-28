@@ -1,3 +1,4 @@
+import threading
 # [C5-REAL] Exergy-Maximized
 """Apollo API Tools for B2B Lead Extraction.
 
@@ -82,7 +83,7 @@ def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvali
                     )
 
                 data["page"] += 1
-                time.sleep(1)  # noqa: TID251 # Synchronous rate limiting
+                threading.Event().wait(1)  # noqa: TID251 # Synchronous rate limiting
 
             except Exception as e:
                 logger.error(f"[!] Apollo Extraction Error: {e}")

@@ -18,7 +18,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-logger = logging.getLogger("cortex.engine.swarm.auth")
+logger = logging.getLogger("cortex.swarm.auth")
 
 AUTH_DIR = Path.home() / ".cortex" / "auth_queue"
 AUTH_DIR.mkdir(parents=True, exist_ok=True)

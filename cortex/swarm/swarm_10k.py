@@ -22,7 +22,7 @@ from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
 from cortex.engine.forensic.slashing import SlashingPenalty
 from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
-logger = logging.getLogger("cortex.engine.swarm.swarm_10k")
+logger = logging.getLogger("cortex.swarm.swarm_10k")
 
 
 @dataclass

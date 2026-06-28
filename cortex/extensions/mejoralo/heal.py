@@ -279,7 +279,7 @@ def _commit_healed_file(
                     ],
                 )
                 console.print(f"  [dim]⏱ CHRONOS-1: {hours}h saved recorded in ledger.[/]")
-            except Exception:
+            except (RuntimeError, ValueError, OSError):
                 logger.exception("Failed to record CHRONOS-1 yield for %s", top_file_rel)
         return True
     except (OSError, subprocess.SubprocessError):

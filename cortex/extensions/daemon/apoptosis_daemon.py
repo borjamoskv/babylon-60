@@ -87,7 +87,7 @@ class ApoptosisDaemon:
                     for exp in exports:
                         if exp in content:
                             return True
-            except Exception:
+            except OSError:
                 continue
                 
         return False

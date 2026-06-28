@@ -13,7 +13,7 @@ from cortex.engine.evo.repair_strategies import RepairResult
 from cortex.engine.forensic.circuit_breaker import CircuitState
 
 if TYPE_CHECKING:
-    from cortex.engine.swarm.autocurative_agent import AutoCurativeAgent
+    from cortex.swarm.autocurative_agent import AutoCurativeAgent
 
 logger = logging.getLogger("cortex.engine.autocurative")
 

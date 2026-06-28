@@ -26,18 +26,18 @@ from cortex.engine.core.memory_mixin import MemoryMixin
 from cortex.engine.core.store_mixin import StoreMixin
 from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
-from cortex.engine.swarm.agent_mixin import AgentMixin
+from cortex.swarm.agent_mixin import AgentMixin
 
 if TYPE_CHECKING:
     from cortex.consensus.manager import ConsensusManager
     from cortex.embeddings import LocalEmbedder
     from cortex.embeddings.manager import EmbeddingManager
     from cortex.engine.flow.lock import SovereignLock
-    from cortex.engine.swarm.auth import ByzantineAuthLayer
-    from cortex.engine.swarm.trust_registry import TrustRegistry
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
+    from cortex.swarm.auth import ByzantineAuthLayer
+    from cortex.swarm.trust_registry import TrustRegistry
 try:
     from cortex.extensions.health.health_mixin import (
         HealthMixin,  # pyright: ignore[reportAssignmentType]

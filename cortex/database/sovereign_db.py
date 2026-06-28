@@ -13,7 +13,7 @@ import logging
 import queue
 import sqlite3
 import threading
-from collections.abc import Sequence, Iterator
+from collections.abc import Iterator, Sequence
 from typing import Any
 
 logger = logging.getLogger("cortex.database.sovereign_db")

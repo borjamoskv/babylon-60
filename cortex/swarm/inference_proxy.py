@@ -24,7 +24,7 @@ except ImportError:
 from cortex.consensus.pki import trust_matrix
 from cortex.extensions.llm.client import SovereignLLMClient  # Assume this is the real client
 
-logger = logging.getLogger("cortex.engine.swarm.inference_proxy")
+logger = logging.getLogger("cortex.swarm.inference_proxy")
 
 app = FastAPI(title="CORTEX Zero-Trust Inference Proxy")
 

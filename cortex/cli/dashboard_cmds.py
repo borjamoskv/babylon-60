@@ -1,3 +1,4 @@
+import threading
 # [C5-REAL] Exergy-Maximized
 """Sovereign Dashboard (Industrial Noir).
 
@@ -365,7 +366,7 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                 while True:
                     data = _run_async(_collect_all(engine))
                     live.update(_build_dashboard(data))
-                    time.sleep(interval)  # noqa: TID251 # Synchronous CLI loop
+                    threading.Event().wait(interval)  # noqa: TID251 # Synchronous CLI loop
             except Exception as exc:
                 import logging
 

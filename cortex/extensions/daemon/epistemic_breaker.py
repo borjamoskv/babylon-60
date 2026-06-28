@@ -50,7 +50,7 @@ class EpistemicBreakerDaemon:
         """
         try:
             s = await self.engine.stats()
-        except Exception:
+        except (RuntimeError, ValueError, OSError):
             logger.debug("_measure_entropy: engine.stats() unavailable, returning 0")
             return 0.0
 

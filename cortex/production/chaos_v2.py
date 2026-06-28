@@ -1,3 +1,4 @@
+import threading
 # [C5-REAL] Exergy-Maximized
 import pathlib
 import random
@@ -14,7 +15,7 @@ class ChaosLayerV2:
         burst_size = int(random.expovariate(0.01))
         for _ in range(burst_size):
             self.kernel.process(generate_event())
-        time.sleep(random.expovariate(0.001))  # noqa: TID251 # Synchronous chaos delay
+        threading.Event().wait(random.expovariate(0.001))  # noqa: TID251 # Synchronous chaos delay
 
     def byzantine_memory_corruption(self, state):
         """2. Mutación controlada de estado persistente."""

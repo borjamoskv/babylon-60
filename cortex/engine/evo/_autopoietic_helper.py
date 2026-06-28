@@ -9,9 +9,9 @@ from cortex.engine.evo.genome import MutationType, StrategyGenome
 from cortex.engine.speculative.genesis import AgentBlueprint
 
 if TYPE_CHECKING:
-    from cortex.engine.swarm.autopoietic_agent import AutopoieticAgent
+    from cortex.swarm.autopoietic_agent import AutopoieticAgent
 
-logger = logging.getLogger("cortex.engine.swarm.autopoietic_agent")
+logger = logging.getLogger("cortex.swarm.autopoietic_agent")
 
 
 async def evaluate_genome(agent: AutopoieticAgent, genome: StrategyGenome) -> float:

@@ -10,7 +10,6 @@ via OS-level symlinks to satellite repositories.
 import logging
 import os
 import shutil
-from pathlib import Path
 
 logger = logging.getLogger("cortex.nexus.symlink_engine")
 

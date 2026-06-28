@@ -127,7 +127,7 @@ class DelegatesMixin:
     def get_trust_registry(self):
         """Return the in-memory trust registry used by trust endpoints."""
         if self._trust_registry is None:
-            from cortex.engine.swarm.trust_registry import TrustRegistry
+            from cortex.swarm.trust_registry import TrustRegistry
 
             self._trust_registry = TrustRegistry()
         return self._trust_registry

@@ -1,3 +1,4 @@
+import threading
 # [C5-REAL] Exergy-Maximized
 """
 Fiat Oracle Sidecar (Operation Citadel).
@@ -63,7 +64,7 @@ class FiatOracle:
                 sovereign_run(self._check_signals())
             except (ValueError, TypeError, OSError, KeyError, CortexError) as e:
                 logger.error("❌ [FIAT_ORACLE] (Thread) Error: %s", e)
-            time.sleep(self.interval)  # noqa: TID251 # Threaded loop
+            threading.Event().wait(self.interval)  # noqa: TID251 # Threaded loop
 
     def _verify_signature(self, data: dict, signature: str) -> bool:
         """

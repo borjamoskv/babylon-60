@@ -29,6 +29,7 @@ async def enforce_store_guards(
             AnomalyGuardWrapper,
             BridgeConflictGuard,
             ContradictionSignalGuard,
+            DuressGuardWrapper,
             HoneypotGuardWrapper,
             InjectionGuardWrapper,
             enforce_guard_pipeline,
@@ -49,6 +50,7 @@ async def enforce_store_guards(
 
     # Initialize guards (stateless runtime objects)
     guards = [
+        DuressGuardWrapper(),
         InjectionGuardWrapper(),
         HoneypotGuardWrapper(),
         ContradictionSignalGuard(),

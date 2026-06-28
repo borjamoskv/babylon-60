@@ -49,7 +49,7 @@ __all__ = [
     "EvolutionConfig",
 ]
 
-logger = logging.getLogger("cortex.engine.swarm.autopoietic_agent")
+logger = logging.getLogger("cortex.swarm.autopoietic_agent")
 
 
 class AutopoieticAgent:

@@ -5,7 +5,7 @@ import time
 import uuid
 from typing import Any
 
-logger = logging.getLogger("cortex.engine.swarm.auth_gateway")
+logger = logging.getLogger("cortex.swarm.auth_gateway")
 
 
 class QuorumGateway:
