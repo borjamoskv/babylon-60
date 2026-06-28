@@ -33,24 +33,27 @@ class OuroborosCollapseEngine:
     def _get_branch_exergy(self, branch_name: str) -> float:
         """
         Calculates Net Improvement (Exergy Delta) for a specific branch.
-        Uses Git Sentinel empirical data.
+        Uses Git Sentinel empirical data isolated to the divergent topology (main..branch).
         """
         try:
-            # Count total commits in branch
+            # Count total commits strictly in the divergent branch
             total_cmd = subprocess.run(
-                ["git", "rev-list", "--count", branch_name], 
+                ["git", "rev-list", "--count", f"main..{branch_name}"], 
                 cwd=self.repo_path, capture_output=True, text=True, check=True
             )
-            total_commits = int(total_cmd.stdout.strip() or 1)
+            total_commits = int(total_cmd.stdout.strip() or 0)
+            
+            if total_commits == 0:
+                return 0.0
 
-            # Count reverts/fixes
+            # Count reverts/fixes strictly in the divergent branch
             revert_cmd = subprocess.run(
-                ["git", "log", "--oneline", "--grep=revert", "--grep=fix", "-i", branch_name], 
+                ["git", "log", "--oneline", "--grep=revert", "--grep=fix", "-i", f"main..{branch_name}"], 
                 cwd=self.repo_path, capture_output=True, text=True, check=True
             )
             revert_commits = len([line for line in revert_cmd.stdout.splitlines() if line])
 
-            # Net Improvement
+            # Net Improvement (Signal to Noise ratio)
             return ((total_commits - revert_commits) / total_commits) * 100
         except Exception as e:
             logger.error(f"Failed to compute exergy for branch {branch_name}: {e}")
