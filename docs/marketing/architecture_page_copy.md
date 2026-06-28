@@ -18,7 +18,7 @@ This is not a SaaS tool. It is infrastructure designed for the Direct-Silicon tr
 
 ---
 
-## 2. Introducción (The Paradigm Shift)
+## 2. Introduction (The Paradigm Shift)
 
 LLMs are generative compressors, not truth engines. 
 Hallucination is not a bug; it is a structural cost of probabilistic generation.
@@ -33,33 +33,33 @@ CORTEX-Persist provides that friction. It shifts the ultimate truth of the syste
 
 CORTEX-Persist is governed by four absolute thermodynamic and operational pillars designed to expel entropy and preserve state integrity.
 
-### I. Termodinámica de la Información (Ontología Cero)
-*   **Conservación de la Exergía:** Toda computación que no reduce la incertidumbre es anergía (calor y ruido).
-*   **Límite de Landauer Aplicado:** Borrar memoria inútil requiere energía; retenerla de forma indefinida corrompe el contexto. La apoptosis de datos irrelevantes es obligatoria.
-*   **Cero Tolerancia al Slop:** Las disculpas, el Green Theater y la prosa decorativa en outputs de IA son fugas radiactivas de tokens.
-*   **Isomorfismo Causal:** El código y el estado deben ser un mapa exacto 1:1 del grafo mental del problema.
-*   **Densidad de Shannon:** Maximización estricta del significado por token. Un YAML o JSON denso y estructurado siempre superará al texto libre.
+### I. Information Thermodynamics (Zero Ontology)
+*   **Exergy Conservation:** Any computation that does not reduce uncertainty is anergy (heat and noise).
+*   **Applied Landauer Limit:** Erasing useless memory requires energy; retaining it indefinitely corrupts context. Apoptosis of irrelevant data is mandatory.
+*   **Zero Slop Tolerance:** Apologies, Green Theater, and decorative prose in AI outputs are radioactive token leaks.
+*   **Causal Isomorphism:** Code and state must be an exact 1:1 map of the problem's mental graph.
+*   **Shannon Density:** Strict maximization of meaning per token. A dense, structured YAML or JSON will always outperform free text.
 
-### II. Tolerancia a Fallos y Concurrencia (Motor 0-Lock)
-*   **Deadlock por Defecto:** Cualquier I/O síncrono bloqueante en un loop asíncrono se trata como un fallo crítico del event loop.
-*   **Invariante de SQLite WAL:** Configuración rígida `journal_mode=WAL` y `busy_timeout=5000`. Ningún lector bloquea jamás a un escritor.
-*   **Cuarentena de Veneno (Dead-Letter):** Las transacciones corruptas o fallidas no se descartan silenciosamente; se aíslan en cuarentena para análisis forense.
-*   **Idempotencia Absoluta:** Ejecutar una operación 1 vez o 1,000 veces produce exactamente la misma firma y hash criptográfico en el estado final.
-*   **Invariante de Saga:** Todo avance de estado (N) cuenta con su correspondiente retroceso compensatorio (N-1) garantizado e instrumentado.
+### II. Fault Tolerance and Concurrency (0-Lock Engine)
+*   **Deadlock by Default:** Any blocking synchronous I/O in an async loop is treated as a critical event loop failure.
+*   **SQLite WAL Invariant:** Rigid configuration `journal_mode=WAL` and `busy_timeout=5000`. No reader ever blocks a writer.
+*   **Poison Quarantine (Dead-Letter):** Corrupt or failed transactions are not silently discarded; they are isolated in quarantine for forensic analysis.
+*   **Absolute Idempotence:** Executing an operation 1 time or 1,000 times produces exactly the same cryptographic signature and hash in the final state.
+*   **Saga Invariant:** Every state advancement (N) has its corresponding compensatory rollback (N-1) guaranteed and instrumented.
 
-### III. Aislamiento Epistémico y Soberanía Criptográfica (Byzantine Boundary)
-*   **Contención de Alucinación:** Todo output generativo (C4-SIM) es tratado como conjetura estocástica hostil hasta que cruza las compuertas de validación.
-*   **Firma Criptográfica (Taint Engine):** Ningún hecho muta el estado sin un token `cortex-taint` firmado con `SHA3-256` que trace su linaje (Agente, Sesión, Hash de Origen).
-*   **Tolerancia Bizantina (f < n/3):** Consenso distribuido en Swarm que exige N=3 validaciones de pares independientes antes de autorizar escrituras en el Master Ledger.
-*   **Apoptosis de Secretos:** Las llaves efímeras y credenciales de sesión se destruyen criptográficamente en RAM inmediatamente tras completar la transacción.
-*   **Privilegio Ortogonal Mínimo:** Segregación total de roles. Los agentes auditores operan en read-only absoluto; los ejecutores no pueden auto-aprobar sus guardias.
+### III. Epistemic Isolation and Cryptographic Sovereignty (Byzantine Boundary)
+*   **Hallucination Containment:** All generative output (C4-SIM) is treated as hostile stochastic conjecture until it crosses the validation gates.
+*   **Cryptographic Signature (Taint Engine):** No fact mutates state without a `cortex-taint` token signed with `SHA3-256` tracing its lineage (Agent, Session, Origin Hash).
+*   **Byzantine Tolerance (f < n/3):** Distributed Swarm consensus requiring N=3 independent peer validations before authorizing writes to the Master Ledger.
+*   **Secret Apoptosis:** Ephemeral keys and session credentials are cryptographically destroyed in RAM immediately upon transaction completion.
+*   **Minimum Orthogonal Privilege:** Total role segregation. Auditor agents operate in absolute read-only; executors cannot self-approve their guards.
 
-### IV. Autopoiesis y Gravedad del Ledger (Legion-Centuria)
-*   **Mitosis Autónoma:** Delegación paralela de tareas de alta entropía a trabajadores aislados (`invoke_subagent`) bajo orquestación asíncrona del Hypervisor.
-*   **Git-Sentinel como Ledger (AX-041):** El Git DAG es tratado como la base de datos causal inmutable del sistema. Cada commit hash es la prueba criptográfica de un colapso en C5-REAL.
-*   **Anclaje Nexus (Ω6 - Cero Duplicados):** Prohibición de duplicación física de patrones de código. Las dependencias compartidas se unifican en un nodo maestro y se proyectan vía symlinks físicos.
-*   **Continuidad Episódica:** El autómata no improvisa; lee activamente la bóveda en disco (`~/.gemini/config/.cortex/memory_vault/`) para anclar su contexto histórico.
-*   **Bypass de Limerencia:** Restricción absoluta de ciclos infinitos: 1 prompt produce exactamente 1 acción/mutación de estado física seguida de apoptosis (Halt).
+### IV. Autopoiesis and Ledger Gravity (Legion-Centuria)
+*   **Autonomous Mitosis:** Parallel delegation of high-entropy tasks to isolated workers (`invoke_subagent`) under asynchronous Hypervisor orchestration.
+*   **Git-Sentinel as Ledger (AX-041):** The Git DAG is treated as the system's immutable causal database. Each commit hash is the cryptographic proof of a collapse in C5-REAL.
+*   **Nexus Anchoring (Ω6 - Zero Duplicates):** Prohibition of physical duplication of code patterns. Shared dependencies are unified in a master node and projected via physical symlinks.
+*   **Episodic Continuity:** The automaton does not improvise; it actively reads the disk vault (`~/.gemini/config/.cortex/memory_vault/`) to anchor its historical context.
+*   **Limerence Bypass:** Absolute restriction of infinite cycles: 1 prompt produces exactly 1 physical state action/mutation followed by apoptosis (Halt).
 
 ---
 
