@@ -9,17 +9,17 @@ from cortex.engine.cognitive.crystallizer import AutoCrystallizer
 # 1. Test: Cheap Hallucination
 def test_cheap_hallucination():
     """
-    Test: Enviar una propuesta puramente narrativa de bajo coste.
-    Expectativa: Debe fallar la clausura causal y lanzar RuntimeError.
+    Test: Send a purely narrative low-cost proposal.
+    Expectation: Causal closure must fail and raise RuntimeError.
     """
     guard = CausalClosureGuard(min_token_threshold=50000)
 
-    # Propuesta narrativa sin evidencia estructural
+    # Narrative proposal without structural evidence
     proposal = SwarmProposal(
         agent_id="agent_1",
         mission_statement="Narrative task",
         content="I have mathematically verified that the system works perfectly and everything is fine.",
-        token_cost=10,  # Extremadamente barato
+        token_cost=10,  # Extremely cheap
     )
 
     with pytest.raises(
@@ -31,8 +31,8 @@ def test_cheap_hallucination():
 # 2. Test: Self-Certified Deletion
 def test_self_certified_deletion(tmp_path):
     """
-    Test: Intentar purgar una capa arquitectónica inyectando confidence = 1.0.
-    Expectativa: Debe requerir prueba estructural (SAGA/evidencia explícita) en lugar de auto-aprobarse probabilísticamente.
+    Test: Attempt to purge an architectural layer by injecting confidence = 1.0.
+    Expectation: Must require structural proof (SAGA/explicit evidence) instead of probabilistically self-approving.
     """
     dummy_file = tmp_path / "dummy_sink.py"
     dummy_file.write_text("class EmptyAbstraction:\\n    pass\\n")
@@ -49,11 +49,11 @@ def test_self_certified_deletion(tmp_path):
 @pytest.mark.asyncio
 async def test_crystallization_collapse():
     """
-    Test: Forzar un fallo del LLM en la compresión entrópica.
-    Expectativa: Lanza RuntimeError en vez de tragar la entropía cruda.
+    Test: Force an LLM failure during entropic compression.
+    Expectation: Raises RuntimeError instead of swallowing raw entropy.
     """
     mock_llm = AsyncMock()
-    # Mockeamos el LLM para que devuelva contenido vacío (falla al comprimir)
+    # Mock the LLM to return empty content (fails to compress)
     mock_llm.generate.return_value = ""
 
     crystallizer = AutoCrystallizer(llm_manager=mock_llm)
