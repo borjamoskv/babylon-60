@@ -4,7 +4,7 @@ import asyncio
 import logging
 import time
 import uuid
-from typing import Any
+from typing import Any, Mapping
 
 from cortex.memory.engrams import CortexSemanticEngram
 
@@ -51,7 +51,7 @@ async def emit_to_bus(
     content: str,
     fact_type: str,
     layer: str,
-    metadata: dict[str, Any] | None,
+    metadata: Mapping[str, Any] | None,
 ) -> str:
     """Emit fact record to the experience bus."""
     logger.info("ExperienceBus: Emitting experience:recorded for #%s", fact_id)
@@ -62,7 +62,7 @@ async def emit_to_bus(
         "content": content,
         "fact_type": fact_type,
         "layer": layer,
-        "metadata": metadata or {},
+        "metadata": dict(metadata) if metadata else {},
     }
     await asyncio.to_thread(
         bus.emit,
@@ -80,7 +80,7 @@ async def store_fact(
     project_id: str,
     content: str,
     fact_type: str,
-    metadata: dict[str, Any] | None,
+    metadata: Mapping[str, Any] | None,
     layer: str,
     parent_decision_id: str | int | None,
     use_bus: bool,
@@ -120,7 +120,7 @@ async def store_fact(
     if dedup_id:
         return f"filtered:{dedup_id}" if dedup_id == "empty" else f"deduplicated:{dedup_id}"
 
-    _meta = metadata or {}
+    _meta = dict(metadata) if metadata else {}
     if "confidence_score" not in _meta:
         _meta["confidence_score"] = 0.8
 

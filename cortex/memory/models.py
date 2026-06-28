@@ -14,7 +14,8 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Literal
+from types import MappingProxyType
+from typing import Any, Literal, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -102,7 +103,7 @@ class MemoryEntry:
     id: str = field(default_factory=next_id)
     project: str | None = None
     source: str = "episodic"  # episodic | fact | reflection | ghost
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: Mapping[str, Any] = field(default_factory=lambda: MappingProxyType({}))
     created_at: str = field(default_factory=now_iso)
 
     def to_payload(self) -> dict[str, Any]:
@@ -173,10 +174,17 @@ class MemoryEvent(BaseModel):
     tenant_id: str = Field(default="default", description="Tenant isolation identifier.")
     prev_hash: str = Field(default="", description="Hash of the previous event (hash-chain).")
     signature: str = Field(default="", description="Cryptographic signature of this event.")
-    metadata: dict[str, Any] = Field(
-        default_factory=dict,
+    metadata: Mapping[str, Any] = Field(
+        default_factory=lambda: MappingProxyType({}),
         description="Optional structured metadata (tool calls, emotions, tags).",
     )
+
+    @field_validator("metadata", mode="before")
+    @classmethod
+    def _freeze_metadata(cls, v: Any) -> Any:
+        if isinstance(v, dict):
+            return MappingProxyType(v)
+        return v
 
 
 class EpisodicSnapshot(BaseModel):
@@ -249,10 +257,18 @@ class CortexFactModel(BaseModel):
 
     # Entropy and Health (The OUROBOROS engine will update this)
     success_rate: float = Field(default=1.0, description="Degrades if this fact causes errors.")
-    metadata: dict[str, Any] = Field(
-        default_factory=dict,
+    metadata: Mapping[str, Any] = Field(
+        default_factory=lambda: MappingProxyType({}),
         description="Optional structured metadata (session_id, tool calls, etc).",
     )
+    
+    @field_validator("metadata", mode="before")
+    @classmethod
+    def _freeze_metadata(cls, v: Any) -> Any:
+        if isinstance(v, dict):
+            return MappingProxyType(v)
+        return v
+        
     # Double-Plane Facets (Ω₁₃)
     category: str = Field(default="general", description="Thematic categorization of the fact.")
     quadrant: str = Field(
