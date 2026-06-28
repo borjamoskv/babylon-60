@@ -113,7 +113,12 @@ class SwarmSupervisor:
             try:
                 # EPISTEMIC GATEKEEPER (Sanedrin-Autodidact Fusion)
                 try:
-                    payload_dict = json.loads(task["payload"]) if isinstance(task["payload"], str) else task["payload"]
+                    payload_raw = task.get("statement", task.get("payload"))
+                    if not payload_raw:
+                        async with self._db.execute("SELECT statement FROM system_hypotheses WHERE id = ?", (task["id"],)) as cur:
+                            row = await cur.fetchone()
+                            payload_raw = row[0] if row else "{}"
+                    payload_dict = json.loads(payload_raw) if isinstance(payload_raw, str) else payload_raw
                     Hypothesis.model_validate(payload_dict)
                 except (ValidationError, json.JSONDecodeError, TypeError) as epi_err:
                     logger.warning(f"[EpistemicBreaker] Task {task['id']} rejected (Narrative/Stochastic Slop): {epi_err}")
