@@ -147,4 +147,5 @@ if __name__ == "__main__":
         engine = OuroborosCollapseEngine(Path("."))
         asyncio.run(engine.run_convergence(branches))
     else:
-        print("Usage: python thermodynamic_apoptosis.py <branch1> <branch2> ...")
+        import logging
+        logging.getLogger(__name__).warning("Usage: python thermodynamic_apoptosis.py <branch1> <branch2> ...")
