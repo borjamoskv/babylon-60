@@ -47,7 +47,7 @@ Following the initial KIMI-Swarm audit, a subsequent deep-dive analysis by GPT-4
 ## 🛠️ Hardening Roadmap (GPT-4o Wave)
 
 ### Critical & High Actions
-- [ ] Remove `sys.path.insert(0, ...)` from `bridge.py`.
-- [ ] Remove `PYTHONPATH` from safe whitelist in `autopoiesis.py`.
-- [ ] Set minimum temperature floor in `endocrine.py`.
-- [ ] Increase UUID entropy in `autopoiesis.py`.
+- [x] Remove `sys.path.insert(0, ...)` from `bridge.py`.
+- [x] Remove `PYTHONPATH` from safe whitelist in `autopoiesis.py`.
+- [x] Set minimum temperature floor in `endocrine.py`.
+- [x] Increase UUID entropy in `autopoiesis.py`.
