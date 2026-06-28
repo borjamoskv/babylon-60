@@ -28,10 +28,10 @@ logger = logging.getLogger("cortex.storage.classifier")
 # ── Correlation Patterns ──────────────────────────────────────────────
 CORRELATION_PATTERNS: Final[dict[str, str]] = {
     "eth_address": r"0x[a-fA-F0-9]{40}",
-    "salt": r"(?i)(salt|nonce)\s*[=:]\s*['\"]?[a-fA-F0-9]{32,64}['\"]?",
-    "pubkey": r"(?i)(public[_-]?key|pubkey)\s*[=:]\s*['\"]?[a-fA-F0-9]{64,130}['\"]?",
-    "session_id": r"(?i)(session[_-]?id|session[_-]?nonce)\s*[=:]\s*['\"]?[a-fA-F0-9]{32,64}['\"]?",
-    "merkle_root": r"(?i)(merkle[_-]?root|root[_-]?hash)\s*[=:]\s*['\"]?[a-fA-F0-9]{64}['\"]?",
+    "salt": r"(?i)(salt|nonce)\s*[=:]\s*['\"]?(0x|0X)?[a-fA-F0-9]{32,64}['\"]?",
+    "pubkey": r"(?i)(public[_-]?key|pubkey)\s*[=:]\s*['\"]?(0x|0X)?[a-fA-F0-9]{64,130}['\"]?",
+    "session_id": r"(?i)(session[_-]?id|session[_-]?nonce)\s*[=:]\s*['\"]?(0x|0X)?[a-fA-F0-9]{32,64}['\"]?",
+    "merkle_root": r"(?i)(merkle[_-]?root|root[_-]?hash)\s*[=:]\s*['\"]?(0x|0X)?[a-fA-F0-9]{64}['\"]?",
     "api_prefix": r"ctx_[a-zA-Z0-9]{4,10}",
 }
 

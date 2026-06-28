@@ -116,42 +116,45 @@ class PrivacyMixin(EngineMixinBase):
                     }
 
                     # Retroactively update metadata of matched stored facts
-                    for stored_fact, category in flagged_stored_facts:
-                        stored_id = stored_fact["id"]
-                        
-                        async with conn.execute(
-                            "SELECT metadata FROM facts WHERE id = ? AND tenant_id = ?",
-                            (stored_id, tenant_id),
-                        ) as c:
-                            meta_row = await c.fetchone()
-                        
-                        raw_meta = meta_row[0] if meta_row else None
-                        stored_meta: dict[str, Any] = {}
-                        is_encrypted = False
-                        
-                        if raw_meta:
-                            if isinstance(raw_meta, str) and raw_meta.startswith(enc.PREFIX):
-                                is_encrypted = True
-                                stored_meta = enc.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
-                            else:
-                                try:
-                                    stored_meta = json.loads(raw_meta) or {}
-                                except Exception:
-                                    stored_meta = {}
+                    from cortex.database.core import causal_write
 
-                        # Update stored metadata
-                        stored_meta["privacy_flagged"] = True
-                        stored_meta["composition_leakage"] = True
-                        stored_meta["composition_category"] = category
-                        
-                        updated_meta_json = json.dumps(stored_meta)
-                        if is_encrypted:
-                            updated_meta_json = enc.encrypt_json(stored_meta, tenant_id=tenant_id)
+                    with causal_write(conn):
+                        for stored_fact, category in flagged_stored_facts:
+                            stored_id = stored_fact["id"]
+                            
+                            async with conn.execute(
+                                "SELECT metadata FROM facts WHERE id = ? AND tenant_id = ?",
+                                (stored_id, tenant_id),
+                            ) as c:
+                                meta_row = await c.fetchone()
+                            
+                            raw_meta = meta_row[0] if meta_row else None
+                            stored_meta: dict[str, Any] = {}
+                            is_encrypted = False
+                            
+                            if raw_meta:
+                                if isinstance(raw_meta, str) and raw_meta.startswith(enc.PREFIX):
+                                    is_encrypted = True
+                                    stored_meta = enc.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
+                                else:
+                                    try:
+                                        stored_meta = json.loads(raw_meta) or {}
+                                    except Exception:
+                                        stored_meta = {}
 
-                        await conn.execute(
-                            "UPDATE facts SET metadata = ? WHERE id = ? AND tenant_id = ?",
-                            (updated_meta_json, stored_id, tenant_id),
-                        )
+                            # Update stored metadata
+                            stored_meta["privacy_flagged"] = True
+                            stored_meta["composition_leakage"] = True
+                            stored_meta["composition_category"] = category
+                            
+                            updated_meta_json = json.dumps(stored_meta)
+                            if is_encrypted:
+                                updated_meta_json = enc.encrypt_json(stored_meta, tenant_id=tenant_id)
+
+                            await conn.execute(
+                                "UPDATE facts SET metadata = ? WHERE id = ? AND tenant_id = ?",
+                                (updated_meta_json, stored_id, tenant_id),
+                            )
 
         except (ValueError, TypeError, KeyError, OSError, RuntimeError) as exc:
             logger.warning("Suppressed exception: %s", exc)

@@ -50,7 +50,10 @@ async def test_taint_is_verified_after_bridge_mutation(monkeypatch: pytest.Monke
 
     monkeypatch.setattr(sv, "_enforce_cortex_taint", capture_taint)
 
-    mixin = SimpleNamespace(_apply_privacy_shield=lambda content, project, meta: meta or {})
+    async def mock_privacy_shield(conn, content, project, tenant_id, meta):
+        return meta or {}
+
+    mixin = SimpleNamespace(_apply_privacy_shield=mock_privacy_shield)
     result = await sv.run_store_validation_logic(
         mixin_instance=mixin,
         conn=object(),
