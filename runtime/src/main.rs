@@ -226,6 +226,18 @@ impl Machine {
 
     fn run(&mut self) {
         while !self.q.is_empty() {
+            let mut only_waiting = true;
+            for qco in &self.q {
+                if !matches!(qco.state, CoroutineState::Waiting(_) | CoroutineState::Halted | CoroutineState::Completed) {
+                    only_waiting = false;
+                    break;
+                }
+            }
+            if only_waiting {
+                eprintln!("CRITICAL ERROR: Global deadlock detected. All coroutines are awaiting unresolved signals.");
+                std::process::exit(1);
+            }
+
             let mut coro = self.q.pop_front().unwrap();
 
             match coro.state {
@@ -345,6 +357,10 @@ impl Machine {
                     coro.r[idx1].val = F60::new(num / val2.num, scale);
                 }
                 "FORK" => {
+                    if self.next_cid > 10000 {
+                        eprintln!("CRITICAL ERROR: Maximum FORK depth exceeded.");
+                        std::process::exit(1);
+                    }
                     let label = &tokens[1];
                     if let Some(&target) = self.labels.get(label) {
                         let new_coro = Coroutine {

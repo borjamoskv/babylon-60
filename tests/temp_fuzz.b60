@@ -1,0 +1,15 @@
+
+ALLOC TIME R0
+ALLOC I64 R1
+NIG R0 [ YYYYY ; <<<Y ] UNIT.TICK
+NIG R1 [ YYYYY ; <<<Y ]
+# Try to force mathematical fracture across typed domains
+DAH R0 R1
+BA.EXACT R0 R1
+FORK "SINGULARITY"
+EXECUTE "CHECK"
+AWAIT "CHECK" "END"
+MUB "SINGULARITY"
+FORK "SINGULARITY"
+MUB "END"
+HALT

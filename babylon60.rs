@@ -199,6 +199,7 @@ impl B60Compiler {
                     if dest.starts_with('R') && src.starts_with('R') {
                         let dest_typ = allocated_regs.get(dest);
                         let src_typ = allocated_regs.get(src);
+                        println!("DEBUG DAH/LAL/BA.EXACT: dest {} ({:?}), src {} ({:?})", dest, dest_typ, src, src_typ);
                         if dest_typ != src_typ {
                             return Err(format!("CRITICAL COMPILE ERROR: Topological domain mismatch. Cannot execute '{}' between '{}' ({:?}) and '{}' ({:?})", cmd, dest, dest_typ, src, src_typ));
                         }
@@ -406,6 +407,23 @@ fn main() {
             continue;
         }
 
+        if queue.is_empty() && matches!(co.state, CoroutineState::Waiting(_, _)) {
+            eprintln!("CRITICAL ERROR: Global deadlock detected. Coroutine awaiting unresolved signal.");
+            std::process::exit(1);
+        }
+        
+        let mut all_waiting = true;
+        for qco in &queue {
+            if !matches!(qco.state, CoroutineState::Waiting(_, _)) {
+                all_waiting = false;
+                break;
+            }
+        }
+        if all_waiting && matches!(co.state, CoroutineState::Waiting(_, _)) {
+            eprintln!("CRITICAL ERROR: Global deadlock detected. All coroutines are awaiting unresolved signals.");
+            std::process::exit(1);
+        }
+
         if let CoroutineState::WaitingTimer(target_tick) = co.state {
             if clock >= target_tick {
                 co.state = CoroutineState::Ready;
@@ -420,7 +438,7 @@ fn main() {
             if ledger.events.values().any(|ev| ev.payload == *await_sym) {
                 if clock.0 < enter_tick {
                     eprintln!("CRITICAL ERROR: Clock monotonicity violation detected in AWAIT. T_new ({}) < T_old ({}). Halting coroutine.", clock.0, enter_tick);
-                    co.state = CoroutineState::Halted;
+                    std::process::exit(1);
                 } else {
                     co.state = CoroutineState::Ready;
                 }
@@ -484,9 +502,7 @@ fn main() {
             "FORK" => {
                 if next_co_id > 10000 {
                     eprintln!("CRITICAL ERROR: Maximum FORK depth exceeded. Discarding malicious fork.");
-                    co.state = CoroutineState::Halted;
-                    queue.push_back(co);
-                    continue;
+                    std::process::exit(1);
                 }
                 let target = &tokens[1].trim_matches('"');
                 let mut new_co = co.clone();
