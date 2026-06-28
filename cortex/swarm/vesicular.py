@@ -6,10 +6,10 @@ must execute in an isolated vesicular membrane (scratch space) with
 zero access to the host's physical environment variables or persistent storage.
 """
 
+import asyncio
 import logging
 import os
 import shutil
-import subprocess
 import tempfile
 import uuid
 
@@ -42,11 +42,11 @@ class VesicularRuntime:
         except OSError as e:
             logger.error(f"[Vesicular] Failed to annihilate membrane {path}: {e}")
 
-    def execute(
+    async def execute(
         self, payload: str, bootstrap_token: str = "", proxy_port: int = 13337
     ) -> tuple[bool, str, str]:
         """
-        Execute an untrusted Python payload inside the vesicular membrane.
+        Execute an untrusted Python payload inside the vesicular membrane asynchronously.
 
         Args:
             payload: Python code string.
@@ -80,26 +80,28 @@ class VesicularRuntime:
 
         try:
             # OP_SWARM_ISOLATE: Execute as subprocess in the membrane CWD
-            result = subprocess.run(
-                [sys.executable, script_path],
+            process = await asyncio.create_subprocess_exec(
+                sys.executable, script_path,
                 cwd=membrane_path,
                 env=safe_env,
-                capture_output=True,
-                text=True,
-                timeout=self.timeout_seconds,
-                check=False,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
-            success = result.returncode == 0
-            stdout = result.stdout
-            stderr = result.stderr
-
-        except subprocess.TimeoutExpired as e:
-            logger.critical(
-                f"[Vesicular] Payload breached execution timeout ({self.timeout_seconds}s). Terminated."
-            )
-            stdout = e.stdout.decode("utf-8") if e.stdout else ""
-            stderr = e.stderr.decode("utf-8") if e.stderr else "TimeoutExpired"
-            success = False
+            
+            try:
+                out, err = await asyncio.wait_for(process.communicate(), timeout=self.timeout_seconds)
+                success = process.returncode == 0
+                stdout = out.decode("utf-8") if out else ""
+                stderr = err.decode("utf-8") if err else ""
+            except asyncio.TimeoutError:
+                process.kill()
+                out, err = await process.communicate()
+                logger.critical(
+                    f"[Vesicular] Payload breached execution timeout ({self.timeout_seconds}s). Terminated."
+                )
+                stdout = out.decode("utf-8") if out else ""
+                stderr = (err.decode("utf-8") if err else "") + "\nTimeoutExpired"
+                success = False
 
         except Exception as e:
             logger.critical(f"[Vesicular] Membrane rupture during execution: {e}")
