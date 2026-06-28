@@ -49,9 +49,11 @@ class MCTSGitEnvironment:
         await proc.communicate()
         if proc.returncode != 0:
             # Fallback for existing branch
-            await asyncio.create_subprocess_shell(
-                f"git checkout {shlex.quote(new_name)}"
-            ).communicate()  # pyright: ignore[reportAttributeAccessIssue]
+            proc_checkout = await asyncio.create_subprocess_shell(
+                f"git checkout {shlex.quote(new_name)}",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            )
+            await proc_checkout.communicate()
         return new_name
 
     async def mutate(self, prompt_instruction: str) -> bool:
@@ -136,6 +138,11 @@ class MCTSGitEnvironment:
     async def secure_checkout(self, branch: str) -> None:
         """Returns to a safe branch restoring any changes."""
         logger.debug("Restoring entropy: checkout to %s", branch)
-        await asyncio.create_subprocess_shell("git reset --hard HEAD").communicate()  # pyright: ignore[reportAttributeAccessIssue]
-        await asyncio.create_subprocess_shell("git clean -fd").communicate()  # pyright: ignore[reportAttributeAccessIssue]
-        await asyncio.create_subprocess_shell(f"git checkout {shlex.quote(branch)}").communicate()  # pyright: ignore[reportAttributeAccessIssue]
+        p1 = await asyncio.create_subprocess_shell("git reset --hard HEAD", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        await p1.communicate()
+        
+        p2 = await asyncio.create_subprocess_shell("git clean -fd", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        await p2.communicate()
+        
+        p3 = await asyncio.create_subprocess_shell(f"git checkout {shlex.quote(branch)}", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        await p3.communicate()
