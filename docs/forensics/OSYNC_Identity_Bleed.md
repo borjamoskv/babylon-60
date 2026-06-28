@@ -9,7 +9,7 @@
 ## 1. Justificación Densa (Epistémica)
 
 ```yaml
-Claim: "La identidad artística 'Borja Moskv' está irrevocablemente vinculada a 'Borja Fernández Angulo' a través del sustrato de metadatos musicales globales."
+Claim: "La identidad artística 'Borja Moskv' está irrevocablemente vinculada a '[REDACTED_LEGAL_PII]' a través del sustrato de metadatos musicales globales."
 Proof:
   Base: "Metadatos indexados de registro de derechos de autor (SGAE/APX) en Apple Music, YouTube, Joox y Shazam."
   Range: "Rango de confianza: Máximo (100% de coincidencia unívoca)."
@@ -30,7 +30,7 @@ graph TD
     classDef node fill:#1A1A1A,stroke:#555,stroke-width:1px,color:#ccc;
 
     A[Identidad Pública:<br/>Borja Moskv]:::clean
-    B[Identidad Legal:<br/>Borja Fernández Angulo]:::clean
+    B[Identidad Legal:<br/>[REDACTED_LEGAL_PII]]:::clean
 
     subgraph "Capa Web3 / Descentralizada"
         W1[Paragraph.xyz]:::clean
