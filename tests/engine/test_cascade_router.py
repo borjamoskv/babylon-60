@@ -71,7 +71,7 @@ class TestCascadeRouter:
     @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
     @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "0"})
     async def test_execute_gemini_with_files_npx(self, mock_create):
-        """Should call npx gemini-cli with file flags when local_first is disabled."""
+        """Should call ollama regardless of local_first due to OMEGA override."""
         router = CascadeRouter()
 
         mock_process = MagicMock()
@@ -84,10 +84,7 @@ class TestCascadeRouter:
 
         mock_create.assert_called_once()
         cmd = mock_create.call_args[0]
-        assert cmd[:3] == ("npx", "-y", "@google/gemini-cli")
-        assert "--file" in cmd
-        assert "app.py" in cmd
-        assert "utils.py" in cmd
+        assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
         assert "Check this code" in cmd
 
     @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
@@ -112,7 +109,7 @@ class TestCascadeRouter:
     @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
     @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "0"})
     async def test_execute_claude_npx(self, mock_create):
-        """Should call npx claude-code when local_first is disabled."""
+        """Should call ollama regardless of local_first due to OMEGA override."""
         router = CascadeRouter()
 
         mock_process = MagicMock()
@@ -125,7 +122,7 @@ class TestCascadeRouter:
 
         mock_create.assert_called_once()
         cmd = mock_create.call_args[0]
-        assert cmd[:3] == ("npx", "-y", "@anthropic-ai/claude-code")
+        assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
         assert "Fix this typo" in cmd
 
     @patch("cortex.engine.flow.cascade_router.asyncio.sleep")
