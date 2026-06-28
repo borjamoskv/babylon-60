@@ -65,7 +65,7 @@ primitives:
 - id: APEX-008
   name: OP_SAGA_REVERT
   execute: Desenrollado atómico SAGA-N -> SAGA-1. Requiere quorum BFT N/3 previo a
-    revertir estado físico.
+    revertir estado físico. Requiere quorum BFT N/3 previo a revertir estado físico.
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -553,6 +553,7 @@ primitives:
 - id: APEX-062
   name: OP_PUNISH_NODE
   execute: Degradación de peso en red (Sensor Drift). Anclaje obligatorio a OP_BFT_VOTE.
+    Anclaje obligatorio a OP_BFT_VOTE.
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -586,15 +587,6 @@ primitives:
   signature: ssh_tunnel()
   complexity: O(1)
   mutation: OS Process. Port-forward encriptado a través de NAT.
-- id: APEX-066
-  name: OP_REROUTE_HUMAN
-  execute: Escalada manual al Operador.
-  trigger: Thermodynamic state mutation requested.
-  verify: Hash matches deterministic output.
-  fail: Abort SAGA. Fallback to Ouroboros.
-  signature: ip_hash()
-  complexity: O(1)
-  mutation: CPU. Routing estático para Node-Affinity de Caché.
 - id: APEX-067
   name: OP_PARSE_INTENT
   execute: Extracción de verbo C5 desde string.
@@ -614,33 +606,14 @@ primitives:
   complexity: O(1)
   mutation: CPU/Red. Validación criptográfica de CA (Root of Trust).
 - id: APEX-069
-  name: OP_VERIFY_SIG
-  execute: Ed25519 check.
+  name: OP_NEXUS_MUTATE
+  execute: Mutación atómica de enlaces duros en Base 60 (estado cruzado).
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
   signature: ast.walk()
   complexity: O(Nodes)
   mutation: CPU. Inyección transversal de instrumentación.
-- id: APEX-070
-  name: OP_SIGN_PAYLOAD
-  execute: La validación BFT debe preceder a la firma del payload en RAM (pasaporte
-    criptográfico avalado).
-  trigger: Thermodynamic state mutation requested.
-  verify: Hash matches deterministic output.
-  fail: Abort SAGA. Fallback to Ouroboros.
-  signature: json.loads()
-  complexity: O(len)
-  mutation: CPU. Strict parsing. Error de formato = Abortar.
-- id: APEX-071
-  name: OP_ENCRYPT_GCM
-  execute: AES-GCM 256.
-  trigger: Thermodynamic state mutation requested.
-  verify: Hash matches deterministic output.
-  fail: Abort SAGA. Fallback to Ouroboros.
-  signature: yaml.safe_load()
-  complexity: O(len)
-  mutation: CPU. Deserialización segura sin instanciación Pickle.
 - id: APEX-072
   name: OP_DECRYPT_GCM
   execute: AES-GCM 256.
@@ -652,7 +625,8 @@ primitives:
   mutation: RAM. Cachea autómata finito en inicialización.
 - id: APEX-073
   name: OP_GIT_SENTINEL
-  execute: Auto-add, auto-commit asíncrono.
+  execute: La validación BFT debe preceder a la firma del payload en RAM (pasaporte
+    criptográfico avalado).
   trigger: Thermodynamic state mutation requested.
   verify: Hash matches deterministic output.
   fail: Abort SAGA. Fallback to Ouroboros.
@@ -980,11 +954,6 @@ invariants:
   rule: La memoria empieza en el DAG Git en cada ciclo.
   logic: IF error_rate > threshold THEN open_circuit()
   risk: P0
-- id: OUROBOROS-021
-  name: INV_NO_DECORATOR_SLOP
-  rule: Decorador Python sin AST mutator es anergía a purgar.
-  logic: agent.id == public_key; agent.ip == NULL
-  risk: P0
 - id: OUROBOROS-022
   name: INV_B58_TRACEABILITY
   rule: Los logs exponen Base58, la DB almacena Hash Completo.
@@ -1019,7 +988,8 @@ invariants:
   risk: P1
 - id: OUROBOROS-028
   name: INV_SENTINEL_ATOMIC
-  rule: Cada mutación termina en commit (Git Sentinel) o no sucedió.
+  rule: Cada mutación termina en commit (Git Sentinel) o no sucedió. Un Rollback debe
+    someterse a votación asimétrica N/3.
   logic: ASSERT can_rebuild_state(read_only_auditor)
   risk: P0
 - id: OUROBOROS-029
@@ -1041,9 +1011,9 @@ invariants:
   logic: IF task.complexity > C THEN split_into(10_atomic_tasks)
   risk: P2
 - id: OUROBOROS-032
-  name: INV_ONE_MUTATION
-  rule: 'Regla Anti-Limerencia: 1 Prompt == 1 Mutación Ejecutada. Sin bucles contemplativos
-    de análisis.'
+  name: INV_ASYNC_STRICT
+  rule: Flujo asíncrono estricto. Prohibido síncrono. Bloqueo de event-loop (GIL)
+    == Muerte P0.
   logic: IF logic == HEAVY -> Opus ELSE -> Local_Qwen
   risk: P1
 - id: OUROBOROS-033
@@ -1072,11 +1042,6 @@ invariants:
     conocimiento ahí.
   logic: IF confidence < 0.9 THEN emit(DELEGATE)
   risk: P1
-- id: OUROBOROS-038
-  name: INV_NO_EMPTY_LOOP
-  rule: Un `while` sin avance estocástico o causal dispara SIGKILL autónomo.
-  logic: EXPECT 33% nodes == Faulty_or_Hallucinating
-  risk: P0
 - id: OUROBOROS-039
   name: INV_LOCAL_ONNX
   rule: Embeddings no abandonan la LAN; inferencia se confina en hardware local.
@@ -1216,7 +1181,8 @@ invariants:
   risk: P1
 - id: OUROBOROS-066
   name: INV_NO_EVAL_STRING
-  rule: Ejecución indirecta de strings dinámicos de OS bloqueada.
+  rule: Directorio se auto-limpia ante entropía parasitaria. Sincrónico con OP_WAL_LOCK
+    (APEX-009) para no corromper la matriz.
   logic: IF wrapper_lat > 5ms THEN USE ctypes.CDLL
   risk: P2
 - id: OUROBOROS-067
