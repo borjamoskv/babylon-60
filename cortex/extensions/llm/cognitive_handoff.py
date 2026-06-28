@@ -254,6 +254,7 @@ class CognitiveHandoff:
                 return _PrescreenResult(action="compact_and_forget", tokens_used=0)
             return _PrescreenResult(action="audit", tokens_used=0)
 
+        drm = self.get_drm_route(0.0)
         prompt = CortexPrompt(
             system_instruction="You are an Infrastructure prescreen agent. Evaluate if this "
             "belief statement is worth detailed audit. Respond with JSON: "
@@ -265,9 +266,11 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.EPISODIC_PROCESSING,
+            temperature=drm["temperature"],
+            reasoning_mode=drm["reasoning_mode"],
         )
 
-        result = await self._router.route(prompt, provider_hint=self._infra)
+        result = await self._router.route(prompt, provider_hint=drm["provider"])
         tokens = getattr(result, "tokens_used", 0)
         # Parse infrastructure response
         # In production, parse JSON response; here we default to audit
@@ -290,6 +293,7 @@ class CognitiveHandoff:
                 model="deep_think",
             )
 
+        drm = self.get_drm_route(0.15)
         prompt = CortexPrompt(
             system_instruction="You are a Belief Auditor (economic tier). Analyze the given "
             "belief for contradictions against the existing belief context. "
@@ -307,10 +311,11 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.BELIEF_AUDIT,
-            reasoning_mode=ReasoningMode.DEEP_THINK,
+            temperature=drm["temperature"],
+            reasoning_mode=drm["reasoning_mode"] or ReasoningMode.DEEP_THINK,
         )
 
-        result = await self._router.route(prompt, provider_hint=self._auditor_economic)
+        result = await self._router.route(prompt, provider_hint=drm["provider"])
         tokens = getattr(result, "tokens_used", 0)
         return _AuditResult(
             verdict="CERTAIN",
@@ -341,6 +346,7 @@ class CognitiveHandoff:
                 model="opus",
             )
 
+        drm = self.get_drm_route(0.95)
         prompt = CortexPrompt(
             system_instruction="You are the Premium Belief Auditor (Claude Opus 4.8 Thinking). "
             "A prior economic audit returned an UNCERTAIN verdict or detected contradictions. "
@@ -358,12 +364,11 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.BELIEF_AUDIT,
-            # Opus 4.8 supports native extended thinking blocks.
-            # Setting DEEP_THINK allows the router to invoke its >32k thinking envelope.
-            reasoning_mode=ReasoningMode.DEEP_THINK,
+            temperature=drm["temperature"],
+            reasoning_mode=drm["reasoning_mode"],
         )
 
-        result = await self._router.route(prompt, provider_hint=self._auditor_premium)
+        result = await self._router.route(prompt, provider_hint=drm["provider"])
         tokens = getattr(result, "tokens_used", 0)
         return _AuditResult(
             verdict="CERTAIN",
@@ -425,7 +430,7 @@ class CognitiveHandoff:
         """
         if tolerance_variance <= 0.0:
             # 0% Tolerance -> Gemini 3.5 Flash, LOW Temp, No Reasoning
-            return {
+            route = {
                 "provider": self._infra,
                 "temperature": 0.0,
                 "reasoning_mode": None,
@@ -433,7 +438,7 @@ class CognitiveHandoff:
             }
         elif tolerance_variance <= 0.15:
             # 15% Tolerance -> Gemini 3.1 Pro (or high-fidelity economic tier), LOW Temp
-            return {
+            route = {
                 "provider": self._auditor_economic,
                 "temperature": 0.0,
                 "reasoning_mode": None,
@@ -441,12 +446,21 @@ class CognitiveHandoff:
             }
         else:
             # >90% Tolerance -> Premium Tier with reasoning (ULTRATHINK / o-series / GPT-5.5)
-            return {
+            route = {
                 "provider": self._auditor_premium,
                 "temperature": 0.5,
                 "reasoning_mode": ReasoningMode.ULTRA_THINK,
                 "description": "DRM-v1: Singularidad / Resolución P0 (>90% Varianza)"
             }
+            
+        logger.info(
+            "⚡ [DRM-v1 ROUTING] %s | Provider: %s | Temp: %s | Mode: %s",
+            route["description"],
+            route["provider"],
+            route["temperature"],
+            route["reasoning_mode"].value if route["reasoning_mode"] else "Standard",
+        )
+        return route
 
     @staticmethod
     def _involves_axiomatics(
