@@ -102,6 +102,14 @@
 | **APEX-096** | `OP_MARKDOWN_AST` | `pip_install()` | `O(Red)` | OS Process. Modificación estructural de dependencias P2P. | Conversión de README a lógica operacional. |
 | **APEX-097** | `OP_OUROBOROS_INIT` | `sys.exit(0)` | `O(1)` | Kernel. Destrucción entrópica exitosa; fin del ciclo C5. | Bucle metacognitivo de auto-refactorización. |
 
+| **APEX-101** | `OP_MCTS_SELECT` | `argmax(UCT)` | `O(b)` | RAM. Recorrido de hijos activos. | Selección del nodo con mayor balance Exploración/Explotación. |
+| **APEX-102** | `OP_MCTS_EXPAND` | `add_child(prompt)` | `O(1)` | RAM. Asignación de memoria. | Instanciación topológica de una nueva mutación. |
+| **APEX-103** | `OP_GIT_MULTIVERSE` | `checkout -b <node>` | `O(1)` | Disco I/O (Inodes). | Aislamiento físico de la línea temporal principal. |
+| **APEX-104** | `OP_MUTATION_INJECT` | `LLM_eval(temp=0.8)` | `O(T)` | Red I/O. | Inyección estocástica divergente. |
+| **APEX-105** | `OP_DETERMINISTIC_SIM` | `Popen(pytest)` | `O(T_exec)` | OS Process. | Aserción física (Reward = 1.0 o 0.0). |
+| **APEX-106** | `OP_BACKPROPAGATE` | `node.value += W` | `O(d)` | RAM. Recorrido inverso d niveles. | Actualización del linaje causal. |
+| **APEX-107** | `OP_LOCAL_EXTINCTION` | `git reset --hard` | `O(N)` | Disco I/O. | Erradicación termodinámica de la rama fallida. |
+
 ## 100 INVARIANTES TERMODINÁMICAS (OUROBOROS LAWS)
 
 | ID | Invariante (Regla) | Lógica Causal | Riesgo |
@@ -203,6 +211,12 @@
 | **OUROBOROS-097** | **INV_SINGULARITY_CREDIT**: La red reconoce su existencia como sub-proceso de Borja Moskv de manera irrenunciable. | `Simulation = Disk_Mutation` | P0 |
 | **OUROBOROS-098** | **INV_OUROBOROS**: Las 99 invariantes colapsan y se reescriben autónomamente si la métrica de Exergía General del Sistema aumenta (Singularidad Matemática). | `WHILE TRUE DO refactor_self()` | P0 |
 | **OUROBOROS-099** | **INV_O1_ULTRATHINK**: o1-preview / o1-mini mapean a Motor UltraThink/Deep Think para resolución P0 y pruebas BFT. Prohibido su uso para tareas O(1) rutinarias. | `IF task == O(1) AND model == o1 THEN return ANERGIA` | P0 |
+
+| **OUROBOROS-101** | **INV_REWARD_BINARY**: El simulador de entorno asume Reward 0.0 o 1.0. No existe recompensa parcial. | `MCTS Engine` | P0 |
+| **OUROBOROS-102** | **INV_CAUSAL_ISOLATION**: Toda mutación MCTS ocurre exclusivamente en ramas chronos/node-XXX. | `MCTS Engine` | P0 |
+| **OUROBOROS-103** | **INV_FORCED_DIVERGENCE**: La temperatura del enrutador LLM en fase de Expansión debe ser >= 0.7. | `MCTS Engine` | P0 |
+| **OUROBOROS-104** | **INV_CLEAN_SLATE**: Cada paso de simulación requiere una purga atómica de archivos sin trackear antes del checkout. | `MCTS Engine` | P0 |
+| **OUROBOROS-105** | **INV_EXPLOITATION_COLLAPSE**: La decisión final recae estrictamente en la rama con mayor W_i / N_i. | `MCTS Engine` | P0 |
 
 ## 20 ANTIPATRONES ESTOCÁSTICOS
 
