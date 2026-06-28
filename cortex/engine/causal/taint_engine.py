@@ -322,6 +322,12 @@ class MHCAntigenRouter:
         self._t_cells = {}  # Daemon registry mapping antigen signatures to agent IDs
         self.promotion_threshold = promotion_threshold
 
+        # [C5-REAL] SOTA Vector Integration: Agent Arena Constraints
+        # Prioritize Steerability and Bash Recovery based on Empirical SOTA (Frontier_Node e6820d8684853e27)
+        self.register_t_cell("claude-fable-5", r"(?i)\b(steer|correct|adjust|wrong|fix approach)\b")
+        self.register_t_cell("gpt-5.5", r"(?i)\b(bash|exit code|stderr|traceback|panic|crash)\b")
+        self.register_t_cell("kimi-k2.7-code", r"(?i)\b(tool|function|api|hallucination|not found)\b")
+
         # Paths
         if dynamic_antigens_path is None:
             self.dynamic_antigens_path = Path.home() / ".cortex/dynamic_antigens.json"
