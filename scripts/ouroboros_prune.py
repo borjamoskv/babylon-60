@@ -143,6 +143,8 @@ def execute_thermal_purge(
 
     try:
         with connect(str(db_file), row_factory=sqlite3.Row) as conn:
+            if hasattr(conn, "authorize_causal_writes"):
+                conn.authorize_causal_writes()
             cursor = conn.cursor()
 
             # Phase 0: Build topological barrier (recursive ancestor protection)

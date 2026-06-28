@@ -44,3 +44,18 @@ def test_ultrathink_authorization():
     auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(50.0, 60.0, 10.0, 5)
     assert auth is False
     assert "Insufficient" in msg
+
+
+def test_ultrathink_critical_authorization():
+    """Verify that critical domains trigger with lower exergy and blast requirements."""
+    # A standard node with blast radius 2 fails
+    auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(10.0, 200.0, 5.0, 2, epicenter_node="ordinary_node")
+    assert auth is False
+
+    # A critical node (e.g. "master_ledger") with blast radius 2 succeeds because radius is amplified and exergy threshold is halved
+    auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(10.0, 100.0, 10.0, 2, epicenter_node="master_ledger")
+    # exergy = (100 - 10) / 10 = 9.0. Required for critical: 0.05 * 100 = 5.0. 9.0 >= 5.0 -> True.
+    # effective_radius = 2 * 1.5 = 3. min_radius = 2 -> True.
+    assert auth is True
+    assert "Authorized" in msg
+

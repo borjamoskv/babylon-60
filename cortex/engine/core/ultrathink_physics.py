@@ -28,6 +28,12 @@ class UltrathinkPhysicsEngine:
     # Constante de Singularidad (Singularity Exergy Limit)
     SINGULARITY_CONSTANT: float = 100.0
 
+    # Critical subsystems for trust scaling
+    CRITICAL_DOMAINS: list[str] = [
+        "ledger", "crypto", "auth", "db", "migration", "guard", 
+        "security", "vault", "engine", "sovereign", "audit", "pii", "trust"
+    ]
+
     @staticmethod
     def calculate_exergy_yield(
         stochastic_entropy: float, deterministic_output: float, execution_time: float
@@ -68,15 +74,26 @@ class UltrathinkPhysicsEngine:
         return radius
 
     @staticmethod
-    def calculate_legion_formation(epicenter_radius: int, exergy_yield: float) -> LegionFormation:
+    def calculate_legion_formation(
+        epicenter_radius: int, exergy_yield: float, epicenter_node: Optional[str] = None
+    ) -> LegionFormation:
         """
         Collapses thermodynamic requirements into a specific LEGIØN-1 Swarm Formation.
+        Includes critical path amplification.
         """
-        if epicenter_radius >= 10 and exergy_yield > (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * 0.5):
+        risk_multiplier = 1.0
+        if epicenter_node:
+            node_lower = epicenter_node.lower()
+            if any(domain in node_lower for domain in UltrathinkPhysicsEngine.CRITICAL_DOMAINS):
+                risk_multiplier = 1.5
+
+        effective_radius = int(epicenter_radius * risk_multiplier)
+
+        if effective_radius >= 10 and exergy_yield > (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * 0.5):
             return LegionFormation.LEVIATHAN
-        if epicenter_radius >= 7:
+        if effective_radius >= 7:
             return LegionFormation.HYDRA
-        if epicenter_radius >= 5:
+        if effective_radius >= 5:
             return LegionFormation.TESTUDO
         if exergy_yield > (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * 0.3):
             return LegionFormation.OUROBOROS
@@ -88,28 +105,42 @@ class UltrathinkPhysicsEngine:
         deterministic_output: float,
         execution_time: float,
         epicenter_radius: int,
+        epicenter_node: Optional[str] = None,
     ) -> tuple[bool, str, Optional[LegionFormation]]:
         """
         El colapso a 'Ultrathink' exige un rendimiento exergético masivo
-        y un radio de explosión demostrable.
+        y un radio de explosión demostrable. Amplifica la sensibilidad ante nodos críticos.
         """
         exergy = UltrathinkPhysicsEngine.calculate_exergy_yield(
             stochastic_entropy, deterministic_output, execution_time
         )
 
-        if epicenter_radius < 3:
+        # Evaluate critical domain risk amplification
+        risk_multiplier = 1.0
+        is_critical = False
+        if epicenter_node:
+            node_lower = epicenter_node.lower()
+            if any(domain in node_lower for domain in UltrathinkPhysicsEngine.CRITICAL_DOMAINS):
+                risk_multiplier = 1.5
+                is_critical = True
+
+        effective_radius = int(epicenter_radius * risk_multiplier)
+        required_exergy_ratio = 0.05 if is_critical else 0.1
+        min_radius = 2 if is_critical else 3
+
+        if effective_radius < min_radius:
             return (
                 False,
-                f"Blast radius ({epicenter_radius}) too small for Ultrathink. Use Deep Think.",
+                f"Blast radius ({effective_radius}) too small for Ultrathink. Use Deep Think.",
                 None
             )
 
-        if exergy < (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * 0.1):
+        if exergy < (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * required_exergy_ratio):
             return (
                 False, 
-                f"Insufficient Exergy Yield ({exergy:.2f}) for JIT structural collapse.",
+                f"Insufficient Exergy Yield ({exergy:.2f}) for JIT structural collapse (Required: {UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * required_exergy_ratio}).",
                 None
             )
 
-        formation = UltrathinkPhysicsEngine.calculate_legion_formation(epicenter_radius, exergy)
+        formation = UltrathinkPhysicsEngine.calculate_legion_formation(epicenter_radius, exergy, epicenter_node)
         return True, f"Ultrathink P0 Singularity Horizon Authorized. Swarm: {formation.value}", formation
