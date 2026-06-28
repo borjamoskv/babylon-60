@@ -74,13 +74,13 @@ Este documento establece la ontología absoluta de operaciones CYBINT. Cero ruid
 
 ### Dominio 6: Enriquecimiento y Correlación (051-060)
 - **CYB-P051** | `OP_VT_RELATION`: Hash Aislado -> Grafo de Contacto VT (URLs/Droppers).
-- **CYB-P052** | `OP_MISP_INJECT`: IoC Evaluado -> Persistencia en Grafo Compartido (MISP).
+- **CYB-P052** | `OP_ASSERT_INTEGRITY_SMT`: Bloque Threat Intel -> Merkle Proof de Inmutabilidad.
 - **CYB-P053** | `OP_STIX_NORMALIZE`: Formato Libre -> Objeto JSON STIX Determinista.
 - **CYB-P054** | `OP_PIVOT_IP_DOM`: Nodo IP -> Aristas de Nodos Dominio Asociados.
 - **CYB-P055** | `OP_PIVOT_DOM_REG`: Nodo Dominio -> Entidad Humana/Organización Registrante.
 - **CYB-P056** | `OP_PIVOT_HASH_FAM`: Nodo Hash -> Pertenencia a Grafo de Familia de Malware.
 - **CYB-P057** | `OP_LOG_CORRELATE`: Alerta EDR + Flujo FW -> Cadena de Ataque Verificada.
-- **CYB-P058** | `OP_PPI_SCORE`: Fuente Cruda -> Índice de Confiabilidad Probabilística (0-5).
+- **CYB-P058** | `OP_RECALIBRATE_CONFIDENCE_BAYES`: Evidencia Contradictoria -> Confidence_score (Bayesiano).
 - **CYB-P059** | `OP_MALTEGO_GRAPH`: Nodos JSON -> Visualización Topológica de Vértices/Aristas.
 - **CYB-P060** | `OP_IOC_DEDUPLICATE`: Base de Datos Ruido -> Set Único de Amenazas Activas.
 
@@ -128,7 +128,7 @@ Este documento establece la ontología absoluta de operaciones CYBINT. Cero ruid
 - **CYB-P095** | `OP_TLP_ASSIGN`: Reporte -> Etiqueta de Restricción de Diseminación (Red/Amber/Green/Clear).
 - **CYB-P096** | `OP_RISK_INTEGRATE`: Inteligencia CYBINT -> Variable de Riesgo Empresarial Cuantificada.
 - **CYB-P097** | `OP_COLLECTION_PLAN`: Vacío de Conocimiento -> Vector de Adquisición Planificado.
-- **CYB-P098** | `OP_DATA_VALIDATE`: Ingesta Cruda -> Aserción de Integridad y Fidelidad.
+- **CYB-P098** | `OP_EVAL_RISK_CONTAM`: IoC del Adyacente -> Risk_contam Escalar (0.0-1.0) para prompt.
 - **CYB-P099** | `OP_TRAIN_ANALYST`: Humano Estocástico -> Analista Determinado por Invariantes (CYBINT).
 - **CYB-P100** | `OP_AUTOMATE_INTEL`: Tarea Repetitiva -> Pipeline Autopoético de Ingesta (Cero Anergía).
 
@@ -174,8 +174,8 @@ Este documento establece la ontología absoluta de operaciones CYBINT. Cero ruid
 - **CYB-I030** | `INV_ACCESS_COMMODITY`: El acceso inicial (IABs) se mercantiliza, creando cadenas de suministro ofensivas.
 
 ### Inteligencia y Datos (031-040)
-- **CYB-I031** | `INV_IOC_CONTEXT`: Un IoC sin contexto no es inteligencia, es un bloqueador ciego de firewall.
-- **CYB-I032** | `INV_INTEL_DECAY`: La inteligencia perece termodinámicamente; un IoC viejo es un falso positivo garantizado.
+- **CYB-I031** | `INV_INTEGRITY_VS_VALIDITY`: La firma criptográfica válida de una fuente no implica admisibilidad epistémica del IoC.
+- **CYB-I032** | `INV_EPHEMERAL_EPISODIC_PURGE`: Datos de telemetría sin correlación estructural son purgados por NightShift.
 - **CYB-I033** | `INV_DATA_ENRICHMENT`: El enriquecimiento de datos reduce axiomáticamente la entropía analítica.
 - **CYB-I034** | `INV_EVENT_CORRELATION`: La correlación de eventos aislados colapsa la onda de probabilidad revelando la campaña.
 - **CYB-I035** | `INV_DARKWEB_REPUTATION`: Los foros underground son ecosistemas donde la reputación es el único ancla de confianza.
