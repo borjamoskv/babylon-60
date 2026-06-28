@@ -123,6 +123,7 @@ class SwarmSupervisor:
                             "UPDATE system_hypotheses SET status = 'INVALIDATED' WHERE id = ?", (task["id"],)
                         )
                         await self._db.commit()
+                    in_flight.add(task["id"])
                     continue
 
                 # SANEDRIN VECTOR 3: Lease lock task using supervisor_id and 5-min TTL
