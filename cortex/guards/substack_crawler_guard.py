@@ -22,11 +22,7 @@ CRAWLER_BOT_PREFIXES = frozenset({
     'hello', 'hi', 'admin', 'marketing', 'pr', 'support', 'team', 'hola', 'webmaster'
 })
 
-STOCHASTIC_NOISE_DOMAINS = frozenset({
-    'gmail.com', 'hotmail.com', 'yahoo.es', 'yahoo.com', 'outlook.com', 
-    'icloud.com', 'protonmail.com', 'me.com', 'mac.com', 'live.com',
-    'msn.com', 'pm.me', 'proton.me', 'gmx.com', 'yandex.ru', 'mail.com'
-})
+# No B2C blacklist: consumer domains are considered valid organic traffic.
 
 
 # Sovereign Whitelist: Known Human Nodes (Top Organics) that bypass B2C Noise filters
@@ -60,15 +56,7 @@ class SubstackCrawlerGuard:
             
         local_part, domain = email_lower.split('@', 1)
         
-        # 1. Reject B2C Stochastic Noise
-        if domain in STOCHASTIC_NOISE_DOMAINS:
-            logger.error("B2C Stochastic Noise detected for %s", email)
-            raise ValueError(
-                f"[Axiom OUROBOROS-094] Thermodynamic Violation: Epistemic Limerence detected. "
-                f"Email '{email}' belongs to a B2C Stochastic Noise domain ({domain})."
-            )
-
-        # 2. Reject Firewall Dead Inboxes (Crawler Inflation)
+        # 1. Reject Firewall Dead Inboxes (Crawler Inflation)
         if local_part in CRAWLER_BOT_PREFIXES:
             # If there's engagement on a dead inbox, it's 100% a firewall bot
             if opens > 10:
