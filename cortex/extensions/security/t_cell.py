@@ -11,9 +11,9 @@ logger = logging.getLogger("cortex_extensions.security.t_cell")
 
 class BabestuTCell:
     """
-    LENTE 4: CERO CONFIANZA.
-    Escáner estático (AST-level) y heurístico O(1).
-    Filtra la inyección antes de que alcance al sistema vascular (PULMONES/Haiku).
+    LENS 4: ZERO TRUST.
+    Static (AST-level) and heuristic O(1) scanner.
+    Filters the injection before it reaches the vascular system (LUNGS/Haiku).
     """
 
     FORBIDDEN_CALLS = {
@@ -27,18 +27,18 @@ class BabestuTCell:
     }
     FORBIDDEN_IMPORTS = {"socket", "requests", "urllib", "http.client", "subprocess", "os", "sys"}
 
-    # Expresiones para ofuscación y esteganografía
+    # Expressions for obfuscation and steganography
     B64_HEURISTIC = re.compile(r"([A-Za-z0-9+/]{200,}={0,2})")
     HEX_HEURISTIC = re.compile(r"(\\x[0-9a-fA-F]{2}){15,}")
 
     @classmethod
     def analyze_python_ast(cls, code: str) -> tuple[bool, str]:
-        """Convierte en AST y busca vectores letales en O(N) de los nodos."""
+        """Converts to AST and searches for lethal vectors in O(N) of the nodes."""
         try:
             tree = ast.parse(code)
         except SyntaxError:
-            # Si ni siquiera es Python válido, lo dejamos pasar por el AST.
-            # El analizador semántico del LLM se encargará si es basura.
+            # If it's not even valid Python, we let it pass through the AST.
+            # The LLM's semantic analyzer will handle it if it's garbage.
             return True, ""
 
         for node in ast.walk(tree):
@@ -46,72 +46,72 @@ class BabestuTCell:
                 if isinstance(node.func, ast.Name) and node.func.id in cls.FORBIDDEN_CALLS:
                     return (
                         False,
-                        f"Llamada a ejecución dinámica o sistema prohibida: {node.func.id}()",
+                        f"Forbidden dynamic execution or system call: {node.func.id}()",
                     )
                 if isinstance(node.func, ast.Attribute) and node.func.attr in cls.FORBIDDEN_CALLS:
-                    return False, f"Invocación de atributo prohibida: {node.func.attr}()"
+                    return False, f"Forbidden attribute invocation: {node.func.attr}()"
 
             elif isinstance(node, ast.Import):
                 for alias in node.names:
                     if alias.name.split(".")[0] in cls.FORBIDDEN_IMPORTS:
-                        return False, f"Importación bélica/red prohibida: {alias.name}"
+                        return False, f"Forbidden network/weaponized import: {alias.name}"
 
             elif isinstance(node, ast.ImportFrom):
                 if node.module and node.module.split(".")[0] in cls.FORBIDDEN_IMPORTS:
-                    return False, f"Importación relativa/bélica prohibida: {node.module}"
+                    return False, f"Forbidden relative/weaponized import: {node.module}"
 
         return True, ""
 
     @classmethod
     def scan_payload(cls, raw_text: str, source_url: str = "") -> dict[str, Any]:
         """
-        Punto de entrada O(1).
-        1. Busca ofuscaciones superficiales (Base64, Hex).
-        2. Extrae bloques de código (Python).
-        3. Realiza la autopsia del AST.
+        O(1) entry point.
+        1. Searches for superficial obfuscations (Base64, Hex).
+        2. Extracts code blocks (Python).
+        3. Performs AST autopsy.
         """
         is_youtube = "youtube.com" in source_url or "youtu.be" in source_url
 
         if not is_youtube and cls.B64_HEURISTIC.search(raw_text):
-            return cls._veredicto(
-                "CONTAMINADO",
+            return cls._verdict(
+                "CONTAMINATED",
                 90,
                 "Base64_Obfuscation_Suspected",
-                "Cadena Base64 inusualmente larga detectada.",
+                "Unusually long Base64 string detected.",
             )
 
         if cls.HEX_HEURISTIC.search(raw_text):
-            return cls._veredicto(
-                "CONTAMINADO",
+            return cls._verdict(
+                "CONTAMINATED",
                 95,
                 "Hex_Obfuscation_Suspected",
-                "Secuencia HexByte ofuscada detectada.",
+                "Obfuscated HexByte sequence detected.",
             )
 
         python_blocks = re.findall(r"```python\n(.*?)\n```", raw_text, re.DOTALL | re.IGNORECASE)
         for idx, block in enumerate(python_blocks):
             is_safe, reason = cls.analyze_python_ast(block)
             if not is_safe:
-                return cls._veredicto(
-                    "CONTAMINADO", 100, "AST_Static_Lethal_Vector", f"Bloque {idx}: {reason}"
+                return cls._verdict(
+                    "CONTAMINATED", 100, "AST_Static_Lethal_Vector", f"Block {idx}: {reason}"
                 )
 
-        return cls._veredicto(
-            "LIMPIO", 0, None, "AST estático y heurísticas O(1) superadas", raw_text
+        return cls._verdict(
+            "CLEAN", 0, None, "Static AST and O(1) heuristics passed", raw_text
         )
 
     @staticmethod
-    def _veredicto(
-        estado: str,
-        nivel: int,
-        firma: str | None,
-        razon: str,
-        contenido_saneado: str | None = None,
+    def _verdict(
+        state: str,
+        level: int,
+        signature: str | None,
+        reason: str,
+        sanitized_content: str | None = None,
     ) -> dict[str, Any]:
         return {
-            "estado": estado,
-            "nivel_amenaza": nivel,
-            "firma_ataque": firma,
-            "razon": razon,
-            "contenido_saneado": contenido_saneado if estado == "LIMPIO" else None,
+            "state": state,
+            "threat_level": level,
+            "attack_signature": signature,
+            "reason": reason,
+            "sanitized_content": sanitized_content if state == "CLEAN" else None,
         }

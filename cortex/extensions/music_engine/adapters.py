@@ -20,23 +20,23 @@ DEFAULT_TIMEOUT_LYRIA = 30.0
 
 
 class AudioAdapter(abc.ABC):
-    """Interfaz base para modelos generativos de audio."""
+    """Base interface for generative audio models."""
 
     @abc.abstractmethod
     async def generate(self, prompt_matrix: dict[str, Any]) -> str:
-        """Genera audio basado en una matriz de parámetros y devuelve el URI/Path."""
+        """Generates audio based on a parameter matrix and returns the URI/Path."""
 
     @abc.abstractmethod
     async def get_stems(self, job_id: str) -> dict[str, str]:
-        """Aislar stems (vocals, bass, drums, other)."""
+        """Isolate stems (vocals, bass, drums, other)."""
 
     @abc.abstractmethod
     async def close(self) -> None:
-        """Cierra los recursos del cliente."""
+        """Closes the client resources."""
 
 
 class SunoV5Adapter(AudioAdapter):
-    """Adaptador para Suno v5 (Especialización: Groove, Vocales, Coherencia Pop)."""
+    """Adapter for Suno v5 (Specialization: Groove, Vocals, Pop Coherence)."""
 
     def __init__(self, base_url: str = "https://api.suno.ai/v5"):
         self.api_key = os.environ.get("SUNO_API_KEY", "")
@@ -48,7 +48,7 @@ class SunoV5Adapter(AudioAdapter):
 
     async def generate(self, prompt_matrix: dict[str, Any]) -> str:
         logger.info(
-            "Enviando matriz paramétrica a la API de Suno v5... BPM: %s", prompt_matrix.get("bpm")
+            "Sending parametric matrix to Suno v5 API... BPM: %s", prompt_matrix.get("bpm")
         )
         # Inject sonic vectors for premium texture
         sonic_v = prompt_matrix.get("sonic_vectors", {})
@@ -90,7 +90,7 @@ class SunoV5Adapter(AudioAdapter):
 
 
 class UdioV4Adapter(AudioAdapter):
-    """Adaptador para Udio v4 (Especialización: Inpainting, Texturas, 48kHz, Electrónica)."""
+    """Adapter for Udio v4 (Specialization: Inpainting, Textures, 48kHz, Electronic)."""
 
     def __init__(self, base_url: str = "https://api.udio.com/v4"):
         self.api_key = os.environ.get("UDIO_API_KEY", "")
@@ -101,7 +101,7 @@ class UdioV4Adapter(AudioAdapter):
         )
 
     async def generate(self, prompt_matrix: dict[str, Any]) -> str:
-        logger.info("Iniciando síntesis en Udio v4 API... Escala: %s", prompt_matrix.get("key"))
+        logger.info("Starting synthesis on Udio v4 API... Key: %s", prompt_matrix.get("key"))
         # Inject sonic vectors for premium texture
         sonic_v = prompt_matrix.get("sonic_vectors", {})
         enhanced_prompt = prompt_matrix.get("prompt_injection", "")
@@ -123,7 +123,7 @@ class UdioV4Adapter(AudioAdapter):
             return "ari:cloud:udio:job:error"
 
     async def get_stems(self, job_id: str) -> dict[str, str]:
-        logger.info("Extrayendo multitracks de Udio API (%s)...", job_id)
+        logger.info("Extracting multitracks from Udio API (%s)...", job_id)
         try:
             response = await self.client.get(f"{self.base_url}/jobs/{job_id}")
             response.raise_for_status()
@@ -136,7 +136,7 @@ class UdioV4Adapter(AudioAdapter):
     async def magic_edit(
         self, track_uri: str, segment: tuple[float, float], edit_prompt: str
     ) -> str:
-        """Refinamiento local vía inpainting."""
+        """Local refinement via inpainting."""
         payload = {
             "track_uri": track_uri,
             "segment_start": segment[0],
@@ -156,7 +156,7 @@ class UdioV4Adapter(AudioAdapter):
 
 
 class Lyria3Adapter(AudioAdapter):
-    """Adaptador para Google DeepMind Lyria 3 (Especialización: B-Roll, Síntesis Corta, Image-to-Audio)."""
+    """Adapter for Google DeepMind Lyria 3 (Specialization: B-Roll, Short Synthesis, Image-to-Audio)."""
 
     def __init__(self):
         # Lyria generally uses GCP auth implicitly via service accounts
@@ -164,7 +164,7 @@ class Lyria3Adapter(AudioAdapter):
         self.client = httpx.AsyncClient(timeout=DEFAULT_TIMEOUT_LYRIA)
 
     async def generate(self, prompt_matrix: dict[str, Any]) -> str:
-        logger.info("DeepMind Lyria 3: Sintetizando textura acústica O(1)...")
+        logger.info("DeepMind Lyria 3: Synthesizing acoustic texture O(1)...")
         if not self.project_id:
             logger.warning("GOOGLE_CLOUD_PROJECT missing for Lyria. Returning mock ID.")
             return "ari:cloud:lyria:job:5555"
@@ -192,7 +192,7 @@ class Lyria3Adapter(AudioAdapter):
 
     async def get_stems(self, job_id: str) -> dict[str, str]:
         # Lyria might not support stem separation natively yet
-        logger.warning("Lyria 3 no soporta separación de stems nativa. Retornando master.")
+        logger.warning("Lyria 3 does not support native stem separation. Returning master.")
         return {"master": f"https://storage.googleapis.com/lyria-out/{job_id.split(':')[-1]}.wav"}
 
     async def close(self) -> None:
