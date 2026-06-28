@@ -8,8 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "test": "make test-fast",
-    "prepare": "husky"
+    "test": "make test-fast"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.7.0",
@@ -26,11 +25,6 @@
     "tailwind-merge": "^3.0.1",
     "three": "^0.183.2",
     "wrangler": "^4.100.0"
-  },
-  "devDependencies": {
-    "@commitlint/cli": "^21.0.2",
-    "@commitlint/config-conventional": "^21.0.2",
-    "husky": "^9.1.7"
   },
   "overrides": {
     "esbuild": "^0.28.1",
