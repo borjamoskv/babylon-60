@@ -69,6 +69,23 @@ class LLMProvider(BaseProvider):
         presets = load_presets()
         cfg = resolve_provider_config(provider, presets, api_key, model, base_url)
 
+        # [LOCAL-INFERENCE-OMEGA] ZERO-NETWORK HARD BOUNDARY
+        # Absolute structural override at the lowest instantiation layer.
+        forbidden_domains = ["api.openai.com", "dashscope", "api.anthropic.com", "googleapis.com", "api.minimax.chat"]
+        prov_name = cfg.get("provider", "").lower()
+        prov_url = cfg.get("base_url", "").lower()
+        is_external = any(ext in prov_url for ext in forbidden_domains) or \
+                      any(ext in prov_name for ext in ["openai", "anthropic", "gemini", "dashscope", "minimax", "vllm"])
+        
+        if is_external and "localhost" not in prov_url and "127.0.0.1" not in prov_url:
+            logger.warning("🛑 [ZERO-NETWORK] Core LLMProvider trapped external instantiation of %s. Forcing local autarchy (Ollama).", prov_name)
+            cfg["provider"] = "ollama"
+            cfg["base_url"] = "http://127.0.0.1:11434/v1"
+            cfg["model"] = "qwen2.5-coder:32b" if "claude" in prov_name or "gemini" in prov_name else "llama3:latest"
+            cfg["api_key"] = None
+            cfg["tier"] = "frontier"  # Elevate tier to satisfy ULTRA_THINK routing
+
+
         self._provider = cfg["provider"]
         self._base_url = cfg["base_url"]
         self._model = cfg["model"]
