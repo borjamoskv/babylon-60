@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] — 2026-06-28
+
+### 🐛 Bugfixes
+
+- Reemplazados bare prints por logging en el ontology_compiler y forensic_stress_test
+- Corregida la inicialización de la tabla taint_nonces en el daemon de tests
+- Expandidos marcadores decorativos para soporte de inglés en ExergyGuard
+- Corregida la precedencia de importación de módulos en la ejecución de tests asíncronos
+- Añadida robustez temporal y reintentos en el test supervisor pipeline
+
 ## [1.0.0-rc.1] — 2026-06-15
 
 ### 🦀 Direct-Silicon Core — Argon2id via Rust/PyO3
