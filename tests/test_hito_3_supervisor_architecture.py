@@ -1,4 +1,6 @@
 import asyncio
+import json
+import logging
 import os
 import uuid
 import pytest
@@ -70,12 +72,15 @@ async def test_supervisor_pipeline_end_to_end():
     db = await setup_db(db_path)
     
     # Insert 5 tasks
-    now = datetime.now(timezone.utc).isoformat()
-    tasks = [(f"hyp-{i}", "Stmt", 1.0, 1.0, 1.0, 1.0, 'ACTIVE', now) for i in range(5)]
-    await db.executemany(
-        "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        tasks
-    )
+    valid_payload = json.dumps({
+        "latent_basis": {"inputs": [], "model": "rule_based", "posterior": 0.99, "inferred_state": {}},
+        "proposed_intervention": {"action_name": "test", "parameters": {}, "predicted_outcomes": {}, "confidence": 0.9}
+    })
+    for i in range(5):
+        await db.execute(
+            "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (f"hyp-{i}", valid_payload, 0.9, 1.0, 1.0, 1.0, "ACTIVE", "2024-01-01T00:00:00Z")
+        )
     await db.close()
 
     # Initialize Supervisor

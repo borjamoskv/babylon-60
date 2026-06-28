@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
+import json
 import uuid
 import pytest
 import aiosqlite
@@ -65,10 +66,19 @@ async def test_2pc_atomic_commit():
     
     # Insert 1 task
     now = datetime.now(timezone.utc).isoformat()
+    valid_payload = json.dumps({
+        "latent_basis": {"inputs": [], "model": "rule_based", "posterior": 0.99, "inferred_state": {}},
+        "proposed_intervention": {"action_name": "test", "parameters": {}, "predicted_outcomes": {}, "confidence": 0.9}
+    })
     await db.execute(
         "INSERT INTO system_hypotheses (id, statement, probability, evi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        ("hyp-test-2pc", "Stmt", 1.0, 1.0, 1.0, 1.0, 'ACTIVE', now)
+        ("hyp-test-2pc", valid_payload, 1.0, 1.0, 1.0, 1.0, 'ACTIVE', now)
     )
+    for i in range(2):
+        await db.execute(
+            "INSERT INTO system_hypotheses (id, statement, probability, evi, cost, impact, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (f"hyp-act-{i}", valid_payload, 0.9, 0.9, 1.0, 1.0, "ACTIVE", now)
+        )
     await db.commit()
     await db.close()
 
@@ -121,9 +131,13 @@ async def test_lease_locks_and_ghost_recovery():
     # Insert 1 IN_FLIGHT task belonging to an old supervisor
     now = datetime.now(timezone.utc).isoformat()
     old_lease = "OLD_LEASE_123"
+    valid_payload = json.dumps({
+        "latent_basis": {"inputs": [], "model": "rule_based", "posterior": 0.99, "inferred_state": {}},
+        "proposed_intervention": {"action_name": "test", "parameters": {}, "predicted_outcomes": {}, "confidence": 0.9}
+    })
     await db.execute(
         "INSERT INTO system_hypotheses (id, statement, probability, svi, cost, impact, status, created_at, owner_id, lease_expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ("hyp-test-lease", "Stmt", 1.0, 1.0, 1.0, 1.0, 'IN_FLIGHT', now, old_lease, "2020-01-01T00:00:00Z")
+        ("hyp-test-lease", valid_payload, 1.0, 1.0, 1.0, 1.0, 'IN_FLIGHT', now, old_lease, "2020-01-01T00:00:00Z")
     )
     await db.commit()
     await db.close()
