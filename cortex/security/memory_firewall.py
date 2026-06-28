@@ -7,14 +7,55 @@ Implements Secret Redaction (DLP) and Risk Scoring to prevent Prompt Injections,
 credential leaks, and malicious persistence.
 """
 
+import ctypes
 import logging
 import re
+import sys
 from typing import Any
 
 logger = logging.getLogger("cortex.security.firewall")
 
 
 from cortex.security.types import RiskLevel
+
+
+class CEnvironWiper:
+    """Zero-Leak Memory Substrate: Wipes secrets from OS-level C environ blocks."""
+
+    @staticmethod
+    def wipe_c_env(key: str) -> bool:
+        """Wipes a specific environment variable from the C memory space."""
+        try:
+            libc = ctypes.CDLL(None)
+        except Exception as e:
+            logger.error(f"[CEnvironWiper] Failed to load libc: {e}")
+            return False
+
+        try:
+            if sys.platform == 'darwin':
+                ns_get_environ = libc._NSGetEnviron
+                ns_get_environ.restype = ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p))
+                environ = ns_get_environ().contents
+            else:
+                environ = ctypes.POINTER(ctypes.c_char_p).in_dll(libc, 'environ')
+        except Exception as e:
+            logger.error(f"[CEnvironWiper] Failed to map environ pointer: {e}")
+            return False
+
+        i = 0
+        key_bytes = key.encode('utf-8') + b'='
+        wiped = False
+        while environ[i]:
+            env_str = ctypes.string_at(environ[i])
+            if env_str.startswith(key_bytes):
+                length = len(env_str)
+                ctypes.memset(environ[i], 0, length)
+                wiped = True
+                logger.info(f"[CEnvironWiper] Deterministically wiped {key} from C-environ.")
+                break
+            i += 1
+        
+        return wiped
 
 RISK_WEIGHTS = {
     RiskLevel.LOW: 0,
