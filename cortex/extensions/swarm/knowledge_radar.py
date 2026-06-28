@@ -22,11 +22,10 @@ from typing import Any
 
 try:
     import yaml
-    YAMLError = yaml.YAMLError
+    YAMLError: Any = getattr(yaml, "YAMLError", Exception)
 except ImportError:
     yaml = None
-    class YAMLError(Exception):
-        pass
+    YAMLError = Exception
 
 logger = logging.getLogger("cortex_extensions.swarm.knowledge_radar")
 

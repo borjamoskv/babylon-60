@@ -362,7 +362,7 @@ class CortexEvolutionEngine:
             EntropyReductionStrategy(),
             CrossoverRecombinationStrategy(),
             StagnationBreakerStrategy(),
-            ZeroPromptingEvolutionStrategy(),  # Axiom Ω₇
+            ZeroPromptingEvolutionStrategy(),  # type: ignore[list-item]
         ]
         self._evaluation_count = 0
         self._prev_avg_fitness: dict[str, float] = {}

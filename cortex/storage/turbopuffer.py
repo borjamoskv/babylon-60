@@ -184,7 +184,7 @@ class TurbopufferVectorBackend(VectorBackend):
         import os
 
         from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-        from cortex.database.core import connect_async
+        from cortex.database.core import connect_async_ctx
         from cortex.engine.causal.taint_engine import verify_taint_token
         
         ns = self._namespace(tenant_id)
@@ -196,7 +196,7 @@ class TurbopufferVectorBackend(VectorBackend):
             else:
                 raise PermissionError("L2 Vector prune rejected: Missing cryptographic taint signature.")
         else:
-            async with connect_async(DEFAULT_DB_PATH) as conn:
+            async with connect_async_ctx(str(DEFAULT_DB_PATH)) as conn:
                 is_valid = await verify_taint_token(conn, taint_signature, content)
                 if not is_valid:
                     raise PermissionError("L2 Vector prune rejected: Cryptographic taint signature is invalid.")

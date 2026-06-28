@@ -304,7 +304,7 @@ class MemoryArchaeologist:
             
         try:
             from cortex.engine.core.l3_archive import l3_archiver
-            l3_archiver.archive_facts(cluster_facts)
+            l3_archiver.archive_facts(cluster_facts)  # type: ignore[arg-type]
         except Exception as e:
             import logging
             logging.getLogger("cortex.memory.archaeology").warning("L3 Archival failed: %s", e)

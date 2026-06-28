@@ -63,7 +63,7 @@ async def proxy_inference(req: InferenceRequest):
             return {"response": f"MOCK_RESPONSE_FOR_{req.agent_id}"}
             
         client = SovereignLLMClient()
-        response = client.generate(req.prompt)
+        response = client.generate(req.prompt)  # type: ignore[call-arg]
         return {"response": response}
     except Exception as e:
         logger.error(f"[InferenceProxy] Upstream LLM failure: {e}")

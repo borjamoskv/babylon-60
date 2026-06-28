@@ -82,6 +82,7 @@ class VirtualAgent:
         self.alive = True
         self._execution_delay = execution_delay
         self._router = router  # CortexLLMRouter | None
+        self.formation: str | None = None
 
     async def execute(self, task_idx: str, prompt: str) -> str:
         """Execute a task. C5-REAL when router is set, C4-SIM otherwise."""

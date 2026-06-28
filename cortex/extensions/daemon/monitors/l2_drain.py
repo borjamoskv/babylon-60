@@ -57,7 +57,7 @@ class L2DrainMonitor:
             return None
 
         # Verify backend
-        if not await self._ensure_backend():
+        if not await self._ensure_backend() or self._backend is None:
             return None
 
         drained_count = 0

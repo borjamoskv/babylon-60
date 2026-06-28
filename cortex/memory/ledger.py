@@ -258,7 +258,7 @@ class EventLedgerL3:
         }
 
 
-def _canonical_metadata(metadata: dict[str, Any]) -> str:
+def _canonical_metadata(metadata: Any) -> str:
     from types import MappingProxyType
     if isinstance(metadata, MappingProxyType):
         metadata = dict(metadata)
@@ -288,7 +288,7 @@ def _compute_event_signature_from_parts(
     content: str,
     token_count: int,
     session_id: str,
-    metadata: dict[str, Any],
+    metadata: Any,
     prev_hash: str,
 ) -> str:
     import hashlib

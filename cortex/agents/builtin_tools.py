@@ -351,7 +351,7 @@ class ApexKnowledgeTool:
         if action == "list":
             return {
                 "ok": True,
-                "primitives": [{"id": p["id"], "name": p["name"]} for p in apex_registry.list_all()]
+                "primitives": [{"id": p.id, "name": p.name} for p in apex_registry.list_primitives()]
             }
         elif action == "lookup":
             if not apex_id:

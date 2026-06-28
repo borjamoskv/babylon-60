@@ -93,7 +93,7 @@ class OuroborosCollapseEngine:
             logger.info(f"Branch {branch} - Exergy Yield: {evaluations[branch]:.2f}%")
 
         # Find the max exergy
-        winner = max(evaluations, key=evaluations.get)
+        winner = max(evaluations.items(), key=lambda x: x[1])[0]
         losers = [b for b in target_branches if b != winner]
 
         from cortex.database.core import connect_async_ctx

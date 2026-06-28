@@ -19,11 +19,10 @@ from typing import Any
 
 try:
     import yaml
-    YAMLError = yaml.YAMLError
+    YAMLError: Any = getattr(yaml, "YAMLError", Exception)
 except ImportError:
     yaml = None
-    class YAMLError(Exception):
-        pass
+    YAMLError = Exception
 
 # ─── Constantes ──────────────────────────────────────────────────────────────
 from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR

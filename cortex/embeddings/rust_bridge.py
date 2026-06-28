@@ -41,13 +41,13 @@ class RustNativeEmbeddings:
             raise FileNotFoundError(f"ONNX model not found: {model_path}")
             
         # Configure Parallelism to maximize thermodynamic efficiency
-        sess_options = ort.SessionOptions()
+        sess_options = ort.SessionOptions()  # type: ignore[attr-defined]
         sess_options.intra_op_num_threads = os.cpu_count() or 4
-        sess_options.execution_mode = ort.ExecutionMode.ORT_PARALLEL
-        sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        sess_options.execution_mode = ort.ExecutionMode.ORT_PARALLEL  # type: ignore[attr-defined]
+        sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL  # type: ignore[attr-defined]
         
         if not os.environ.get("CORTEX_TESTING"):
-            self.session = ort.InferenceSession(
+            self.session = ort.InferenceSession(  # type: ignore[attr-defined]
                 model_path, 
                 sess_options, 
                 providers=['CPUExecutionProvider']
@@ -93,7 +93,7 @@ class RustNativeEmbeddings:
         }
         
         # Typically the output is 'last_hidden_state' or 'sentence_embedding'
-        ort_outs = self.session.run(None, ort_inputs)
+        ort_outs = self.session.run(None, ort_inputs)  # type: ignore[attr-defined]
         
         # Mean pooling based on attention mask
         embeddings = ort_outs[0]  # shape: (batch_size, seq_len, hidden_size)
