@@ -6,8 +6,8 @@
 
 """CORTEX Skills Module - Cognitive Graph Engine.
 
-De un directorio de .md a un grafo cognitivo vivo.
-Skills que se registran solos, declaran capacidades y se componen bajo demanda.
+From a .md directory to a living cognitive graph.
+Self-registering skills that declare capabilities and compose on demand.
 """
 
 from cortex.extensions.skills.registry import SkillManifest, SkillRegistry
