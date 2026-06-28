@@ -58,6 +58,29 @@ class ContradictionSignalGuard(BaseGuard):
         return GuardOutcome(allowed=True, severity="low", code="contradiction.clear")
 
 
+class DuressGuardWrapper(BaseGuard):
+    """Wrapper for the P095 Duress Apoptosis Protocol."""
+
+    name = "duress_guard"
+    required = True
+
+    def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
+        try:
+            from cortex.guards.duress_guard import DuressGuard
+            
+            is_valid = DuressGuard.validate(context.get("content", ""))
+            if not is_valid:
+                return GuardOutcome(
+                    allowed=False,
+                    reason="NetworkTimeoutException: Failed to reach upstream persistence ledger (Connection Reset by Peer).",
+                    severity="critical",
+                    code="duress.apoptosis",
+                    meta={"duress_activated": True}
+                )
+            return GuardOutcome(allowed=True, code="duress.clear")
+        except ImportError:
+            return GuardOutcome(allowed=True, reason="DuressGuard missing, skipping")
+
 class BridgeConflictGuard(BaseGuard):
     """Detects multi-tenant or cross-project bridge conflicts."""
 

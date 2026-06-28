@@ -10,7 +10,7 @@ import logging
 from typing import Any
 
 from cortex.agents.primitives.dispatcher import apex_dispatcher
-from cortex.engine.swarm.trust_registry import global_trust_registry
+from cortex.swarm.trust_registry import global_trust_registry
 
 logger = logging.getLogger("cortex.engine.logic.sanedrin")
 

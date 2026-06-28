@@ -85,7 +85,7 @@ from .meta import (
     sovereign_arbiter,
     vision_reasoner,
 )
-from .swarm import (
+from cortex.swarm import (
     agent_mixin,
     aleph_omega,
     auth,

@@ -17,10 +17,10 @@ if TYPE_CHECKING:
     from cortex.embeddings.manager import EmbeddingManager
     from cortex.engine.flow.guard_pipeline import GuardPipeline
     from cortex.engine.flow.lock import SovereignLock
-    from cortex.engine.swarm.auth import ByzantineAuthLayer
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
+    from cortex.swarm.auth import ByzantineAuthLayer
 
 logger = logging.getLogger("cortex.engine.guards")
 
@@ -93,7 +93,7 @@ class ComponentsMixin:
     @property
     def auth(self) -> ByzantineAuthLayer:
         if self._auth is None:
-            from cortex.engine.swarm.auth import ByzantineAuthLayer
+            from cortex.swarm.auth import ByzantineAuthLayer
 
             self._auth = ByzantineAuthLayer()
         return self._auth

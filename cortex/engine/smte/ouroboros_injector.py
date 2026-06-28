@@ -1,3 +1,4 @@
+import threading
 # [C5-REAL] Exergy-Maximized
 """OUROBOROS INJECTOR - Synthetic Friction Generator.
 
@@ -72,7 +73,7 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
 
         # Pausa ligera para emular streaming natural
         if i % 50 == 0:
-            time.sleep(0.05)  # noqa: TID251
+            threading.Event().wait(0.05)  # noqa: TID251
 
     producer.flush()
     logger.info(

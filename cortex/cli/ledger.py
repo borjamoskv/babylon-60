@@ -124,8 +124,9 @@ def create_checkpoint(db: str, batch: int):
 @click.option("--snapshot-dir", default=".cortex/snapshots", help="Directory to save the snapshot")
 def compact_ledger_cmd(db: str, max_rows: int, snapshot_dir: str):
     """Compact older ledger rows into a snapshot and inject a COMPACTION_NODE."""
-    from cortex.audit.ledger import EnterpriseAuditLedger
     import asyncio
+
+    from cortex.audit.ledger import EnterpriseAuditLedger
     
     # We initialize an EnterpriseAuditLedger which is backed by aiosqlite, not LedgerStore
     async def _run_compaction():
@@ -136,7 +137,7 @@ def compact_ledger_cmd(db: str, max_rows: int, snapshot_dir: str):
             result = await ledger.compact_ledger(max_rows=max_rows, snapshot_dir=Path(snapshot_dir))
             
         if result.get("status") == "compacted":
-            console.print(f"[bold green]✔ Ledger successfully compacted.[/bold green]")
+            console.print("[bold green]✔ Ledger successfully compacted.[/bold green]")
             console.print(f"  Rows compacted: {result.get('rows_compacted')}")
             console.print(f"  Snapshot saved to: {result.get('snapshot_path')}")
         else:

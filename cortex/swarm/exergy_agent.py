@@ -5,7 +5,7 @@ from typing import Any
 
 from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.cognitive.exergy_optimizer import ExergyOptimizer
-from cortex.engine.swarm.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
+from cortex.swarm.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 
 logger = logging.getLogger("cortex.exergy_agent")
 

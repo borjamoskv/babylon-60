@@ -32,7 +32,7 @@ from cortex.engine.core.tuning_store import TuningStore
 from cortex.engine.evo._autocurative_config import AutoCurativeConfig
 from cortex.engine.forensic.predictive_healer import Prediction, PredictiveHealer
 from cortex.engine.self_optimizer import OptimizerConfig, SelfOptimizer
-from cortex.engine.swarm.autocurative_agent import AutoCurativeAgent
+from cortex.swarm.autocurative_agent import AutoCurativeAgent
 
 __all__ = ["HealingStack", "HealingStackConfig"]
 

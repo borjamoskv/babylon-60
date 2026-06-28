@@ -289,7 +289,7 @@ class OmegaDaemon:
                     from pathlib import Path
 
                     from cortex.engine.evo.autopoiesis import AutopoiesisEngine
-                    from cortex.engine.swarm.swarm_10k import SwarmCommander
+                    from cortex.swarm.swarm_10k import SwarmCommander
 
                     bus_path = Path("~/.cortex/10k_shards").expanduser()
                     commander = SwarmCommander(bus_path=bus_path, tenant_id="omega_daemon")

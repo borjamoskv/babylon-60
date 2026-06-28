@@ -9,7 +9,7 @@ import click
 from rich.panel import Panel
 
 from cortex.cli.common import cli, console
-from cortex.engine.swarm.swarm_10k import SwarmCommander
+from cortex.swarm.swarm_10k import SwarmCommander
 
 
 @cli.group()

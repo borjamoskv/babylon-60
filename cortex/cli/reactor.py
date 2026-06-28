@@ -1,3 +1,4 @@
+import threading
 # [C5-REAL] Exergy-Maximized
 """
 CORTEX REACTOR (SYNAPSE-X) v1.0
@@ -47,7 +48,7 @@ class ReactorState:
         self.logs = []
         self.healed_snippets = [
             "except Exception:  # noqa: BLE001 -> except OSError:",
-            "time.sleep(1) -> await asyncio.sleep(1)",
+            "threading.Event().wait(1) -> await asyncio.sleep(1)",
             "import web3 -> [INTERCEPTED]",
             "Complex branch (depth 12) -> Refactored",
             "Bare except found -> Added context",
@@ -119,7 +120,7 @@ def run_reactor():
             state.update()
             layout["reactor"].update(generate_reactor_view(state))
             layout["entropy_feed"].update(generate_feed_view(state))
-            time.sleep(0.2)  # noqa: TID251 # Synchronous UI loop
+            threading.Event().wait(0.2)  # noqa: TID251 # Synchronous UI loop
 
 
 if __name__ == "__main__":

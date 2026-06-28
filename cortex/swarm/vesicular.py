@@ -13,7 +13,7 @@ import subprocess
 import tempfile
 import uuid
 
-logger = logging.getLogger("cortex.engine.swarm.vesicular")
+logger = logging.getLogger("cortex.swarm.vesicular")
 
 class VesicularRuntime:
     """Ephemeral Execution Membrane for untrusted Python payloads."""

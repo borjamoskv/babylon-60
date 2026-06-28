@@ -11,7 +11,7 @@ from cortex.engine.core.performance_tracker import PerformanceTracker
 from cortex.engine.core.tuning_store import TuningStore
 from cortex.engine.forensic.predictive_healer import PredictiveHealer
 from cortex.engine.self_optimizer import SelfOptimizer
-from cortex.engine.swarm.autocurative_agent import AutoCurativeAgent
+from cortex.swarm.autocurative_agent import AutoCurativeAgent
 
 from .daemon import SupervisorDaemon
 from .types import AgentInfo, AgentStatus, SupervisorConfig

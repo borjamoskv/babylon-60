@@ -23,11 +23,11 @@ from pydantic import ValidationError
 from cortex.config import DB_PATH
 from cortex.engine.causal.taint_engine import generate_secure_taint_token
 from cortex.engine.causal.topological_arbitrage import TopologyIndex
-from cortex.engine.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
-from cortex.engine.swarm.state_store import CausalStateStore
 from cortex.extensions.skills.autodidact.epistemology import Hypothesis
+from cortex.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
+from cortex.swarm.state_store import CausalStateStore
 
-logger = logging.getLogger("cortex.engine.swarm.supervisor")
+logger = logging.getLogger("cortex.swarm.supervisor")
 
 
 class DummyAgent(SwarmAgent):
@@ -226,7 +226,7 @@ class SwarmSupervisor:
                     
                     if cached_payload:
                         logger.info(f"⚡ [Semantic Cache Hit] Bypassing LLM inference for task {task['id']}")
-                        from cortex.engine.swarm.legion import SwarmSignal
+                        from cortex.swarm.legion import SwarmSignal
                         synthetic_signal = SwarmSignal(
                             agent_id="semantic_cache",
                             target=task["id"],

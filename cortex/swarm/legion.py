@@ -26,7 +26,7 @@ except ImportError:
 
     bicameral = BicameralStub()
 
-from cortex.engine.swarm.legion_vectors import RED_TEAM_SWARM, AttackVector
+from cortex.swarm.legion_vectors import RED_TEAM_SWARM, AttackVector
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class AsyncSignalBus:
             # If entropy is below the threshold, it means the payload contains repetitive
             # conversational slop (Anergia) instead of dense structural invariants.
             if entropy < LandauerGuard.MIN_ENTROPY:
-                logging.getLogger("cortex.engine.swarm.legion").warning(
+                logging.getLogger("cortex.swarm.legion").warning(
                     f"🛑 [Landauer Epistemic Filter] Payload rejected. Entropy ({entropy:.2f}) < {LandauerGuard.MIN_ENTROPY}. Anergy detected."
                 )
                 signal.status = "FAILURE"

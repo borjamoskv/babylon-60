@@ -10,7 +10,6 @@ import gzip
 import hashlib
 import json
 import logging
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -85,7 +84,7 @@ async def compact_ledger(
         # Calculate the h_end by walking the SMT for the batches we compact
         expected_prev_hash = h_start
         local_smt = SparseMerkleTree()
-        for prev_hash, signature, batch_rows in batches_to_compact:
+        for _prev_hash, _signature, batch_rows in batches_to_compact:
             # Bypass logic if it's already a compaction node
             if len(batch_rows) == 1 and batch_rows[0][6] == "COMPACTION_NODE":
                 expected_prev_hash = batch_rows[0][8]

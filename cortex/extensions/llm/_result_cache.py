@@ -36,7 +36,7 @@ def _db(path: Path, exclusive: bool = False) -> Generator[sqlite3.Connection, No
             conn.execute("BEGIN EXCLUSIVE")
         yield conn
         conn.commit()
-    except Exception:
+    except (RuntimeError, ValueError, OSError):
         conn.rollback()
         raise
     finally:

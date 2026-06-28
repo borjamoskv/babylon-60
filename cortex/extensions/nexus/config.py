@@ -39,7 +39,7 @@ def load_nexus_config(config_path: str | Path) -> NexusConfig:
         return NexusConfig()
         
     try:
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
             
         if not data:

@@ -37,7 +37,7 @@ def mark_file_tainted(
             source="cortex-mejoralo",
             meta={"file_path": file_path, "tainted": True},
         )
-    except Exception:
+    except (RuntimeError, ValueError, OSError):
         logger.exception("Failed to persist taint for %s", file_path)
 
 

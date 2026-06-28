@@ -385,6 +385,7 @@ async def test_hdc_store_l2_taint_rejection(tmp_path, agent_keys):
         project_id="default",
         content="HDC Fact",
         embedding=[0.1] * 128,
+        specular_embedding=[1] * 128,
         metadata={},
     )
     with pytest.raises(TaintValidationError):
@@ -397,6 +398,7 @@ async def test_hdc_store_l2_taint_rejection(tmp_path, agent_keys):
         project_id="default",
         content="HDC Fact",
         embedding=[0.1] * 128,
+        specular_embedding=[1] * 128,
         metadata={"cortex_taint": valid_token},
     )
     # Should succeed

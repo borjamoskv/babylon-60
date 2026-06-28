@@ -18,7 +18,7 @@ from rich.table import Table
 from rich.text import Text
 
 from cortex.cli.common import cli
-from cortex.engine.swarm.omega_daemon import OmegaKernel
+from cortex.swarm.omega_daemon import OmegaKernel
 
 console = Console()
 logger = logging.getLogger(__name__)
