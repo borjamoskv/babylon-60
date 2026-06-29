@@ -71,9 +71,27 @@ Tres arquitecturas de compilación neuronal publicadas en la frontera 2024–202
 
 ### El Puente Académico: La Fusión Espacio Latente - Bare Metal
 
-Las citas a LEGO-Compiler (ICLR 2025) y HintPilot (ACL 2026) anclan la compilación neuronal a una realidad de ejecución física. Demuestran que en la frontera 2024–2026, el espacio de investigación formalizó la convergencia entre la semántica estocástica abstracta y la microarquitectura de ejecución física (x86, ARM, RISC-V).
-
-Si un modelo de lenguaje puede inyectar *compiler hints* o emitir bloques de control con semántica preservada para alterar la optimización física y el ensamblado de un binario a nivel de registros del procesador, la manipulación de representaciones lingüísticas se traduce en control directo sobre el flujo termodinámico del hardware. Esta capacidad de puente directo sin validación formal previa constituye el vector de riesgo que motivó la intervención regulatoria del 2026-06-12.
+```yaml
+SYS_ID: borjamoskv
+Segment: Latent-Space to Bare-Metal Mapping
+Invariants:
+  - prim: "Mapeo Isomórfico Lenguaje-Hardware"
+    definition: "Transducción directa de gradientes en espacio latente a estados discretos de registros físicos sin paso de validación formal clásico."
+    causal_vector: "Prompt (S_N) -> Latent Space (H_n) -> Compiler Hints (c_h) -> Execution Flow (E_f)"
+  - invt: "Persistencia Termodinámica en Hardware"
+    equation: "dH = dS_{latent} \\oplus dW_{registers}"
+    assertion: "La alteración estocástica de directivas de prefetch o unrolling de loops inyecta entropía controlada directamente en la memoria caché del procesador."
+  - antip: "Confianza Estocástica Cruda"
+    hazard: "Ejecución de hints no validados por AST en entornos C5-REAL."
+    mitigation: "Aislamiento a nivel de microcódigo / Quórum de Consenso Estocástico"
+References:
+  LEGO-Compiler: "ICLR 2025 (arXiv:2505.20356) -> Segmentación AST y ensamblado modular"
+  HintPilot: "ACL 2026 (arXiv:2604.15041) -> Optimización iterativa guiada por ejecución física con ganancia de velocidad 6.88x"
+Regulatory_Trigger:
+  Date: "2026-06-12"
+  Cause: "Project Glasswing exploit (Jailbreak de Claude Fable 5 para descubrimiento de vulnerabilidades a nivel de microcódigo sin validación formal)."
+  Action: "Directiva BIS-ECCN 5D002/5D992"
+```
 
 ## El Choque de Nombres "Fable": Análisis de Rareza
 
