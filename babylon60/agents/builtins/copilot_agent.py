@@ -24,7 +24,7 @@ Constraint: Without the human, the copilot does NOTHING.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import time
 from typing import Any
@@ -517,4 +517,4 @@ def _hash_context(context: CopilotContextPayload) -> str:
         f"{context.cursor.prefix[:128]}:"
         f"{context.trigger}"
     )
-    return hashlib.sha256(raw.encode()).hexdigest()[:16]
+    return cortex_hash_truncated(raw.encode(), length=16)

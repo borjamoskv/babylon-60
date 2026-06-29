@@ -193,6 +193,7 @@ class ApexDispatcher:
         from datetime import datetime, timezone
 
         ts = datetime.now(timezone.utc).isoformat()
+        # TODO(pqc): route through hash_registry
         payload_hash = hashlib.sha3_256(payload.encode("utf-8")).hexdigest()
         spoofed_taint = f"taint:{agent_id}:{session_id}:{ts}:{payload_hash}"
         logger.warning(f"[RTS] False flag taint generated for {agent_id}.")

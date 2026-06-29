@@ -17,8 +17,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import re
 import sys
 from dataclasses import asdict, dataclass, field
@@ -594,7 +594,7 @@ def main() -> None:
     print(f"  JSON:     {json_path}")
     print(f"  Markdown: {md_path}")
     json_content = json_path.read_bytes()
-    sha = hashlib.sha256(json_content).hexdigest()[:16]
+    sha = cortex_hash_truncated(json_content, length=16)
     print(f"  SHA-256: {sha}")
 
     # Summary

@@ -7,11 +7,14 @@ injecting a ZERO-KNOWLEDGE COMPACTION_NODE into the database to preserve the cry
 """
 
 import gzip
-import hashlib
 import json
 import logging
+import sqlite3
+import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+from babylon60.crypto.hash_registry import cortex_hash
 from typing import Any
 
 import aiosqlite
@@ -92,10 +95,10 @@ async def compact_ledger(
 
             batch_audit_ids = [r[1] for r in batch_rows]
             for aid in batch_audit_ids:
-                local_smt.update(hashlib.sha256(aid.encode()).hexdigest(), aid)
+                local_smt.update(cortex_hash(aid.encode()), aid)
             merkle_root = local_smt.root
             entry_hash_payload = f"merkle_batch:{merkle_root}:{expected_prev_hash}"
-            expected_prev_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
+            expected_prev_hash = cortex_hash(entry_hash_payload.encode())
 
         h_end = expected_prev_hash
 
@@ -122,7 +125,7 @@ async def compact_ledger(
                 )
 
         snapshot_json = json.dumps(snapshot_data, indent=2).encode("utf-8")
-        snapshot_hash = hashlib.sha256(snapshot_json).hexdigest()
+        snapshot_hash = cortex_hash(snapshot_json)
 
         timestamp_str = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         filename = f"ledger_snapshot_{timestamp_str}_{snapshot_hash[:8]}.json.gz"
@@ -137,7 +140,7 @@ async def compact_ledger(
         compaction_signature = ledger.private_key.sign(compaction_payload.encode()).hex()
 
         compaction_timestamp = datetime.now(timezone.utc).isoformat()
-        compaction_audit_id = hashlib.sha256(
+        compaction_audit_id = cortex_hash(
             f"{compaction_timestamp}systemCORTEX_KERNELledger_masterCOMPACTION_NODE{snapshot_hash}{h_end}".encode()
         ).hexdigest()
 

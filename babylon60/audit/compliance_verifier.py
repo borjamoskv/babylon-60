@@ -8,12 +8,12 @@ without relying on the local database or network.
 """
 
 import base64
-import hashlib
 import json
 import logging
 import zipfile
 from pathlib import Path
 from typing import Any
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.audit.verifier")
 
@@ -96,11 +96,11 @@ class ComplianceVerifier:
             # Reconstruct merkle root for the batch
             batch_audit_ids = [r["audit_id"] for r in rows]
             merkle_payload = "".join(batch_audit_ids) + prev_hash
-            merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+            merkle_root = cortex_hash(merkle_payload.encode())
 
             # Reconstruct the entry_hash that was signed
             entry_hash_payload = f"merkle_batch:{merkle_root}:{prev_hash}"
-            entry_hash = hashlib.sha256(entry_hash_payload.encode()).hexdigest()
+            entry_hash = cortex_hash(entry_hash_payload.encode())
 
             # The signature is hex in the db. We need it in base64 for the Verifier.
             try:

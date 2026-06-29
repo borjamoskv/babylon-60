@@ -5,7 +5,7 @@ COGNITIVE-DB: Database migration and schema ensure logic.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 from typing import Any
 
@@ -117,7 +117,7 @@ async def ensure_table_for_router(router: Any) -> None:
                 "routing_policy_version": routing_policy_ver,
             }
             payload_bytes = router.canonical_json(payload_obj)
-            router._last_hash = hashlib.sha256(payload_bytes).hexdigest()
+            router._last_hash = cortex_hash(payload_bytes)
         else:
             router._last_hash = "GENESIS"
         router._ready = True

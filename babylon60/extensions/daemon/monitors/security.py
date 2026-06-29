@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Any
 
 from cortex.extensions.daemon.models import SecurityAlert
-from cortex.memory import AsyncEncoder, VectorStoreL2
+from cortex.memory.encoder import AsyncEncoder
+from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2 as VectorStoreL2
 
 logger = logging.getLogger("moskv-daemon")
 

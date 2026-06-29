@@ -294,5 +294,48 @@ def export_ledger_cmd(
     )
 
 
+@ledger_cmds.command("escape-hatch")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+@click.option("--check", is_flag=True, help="Check if dead man switch is triggered")
+@click.option("--touch", is_flag=True, help="Record liveness heartbeats/timestamps")
+@click.option("--export-dir", type=click.Path(file_okay=False, path_type=Path), help="Escape export output directory")
+@click.option("--threshold-days", type=int, default=30, help="Dead man switch inactivity threshold in days")
+@click.option("--force", is_flag=True, help="Force export immediately even if switch not triggered")
+def escape_hatch_cmd(db: str, check: bool, touch: bool, export_dir: Path | None, threshold_days: int, force: bool):
+    """Autonomic Data Escape Hatch (Dead Man Switch) operations."""
+    import asyncio
+    import aiosqlite
+    from cortex.ledger.escape_hatch import record_liveness, is_dead_man_switch_triggered, trigger_escape_hatch_export
+
+    async def _run():
+        async with aiosqlite.connect(db) as conn:
+            if touch:
+                await record_liveness(conn)
+                console.print("[bold green]Escape Hatch: Liveness logged successfully.[/bold green]")
+                return
+
+            if check:
+                triggered = await is_dead_man_switch_triggered(conn, threshold_days)
+                if triggered:
+                    console.print("[bold red]Dead Man Switch: TRIGGERED! System inoperable threshold exceeded.[/bold red]")
+                else:
+                    console.print("[bold green]Dead Man Switch: ACTIVE. System is live and healthy.[/bold green]")
+                return
+
+            triggered = await is_dead_man_switch_triggered(conn, threshold_days)
+            if triggered or force:
+                if not export_dir:
+                    console.print("[bold red]Error: --export-dir is required to execute the escape hatch export.[/bold red]")
+                    return
+                console.print(f"[bold yellow]Triggering Autonomic Flat Export to {export_dir}...[/bold yellow]")
+                res = await trigger_escape_hatch_export(conn, export_dir)
+                console.print(f"[bold green]Export Complete![/bold green] Manifest written to: {res['manifest_path']}")
+            else:
+                console.print("[bold green]Dead Man Switch not triggered (system is live). Export skipped. Use --force to override.[/bold green]")
+
+    asyncio.run(_run())
+
+
 ledger_cmds_click = ledger_cmds
 cli.add_command(ledger_cmds, name="trust-ledger")
+

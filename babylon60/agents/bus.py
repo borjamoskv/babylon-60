@@ -199,10 +199,10 @@ class ByzantineZeroCopyBus:
         self._lock = asyncio.Lock()
 
     def _sign(self, msg_json: str) -> str:
-        import hashlib
+        from babylon60.crypto.hash_registry import cortex_hmac
         import hmac
 
-        return hmac.new(self.secret, msg_json.encode("utf-8"), hashlib.sha256).hexdigest()
+        return cortex_hmac(self.secret, msg_json.encode("utf-8"))
 
     async def send(self, message: AgentMessage) -> None:
         """Enqueue a message with Byzantine signature."""

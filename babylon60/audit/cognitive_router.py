@@ -12,10 +12,10 @@ Production-grade verifiable routing state machine featuring:
 from __future__ import annotations
 
 import asyncio
-import hashlib
-import json
 import logging
 import time
+from typing import Any, Dict
+from babylon60.crypto.hash_registry import cortex_hash
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
@@ -165,8 +165,8 @@ class CognitiveRouter:
                 retention_required = tier_policy.get("retention_for_restricted", False)
 
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        prompt_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
-        routing_id = hashlib.sha256(f"{timestamp}{prompt_hash}".encode()).hexdigest()
+        prompt_hash = cortex_hash(prompt.encode("utf-8"))
+        routing_id = cortex_hash(f"{timestamp}{prompt_hash}".encode())
 
         sensitivity_json = json.dumps(sensitivity)
         retention_flag = 1 if retention_required else 0
@@ -183,7 +183,7 @@ class CognitiveRouter:
             "routing_policy_version": self.routing_policy["version"],
         }
         payload_bytes = self.canonical_json(payload_obj)
-        entry_hash = hashlib.sha256(payload_bytes).hexdigest()
+        entry_hash = cortex_hash(payload_bytes)
 
         signature = self.ledger.private_key.sign(entry_hash.encode("utf-8")).hex()
 
@@ -241,7 +241,7 @@ class CognitiveRouter:
                 ),
             }
             payload_bytes = self.canonical_json(payload_obj)
-            entry_hash = hashlib.sha256(payload_bytes).hexdigest()
+            entry_hash = cortex_hash(payload_bytes)
 
             public_key.verify(bytes.fromhex(entry["signature"]), entry_hash.encode("utf-8"))
             return True

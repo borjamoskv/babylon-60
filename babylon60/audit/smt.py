@@ -4,7 +4,7 @@ CORTEX v6+ - Sparse Merkle Tree (SMT) Ledger Integration
 Provides O(log n) cryptographic tamper-evident verification for Swarm agents.
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 class SparseMerkleTree:
@@ -24,12 +24,12 @@ class SparseMerkleTree:
         hashes = ["0" * 64]
         for _ in range(self.depth):
             prev = hashes[-1]
-            h = hashlib.sha256((prev + prev).encode()).hexdigest()
+            h = cortex_hash(prev + prev)
             hashes.append(h)
         return hashes
 
     def _hash_pair(self, left: str, right: str) -> str:
-        return hashlib.sha256((left + right).encode()).hexdigest()
+        return cortex_hash(left + right)
 
     def update(self, key_hash: str, value_hash: str) -> str:
         """

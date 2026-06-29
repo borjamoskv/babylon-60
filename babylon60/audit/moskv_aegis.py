@@ -10,7 +10,6 @@ via Ed25519 cryptographic seals linked to the EnterpriseAuditLedger chain.
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 import logging
 import os
@@ -19,6 +18,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
+from babylon60.crypto.hash_registry import cortex_hash
 from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.audit.moskv_videntia import MoskvVidentiaChainBuilder, MoskvVidentiaOracle
 
@@ -155,7 +155,7 @@ class MoskvAegisEngine:
                 payload_bytes = json.dumps(
                     payload_obj, sort_keys=True, separators=(",", ":")
                 ).encode("utf-8")
-                self._last_hash = hashlib.sha256(payload_bytes).hexdigest()
+                self._last_hash = cortex_hash(payload_bytes)
             else:
                 self._last_hash = "GENESIS"
             self._ready = True
@@ -177,7 +177,7 @@ class MoskvAegisEngine:
         findings = [a for a in attacks if a.get("severity", 0.0) >= 0.6]
 
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
-        audit_id = hashlib.sha256(f"{timestamp}{risk_score}".encode()).hexdigest()
+        audit_id = cortex_hash(f"{timestamp}{risk_score}".encode())
 
         findings_json = json.dumps(findings)
         chains_json = json.dumps(chains)
@@ -192,7 +192,7 @@ class MoskvAegisEngine:
         payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode(
             "utf-8"
         )
-        entry_hash = hashlib.sha256(payload_bytes).hexdigest()
+        entry_hash = cortex_hash(payload_bytes)
 
         signature = self.ledger.private_key.sign(entry_hash.encode("utf-8")).hex()
 
@@ -241,7 +241,7 @@ class MoskvAegisEngine:
             payload_bytes = json.dumps(payload_obj, sort_keys=True, separators=(",", ":")).encode(
                 "utf-8"
             )
-            entry_hash = hashlib.sha256(payload_bytes).hexdigest()
+            entry_hash = cortex_hash(payload_bytes)
 
             public_key.verify(bytes.fromhex(entry["signature"]), entry_hash.encode("utf-8"))
             return True

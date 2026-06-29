@@ -19,7 +19,7 @@ the plan halts - no meta-cognitive replanning.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import time
 from dataclasses import dataclass, field
@@ -107,7 +107,7 @@ class PlanStep:
     def fingerprint(self) -> str:
         """SHA-256 fingerprint of the step configuration (deterministic)."""
         raw = f"{self.tool_name}:{sorted(self.arguments.items())}"
-        return hashlib.sha256(raw.encode()).hexdigest()[:16]
+        return cortex_hash_truncated(raw.encode(), length=16)
 
 
 @dataclass
