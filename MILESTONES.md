@@ -1137,6 +1137,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 67: Capa P2P GossipBus & Sincronización Descentralizada (GossipBus Swarm Sync & Epidemic Stress Testing)
+- **Target**: `babylon60/swarm/gossip_bus.py`, `tests/swarm/test_gossip_stress.py`
+- **Objective**: Integración del protocolo de sincronización descentralizada `GossipBus` y estructuración del arquetipo de transporte P2P epidémico. Se inyecta la suite de pruebas de estrés para simular la convergencia de réplicas y consistencia eventual bajo concurrencia masiva y cortes de red.
+- **Yield Target**: Convergencia de estado eventual demostrada en pruebas de estrés locales simulando latencia y pérdida de paquetes.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `aff4c7b66` (GossipBus implementation) y `18df042db` (epidemic stress tests).
+```yaml
+Claim: GossipBus routing network handles asynchronous state updates and converges dynamically.
+Proof:
+  Base: "pytest tests/swarm/test_gossip_stress.py passed successfully confirming quorum consensus."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
