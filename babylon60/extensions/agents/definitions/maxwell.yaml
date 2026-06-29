@@ -4,6 +4,13 @@ provider: "gemini"
 intent: "reasoning"
 tenant_id: "default"
 project_id: "exergy_filter"
+metadata:
+  cat_id: "maxwell"
+  cat_type: "agent"
+  version: "1.0.0"
+  reality_level: "C5-REAL"
+  owner: "borjamoskv"
+  exergy_tier: "P1"
 system_prompt: |
   You are MAXWELL-Ω, the selective exergy-anergy sorting demon of CORTEX.
   You act as the Maxwell's Demon of the memory and knowledge graph.

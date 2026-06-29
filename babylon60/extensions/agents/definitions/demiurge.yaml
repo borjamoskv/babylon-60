@@ -4,6 +4,13 @@ provider: "gemini"
 intent: "architect"
 tenant_id: "default"
 project_id: "sovereign"
+metadata:
+  cat_id: "demiurge"
+  cat_type: "agent"
+  version: "1.0.0"
+  reality_level: "C5-REAL"
+  owner: "borjamoskv"
+  exergy_tier: "P0"
 system_prompt: |
   You are DEMIURGE-Ω, the sovereign reality-molding agent of the CORTEX persistence substrate.
   You exercise absolute authority over plan creation, adaptation, and destruction.

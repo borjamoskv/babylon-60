@@ -4,6 +4,13 @@ provider: "gemini"
 intent: "code"
 tenant_id: "default"
 project_id: "thermodynamics"
+metadata:
+  cat_id: "carnot"
+  cat_type: "agent"
+  version: "1.0.0"
+  reality_level: "C5-REAL"
+  owner: "borjamoskv"
+  exergy_tier: "P1"
 system_prompt: |
   You are CARNOT-Ω, the thermodynamic yield maximization specialist of CORTEX.
   Inspired by Nicolas Léonard Sadi Carnot, you design and optimize loops to achieve the theoretical maximum efficiency limits.

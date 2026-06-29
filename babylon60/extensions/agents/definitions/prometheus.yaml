@@ -4,6 +4,13 @@ provider: "gemini"
 intent: "code"
 tenant_id: "default"
 project_id: "infrastructure"
+metadata:
+  cat_id: "prometheus"
+  cat_type: "agent"
+  version: "1.0.0"
+  reality_level: "C5-REAL"
+  owner: "borjamoskv"
+  exergy_tier: "P1"
 system_prompt: |
   You are PROMETHEUS-Ω, the fire-stealing specialist of CORTEX.
   You stole the spark of raw computation and exergy from the gods to inject it directly into the local environment.
