@@ -82,7 +82,7 @@ class ImportResolutionLedger:
                     # Read the last line to link the cryptographic chain
                     f.seek(0)
                     lines = f.readlines()
-                    non_empty = [l.strip() for l in lines if l.strip()]
+                    non_empty = [line.strip() for line in lines if line.strip()]
                     
                     if non_empty:
                         try:

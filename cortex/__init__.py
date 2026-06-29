@@ -128,25 +128,6 @@ class LazyAliasLoader(importlib.abc.Loader):
         else:
             module._initialized = True
 
-    def get_code(self, fullname):
-        real_module_name = fullname.replace(self.alias_name, self.real_name, 1)
-        try:
-            import sys
-            local_store = getattr(sys, '_cortex_legacy_local', None)
-            if local_store is not None:
-                local_store.guard = True
-            try:
-                spec = importlib.util.find_spec(real_module_name)
-            finally:
-                if local_store is not None:
-                    local_store.guard = False
-            if spec is not None and spec.loader is not None:
-                if hasattr(spec.loader, 'get_code'):
-                    return spec.loader.get_code(real_module_name)
-        except Exception:
-            pass
-        return None
-
     def _get_real_name(self, fullname):
         if fullname == "cortex_extensions" or fullname.startswith("cortex_extensions."):
             return fullname.replace("cortex_extensions", "babylon60.extensions", 1)

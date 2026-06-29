@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from cortex.consensus.manager import ConsensusManager
+from cortex.consensus.manager import ConsensusManager as ConsensusManager
 
 if TYPE_CHECKING:
     from cortex.consensus.reputation import (
@@ -24,14 +24,14 @@ else:
 
         ReputationManager = _RM
     except ImportError:
-        import logging
+        pass
 
     try:
         from cortex.consensus.trust import TrustGraph as _TG
 
         TrustGraph = _TG
     except ImportError:
-        import logging
+        pass
 
 
 __all__ = ["ConsensusManager", "ReputationManager", "TrustGraph"]
