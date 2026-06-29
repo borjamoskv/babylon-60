@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# MCP Toolbox for Databases — CORTEX Integration
+# MCP Toolbox for Databases — BABYLON-60 Integration
 
 Exposes `cortex.db` as read-only MCP tools for any MCP-compatible client.
 
@@ -72,4 +72,4 @@ Add to `.vscode/settings.json`:
 - **Read-only by design** — no INSERT/UPDATE/DELETE statements
 - **Parameterized queries** — prevents SQL injection
 - **Toolset access control** — limit which tools agents can access
-- **Writes route through CORTEX MCP server** — preserves ledger integrity and SQLite write-lock safety
+- **Writes route through BABYLON-60 MCP server** — preserves ledger integrity and SQLite write-lock safety

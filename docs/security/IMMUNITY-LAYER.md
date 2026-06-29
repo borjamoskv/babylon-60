@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# RFC — CORTEX Immunity Layer v0.1
+# RFC — BABYLON-60 Immunity Layer v0.1
 
 > De memoria verificada a inmunidad computacional
 
 ## 1. Propósito
 
-CORTEX no debe limitarse a persistir estado con trazabilidad.
+BABYLON-60 no debe limitarse a persistir estado con trazabilidad.
 Debe detectar, contener, degradar, amputar y auditar estado con potencial de replicación entrópica.
 
 La capa de inmunidad define cómo el sistema clasifica y gobierna artefactos, bloques, ramas y memorias cuando existe riesgo de contaminación causal.
@@ -133,4 +133,4 @@ Métrica útil: `immune_false_positive_rate = artefactos útiles retenidos / art
 
 ## Invariante Principal
 La versión que fija todo el documento fundacional:
-**"CORTEX no trata el error como una anomalía local, sino como materia entrópica con potencial de replicación causal. Por ello, todo estado relevante atraviesa admisión, perfil inmunológico, cuarentena, promoción y sellado antes de integrarse en la continuidad cognitiva."**
+**"BABYLON-60 no trata el error como una anomalía local, sino como materia entrópica con potencial de replicación causal. Por ello, todo estado relevante atraviesa admisión, perfil inmunológico, cuarentena, promoción y sellado antes de integrarse en la continuidad cognitiva."**

@@ -1,4 +1,4 @@
-# CORTEX-PERSIST EXERGY MANIFEST
+# BABYLON-60 EXERGY MANIFEST
 > Sovereign Hierarchical Ordering of all Cognitive Assets (C5-REAL)
 
 ## EXERGY RANKING

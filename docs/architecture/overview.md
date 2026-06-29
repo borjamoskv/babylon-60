@@ -1,8 +1,8 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Architecture Overview
+# BABYLON-60 Architecture Overview
 
 ## The Core
-Cortex is a **local-first, sovereign intelligence engine**. It is NOT a chatbot. It is an operating system for cognition.
+BABYLON-60 is a **local-first, sovereign intelligence engine**. It is NOT a chatbot. It is an operating system for cognition.
 
 The paths below refer to the current `cortex/` package surface, not to historical top-level module
 names. For the recommended public product boundary, start with [`../product-surface.md`](../product-surface.md).
@@ -14,7 +14,7 @@ names. For the recommended public product boundary, start with [`../product-surf
     -   **`ledger/`**: Hash-chained ledger, checkpoints, writers, queues, and verification.
     -   **`storage/`**: Local and backend-aware storage adapters/classifiers.
 
-2.  **The Engine (Prefrontal Cortex)**
+2.  **The Engine (Prefrontal BABYLON-60)**
     -   **`engine/__init__.py`**: `CortexEngine` composite orchestrator.
     -   **`engine/store_mixin.py` / `engine/query_mixin.py` / `engine/transaction_mixin.py`**: Core write, recall, and verification paths.
     -   **`memory/guardrails.py`**: Deterministic guardrails around memory admission and safety.
@@ -26,7 +26,7 @@ names. For the recommended public product boundary, start with [`../product-surf
 
 ## Data Flow & Truthing Membrane
 
-The core of CORTEX is the Verification Membrane. Agents cannot write arbitrary data directly to the ledger. Every mutation is intercepted, validated, securely sanded, and sealed. 
+The core of BABYLON-60 is the Verification Membrane. Agents cannot write arbitrary data directly to the ledger. Every mutation is intercepted, validated, securely sanded, and sealed. 
 
 ```mermaid
 flowchart TD
@@ -50,7 +50,7 @@ flowchart TD
 
 ## Evolución: El Manifold Omega (Ω)
 
-Para la **v7 y v8**, CORTEX evoluciona de ser una infraestructura de confianza a un organismo cognitivo completo. El [Manifold Omega](OMEGA_MANIFOLD.md) define las 10 dimensiones de esta evolución, integrando percepción, decisión y acción en un solo evento sincrónico.
+Para la **v7 y v8**, BABYLON-60 evoluciona de ser una infraestructura de confianza a un organismo cognitivo completo. El [Manifold Omega](OMEGA_MANIFOLD.md) define las 10 dimensiones de esta evolución, integrando percepción, decisión y acción en un solo evento sincrónico.
 
 ---
 **Sovereign Architecture · Industrial Noir · v8.0.0 Alpha**

@@ -22,7 +22,7 @@ You will receive an acknowledgment within 48 hours and a detailed response withi
 
 ## Security Architecture
 
-CORTEX is built security-first across 7 layers:
+BABYLON-60 is built security-first across 7 layers:
 
 ### 1. Authentication
 
@@ -86,7 +86,7 @@ LLM-generated code is parsed via Python's AST before execution:
 
 ### 8. Nemesis Protocol (Algorithmic Immunity)
 
-The **Nemesis Protocol** is CORTEX's autonomic immune system, acting as an internal "red-teaming" monitor:
+The **Nemesis Protocol** is BABYLON-60's autonomic immune system, acting as an internal "red-teaming" monitor:
 - **Antibody Ledger**: Persistently records structural anti-patterns and previous failures in `nemesis.md`.
 - **Real-time Rejection**: Analyzes every incoming fact and code mutation against the antibody ledger.
 - **Hormonal Feedback**: Triggers `ADRENALINE` spikes in the Endocrine system when entropy is detected, forcing immediate corrective focus.
@@ -124,7 +124,7 @@ The **fourth leakage vector** — and the most insidious — is **composition le
 
 ### AES-256-GCM Vault
 
-CORTEX provides an encrypted vault for sensitive configuration:
+BABYLON-60 provides an encrypted vault for sensitive configuration:
 
 ```python
 from cortex.crypto.vault import Vault
@@ -144,7 +144,7 @@ See `.env.example` for the complete list.
 
 ## Threat Model
 
-CORTEX assumes:
+BABYLON-60 assumes:
 
 1. **Local deployments**: The SQLite database is as secure as the host filesystem
 2. **Network APIs**: All endpoints require authentication (API keys or JWT)
@@ -152,7 +152,7 @@ CORTEX assumes:
 4. **Supply chain**: Dependencies are pinned and audited
 5. **Agent trust**: No agent is trusted by default — reputation is earned through the consensus system
 
-### What CORTEX Protects Against
+### What BABYLON-60 Protects Against
 
 | Threat | Protection |
 |:---|:---|
@@ -166,7 +166,7 @@ CORTEX assumes:
 | XSS/CSRF | Security headers middleware |
 | Structural Entropy | Nemesis Protocol (Antibody Rejection) |
 
-### What CORTEX Does NOT Protect Against
+### What BABYLON-60 Does NOT Protect Against
 
 | Threat | Responsibility |
 |:---|:---|

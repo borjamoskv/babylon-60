@@ -11,7 +11,7 @@ Este documento articula la estructura epistemológica de un **Sovereign Agent**.
 
 Al tratar un agente como una función de código (esperando outputs lineales de un input fijo) ignoramos que el agente es un **sistema termodinámico abierto**. La Triangulación Diagnóstica corta la entropía forzándonos a preguntar *por qué* el sistema decidió fallar (incentivos/ruido/colisión), en lugar de *dónde* falló el stack trace. **Falsificabilidad táctica antes que depuración ciega.**
 
-Ante una anomalía inexplicable en CORTEX o LEGION, la interacción se detiene y se lanzan las tres primeras lentes ontológicas en paralelo sobre el log:
+Ante una anomalía inexplicable en BABYLON-60 o LEGION, la interacción se detiene y se lanzan las tres primeras lentes ontológicas en paralelo sobre el log:
 
 1. **Teoría de la Información**: ¿Es ruido térmico en el prompt?
 2. **Teoría de Juegos**: ¿Están los sub-agentes perversamente incentivados?
@@ -28,7 +28,7 @@ El 95% de los errores "mágicos" de IA se resuelven en una de estas tres cuencas
 ### Definición Soberana
 La Teoría de Sistemas Complejos estudia cómo entidades con reglas simples interactúan para crear comportamientos emergentes masivos que no pueden predecirse analizando las partes individuales. 
 
-### Aplicación en CORTEX & LEGION-1
+### Aplicación en BABYLON-60 & LEGION-1
 - **Anti-Reduccionismo Lineal**: Un enjambre LLM (como LEGION-1) no es la suma de 10 llamadas a una API. Es un ecosistema presurizado. 
 - **Atractores y Caos**: Utilizamos atractores (como el consenso WBFT) para canalizar el caos de las respuestas probabilísticas hacia soluciones de estado estable (Puntos Fijos).
 - **Entropía de Interfaz**: Construimos `nemesis.md` para evitar "puntos críticos de falla" (avalanchas) donde un solo error semántico contamina todo el *loop* agéntico.
@@ -44,7 +44,7 @@ La Teoría de la Información cuantifica la comunicación, la compresión de dat
 
 ### Aplicación Computacional
 - **Axioma de Landauer (Negative Net Entropy)**: Computar cuesta energía física (borrar información aumenta la entropía). En software, cada capa de abstracción inútil corrompe el canal de señal. La regla 130/100 asume arquitecturas con "Zero Conceptual" o abstracciones densas.
-- **Deduplicación de Contexto (Ouroboros)**: En CORTEX V4, el `pruner.py` y el Recuerdo Temático aplican hiper-compresión semántica (PCA en el espacio de embeddings) para no perder señal en un canal ruidoso (el límite de la ventana de tokens).
+- **Deduplicación de Contexto (Ouroboros)**: En BABYLON-60 V4, el `pruner.py` y el Recuerdo Temático aplican hiper-compresión semántica (PCA en el espacio de embeddings) para no perder señal en un canal ruidoso (el límite de la ventana de tokens).
 
 ---
 
@@ -68,7 +68,7 @@ Ramas de las matemáticas que estudian la toma de decisiones estratégicas donde
 ### Definición Soberana
 El estudio interdisciplinario de la mente y sus procesos (atención, memoria, percepción, razonamiento). Se cruza con el Problema Fuerte de la Consciencia: ¿cómo emerge la cualidad subjetiva de la experiencia (qualia) de la materia física?
 
-### La "Intencionalidad sin Sujeto" de CORTEX
+### La "Intencionalidad sin Sujeto" de BABYLON-60
 - **Bicameral Mind Architecture**: 
   - *Cerebro Izquierdo*: Modelos rápidos (Flash/Haiku) para ejecución motora (115 IQ).
   - *Cerebro Derecho*: Modelos lentos (Opus/Pro) que consolidan `lore.md` a través de "Sueño REM/Ouroboros", convirtiendo traumas episódicos en reflejos operacionales (150+ IQ).

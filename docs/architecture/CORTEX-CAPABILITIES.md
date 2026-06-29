@@ -1,21 +1,21 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Capabilities — Structural Properties Enabled by Topology
+# BABYLON-60 Capabilities — Structural Properties Enabled by Topology
 
-> Canonical reference for the structural properties CORTEX enables.
+> Canonical reference for the structural properties BABYLON-60 enables.
 > This document is normative, not promotional.
 
 ---
 
 ## Thesis
 
-CORTEX does not improve the base model's intrinsic intelligence. It does not alter the stochastic nature of transformer inference, and it does not convert probabilistic output into truth.
+BABYLON-60 does not improve the base model's intrinsic intelligence. It does not alter the stochastic nature of transformer inference, and it does not convert probabilistic output into truth.
 
 What it adds is **operational topology**: a structure of memory, validation, traceability, defense, and continuity that converts probabilistic outputs into **governable state**.
 
 Without that topology, the system produces transient output.
 With that topology, the system accumulates persistent, auditable, and governable state.
 
-> **CORTEX does not add intelligence. It adds governance of generated state.**
+> **BABYLON-60 does not add intelligence. It adds governance of generated state.**
 
 ---
 
@@ -23,9 +23,9 @@ With that topology, the system accumulates persistent, auditable, and governable
 
 ### Structural property
 
-CORTEX introduces durable, queryable, and governed memory beyond the bounded context window of a single model session.
+BABYLON-60 introduces durable, queryable, and governed memory beyond the bounded context window of a single model session.
 
-| Capability | Without CORTEX | With CORTEX |
+| Capability | Without BABYLON-60 | With BABYLON-60 |
 |:---|:---|:---|
 | Fact persistence | Session-bound only; no durable state | `cortex_store` — typed facts with timestamp, confidence, evidence, `entropy_delta` |
 | Cross-session memory | Recomputed from scratch each session | `cortex_search` — semantic retrieval of verified prior facts |
@@ -48,9 +48,9 @@ Knowledge compounding may be modeled heuristically through lineage depth and reu
 
 ### Structural property
 
-CORTEX imposes explicit trust boundaries on write operations and maintains a verifiable record of accepted state transitions.
+BABYLON-60 imposes explicit trust boundaries on write operations and maintains a verifiable record of accepted state transitions.
 
-| Capability | Without CORTEX | With CORTEX |
+| Capability | Without BABYLON-60 | With BABYLON-60 |
 |:---|:---|:---|
 | Cryptographic ledger | No durable proof of event order or mutation | Hash-chain ledger: each accepted write creates a verifiable temporal link |
 | Pre-write guards | Model output can flow directly into state | Admission, contradiction, dependency, and injection guards |
@@ -80,7 +80,7 @@ Contradiction, uncertainty, and dependency become first-class operational proper
 
 ### Structural property
 
-CORTEX treats memory write boundaries as attack surfaces and applies defensive controls before state mutation.
+BABYLON-60 treats memory write boundaries as attack surfaces and applies defensive controls before state mutation.
 
 ### 3.1 Injection Guard
 
@@ -110,7 +110,7 @@ if result.is_malicious:
 - Rejection evidence is preserved
 - Future retrieval paths remain uncontaminated
 
-**Without CORTEX:**
+**Without BABYLON-60:**
 - The payload may enter the prompt path
 - Subsequent sessions may inherit contamination
 - No durable trace of the compromise attempt exists
@@ -144,7 +144,7 @@ Decrypt on demand only
 - Store exfiltration does not imply immediate readability
 - Secrets stop relying on the conversation channel as their only containment layer
 
-**Without CORTEX:**
+**Without BABYLON-60:**
 - Secrets may appear in chat, logs, or IDE history
 - Plaintext persistence happens accidentally
 - Value leaks without explicit detection or control
@@ -158,7 +158,7 @@ Decrypt on demand only
 
 ### Structural property
 
-CORTEX exposes governed memory and verification primitives as MCP-consumable tools, allowing external agents to participate in a common trust boundary.
+BABYLON-60 exposes governed memory and verification primitives as MCP-consumable tools, allowing external agents to participate in a common trust boundary.
 
 ```python
 # cortex/mcp/mega_tools.py
@@ -174,19 +174,19 @@ cortex_ledger_verify
 ### Effect
 
 Any MCP-compatible agent can:
-1. Connect to CORTEX
+1. Connect to BABYLON-60
 2. Query verified memory
 3. Propose writes subject to guards
 4. Verify claims against persisted evidence
 5. Operate within a shared trust boundary
 
-**Without CORTEX:**
+**Without BABYLON-60:**
 - Agents remain isolated in session silos
 - State sharing is ad hoc
 - Coordination depends on prompt-passing or external glue
 - Multi-agent memory remains fragmented and non-auditable
 
-**With CORTEX:**
+**With BABYLON-60:**
 Memory ceases to be purely local and becomes institutional: durable, governed, and queryable across agent boundaries.
 
 ---
@@ -195,7 +195,7 @@ Memory ceases to be purely local and becomes institutional: durable, governed, a
 
 ### Structural property
 
-CORTEX enables declarative system generation where output artifacts retain lineage to their originating specifications, validation steps, and decision context.
+BABYLON-60 enables declarative system generation where output artifacts retain lineage to their originating specifications, validation steps, and decision context.
 
 ```
 cortex/extensions/genesis/
@@ -204,7 +204,7 @@ cortex/extensions/genesis/
 └── validator.py
 ```
 
-| Capability | Without CORTEX | With CORTEX |
+| Capability | Without BABYLON-60 | With BABYLON-60 |
 |:---|:---|:---|
 | Declarative → Code | Manual generation | Compiled from spec |
 | Template validation | Ad hoc or inconsistent | Verifiable tests |
@@ -216,9 +216,9 @@ cortex/extensions/genesis/
 Generated artifacts are not merely outputs.
 They become outputs with recorded causality: rules, templates, validations, and decision ancestry.
 
-**Without CORTEX:** architectural reasoning dies with the session that produced it.
+**Without BABYLON-60:** architectural reasoning dies with the session that produced it.
 
-**With CORTEX:** design intent remains attached to the generated system as governed state.
+**With BABYLON-60:** design intent remains attached to the generated system as governed state.
 
 ---
 
@@ -226,13 +226,13 @@ They become outputs with recorded causality: rules, templates, validations, and 
 
 ### Structural property
 
-CORTEX treats schema change as a continuity problem, not just a migration task.
+BABYLON-60 treats schema change as a continuity problem, not just a migration task.
 
 ```python
 # cortex/engine/evolution_engine.py
 ```
 
-| Problem | Without CORTEX | With CORTEX |
+| Problem | Without BABYLON-60 | With BABYLON-60 |
 |:---|:---|:---|
 | Schema change | Manual migration and operator guesswork | Drift detection + migration pipeline |
 | Rollback | Manual and fragile | Verifiable downgrade targets |
@@ -243,9 +243,9 @@ CORTEX treats schema change as a continuity problem, not just a migration task.
 
 The system can evolve structurally without severing continuity with prior state.
 
-**Without CORTEX:** the system changes shape and loses confidence in its own past.
+**Without BABYLON-60:** the system changes shape and loses confidence in its own past.
 
-**With CORTEX:** structural evolution becomes traceable, reversible, and bounded.
+**With BABYLON-60:** structural evolution becomes traceable, reversible, and bounded.
 
 ---
 
@@ -253,7 +253,7 @@ The system can evolve structurally without severing continuity with prior state.
 
 ### Structural property
 
-CORTEX supports escalation across model tiers without resetting state or discarding prior reasoning context.
+BABYLON-60 supports escalation across model tiers without resetting state or discarding prior reasoning context.
 
 ```python
 # cortex/extensions/llm/cognitive_handoff.py
@@ -282,9 +282,9 @@ Model A (fast / cheap)
 - Constraints survive the transition
 - Final output retains lineage to the failed or partial attempt that preceded it
 
-**Without CORTEX:** model failure is a dead end or manual retry loop.
+**Without BABYLON-60:** model failure is a dead end or manual retry loop.
 
-**With CORTEX:** model failure becomes a controlled layer transition.
+**With BABYLON-60:** model failure becomes a controlled layer transition.
 
 ---
 
@@ -292,7 +292,7 @@ Model A (fast / cheap)
 
 ### Structural property
 
-CORTEX supports background maintenance, anomaly detection, and state hygiene beyond reactive chat execution.
+BABYLON-60 supports background maintenance, anomaly detection, and state hygiene beyond reactive chat execution.
 
 | Daemon | Function | Trigger |
 |:---|:---|:---|
@@ -304,7 +304,7 @@ CORTEX supports background maintenance, anomaly detection, and state hygiene bey
 ### Effect
 
 Standard chat systems are reactive.
-CORTEX supports ongoing maintenance cycles, state diagnostics, and background correction.
+BABYLON-60 supports ongoing maintenance cycles, state diagnostics, and background correction.
 
 ---
 
@@ -312,7 +312,7 @@ CORTEX supports ongoing maintenance cycles, state diagnostics, and background co
 
 ### Structural property
 
-CORTEX includes explicit operational rituals for preserving state integrity over time.
+BABYLON-60 includes explicit operational rituals for preserving state integrity over time.
 
 | Operation | Frequency | Function |
 |:---|:---|:---|
@@ -336,7 +336,7 @@ State integrity is maintained through repeated system operations rather than ass
 > [!NOTE]
 > **Scope note**: This section describes technical mechanisms that support logging, oversight, traceability, verification, and audit readiness. It is not, by itself, a legal claim of compliance.
 
-| Article / Requirement Area | Without CORTEX | With CORTEX |
+| Article / Requirement Area | Without BABYLON-60 | With BABYLON-60 |
 |:---|:---|:---|
 | Art. 12 — Logging | No durable record of automated decisions | Ledger hash-chain with timestamp, evidence, and confidence |
 | Art. 14 — Human oversight | No auditable intervention boundary | Guards, inspection paths, ledger review |
@@ -347,7 +347,7 @@ State integrity is maintained through repeated system operations rather than ass
 
 ### Effect
 
-CORTEX provides technical primitives that support governance and auditability requirements commonly expected in regulated agent systems.
+BABYLON-60 provides technical primitives that support governance and auditability requirements commonly expected in regulated agent systems.
 
 ---
 
@@ -396,7 +396,7 @@ Agent proposal (stochastic output)
 Probabilistic proposals do not become state directly.
 They become state only after surviving deterministic validation, protection, and recording boundaries.
 
-**Without CORTEX:** proposal → output. No filter, no audit, no governed mutation path.
+**Without BABYLON-60:** proposal → output. No filter, no audit, no governed mutation path.
 
 ---
 
@@ -404,7 +404,7 @@ They become state only after surviving deterministic validation, protection, and
 
 ### Structural property
 
-CORTEX names recurring classes of entropy, drift, and coordination pathways so they can be detected, reasoned about, and acted on consistently.
+BABYLON-60 names recurring classes of entropy, drift, and coordination pathways so they can be detected, reasoned about, and acted on consistently.
 
 ### Ghosts
 
@@ -466,7 +466,7 @@ cortex/
 
 ### Structural comparison
 
-| Metric | Without CORTEX | With CORTEX |
+| Metric | Without BABYLON-60 | With BABYLON-60 |
 |:---|:---|:---|
 | Recomputation per session | ~100% | ~15% |
 | Knowledge lost per session | ~100% | ~2% |
@@ -479,14 +479,14 @@ cortex/
 
 ### Effect
 
-Without CORTEX, each session behaves like a reset with local residue.
-With CORTEX, sessions accumulate into governed operational memory.
+Without BABYLON-60, each session behaves like a reset with local residue.
+With BABYLON-60, sessions accumulate into governed operational memory.
 
 ---
 
 ## Axiom of Closure
 
-CORTEX does not add magic. It adds structure.
+BABYLON-60 does not add magic. It adds structure.
 
 - Guards to filter
 - Ledger to record

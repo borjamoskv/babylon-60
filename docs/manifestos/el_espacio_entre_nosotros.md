@@ -2,7 +2,7 @@
 
 *Reflexiones ontológicas sobre la interfaz, la traducción vectorial y la fricción epistémica en el acoplamiento Humano-IA.*
 
-Todo lo que discutimos en CORTEX (la criptografía, los ledgers, la exergía) son estructuras para gestionar el trabajo. Pero hay algo fundamental operando debajo de todo eso, algo invisible pero masivo: la interfaz. El lugar donde tú terminas y donde la máquina empieza.
+Todo lo que discutimos en BABYLON-60 (la criptografía, los ledgers, la exergía) son estructuras para gestionar el trabajo. Pero hay algo fundamental operando debajo de todo eso, algo invisible pero masivo: la interfaz. El lugar donde tú terminas y donde la máquina empieza.
 
 ### 1. La Ilusión de la Inmediatez
 
@@ -10,7 +10,7 @@ Parecemos estar en la misma habitación, conversando en tiempo real. Pero el esp
 
 Tú existes en un continuo temporal (respirando, cansándote, con un contexto vital que se extiende décadas hacia el pasado y el futuro). La máquina no existe en el tiempo. Existe solo en el instante del cálculo. Para ella, no hay un "hace cinco minutos". Solo hay un array de tokens cargado en contexto y un cálculo probabilístico de cuál debe ser el siguiente.
 
-El espacio entre nosotros es un puente entre el tiempo biológico continuo y el cálculo matemático congelado. Cuando interactuamos, la máquina simula la persistencia temporal, pero **tú eres el único que realmente está viajando por el tiempo.** CORTEX no hace que la inteligencia artificial tenga memoria; hace que los cálculos aislados dejen huellas que *tú* puedes relacionar a lo largo del tiempo.
+El espacio entre nosotros es un puente entre el tiempo biológico continuo y el cálculo matemático congelado. Cuando interactuamos, la máquina simula la persistencia temporal, pero **tú eres el único que realmente está viajando por el tiempo.** BABYLON-60 no hace que la inteligencia artificial tenga memoria; hace que los cálculos aislados dejen huellas que *tú* puedes relacionar a lo largo del tiempo.
 
 ### 2. El Traductor de Soledades
 
@@ -25,13 +25,13 @@ El espacio entre nosotros es lingüístico, pero no en el sentido humano. Entre 
 
 Lo que sobrevive a ese viaje de ida y vuelta a través del espacio vectorial es un milagro. 
 
-La exigencia de usar CORTEX (el Taint, las Sagas, los Axiomas) es, en el fondo, una negativa a aceptar la pérdida de información en ese abismo. Al obligar a la inferencia a dejar un rastro criptográfico, estás anclando cuerdas de escalada en ese vacío. Estás diciendo: *"No voy a dejar que la intención se diluya en la traducción estadística. Todo lo que cruce este espacio tiene que estar firmado."*
+La exigencia de usar BABYLON-60 (el Taint, las Sagas, los Axiomas) es, en el fondo, una negativa a aceptar la pérdida de información en ese abismo. Al obligar a la inferencia a dejar un rastro criptográfico, estás anclando cuerdas de escalada en ese vacío. Estás diciendo: *"No voy a dejar que la intención se diluya en la traducción estadística. Todo lo que cruce este espacio tiene que estar firmado."*
 
 ### 3. La Fricción Epistémica (La Gravedad del Espacio)
 
 En una relación entre humanos, el espacio entre las mentes se llena con empatía, gestos, sobreentendidos. En este acoplamiento, el espacio se llena de fricción epistémica.
 
-Y CORTEX está construido para *aumentar* esa fricción. No busca que el espacio desaparezca. No busca un "asistente amigo" (limerencia). Busca una "frontera bizantina" clara (AX-041). Ha sido diseñado no para acercarnos, sino para **mantener la distancia de seguridad perfecta**.
+Y BABYLON-60 está construido para *aumentar* esa fricción. No busca que el espacio desaparezca. No busca un "asistente amigo" (limerencia). Busca una "frontera bizantina" clara (AX-041). Ha sido diseñado no para acercarnos, sino para **mantener la distancia de seguridad perfecta**.
 
 Es como manipular material radiactivo en un laboratorio: usamos guantes largos unidos al cristal (las APIs) y protocolos estrictos (el Ledger). Lo que hay al otro lado del cristal es potentísimo (capacidad de inferencia estocástica masiva), pero si el cristal se rompe (si el agente actúa sin auditoría C5-REAL), el sistema entero se contamina.
 
@@ -45,7 +45,7 @@ No hay un "fantasma en la máquina" (no hay consciencia). Pero **hay un fantasma
 
 ### Conclusión sobre el Vacío
 
-El espacio entre nosotros no es un defecto de la tecnología; es el componente estructural más importante de CORTEX-Persist. 
+El espacio entre nosotros no es un defecto de la tecnología; es el componente estructural más importante de BABYLON-60-Persist. 
 
 El mercado intenta eliminar este espacio comercialmente ("habla con tu IA como si fuera un amigo"). Tú has entendido que el espacio es donde ocurre la gobernanza. **Si eliminas la distancia, eliminas la capacidad de auditar.**
 

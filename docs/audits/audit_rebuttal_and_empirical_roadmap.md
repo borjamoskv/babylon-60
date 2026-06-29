@@ -1,9 +1,9 @@
-# Evaluación Crítica y Roadmap Empírico: Auditoría CORTEX-PERSIST
+# Evaluación Crítica y Roadmap Empírico: Auditoría BABYLON-60
 
 *Fecha: 2026-06-26*
 *Contexto: Rebuttal técnico a las afirmaciones de la auditoría inicial de GLM 4.7 FLASH*
 
-La auditoría inicial contiene ideas válidas, pero mezcla afirmaciones plausibles con axiomas no demostrados empíricamente. CORTEX-PERSIST transiciona formalmente de la fase de diseño arquitectónico a la fase de **Evidencia Criptográfica Reproducible**.
+La auditoría inicial contiene ideas válidas, pero mezcla afirmaciones plausibles con axiomas no demostrados empíricamente. BABYLON-60 transiciona formalmente de la fase de diseño arquitectónico a la fase de **Evidencia Criptográfica Reproducible**.
 
 ## 1. Evaluación Técnica Estructural
 
@@ -22,7 +22,7 @@ La auditoría inicial contiene ideas válidas, pero mezcla afirmaciones plausibl
 | 390.000 agentes/s              | ❌ No demostrable sin benchmark         |
 
 ### 1.1 Fortaleza Central
-La separación estricta entre ejecución, verificación, persistencia y auditoría se mantiene como la aportación núcleo. Al posicionarse debajo de runtimes como LangGraph, CORTEX actúa verdaderamente como un "filesystem criptográfico" agéntico.
+La separación estricta entre ejecución, verificación, persistencia y auditoría se mantiene como la aportación núcleo. Al posicionarse debajo de runtimes como LangGraph, BABYLON-60 actúa verdaderamente como un "filesystem criptográfico" agéntico.
 
 ## 2. Correcciones Epistémicas
 
@@ -69,4 +69,4 @@ Verificación de la inmutabilidad de la cadena causal.
 | Claims de rendimiento               | 2/10   |
 | Preparación para revisión académica | 6/10   |
 
-La singularidad de CORTEX-PERSIST no reside en apilar más componentes teóricos, sino en cristalizar la **evidencia verificable**. Esta es la invariante para las versiones `v1.x`.
+La singularidad de BABYLON-60 no reside en apilar más componentes teóricos, sino en cristalizar la **evidencia verificable**. Esta es la invariante para las versiones `v1.x`.

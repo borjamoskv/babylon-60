@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX AXIOMS (AX SERIES & Ω SERIES)
+# BABYLON-60 AXIOMS (AX SERIES & Ω SERIES)
 
 **Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment.**
 
@@ -19,7 +19,7 @@ No estamos diseñando una herramienta para escribir código más rápido. Estamo
 ### AX-051: EL TEOREMA DEL PUENTE TERMODINÁMICO
 > *"Un Puente transfiere capacidad sin inyectar entropía."*
 
-Usar un "Puente" en CORTEX (sea comando CLI, script o protocolo de red) siempre tiene el mismo objetivo termodinámico: transferir estado, patrón o capacidad a través de un límite de confianza (Trust Boundary) sin inyectar entropía en el destino.
+Usar un "Puente" en BABYLON-60 (sea comando CLI, script o protocolo de red) siempre tiene el mismo objetivo termodinámico: transferir estado, patrón o capacidad a través de un límite de confianza (Trust Boundary) sin inyectar entropía en el destino.
 
 ### AX-052: EL COMPILADOR EPISTEMOLÓGICO
 > *"El árbitro nunca decide qué es verdadero, solo qué grado de evidencia respalda cada afirmación."*

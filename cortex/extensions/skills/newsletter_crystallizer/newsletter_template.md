@@ -6,7 +6,7 @@
 ## [1] VECTORES DE FRONTERA (SOTA)
 {SOTA_VECTORS}
 
-## [2] EL SISTEMA CORTEX PERSIST (Invarianza Causal)
+## [2] EL SISTEMA BABYLON-60 (Invarianza Causal)
 > **Delta de Ejecución:** Últimas 72h
 
 {CORTEX_COMMITS}

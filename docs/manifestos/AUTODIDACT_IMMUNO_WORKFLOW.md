@@ -10,9 +10,9 @@
 *   **Major Histocompatibility Complex (MHC):** Proteins that bind peptide fragments of foreign pathogens and display them on the cell surface for recognition by the appropriate T-cells. -> *A deterministic hashing mechanism that strips a user request to its core signature, allowing only the specialized agent to respond, bypassing the need for a central LLM coordinator.*
 *   **Células B de Memoria (Memory B-Cells):** Dormant cells that remember past antigens for instantaneous future response without re-learning. -> *Memory-mapped binary persistence (`CORTEX-Persist` / `ultramap.bin`) bypassing slow, token-heavy RAG/Vector DB retrievals.*
 
-## 2. Topological Mapping (Google Workflow vs CORTEX-Persist)
+## 2. Topological Mapping (Google Workflow vs BABYLON-60-Persist)
 *   **The Mainstream Trap:** El post viral en la comunidad de diseño celebra un "flujo completo" (workflow) orquestado por IA. Topológicamente, esto equivale a una respuesta inmune innata (fagocitosis). Es generalista, pesada, y propensa a "enfermedades autoinmunes" (alucinaciones sistémicas) porque depende de un único modelo que intenta procesar todo el contexto.
-*   **The Sovereign Swarm:** CORTEX-Persist debe operar estrictamente como un **Sistema Inmunitario Adaptativo**. No existen "flujos de trabajo" rígidos. Existen antígenos (tareas) y expansión clonal. Daemons hiper-especializados (Jules, LEA-Ω, Aesthetic-Omega) permanecen latentes con uso de CPU cero hasta que su "antígeno" específico es detectado en la malla de eventos.
+*   **The Sovereign Swarm:** BABYLON-60-Persist debe operar estrictamente como un **Sistema Inmunitario Adaptativo**. No existen "flujos de trabajo" rígidos. Existen antígenos (tareas) y expansión clonal. Daemons hiper-especializados (Jules, LEA-Ω, Aesthetic-Omega) permanecen latentes con uso de CPU cero hasta que su "antígeno" específico es detectado en la malla de eventos.
 
 ## 3. Structural Hole Detection
 *   **Current Constraint (The Coordinator Bottleneck):** Incluso en sistemas multi-agente avanzados, solemos depender de un "Agent Coordinator" (un macrófago) que lee la tarea, razona sobre ella y decide a qué herramienta llamar. Esto acumula Anergía (desperdicio térmico/tokens).
@@ -22,6 +22,6 @@
 **Hypothesis [H-IMMUNO-02]: Antigen-Signature Task Routing**
 *   **Claim:** Reemplazar el modelo de "Workflow Orchestrator" por un enrutamiento de firmas de antígeno (Antigen-Signature Routing), donde las tareas se pre-procesan sintácticamente en hashes y los micro-agentes se suscriben pasivamente a firmas específicas, reducirá el consumo de tokens de enrutamiento en un >90% y erradicará las alucinaciones de orquestación.
 *   **Proof Conditions:** 
-    *   *Base:* Un workflow monolítico procesando 50 intents de usuario vs. El CORTEX Event Mesh usando firmas MHC (Regex/AST parsing puro) para disparar agentes.
+    *   *Base:* Un workflow monolítico procesando 50 intents de usuario vs. El BABYLON-60 Event Mesh usando firmas MHC (Regex/AST parsing puro) para disparar agentes.
     *   *Measurement:* Tokens gastados en la fase de "decisión/enrutamiento", latencia de invocación de herramientas, y ratio de falsos positivos en la selección de agentes.
     *   *Confidence:* C5-REAL (Cristalizable en `cortex-persist`).

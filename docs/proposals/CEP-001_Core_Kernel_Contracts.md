@@ -9,7 +9,7 @@
 
 ------------------------------
 ## 1. Principios Fundamentales de Diseño
-La arquitectura CORTEX se rige por tres invariantes de diseño que delimitan de forma estricta las responsabilidades del núcleo del sistema:
+La arquitectura BABYLON-60 se rige por tres invariantes de diseño que delimitan de forma estricta las responsabilidades del núcleo del sistema:
 
 1. Estabilidad de Interfaces: Las interfaces deben estabilizarse antes que los algoritmos que las implementan. El éxito técnico del núcleo consiste en garantizar que la evolución del conocimiento (nuevas teorías de confianza, motores de inferencia o solvers) no implique la reescritura de la arquitectura.
 2. Agnosticismo Semántico: El microkernel nunca interpreta el significado de los objetos que almacena. Únicamente garantiza su identidad, integridad, trazabilidad y compatibilidad estructural. El núcleo no determina si una afirmación es verdadera; solo valida si está bien formada y si cumple con los contratos.
@@ -17,7 +17,7 @@ La arquitectura CORTEX se rige por tres invariantes de diseño que delimitan de 
 
 ------------------------------
 ## 2. Core Object Model (EpistemicObject)
-Todos los objetos que transitan por el núcleo de CORTEX heredan de la interfaz abstracta EpistemicObject. Son estructuras de datos puras, estáticas, inmutables y serializables de forma determinista. Carecen de lógica de ejecución interna.
+Todos los objetos que transitan por el núcleo de BABYLON-60 heredan de la interfaz abstracta EpistemicObject. Son estructuras de datos puras, estáticas, inmutables y serializables de forma determinista. Carecen de lógica de ejecución interna.
 
 ```text
 EpistemicObject (Abstract)

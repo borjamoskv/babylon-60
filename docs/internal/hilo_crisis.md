@@ -13,7 +13,7 @@ Al día siguiente, tropieza exactamente en el mismo lugar.
 La verdadera "crisis" de la IA en 2026 no es de razonamiento. Es de *Persistencia Epistémica*.
 
 **Tweet 3:**
-CORTEX v6 existe porque rechacé la entropía. 
+BABYLON-60 v6 existe porque rechacé la entropía. 
 Si el agente toma una decisión arquitectónica hoy ("hemos migrado a rclone por X"), esa decisión debe *tatuarse* en el SQLite y estar encriptada en AES-256. Mañana, el enjambre accede a ese `Decision Edge` en O(1) y no vuelve a fallar.
 
 **Tweet 4:**

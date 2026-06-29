@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Suite de Cursos CORTEX
+# Suite de Cursos BABYLON-60
 
 Tres tracks GitHub-native construidos a partir del repositorio real.
 

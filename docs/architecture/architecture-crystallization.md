@@ -3,13 +3,13 @@
 
 Last reviewed: 2026-04-21
 
-This document is the shortest accurate description of what CORTEX Persist is,
+This document is the shortest accurate description of what BABYLON-60 Persist is,
 where its trust boundary actually lives today, and which cuts will increase
 architectural clarity fastest.
 
 ## Core Thesis
 
-CORTEX Persist is strongest when treated as a **verifiable memory core** with a
+BABYLON-60 Persist is strongest when treated as a **verifiable memory core** with a
 strict write boundary:
 
 1. Proposal enters through a guarded store path.
@@ -222,7 +222,7 @@ not dilute trust guarantees.
 
 ## Summary
 
-CORTEX Persist already contains a credible sovereign memory core.
+BABYLON-60 Persist already contains a credible sovereign memory core.
 
 What it needs now is not more myth. It needs sharper boundaries:
 

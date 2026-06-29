@@ -51,7 +51,7 @@ No authorization required
 > models::DeepHealthResponse deep_health_check_v1_health_deep_get(authorization)
 Deep Health Check
 
-Deep Health Check - probes all CORTEX subsystems.  Returns 200 if all checks pass, 503 if any subsystem is degraded. Designed for Kubernetes liveness/readiness probes.
+Deep Health Check - probes all BABYLON-60 subsystems.  Returns 200 if all checks pass, 503 if any subsystem is degraded. Designed for Kubernetes liveness/readiness probes.
 
 ### Parameters
 

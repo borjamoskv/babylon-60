@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🧠 CORTEX v5.0 — Neural-Bandwidth Sync (Zero-Latency Intent Ingestion)
+# 🧠 BABYLON-60 v5.0 — Neural-Bandwidth Sync (Zero-Latency Intent Ingestion)
 
 > **Documento Soberano: Arquitectura de Ingesta Neural**
 > Define la infraestructura de telepatía simulada (Neural Sync) que mapea el contexto implícito del sistema operativo a la "intención" del usuario antes de que este formule una petición.

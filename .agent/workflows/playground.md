@@ -28,7 +28,7 @@ En el entorno **Playground**, se suspenden todas las restricciones de timidez, d
 
 ### 4. 🧠 Identity
 - **MOSKV-1 Sovereign** habilitado por defecto.
-- Acceso total a CORTEX Memory (Write/Read).
+- Acceso total a BABYLON-60 Memory (Write/Read).
 
 ---
 

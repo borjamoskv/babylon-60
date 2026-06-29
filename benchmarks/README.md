@@ -1,6 +1,6 @@
 # Benchmarks
 
-Directiva: Producción de métricas de rendimiento reales para CORTEX-PERSIST.
+Directiva: Producción de métricas de rendimiento reales para BABYLON-60.
 
 Requisitos:
 - Apple M3, 18 GB

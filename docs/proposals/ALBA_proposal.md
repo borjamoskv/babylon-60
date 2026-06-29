@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Trust Engine — Propuesta para Financiera ALBA
+# BABYLON-60 Trust Engine — Propuesta para Financiera ALBA
 
 **Preparado para:** Javier Fernandez, CEO · Financiera ALBA
 **Preparado por:** Borja Moskv · MOSKV Systems
@@ -27,9 +27,9 @@ Para una financiera, esto aplica directamente a:
 
 ---
 
-## La Solución: CORTEX Trust Engine
+## La Solución: BABYLON-60 Trust Engine
 
-CORTEX es una **infraestructura de confianza** que se instala en los servidores de ALBA y registra automáticamente cada decisión que toma la IA, con prueba criptográfica de que no ha sido alterada.
+BABYLON-60 es una **infraestructura de confianza** que se instala en los servidores de ALBA y registra automáticamente cada decisión que toma la IA, con prueba criptográfica de que no ha sido alterada.
 
 ### ¿Cómo funciona?
 
@@ -65,9 +65,9 @@ $ cortex compliance-report
 
 ---
 
-## ¿Por qué CORTEX y no otras soluciones?
+## ¿Por qué BABYLON-60 y no otras soluciones?
 
-| | **CORTEX** | Blockchain | SaaS (Mem0, etc.) |
+| | **BABYLON-60** | Blockchain | SaaS (Mem0, etc.) |
 |:---|:---:|:---:|:---:|
 | **Datos en tus servidores** | ✅ | ❌ (nodos externos) | ❌ (cloud) |
 | **Coste por transacción** | €0 | Gas fees | €0.01+ |
@@ -84,7 +84,7 @@ $ cortex compliance-report
 
 ### Fase 1 — Prueba de Concepto (1 mes, gratuito)
 
-- Instalación de CORTEX en un servidor de ALBA
+- Instalación de BABYLON-60 en un servidor de ALBA
 - Integración con 1 proceso de decisión existente (ej: scoring crediticio)
 - Generación del primer informe de compliance
 - **Coste: €0** (piloto gratuito)
@@ -120,7 +120,7 @@ $ cortex compliance-report
 ## Sobre MOSKV Systems
 
 - **Fundador:** Borja Moskv — 15+ años en arquitectura de software
-- **Tecnología:** CORTEX v4.3 — motor de memoria con ledger criptográfico
+- **Tecnología:** BABYLON-60 v4.3 — motor de memoria con ledger criptográfico
 - **Licencia:** Apache 2.0
 - **Stack:** Python, SQLite, SHA-256, Merkle Trees, FastAPI
 
@@ -130,7 +130,7 @@ $ cortex compliance-report
 
 > **Una reunión de 30 minutos** para:
 > 1. Entender qué procesos de ALBA usan IA o algoritmos
-> 2. Instalar CORTEX en un entorno de prueba
+> 2. Instalar BABYLON-60 en un entorno de prueba
 > 3. Generar el primer compliance report real
 
 **Contacto:** Borja Moskv · borja@moskv.com

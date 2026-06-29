@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Deployment
 
-CORTEX supports multiple deployment models — from a single `pip install` to the included
+BABYLON-60 supports multiple deployment models — from a single `pip install` to the included
 Dockerfile. Kubernetes, compose, and sovereign-cloud blueprints are target-state deployment
 patterns unless the corresponding files are present in this repository snapshot.
 
@@ -129,7 +129,7 @@ Target architecture:
 
 ## Daemon Installation
 
-CORTEX includes a self-healing background daemon that monitors 13 specialized areas.
+BABYLON-60 includes a self-healing background daemon that monitors 13 specialized areas.
 The daemon is exposed as the `moskv-daemon` console script, not as a default `cortex daemon`
 subcommand.
 
@@ -267,7 +267,7 @@ For AlloyDB/PostgreSQL backends, use standard database backup tools (`pg_dump`, 
 
 ## Monitoring
 
-CORTEX exposes Prometheus-compatible metrics at `/metrics`:
+BABYLON-60 exposes Prometheus-compatible metrics at `/metrics`:
 
 - `cortex_facts_total` — Total facts stored
 - `cortex_search_latency_p50` / `p95` / `p99` — Search latencies

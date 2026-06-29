@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Hello World in 3 Minutes
 
-As an engineer or builder integrating CORTEX Persist, your goal is to seamlessly plug cryptographic memory into your existing agent loops without rewriting your architecture.
+As an engineer or builder integrating BABYLON-60 Persist, your goal is to seamlessly plug cryptographic memory into your existing agent loops without rewriting your architecture.
 
-CORTEX is local-first, async-native, and drop-in ready.
+BABYLON-60 is local-first, async-native, and drop-in ready.
 
 ## 1. Install & Init
 
@@ -17,7 +17,7 @@ cortex init
 
 ## 2. Store a Fact from your Agent
 
-Whenever your agent makes a rigid decision, writes a tool output, or commits to a state, intercept that event and dump it into CORTEX.
+Whenever your agent makes a rigid decision, writes a tool output, or commits to a state, intercept that event and dump it into BABYLON-60.
 
 ```python
 import asyncio

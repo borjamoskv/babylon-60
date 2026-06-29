@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX-Persist Workspace — Cognitive Routing Protocol
+# BABYLON-60-Persist Workspace — Cognitive Routing Protocol
 
-> Workspace-level rules for CORTEX-Persist repository. Extends global GEMINI.md.
+> Workspace-level rules for BABYLON-60-Persist repository. Extends global GEMINI.md.
 
 ---
 
@@ -23,7 +23,7 @@ Three reasoning modes. Each occupies a distinct thermodynamic lane.
 #### Deep Think (`thinking_mode: "deep"`)
 **Invoke when the next decision is irreversible or has downstream compound effects.**
 
-- Architecture: "Should CORTEX use Zenoh or gRPC for inter-agent transport?"
+- Architecture: "Should BABYLON-60 use Zenoh or gRPC for inter-agent transport?"
 - Tradeoff resolution: "Latency vs consistency vs complexity — pick two and justify"
 - Formal verification: "Prove this Merkle chain operation preserves integrity"
 - Refactoring: "Evaluate 3 approaches to decouple persistence from embeddings"
@@ -38,7 +38,7 @@ Three reasoning modes. Each occupies a distinct thermodynamic lane.
 - Technology evaluation: "Compare sqlite-vec vs Qdrant vs Pinecone for 10M vectors"
 - Standards compliance: "What does EU AI Act Article 12 require for audit trails?"
 - State of art: "What are the 2026 approaches to Byzantine consensus in AI swarms?"
-- Competitive analysis: "Compare CORTEX memory architecture vs MemGPT vs Letta"
+- Competitive analysis: "Compare BABYLON-60 memory architecture vs MemGPT vs Letta"
 
 **Do NOT invoke for:** questions answerable from existing codebase or docs.
 
@@ -70,7 +70,7 @@ Is the problem a P0 Singularity?
       └─ YES → Standard inference
 ```
 
-### Integration with CORTEX Cognitive Handoff
+### Integration with BABYLON-60 Cognitive Handoff
 
 ```python
 # Illustrative routing (see cortex/extensions/hypervisor/belief_engine.py)

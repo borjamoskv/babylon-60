@@ -11,7 +11,7 @@ La expansión de la topología de 1,000 a 10,000 agentes (LEGION-10k) desafía l
 ## 2. Hoja de Ruta de Asimilación Semántica
 1. **Redimensionamiento de Tensores:** Ampliar el buffer binario `swarm_ring_vsa.bin` de `10,000` de capacidad estricta para soportar bursts seguros de 10k sin saturar la memoria (ideal: capacity = 100,000).
 2. **ThreadPoolExecutor Bottleneck:** La paralelización de la ejecución basada en `ThreadPoolExecutor(max_workers=100)` será ineficiente para 10,000 agentes debido al GIL de Python.
-    - *Mitigación:* Se requerirá la integración nativa y total con **CORTEX-RS (Rust FFI)**, migrando el pool de hilos a Rust mediante PyO3 o FFI para sortear el bloqueo de hilos.
+    - *Mitigación:* Se requerirá la integración nativa y total con **BABYLON-60-RS (Rust FFI)**, migrando el pool de hilos a Rust mediante PyO3 o FFI para sortear el bloqueo de hilos.
 3. **Telemetría y UltraMap:** La topografía espacio-temporal de L5 (UltraMapSubstrate) debe manejar 10k posiciones en O(1). Las colisiones hash espaciales pueden aumentar; será necesario refinar la semilla de entropía topológica.
 
 ## 3. Implicaciones C5-REAL

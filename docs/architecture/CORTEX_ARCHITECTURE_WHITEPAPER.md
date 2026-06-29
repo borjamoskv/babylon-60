@@ -1,12 +1,12 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX-PERSIST: Infraestructura de Gobernanza Cognitiva y Resolución de Colisiones para Enjambres de Agentes Autónomos
+# BABYLON-60: Infraestructura de Gobernanza Cognitiva y Resolución de Colisiones para Enjambres de Agentes Autónomos
 
 > **Documento Arquitectónico Canónico**  
 > *Sovereign Hypervisor Architecture - Rust-First*
 
 ## 1. Introducción: El Paradigma de la Continuidad Cognitiva
 La excesiva dependencia de persistencia de datos pasiva exacerba la "entropía del conocimiento". Las bases vectoriales que operan con RAG puro fallan epistémicamente al recuperar fragmentos semánticamente similares pero lógicamente invalidados.
-**Cortex-Persist** no es una base de datos; es un **Cognitive Hypervisor**. Orquesta la verdad operativa en tiempo real, gestionando qué se retiene y qué se poda. Para que esto opere en milisegundos, descarta Python en su ruta crítica a favor de un ecosistema fuertemente tipado, memory-safe y asíncrono (Rust-first).
+**BABYLON-60** no es una base de datos; es un **Cognitive Hypervisor**. Orquesta la verdad operativa en tiempo real, gestionando qué se retiene y qué se poda. Para que esto opere en milisegundos, descarta Python en su ruta crítica a favor de un ecosistema fuertemente tipado, memory-safe y asíncrono (Rust-first).
 
 ## 2. Ontología Formal: Belief Objects (BO)
 La unidad atómica es el **Belief Object**.
@@ -26,7 +26,7 @@ La gobernanza del Hipervisor se expone mediante 5 operaciones atómicas de alta 
 5.  `fork_memory(agent_id, context_delta)`: Ramifica semánticamente el estado creando sandboxes cognitivos aislados (zero-copy) para simulación Monte Carlo.
 
 ## 4. Swarm Sync: Consenso Bayesiano y Resolución Multi-Agente
-En un enjambre autónomo descentralizado (Swarm), la divergencia epistémica es garantizada. Cortex-Persist soluciona esto a nivel de infraestructura:
+En un enjambre autónomo descentralizado (Swarm), la divergencia epistémica es garantizada. BABYLON-60 soluciona esto a nivel de infraestructura:
 
 *   **Semantic CRDTs**: Los CRDTs convencionales (LWW) mueren aquí porque la "última" escritura no es epistémicamente la "verdadera". El Modelo de Conflicto Semántico fusiona deltas basándose en dependencias formales (`entails`/`discards`), creando una "fusión de tres vías" (three-way merge) aislada cuando existe colisión dura.
 *   **Consenso LogOP (Logarithmic Opinion Pool)**: Rechazamos la agrupación lineal (LinOP) que genera compromisos irracionales inter-agente. Implementamos **LogOP**, que provee actualización externamente Bayesiana y actúa como un **Veto Epistémico Físico**: si un agente supervisor especializado evalúa la probabilidad de una decisión como $0$, la ecuación LogOP, por su naturaleza geométrica, fuerza inamoviblemente el consenso total del Swarm a $0$.
@@ -45,8 +45,8 @@ La arquitectura destrona al frágil GIL (Global Interpreter Lock) asimilando una
 *   **Integrity Layer (Árboles Merkle - mssmt)**: Almacenamiento matemáticamente tamper-evident de estado ($O(\log N)$). Proporciona los cimientos estructurales descentralizados donde descansar la confianza normativa.
 
 ## 7. Memory Consolidation (El "Sueño" del Enjambre)
-Cortex-Persist abstrae la red topológicamente en 3 subgrafos ($G_e$: Episódico, $G_s$: Semántica de Entidades, $G_c$: Entidades Comunitarias / Memoria Procedimental). 
+BABYLON-60 abstrae la red topológicamente en 3 subgrafos ($G_e$: Episódico, $G_s$: Semántica de Entidades, $G_c$: Entidades Comunitarias / Memoria Procedimental). 
 Durante los ciclos *idle* (inactividad del modelo fundacional), los procesos en background ejecutan heurísticas que consolidan inferencias complejas y *olvidan algorítmicamente* el ruido episódico. Esto detiene implacablemente la expansión letal e incontrolable del contexto del LLM.
 
 ## 8. Conclusión
-Replicar inteligencia artificial asíncrona confiando sólamente en la similitud coseno condena el sistema a chocar violentamente contra **La Pared de la Consistencia**. Cortex-Persist usa SHM (iceoryx2), Pub/Sub nativo L3 (Zenoh) y fusiones LogOP para orquestar la resolución epistémica en microsegundos, forjando la plataforma fundacional exigida por la verdadera era de los enjambres multi-agente.
+Replicar inteligencia artificial asíncrona confiando sólamente en la similitud coseno condena el sistema a chocar violentamente contra **La Pared de la Consistencia**. BABYLON-60 usa SHM (iceoryx2), Pub/Sub nativo L3 (Zenoh) y fusiones LogOP para orquestar la resolución epistémica en microsegundos, forjando la plataforma fundacional exigida por la verdadera era de los enjambres multi-agente.

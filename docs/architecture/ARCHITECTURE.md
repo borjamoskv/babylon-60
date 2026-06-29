@@ -1,21 +1,21 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Architecture
 
-> **CORTEX Trust Engine v1.0.0 — Sovereign Cloud**
+> **BABYLON-60 Trust Engine v1.0.0 — Sovereign Cloud**
 > *La probabilidad puede sugerir. Solo la verificación puede gobernar.*
 
 ---
 
 ## System Overview
 
-CORTEX is a **trust infrastructure engine** that provides cryptographic verification, tamper-evident audit trails, and regulatory compliance for AI agent memory. It is built under the strict premise that generative AI output is fundamentally *thermodynamically unstable conjecture* (`Void-State`). It only becomes durable state after surviving a predefined path of deterministic filters.
+BABYLON-60 is a **trust infrastructure engine** that provides cryptographic verification, tamper-evident audit trails, and regulatory compliance for AI agent memory. It is built under the strict premise that generative AI output is fundamentally *thermodynamically unstable conjecture* (`Void-State`). It only becomes durable state after surviving a predefined path of deterministic filters.
 
 To enforce this, it combines a relational database with vector embeddings, hash-chained transactions, Merkle tree integrity, multi-agent consensus, and privacy protection — running locally on SQLite or scaling to AlloyDB + Qdrant + Redis for enterprise deployments.
 
 This page describes the broader repository and system architecture. For the recommended product
 boundary and first integration surface, start with [Public Product Surface](product-surface.md).
 For the agent-layer vocabulary used in this repo, see Agent Taxonomy.
-For executable capability packages and the Antigravity-CORTEX nexus, see
+For executable capability packages and the Antigravity-BABYLON-60 nexus, see
 [Skill Taxonomy](skills/SKILL-TAXONOMY.md).
 
 Today, the default FastAPI core bootstrap still fails closed unless `CORTEX_STORAGE=local`.
@@ -24,11 +24,11 @@ than the default public API bootstrap contract.
 
 ## Target Audience & Operational Taxonomy
 
-To ground the architectural design in real-world application, the CORTEX engine serves a multi-dimensional matrix of target audiences. Each audience maps to a core subsystem:
+To ground the architectural design in real-world application, the BABYLON-60 engine serves a multi-dimensional matrix of target audiences. Each audience maps to a core subsystem:
 
 ### Audience to Module Mapping
 
-| ID | Target Audience Vector | Operational Pain Point | CORTEX Engine Interface |
+| ID | Target Audience Vector | Operational Pain Point | BABYLON-60 Engine Interface |
 | :--- | :--- | :--- | :--- |
 | **V1** | Platform Engineers | Episodic corruption / state drift | `cortex/engine/` (`crystallizer.py`) |
 | **V2** | AI Agent Developers | Stochastic behavior in pipelines | `cortex/agents/` y `cortex/guards/` (`virgo.py`) |
@@ -168,7 +168,7 @@ Periodically, the ledger creates Merkle tree checkpoints from batches of fact ha
 
 ### Multi-Agent Consensus (WBFT)
 
-CORTEX implements **Weighted Byzantine Fault Tolerance**:
+BABYLON-60 implements **Weighted Byzantine Fault Tolerance**:
 
 1. Tracks reputation scores per agent (0.0–1.0) with decay
 2. Weighs votes by agent reputation
@@ -181,7 +181,7 @@ CORTEX implements **Weighted Byzantine Fault Tolerance**:
 
 ## Architecture v10.5+: Sovereignty & Scale
 
-En la transición hacia **v10.5+**, CORTEX consolida su arquitectura descentralizada (C5-REAL) mediante tres avances estructurales mayores:
+En la transición hacia **v10.5+**, BABYLON-60 consolida su arquitectura descentralizada (C5-REAL) mediante tres avances estructurales mayores:
 
 ### 1. Tripartite Memory (L1 / L2 / L3)
 El ecosistema separa el ciclo de vida de los datos según su termodinámica de acceso:

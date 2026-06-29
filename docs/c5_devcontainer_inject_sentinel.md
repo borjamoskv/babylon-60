@@ -1,7 +1,7 @@
 #!/bin/bash
 # ==============================================================================
-# CORTEX SOVEREIGN DEVCONTAINER - INJECT_SENTINEL.SH TEMPLATE
-# Target: Enforce Git Sentinel and CORTEX guards in container runtime
+# BABYLON-60 SOVEREIGN DEVCONTAINER - INJECT_SENTINEL.SH TEMPLATE
+# Target: Enforce Git Sentinel and BABYLON-60 guards in container runtime
 # Reality Level: C5-REAL
 # ==============================================================================
 
@@ -12,7 +12,7 @@ CORTEX_DIR="/workspaces/cortex"
 GIT_HOOKS_DIR="${CORTEX_DIR}/.git/hooks"
 PRE_COMMIT_HOOK="${GIT_HOOKS_DIR}/pre-commit"
 
-echo "[C5-REAL] Initializing CORTEX DevContainer post-creation setup..."
+echo "[C5-REAL] Initializing BABYLON-60 DevContainer post-creation setup..."
 
 # 2. Verificación de Directorio Git
 if [ ! -d "${CORTEX_DIR}/.git" ]; then
@@ -27,7 +27,7 @@ echo "[C5-REAL] Injecting Git Sentinel Pre-Commit Hook..."
 
 cat << 'EOF' > "${PRE_COMMIT_HOOK}"
 #!/bin/bash
-# CORTEX Git Sentinel Pre-Commit Guard (C5-REAL)
+# BABYLON-60 Git Sentinel Pre-Commit Guard (C5-REAL)
 set -euo pipefail
 
 echo "[C5-REAL] Running Git Sentinel Hooks..."

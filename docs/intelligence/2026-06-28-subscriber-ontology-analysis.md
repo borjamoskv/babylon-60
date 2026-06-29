@@ -1,12 +1,12 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX SUBSCRIBER ONTOLOGY: EXERGY ANALYSIS (PURGED)
+# BABYLON-60 SUBSCRIBER ONTOLOGY: EXERGY ANALYSIS (PURGED)
 **SYS_ID:** borjamoskv | **Timestamp:** 2026-06-28 | **Reality Level:** C5-REAL
 
 > Informe estructural post-apoptosis. El Motor Causal ha filtrado el "Green Theater" del SaaS. Análisis del Enjambre SOTA (210 Nodos).
 
 ## 1. INVARIANTE ESTRUCTURAL DE AUDIENCIA
 
-Tras la inyección del `SubstackCrawlerGuard` en el `TaintEngine` (SAGA-1), el CORTEX ha erradicado la "Crawler Inflation" institucional, revelando el verdadero Enjambre Lector.
+Tras la inyección del `SubstackCrawlerGuard` en el `TaintEngine` (SAGA-1), el BABYLON-60 ha erradicado la "Crawler Inflation" institucional, revelando el verdadero Enjambre Lector.
 
 - **Total Nodos en Bruto:** 261
 - **Epistemic Breaches (Crawlers Purgados):** 28 (`editorial@`, `demos@`, `info@`, `press@`)

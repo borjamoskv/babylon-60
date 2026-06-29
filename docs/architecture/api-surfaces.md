@@ -4,7 +4,7 @@
 **Last Updated:** 2026-06-26
 
 ## Overview
-This document explicitly resolves the architectural duality within the CORTEX-Persist repository. It defines the source of truth for the API surfaces, preventing operational uncertainty and divergent configuration drift.
+This document explicitly resolves the architectural duality within the BABYLON-60-Persist repository. It defines the source of truth for the API surfaces, preventing operational uncertainty and divergent configuration drift.
 
 ---
 
@@ -15,7 +15,7 @@ This document explicitly resolves the architectural duality within the CORTEX-Pe
 * **Alias:** `cortex.api:app` (via lazy `__getattr__` in `cortex/api/__init__.py`)
 
 ### Purpose
-The official production surface of the CORTEX memory engine. It is the only API authorized to mutate core ledger state in production. All new features, bug fixes, auth mechanisms, and routes must be implemented here.
+The official production surface of the BABYLON-60 memory engine. It is the only API authorized to mutate core ledger state in production. All new features, bug fixes, auth mechanisms, and routes must be implemented here.
 
 ### Deployment & Execution
 * **Local Dev:** `make serve` (invokes `uvicorn cortex.api.core:app`)

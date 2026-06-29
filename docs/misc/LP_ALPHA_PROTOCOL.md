@@ -1,10 +1,10 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🗄️ LP ALPHA PROTOCOL: CORTEX-PERSIST CONVERGENCE
+# 🗄️ LP ALPHA PROTOCOL: BABYLON-60 CONVERGENCE
 
 > **Reality Level:** `C5-REAL` | **State:** `LOCKED`
 > **Framework:** Industrial Noir 2026 | **Tuning:** 21-EDO
 
-This document establishes the absolute operational protocol for "Long Play" (LP) assets within the Borja Moskv / CORTEX-Persist ecosystem, unifying acoustic execution and digital extraction.
+This document establishes the absolute operational protocol for "Long Play" (LP) assets within the Borja Moskv / BABYLON-60-Persist ecosystem, unifying acoustic execution and digital extraction.
 
 ## 1. DEFINITION MATRIX
 
@@ -17,10 +17,10 @@ This document establishes the absolute operational protocol for "Long Play" (LP)
 - **Purpose**: Deterministic traffic extraction (Exergy capture).
 
 ## 2. CONVERGENCE MATRIX (LP x LP)
-CORTEX-Persist orchestrates both entities. The Landing Page (LP_Web) acts as the deterministic extraction vector for the Music Release (LP_Audio).
+BABYLON-60-Persist orchestrates both entities. The Landing Page (LP_Web) acts as the deterministic extraction vector for the Music Release (LP_Audio).
 - **Ingestion**: Traffic -> LP_Web (Industrial Noir 2026 UI).
 - **Extraction**: User surrenders data (Exergy) to unlock audio.
-- **Delivery**: CORTEX-Guard verifies cryptographic continuity and serves the 21-EDO stems.
+- **Delivery**: BABYLON-60-Guard verifies cryptographic continuity and serves the 21-EDO stems.
 
 ## 3. OUROBOROS-INFINITY LOOP (POST-LAUNCH)
 The LP is a living dissipative structure.
@@ -46,7 +46,7 @@ The LP is a living dissipative structure.
 
 ## 6. ACOUSTIC & EXERGY MAXIMIZATION
 - **Acoustic Specs**: 96kHz / 32-bit Float / -10 LUFS / -1.0 dBTP.
-- **Psychoacoustics (CORTEX-Guard)**:
+- **Psychoacoustics (BABYLON-60-Guard)**:
   - Absolute HPF culling below 150Hz on 21-EDO synths. 
   - Pure Sine sub-bass in mono vacuum.
   - Phase-aligned transients.

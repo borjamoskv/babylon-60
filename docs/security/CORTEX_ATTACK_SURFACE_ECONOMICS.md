@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX: ATTACK SURFACE ECONOMICS LAYER
+# BABYLON-60: ATTACK SURFACE ECONOMICS LAYER
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)
 > **Aesthetic:** `Industrial Noir 2026`
@@ -44,4 +44,4 @@ The system must mathematically conserve `Ψ` under prolonged adversarial exploit
 Ψ = (Causal_Truth_Mass) × (Velocity_of_Consensus) - (Adversarial_Friction_Loss)
 ```
 
-The mathematics of CORTEX have officially left standard software architecture and entered the domain of computational physics.
+The mathematics of BABYLON-60 have officially left standard software architecture and entered the domain of computational physics.

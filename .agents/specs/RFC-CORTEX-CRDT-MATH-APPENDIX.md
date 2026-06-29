@@ -1,15 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Appendix: Cortex-Persist CRDT Merge Semantics
+# Appendix: BABYLON-60 CRDT Merge Semantics
 
 > **Status:** EXPERIMENTAL — Living Formal Appendix  
-> **Parent RFC:** [RFC-CORTEX-NATIVE-AI v0.1](file:///.agents/workflows/RFC-CORTEX-NATIVE-AI.md)  
+> **Parent RFC:** [RFC-BABYLON-60-NATIVE-AI v0.1](file:///.agents/workflows/RFC-BABYLON-60-NATIVE-AI.md)  
 > **Last Updated:** 2026-03-14
 
 ---
 
 ## 0. Preamble
 
-This appendix formalizes the algebraic properties, merge semantics, and convergence guarantees required for Cortex-Persist Semantic Swarm Sync. All merge operations MUST satisfy the Strong Eventual Consistency (SEC) contract: replicas that have received the same set of updates — regardless of order — MUST converge to identical states without coordination.
+This appendix formalizes the algebraic properties, merge semantics, and convergence guarantees required for BABYLON-60 Semantic Swarm Sync. All merge operations MUST satisfy the Strong Eventual Consistency (SEC) contract: replicas that have received the same set of updates — regardless of order — MUST converge to identical states without coordination.
 
 **Foundational Axiom (SEC):** For any two replicas $r_i, r_j$ that have delivered the same set of operations $O$:
 $$\text{state}(r_i) = \text{state}(r_j)$$
@@ -20,7 +20,7 @@ This requires all merge functions to be **commutative**, **associative**, and **
 
 ## 1. Entity CRDT Typology
 
-Each entity in the Cortex-Persist data model maps to a specific CRDT class. The choice is driven by the entity's mutation semantics.
+Each entity in the BABYLON-60 data model maps to a specific CRDT class. The choice is driven by the entity's mutation semantics.
 
 | Entity | CRDT Class | Lattice Join (⊔) | Rationale |
 | ------ | ---------- | ----------------- | --------- |

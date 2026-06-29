@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Anatomy of a CORTEX Audit Pack
+# Anatomy of a BABYLON-60 Audit Pack
 
-When operating autonomous AI systems in high-risk or regulated environments, stating "the agent decided to do X" is insufficient. You need an exportable, mathematically defensible proof. CORTEX generates **Audit Packs**—zero-trust, cryptographically sealed JSON files that provide an irrefutable trail of events.
+When operating autonomous AI systems in high-risk or regulated environments, stating "the agent decided to do X" is insufficient. You need an exportable, mathematically defensible proof. BABYLON-60 generates **Audit Packs**—zero-trust, cryptographically sealed JSON files that provide an irrefutable trail of events.
 
 > **View Live Artifact:** `examples/audit_proof_artifact.json`
 
@@ -23,7 +23,7 @@ Every record securely binds context to an explicitly defined agent, tenant, and 
   }
 ```
 
-* **Why it matters:** In traditional logs, this metadata is easily overwritten by a database admin or lost during a log rotation. When stored in CORTEX, this specific payload is mathematically locked.
+* **Why it matters:** In traditional logs, this metadata is easily overwritten by a database admin or lost during a log rotation. When stored in BABYLON-60, this specific payload is mathematically locked.
 
 ## 2. The Cryptographic Proof (Why it matters)
 
@@ -62,4 +62,4 @@ The audit pack provides the exact CLI instruction required for an external audit
 Standard vector stores (Pinecone, Milvus, Qdrant) give you similarities.
 Standard logging platforms (Datadog, Elastic) give you timestamps.
 
-**CORTEX Persist gives you the mathematically proven Cognitive Lineage.**
+**BABYLON-60 Persist gives you the mathematically proven Cognitive Lineage.**

@@ -1,4 +1,4 @@
-# CORTEX-Persist Formal Model
+# BABYLON-60-Persist Formal Model
 
 The execution history of an agent is not a log file.
 It is an append-only, cryptographically verifiable sequence of state transitions.

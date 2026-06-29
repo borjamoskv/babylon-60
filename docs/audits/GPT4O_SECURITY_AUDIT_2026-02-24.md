@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# GPT-4o DEEP SECURITY AUDIT: CORTEX-MOSKV-1
+# GPT-4o DEEP SECURITY AUDIT: BABYLON-60-MOSKV-1
 
 **Date:** 2026-02-24  
 **Protocol:** GPT-4o Secondary Review (130/100 Standards)  
@@ -7,14 +7,14 @@
 
 ## 🏛️ Executive Summary
 
-Following the initial KIMI-Swarm audit, a subsequent deep-dive analysis by GPT-4o has revealed critical architectural vulnerabilities that bypass the initial hardening efforts. The primary vectors leverage Python `sys.path` mechanics and environment variable inheritance to achieve sandbox escape and arbitrary code execution within the CORTEX environment.
+Following the initial KIMI-Swarm audit, a subsequent deep-dive analysis by GPT-4o has revealed critical architectural vulnerabilities that bypass the initial hardening efforts. The primary vectors leverage Python `sys.path` mechanics and environment variable inheritance to achieve sandbox escape and arbitrary code execution within the BABYLON-60 environment.
 
 ### 📊 Vital Signs (Post-KIMI Audit)
 
 | Index | Status | Score | Risk |
 | :--- | :--- | :--- | :--- |
 | **Isolation (Autopoiesis)** | 🔴 | 25/100 | CRITICAL: PYTHONPATH inheritance enables sandbox escape. |
-| **Integrity (Bridge)** | 🔴 | 10/100 | CRITICAL: `sys.path` injection enables full CORTEX hijack. |
+| **Integrity (Bridge)** | 🔴 | 10/100 | CRITICAL: `sys.path` injection enables full BABYLON-60 hijack. |
 | **Resilience (Endocrine)** | 🟡 | 70/100 | MEDIUM: Extreme clamping causes 0.0 temperature drops. |
 | **Naming (Autopoiesis)** | 🟡 | 65/100 | MEDIUM: Low entropy in tool generation naming. |
 
@@ -24,7 +24,7 @@ Following the initial KIMI-Swarm audit, a subsequent deep-dive analysis by GPT-4
 
 ### 1. GPT-BRG-01: Python Path Injection (`bridge.py`)
 - **Finding:** `SovereignBridge._ensure_path()` inserts `SKILLS_ROOT.parent` (`~/.gemini/antigravity`) directly into `sys.path[0]`.
-- **Impact:** **CRITICAL**. Any Python file placed in `~/.gemini/antigravity` (e.g., `os.py`, `json.py`) will shadow the standard library for the entire CORTEX runtime, leading to arbitrary code execution without warning.
+- **Impact:** **CRITICAL**. Any Python file placed in `~/.gemini/antigravity` (e.g., `os.py`, `json.py`) will shadow the standard library for the entire BABYLON-60 runtime, leading to arbitrary code execution without warning.
 - **Strategy:** Refactor skill loading to use explicit module paths without modifying the global `sys.path[0]` namespace. Alternatively, append to the END of `sys.path` or rely on standard subpackage imports.
 
 ### 2. GPT-APO-01: PYTHONPATH Sandbox Escape (`autopoiesis.py`)

@@ -1,10 +1,10 @@
-# 🌐 CORTEX Ecosystem: Singular Topology Map (v10.0)
+# 🌐 BABYLON-60 Ecosystem: Singular Topology Map (v10.0)
 
 > **C5-REAL State**: Entropy Level 0.00 Hz
 > **Aesthetic**: Industrial Noir 2026
 > **Generated via**: ULTRATHINK-OMEGA & Nexus Bridging Ω6
 
-Este artefacto cristaliza la topología estructural exacta del ecosistema CORTEX tras la purga termodinámica y el anclaje de los Nodos Autoritativos. Todo estado flotante ha sido asimilado.
+Este artefacto cristaliza la topología estructural exacta del ecosistema BABYLON-60 tras la purga termodinámica y el anclaje de los Nodos Autoritativos. Todo estado flotante ha sido asimilado.
 
 ## 🗺️ Arquitectura de Enrutamiento y Verdad Inmutable
 

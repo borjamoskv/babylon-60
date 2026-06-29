@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Tutorial: Memory for LangChain Agents
 
-Give your LangChain agent persistent, searchable memory backed by CORTEX.
+Give your LangChain agent persistent, searchable memory backed by BABYLON-60.
 
 ## The Problem
 
-LangChain's default memory is ephemeral — it disappears when your process dies. CORTEX gives you:
+LangChain's default memory is ephemeral — it disappears when your process dies. BABYLON-60 gives you:
 
 - **Persistent** memory that survives restarts
 - **Semantic search** across past interactions

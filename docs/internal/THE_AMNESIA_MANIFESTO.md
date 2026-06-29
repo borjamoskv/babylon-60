@@ -17,8 +17,8 @@ Engineering teams spend 15% of their session time re-explaining architecture, te
 This is a **Friction Tax** that the market can no longer afford.
 If your AI doesn't remember why you chose `AES-256-GCM` over `RSA` six weeks ago, it's not a collaborator; it's a temp worker.
 
-### 3. THE CORTEX SOLUTION
-CORTEX provides a **Sovereign Memory Layer** that sits between the developer and the model.
+### 3. THE BABYLON-60 SOLUTION
+BABYLON-60 provides a **Sovereign Memory Layer** that sits between the developer and the model.
 It's not just "RAG". It's **Temporal Reasoning**.
 - **CLI first:** Data capture at the speed of thought.
 - **Demon-mode:** Background monitoring of decisions and errors.

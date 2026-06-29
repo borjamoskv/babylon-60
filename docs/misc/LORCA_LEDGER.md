@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 📜 CORTEX LORCA-Ω NARRATIVE LEDGER
+# 📜 BABYLON-60 LORCA-Ω NARRATIVE LEDGER
 
 > **Sovereign Chronicle of the Substrate** | **Reality Level:** `C5-REAL`
 > **Generated at:** `2026-05-27T05:21:55.826018+00:00` | **Source:** `git history` (last 30 commits)
@@ -44,7 +44,7 @@ This ledger projects a retroactive narrative translation of repository mutations
 ## 🌌 LORCA-Ω Engine Axioms
 
 1. **Entropic Asymmetry**: Standard commit comments accumulate cognitive load. Poetry resolves it into a single clean line.
-2. **Aesthetic Continuity**: Highlights transitions using targeted emojis and CORTEX-native metaphors (e.g. reactors, citadels, anomalies).
+2. **Aesthetic Continuity**: Highlights transitions using targeted emojis and BABYLON-60-native metaphors (e.g. reactors, citadels, anomalies).
 3. **Zero Mutation Invariant**: The repository's git indices are untouched. The ledger remains a pure projection layer.
 
 *Status: C5-REAL (Synchronized)*

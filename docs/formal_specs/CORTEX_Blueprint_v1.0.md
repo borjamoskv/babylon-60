@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Core Specification Blueprint v1.0
+# BABYLON-60 Core Specification Blueprint v1.0
 
 ## Status
 
 **Document Status:** Conceptual Architecture (Frozen)
 
-This document defines the architectural invariants and abstract execution model of CORTEX. It is intentionally independent of any implementation language, machine learning model, storage engine or execution runtime.
+This document defines the architectural invariants and abstract execution model of BABYLON-60. It is intentionally independent of any implementation language, machine learning model, storage engine or execution runtime.
 
 It is **not** an implementation specification. Its purpose is to define the properties that every conforming implementation shall preserve.
 
@@ -13,7 +13,7 @@ It is **not** an implementation specification. Its purpose is to define the prop
 
 # Design Goal
 
-CORTEX v1.0 is not a theory of truth, nor is it a complete theory of trust. 
+BABYLON-60 v1.0 is not a theory of truth, nor is it a complete theory of trust. 
 
 It is an architectural proposal designed to make the epistemological decisions of a computational system explicit, typed, traceable, and auditable. 
 
@@ -102,7 +102,7 @@ Future specifications shall define these components independently while preservi
 
 # Conformance Principle
 
-An implementation conforms to CORTEX if—and only if—it preserves the architectural invariants defined in this document.
+An implementation conforms to BABYLON-60 if—and only if—it preserves the architectural invariants defined in this document.
 
 Performance, implementation language, hardware architecture and underlying language models are intentionally outside the scope of conformance.
 
@@ -113,14 +113,14 @@ Performance, implementation language, hardware architecture and underlying langu
 The project lifecycle acknowledges three distinct levels of maturity:
 
 * **Blueprint (v1.0):** Defines principles, invariants, and abstract architecture. (Status: FROZEN).
-* **CEP (CORTEX Engineering Proposals):** Refines and formalizes specific components like the parameterizable Trust Algebra. (Status: OPEN SPECIFICATION).
+* **CEP (BABYLON-60 Engineering Proposals):** Refines and formalizes specific components like the parameterizable Trust Algebra. (Status: OPEN SPECIFICATION).
 * **Reference Kernel & Test Suite:** Canonical implementation and conformance testing. (Status: NON-EXISTENT).
 
 ---
 
 # Methodological Note: The Epistemic OS
 
-The primary contribution of CORTEX is not judged by the sophistication of its algorithms, but by the quality and stability of its epistemic interfaces.
+The primary contribution of BABYLON-60 is not judged by the sophistication of its algorithms, but by the quality and stability of its epistemic interfaces.
 
 A conforming epistemic interface possesses four fundamental properties:
 1. **Explicit:** Every claim must be accompanied by the epistemic state from which it was emitted.
@@ -128,4 +128,4 @@ A conforming epistemic interface possesses four fundamental properties:
 3. **Audited:** Every state transition must be strictly reconstructable from verifiable artifacts.
 4. **Replaceable:** No concrete trust model, provenance system, or inference engine constitutes an essential part of the architecture.
 
-CORTEX is designed to function as an **Operating System for Epistemological Models**. Just as an OS defines stable abstractions (processes, memory, file systems) allowing diverse applications to coexist, CORTEX defines stable infrastructure allowing multiple trust theories, inference engines, and provenance models to be implemented, compared, and replaced without altering fundamental system contracts.
+BABYLON-60 is designed to function as an **Operating System for Epistemological Models**. Just as an OS defines stable abstractions (processes, memory, file systems) allowing diverse applications to coexist, BABYLON-60 defines stable infrastructure allowing multiple trust theories, inference engines, and provenance models to be implemented, compared, and replaced without altering fundamental system contracts.

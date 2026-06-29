@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX cURL Cheatsheet
+# BABYLON-60 cURL Cheatsheet
 
-Quick reference for the CORTEX API. Replace `YOUR_KEY` with your API key.
+Quick reference for the BABYLON-60 API. Replace `YOUR_KEY` with your API key.
 
 ## Health
 

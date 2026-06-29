@@ -13,7 +13,7 @@ La mayoría de los ingenieros de software senior se estrellan contra la Intelige
 - Inputs idénticos producen outputs idénticos.
 - La complejidad es lineal o polinómica, pero siempre reducible a sus partes (O(1), O(N), O(N^2)).
 
-Cuando aplican este mapa a un LLM, o peor, a un *enjambre de LLMs interactuando*, el sistema colapsa en un caos inmanejable. ¿Por qué? Porque un enjambre LLM (como LEGION-1 o CORTEX V4) no obedece a las reglas de la ingeniería de software tradicional. Obedece a las reglas de la **Física de Sistemas Complejos Limitados por Entropía**.
+Cuando aplican este mapa a un LLM, o peor, a un *enjambre de LLMs interactuando*, el sistema colapsa en un caos inmanejable. ¿Por qué? Porque un enjambre LLM (como LEGION-1 o BABYLON-60 V4) no obedece a las reglas de la ingeniería de software tradicional. Obedece a las reglas de la **Física de Sistemas Complejos Limitados por Entropía**.
 
 La transición de paradigma es brutal:
 **Dejas de ser un relojero matemático para convertirte en un ecologista de la información.**

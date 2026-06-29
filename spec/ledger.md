@@ -1,7 +1,7 @@
 # Ledger AOF (Append-Only File) Specification
 
 ## 1. Definición Formal
-El Ledger de CORTEX-PERSIST es un archivo inmutable de sólo adición (Append-Only File) que actúa como la fuente unificada de verdad (Source of Truth) para todas las transacciones causales de los agentes.
+El Ledger de BABYLON-60 es un archivo inmutable de sólo adición (Append-Only File) que actúa como la fuente unificada de verdad (Source of Truth) para todas las transacciones causales de los agentes.
 
 ## 2. Invariantes
 - **Inmutabilidad Absoluta**: Un evento insertado en el Ledger jamás puede ser modificado ni borrado.

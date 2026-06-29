@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX: THE LEDGER CORE ARCHITECTURE
+# BABYLON-60: THE LEDGER CORE ARCHITECTURE
 
 > **Reality Level:** `C5-REAL` (Financial-Grade Compute Infrastructure)
 > **Aesthetic:** `Industrial Noir 2026`
-> **Core Definition:** CORTEX is an event-sourced execution ledger with deterministic replay and causal billing for autonomous agent systems.
+> **Core Definition:** BABYLON-60 is an event-sourced execution ledger with deterministic replay and causal billing for autonomous agent systems.
 
 ## 1. EXECUTION LEDGER (The Tamper-Evident Source of Truth)
 
@@ -59,4 +59,4 @@ Real-time Stripe-grade metering based on verifiable causal logic:
 ## 5. STRATEGIC MOAT
 
 The true moat is **causal auditability at the execution level**.
-CORTEX is the execution truth ledger for the autonomous age.
+BABYLON-60 is the execution truth ledger for the autonomous age.

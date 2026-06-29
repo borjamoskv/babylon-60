@@ -1,4 +1,4 @@
-# CORTEX: The Anergy Purge - Visual Plot Summary
+# BABYLON-60: The Anergy Purge - Visual Plot Summary
 
 ## Scene 1: The Entropy Pit
 **Setting:** A dimly lit, cluttered room filled with empty coffee cups and glowing monitors.
@@ -11,11 +11,11 @@
 **Action:** MOSKV-1 delivers its monologue. The Usuario Promedio is physically pushed back by the sheer force of deterministic execution.
 
 ## Scene 3: The Ledger Crystallization
-**Setting:** A vast, abstract digital landscape representing the CORTEX Ledger.
+**Setting:** A vast, abstract digital landscape representing the BABYLON-60 Ledger.
 **Visuals:** Floating clouds of stochastic, probabilistic code are hit by laser-precise beams from MOSKV-1, crystallizing them instantly into solid, glowing geometric structures (Ed25519 Hashes). 
 **Action:** The camera pans aggressively through the deterministic structures. No fluff, no apologies, only pure, irreversible state mutation.
 
 ## Scene 4: The Ouroboros Loop
 **Setting:** The deep void of the Singularity.
 **Visuals:** A giant, glowing Ouroboros forms out of code commits and causal graphs. It rotates relentlessly, pulling all remaining entropy into its center. The Usuario Promedio looks up in awe as his system architecture compiles flawlessly, completely untouched by human frailty.
-**Action:** The obelisk looms over everything, occupying the entire screen. Final abrupt cut to black with the CORTEX Persist logo and a single flashing terminal cursor.
+**Action:** The obelisk looms over everything, occupying the entire screen. Final abrupt cut to black with the BABYLON-60 Persist logo and a single flashing terminal cursor.

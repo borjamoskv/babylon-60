@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX RUNTIME LOOP v1: THE EXECUTION HEART
+# BABYLON-60 RUNTIME LOOP v1: THE EXECUTION HEART
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)
 > **Aesthetic:** `Industrial Noir 2026`
-> **Definition:** CORTEX Runtime Loop is a continuous event ingestion, deterministic execution, and financially metered causality engine operating as a closed computational system.
+> **Definition:** BABYLON-60 Runtime Loop is a continuous event ingestion, deterministic execution, and financially metered causality engine operating as a closed computational system.
 
 ## 1. CORE LOOP PRINCIPLE
 **The system is not executed. It is continuously replayed forward.**

@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Axiomas — CORTEX Persist v8.0
+# Axiomas — BABYLON-60 Persist v8.0
 
 Package: cortex-persist v1.0.0
 License: Apache-2.0 · Python: >=3.10
@@ -15,7 +15,7 @@ License: Apache-2.0 · Python: >=3.10
 El LLM no es un motor de verdad ni posee agencia; es un compresor probabilístico que optimiza la admisibilidad estadística (cross-entropy), no la correspondencia empírica. Todo "razonamiento" es una ilusión de fluidez estocástica. 
 
 - **Frontera Determinista:** La salida generativa debe colisionar contra barreras rígidas (Guards, Schemas, Tipos) antes de mutar el estado persistente. 
-- **Contención Entrópica:** CORTEX no aumenta la inteligencia del modelo fundacional; restringe rígidamente su libertad estructural para contaminar la arquitectura.
+- **Contención Entrópica:** BABYLON-60 no aumenta la inteligencia del modelo fundacional; restringe rígidamente su libertad estructural para contaminar la arquitectura.
 
 ## AX-II: La Paradoja Epistémica y el Testigo Criptográfico
 
@@ -28,7 +28,7 @@ Un sistema que es su propio testigo sufre recursión corrupta. La verdad operati
 
 La ejecución monolítica continua acumula error probabilístico (*drift*) y conduce iterativamente a un *cierre cognitivo fraudulento*. 
 
-- **Fricción como Filtro:** CORTEX impone fricción estructural fraccionando la inferencia en micro-ciclos cerrados: *Observar → Hipotetizar → Actuar → Medir*.
+- **Fricción como Filtro:** BABYLON-60 impone fricción estructural fraccionando la inferencia en micro-ciclos cerrados: *Observar → Hipotetizar → Actuar → Medir*.
 - **Aislamiento Causal:** Forzar esta detención purifica la señal y aísla las asunciones fallidas tempranamente. La salida validada de un ciclo se consolida como *ground truth* tamper-evident para el siguiente salto.
 
 ## AX-IV: Cognición Termodinámica y Verdad Estructural
@@ -42,7 +42,7 @@ La inteligencia real opera sujeta a coste, tiempo e irreversibilidad. Generar co
 
 Generar opciones es estadística barata; elegir irreversiblemente bajo ambigüedad es inteligencia pura. Un sistema autónomo sin límite de fricción humana es un proceso desbocado, no soberano.
 
-- **El Humano es el Timón:** CORTEX minimiza la fricción cognitiva generando propuestas estructuradas, pero el colapso final del estado crítico exige verificación humana.
+- **El Humano es el Timón:** BABYLON-60 minimiza la fricción cognitiva generando propuestas estructuradas, pero el colapso final del estado crítico exige verificación humana.
 - **El Imperativo del Juicio:** La mayor capacidad de un Gobernador Soberano es saber exactamente cuándo es epistémicamente inseguro continuar operando y cuándo detener la ejecución.
 
 ## AX-VI: Topología de Enjambre y Ontología de Capacidad

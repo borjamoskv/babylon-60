@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Persist — Canonical Naming Reference
+# BABYLON-60 Persist — Canonical Naming Reference
 
-This document is the authoritative source of truth for all public-facing names across the CORTEX Persist project.
+This document is the authoritative source of truth for all public-facing names across the BABYLON-60 Persist project.
 
 ---
 
@@ -45,7 +45,7 @@ cortex verify ledger
 
 ### Cloud SDK: `cortex_persist` (from `cortex-sdk/`)
 
-The `cortex-sdk/` directory contains a **thin HTTP wrapper SDK** for the hosted CORTEX Persist cloud API. This SDK uses the Python import `cortex_persist` and is a **different package** from the local engine.
+The `cortex-sdk/` directory contains a **thin HTTP wrapper SDK** for the hosted BABYLON-60 Persist cloud API. This SDK uses the Python import `cortex_persist` and is a **different package** from the local engine.
 
 > ⚠️ **Not yet published.** The cloud SDK (`cortex-sdk/`) is not yet deployed to PyPI or production. Do not use `from cortex_persist import CortexMemory` in examples unless you are explicitly documenting the cloud SDK.
 
@@ -64,7 +64,7 @@ The JavaScript/TypeScript SDK lives in `sdks/js/` and will eventually be publish
 | `from cortex_persist import CortexMemory` (in core docs) | `from cortex import CortexEngine` | Cloud SDK, not local engine |
 | `pip install cortex_persist` | `pip install cortex-persist` | Underscore is wrong |
 | `npm install @cortex-persist/sdk` (without caveat) | Add "⏳ Coming Soon" note | Not yet on npm |
-| Referring to the package as "Cortex Persist SDK" | "CORTEX Persist" | Canonical product name |
+| Referring to the package as "BABYLON-60 SDK" | "BABYLON-60 Persist" | Canonical product name |
 
 ---
 

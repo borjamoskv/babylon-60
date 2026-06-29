@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Plan de Implementación: Refactorización CORTEX Core via LEGIØN-1 (Swarm)
+# Plan de Implementación: Refactorización BABYLON-60 Core via LEGIØN-1 (Swarm)
 
 ## Meta
 Alcanzar una organización pluscuamperfecta del núcleo `cortex/cortex/` sin romper dependencias cíclicas ni exponer los tests a errores en cascada.
@@ -35,4 +35,4 @@ Alcanzar una organización pluscuamperfecta del núcleo `cortex/cortex/` sin rom
 
 ---
 
-**Protocolo CORTEX Activo.** Esperando tu APROBACIÓN para iniciar el Swarm Phase 1 (Limpieza y reparación de Tests rotos).
+**Protocolo BABYLON-60 Activo.** Esperando tu APROBACIÓN para iniciar el Swarm Phase 1 (Limpieza y reparación de Tests rotos).

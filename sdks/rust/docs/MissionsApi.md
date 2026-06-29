@@ -14,7 +14,7 @@ Method | HTTP request | Description
 > models::MissionResponse launch_mission_v1_missions_launch_post(mission_launch_request, authorization)
 Launch Mission
 
-Launch a new swarm mission through the CORTEX Launchpad.
+Launch a new swarm mission through the BABYLON-60 Launchpad.
 
 ### Parameters
 

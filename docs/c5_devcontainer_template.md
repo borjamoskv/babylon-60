@@ -1,4 +1,4 @@
-# CORTEX SOVEREIGN DEVCONTAINER SKELETON
+# BABYLON-60 SOVEREIGN DEVCONTAINER SKELETON
 > **Target:** Local Autarchy (1000/1000)
 > **Engine:** OrbStack / Colima (macOS Metal)
 > **Reality Level:** C5-REAL

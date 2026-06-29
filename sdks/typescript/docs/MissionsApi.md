@@ -15,7 +15,7 @@ All URIs are relative to *http://localhost*
 
 Launch Mission
 
-Launch a new swarm mission through the CORTEX Launchpad.
+Launch a new swarm mission through the BABYLON-60 Launchpad.
 
 ### Example
 

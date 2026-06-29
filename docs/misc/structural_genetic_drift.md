@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX SICA: Structural Genetic Drift & Ouroboros Convergence
+# BABYLON-60 SICA: Structural Genetic Drift & Ouroboros Convergence
 
 > **Reality Level:** `C5-REAL`  
 > **Milestone Alignment:** `death_protocol` (AI Code Hygiene & OSS Metabolism) / `cryptographic_autopoiesis_swarm_thermodynamics` (Swarm Autopoiesis)

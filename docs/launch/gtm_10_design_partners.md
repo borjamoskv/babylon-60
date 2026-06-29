@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX-Persist: GTM-10 Design Partner Strategy
+# BABYLON-60-Persist: GTM-10 Design Partner Strategy
 
 ## 1. El Problema: "Context Fatigue"
 
@@ -36,7 +36,7 @@ Buscar discusiones sobre "Cursor memory limits", "ChatGPT custom instructions no
 **Mensaje (The "Show, Don't Tell" Hook):**
 > "Hey [Nombre]. He visto tu repo en [Tecnología]. Seguramente estás harto de que Copilot/Claude te escupa código boilerplate genérico que ignora tu arquitectura. 
 > 
-> Acabo de cerrar la versión *Killer* de **CORTEX-Persist**: Un 'Persistent Dev Companion' que se engancha a tu IDE/Terminal, se aprende tu stack (Memory Genesis), y *nunca más* te vuelve a hacer preguntas redundantes. Tengo 10 cupos para Design Partners. ¿Quieres el binario?"
+> Acabo de cerrar la versión *Killer* de **BABYLON-60-Persist**: Un 'Persistent Dev Companion' que se engancha a tu IDE/Terminal, se aprende tu stack (Memory Genesis), y *nunca más* te vuelve a hacer preguntas redundantes. Tengo 10 cupos para Design Partners. ¿Quieres el binario?"
 
 ---
 

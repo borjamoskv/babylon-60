@@ -1,4 +1,4 @@
-# Cortex-Persist — Graph Executable Brain (C4-SIM)
+# BABYLON-60 — Graph Executable Brain (C4-SIM)
 
 ## 1. Neo4j Graph Schema (Executable Core)
 
@@ -108,12 +108,12 @@ state_t+1 = f(state_t, Event_t, neuromodulators_t)
 
 ## 5. Mapping Rules (C4-SIM → Graph)
 
-| Cortex Layer | Graph Representation |
+| BABYLON-60 Layer | Graph Representation |
 |--------------|---------------------|
 | L1 Motor     | real-time node cluster |
 | L2 Limbic    | event filters + scoring |
 | L3 Routing   | graph traversal engine |
-| L4 Cortex    | LLM + feature extraction nodes |
+| L4 BABYLON-60    | LLM + feature extraction nodes |
 
 ---
 

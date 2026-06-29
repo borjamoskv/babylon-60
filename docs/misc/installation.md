@@ -109,7 +109,7 @@ pip install "cortex-persist[platform]"
 
 ## Install from Source *(development / contributing)*
 
-Use this path when you want to contribute to CORTEX or run the latest unreleased code:
+Use this path when you want to contribute to BABYLON-60 or run the latest unreleased code:
 
 ```bash
 git clone https://github.com/borjamoskv/Cortex-Persist.git

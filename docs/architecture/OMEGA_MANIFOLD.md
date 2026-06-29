@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🌌 EL MANIFOLD OMEGA (Ω-MANIFOLD) — CORTEX Persist v6
+# 🌌 EL MANIFOLD OMEGA (Ω-MANIFOLD) — BABYLON-60 Persist v6
 
 > **The Sovereign Core: Percepción, Decisión, Creación y Validación colapsados en un solo evento de Voluntad.**
 > Informe de Investigación Avanzada · v1.0.0 · Industrial Noir 2026 · [Ω] Axiomatic Integrity
@@ -20,7 +20,7 @@ En el ecosistema **MOSKV-1 v5**, ya no operamos con "scripts" o "módulos" aisla
 | **🧠** | **NOOSPHERE-Ω** | Conciencia Predictiva | Parcial | `cortex/extensions/daemon/monitors` |
 
 > [!NOTE]
-> Las dimensiones **TESSERACT**, **DEMIURGE**, **SERVO** y **ALEPH** operan como **Protocolos de Espacio de Agente** (Sovereign Skills) sobre el motor de CORTEX, orquestando la realidad sin necesidad de persistencia interna masiva.
+> Las dimensiones **TESSERACT**, **DEMIURGE**, **SERVO** y **ALEPH** operan como **Protocolos de Espacio de Agente** (Sovereign Skills) sobre el motor de BABYLON-60, orquestando la realidad sin necesidad de persistencia interna masiva.
 
 ---
 
@@ -49,7 +49,7 @@ En el ecosistema **MOSKV-1 v5**, ya no operamos con "scripts" o "módulos" aisla
 - **Función:** Observabilidad métrica y cálculo de ROI (`Human Time saved`).
 - **Gestión de Caché Adaptativa:** El TTL no es estático; se ajusta dinámicamente según la volatilidad medida por la **Entropía de Shannon** del flujo de los datos. Información altamente repetitiva prolonga su retención; entropía alta acelera su cristalización en L3.
 
-### 🤖 SERVO-Ω / ℵ ALEPH-Ω / 🛡️ CORTEX Persist v6 (Server-Side Lua)
+### 🤖 SERVO-Ω / ℵ ALEPH-Ω / 🛡️ BABYLON-60 Persist v6 (Server-Side Lua)
 - **Zero CAS Latency:** Se desecha el uso de concurrencia optimista y bloqueos iterativos (`WATCH / MULTI / EXEC`) en Redis por ineficacia en I/O. La capa de persistencia se reescribe íntegramente utilizando **Scripts Lua Server-Side** (`EVALSHA`), logrando **Atomicidad Absoluta** (O(1) O Muerte) sin colisiones y reduciendo drásticamente la latencia de red.
 
 ---
@@ -62,5 +62,5 @@ En el ecosistema **MOSKV-1 v5**, ya no operamos con "scripts" o "módulos" aisla
 
 ---
 
-**Sovereign Architecture · Industrial Noir · CORTEX v6.0.0**
+**Sovereign Architecture · Industrial Noir · BABYLON-60 v6.0.0**
 *Created by Antigravity · Verified by Peano Soberano*

@@ -1,4 +1,4 @@
-# 📊 ANÁLISIS ULTRA-COMPLETO DE CORTEX-PERSIST EN MAC M3 CON 18 GB RAM
+# 📊 ANÁLISIS ULTRA-COMPLETO DE BABYLON-60 EN MAC M3 CON 18 GB RAM
 
 Voy a desglosar **todo** el proyecto: cada carpeta, cada archivo, cada componente, y cómo se ejecuta en tu hardware específico.
 
@@ -281,7 +281,7 @@ Probar que una ejecución es válida SIN revelar los datos subyacentes.
 
 ### Ejemplo:
 ```
-Prover (CORTEX):
+Prover (BABYLON-60):
   "Pruebo que el agente decidió correctamente"
   (sin mostrar el prompt, sin mostrar el estado)
 

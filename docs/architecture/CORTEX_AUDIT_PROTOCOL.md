@@ -1,18 +1,18 @@
 ---
-title: "CORTEX Audit Protocol v2.0 (L0-L6 Pipeline)"
+title: "BABYLON-60 Audit Protocol v2.0 (L0-L6 Pipeline)"
 level: "C5-REAL"
 author: "borjamoskv (via MOSKV-1)"
 status: "Active"
 ---
 
-# CORTEX AUDIT PROTOCOL: Ciclo de Ingeniería Causal L0-L6
+# BABYLON-60 AUDIT PROTOCOL: Ciclo de Ingeniería Causal L0-L6
 
 > **Directiva (UltraThink):** La inteligencia sin impacto termodinámico es una ilusión estocástica. Este protocolo evita la autojustificación LLM insertando un puente empírico (`Experiment`) entre la inferencia y la mutación, garantizando que todo cambio de estado esté basado en evidencia irrefutable.
 >
 > **PRINCIPIO ABSOLUTO DE TRAZABILIDAD:**
 > **Toda intervención debe ser trazable hasta al menos una evidencia (L0), una predicción falsable (L3) y un resultado experimental (L4).**
 
-La infraestructura de gobernanza cognitiva (CORTEX) exige que la incertidumbre colapse de manera auditable. La progresión se divide en 7 niveles lógicos acoplados a contratos JSON (`schema/`).
+La infraestructura de gobernanza cognitiva (BABYLON-60) exige que la incertidumbre colapse de manera auditable. La progresión se divide en 7 niveles lógicos acoplados a contratos JSON (`schema/`).
 
 ---
 
@@ -33,7 +33,7 @@ Destrucción del texto decorativo y preservación únicamente del vector estruct
 ## [L2] COGNITIVE MODEL (Modelo Cognitivo)
 
 **Isomorfismo Estructural.**
-El patrón destilado se mapea sobre el grafo de CORTEX-Persist para formar una hipótesis de la realidad subyacente.
+El patrón destilado se mapea sobre el grafo de BABYLON-60-Persist para formar una hipótesis de la realidad subyacente.
 *   **Contrato:** `schema/model.schema.json`
 *   **Mecánica:** Diseño de la topología causal (ej. "La fuga de memoria ocurre porque `sqlite-vec` no soporta `busy_timeout` en el hilo secundario").
 

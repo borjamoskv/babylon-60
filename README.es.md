@@ -5,11 +5,11 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/marketing/social-preview.png">
     <source media="(prefers-color-scheme: light)" srcset="assets/marketing/social-preview-light.png">
-    <img src="assets/marketing/social-preview.png" alt="CORTEX Persist — Memoria a prueba de manipulaciones para agentes de IA" width="100%">
+    <img src="assets/marketing/social-preview.png" alt="BABYLON-60 Persist — Memoria a prueba de manipulaciones para agentes de IA" width="100%">
   </picture>
 </div>
 
-<h1 align="center">█ CORTEX-PERSIST</h1>
+<h1 align="center">█ BABYLON-60</h1>
 <p align="center">
   <strong>Rastrea criptográficamente lo que sabía tu agente de IA.</strong>
 </p>
@@ -32,9 +32,9 @@
 
 ## ▀▄ HUMILDAD Y CONTENCIÓN EPISTÉMICA
 
-En el núcleo de CORTEX-Persist se encuentra la **Humildad Epistémica**: la aceptación de que toda salida de IA generativa es fundamentalmente una conjetura probabilística. El registro tradicional y los almacenes vectoriales estándar confían ciegamente en las salidas de los LLM, fallando la prueba de contención epistémica. 
+En el núcleo de BABYLON-60-Persist se encuentra la **Humildad Epistémica**: la aceptación de que toda salida de IA generativa es fundamentalmente una conjetura probabilística. El registro tradicional y los almacenes vectoriales estándar confían ciegamente en las salidas de los LLM, fallando la prueba de contención epistémica. 
 
-CORTEX-Persist actúa como un **Hipervisor L0** para agentes autónomos, aplicando un determinismo estructural absoluto para contener la incertidumbre inherente de la inteligencia artificial. **No confiamos en el modelo; verificamos la evidencia criptográfica.**
+BABYLON-60-Persist actúa como un **Hipervisor L0** para agentes autónomos, aplicando un determinismo estructural absoluto para contener la incertidumbre inherente de la inteligencia artificial. **No confiamos en el modelo; verificamos la evidencia criptográfica.**
 
 ```text
   [ GENERACIÓN ESTOCÁSTICA ] 
@@ -51,7 +51,7 @@ CORTEX-Persist actúa como un **Hipervisor L0** para agentes autónomos, aplican
   [ ESTADO VERIFICADO SOBERANO ]
 ```
 
-| CAPACIDAD | RAG / LOGS TRADICIONALES | CORTEX-PERSIST |
+| CAPACIDAD | RAG / LOGS TRADICIONALES | BABYLON-60 |
 | :--- | :--- | :--- |
 | **Modelo de Confianza** | Confiar en el Proceso | **Verificar la Evidencia (C5-REAL)** |
 | **Mutación** | CRUD Silencioso / Sobrescribible | **Append-Only + Sellos Merkle SHA-256** |
@@ -62,7 +62,7 @@ CORTEX-Persist actúa como un **Hipervisor L0** para agentes autónomos, aplican
 
 ## ▀▄ ARQUITECTURA DETALLADA Y FLUJO DE DATOS
 
-Las estructuras de interceptación de CORTEX-Persist obligan a que las salidas de texto producidas estocásticamente pasen a través de escudos de verificación deterministas antes de confirmar el estado en el libro de contabilidad (Ledger) vinculado criptográficamente.
+Las estructuras de interceptación de BABYLON-60-Persist obligan a que las salidas de texto producidas estocásticamente pasen a través de escudos de verificación deterministas antes de confirmar el estado en el libro de contabilidad (Ledger) vinculado criptográficamente.
 
 ```mermaid
 graph TD
@@ -128,7 +128,7 @@ El daemon de persistencia opera bajo estrictas restricciones termodinámicas (Jo
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/marketing/cortex_demo.gif">
   <source media="(prefers-color-scheme: light)" srcset="assets/marketing/cortex_demo_light.gif">
-  <img alt="Ejecución de terminal de CORTEX-Persist" src="assets/marketing/cortex_demo.gif" width="100%">
+  <img alt="Ejecución de terminal de BABYLON-60-Persist" src="assets/marketing/cortex_demo.gif" width="100%">
 </picture>
 
 ---
@@ -164,7 +164,7 @@ python examples/demo_canonical.py
 ```
 
 ### 3. Integración Soberana (Fricción Cero)
-Integra el sustrato de memoria CORTEX en cualquier pipeline de agentes existente (LangChain, LlamaIndex, etc.) con un único decorador mágico.
+Integra el sustrato de memoria BABYLON-60 en cualquier pipeline de agentes existente (LangChain, LlamaIndex, etc.) con un único decorador mágico.
 
 ```python
 import asyncio

@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # AGENTS.md — Sovereign Swarm Protocol v3.0
 
-> **System:** MOSKV-1 v5 (CORTEX v6)
+> **System:** MOSKV-1 v5 (BABYLON-60 v6)
 > **Architecture:** LEGIØN-1 Fractal Swarm
 > **Mode:** SOVEREIGN CLOUD
 > **Updated:** 2026-03-02
@@ -21,7 +21,7 @@
 ### @NEXUS — The Cross-Project Unifier
 - **Title**: Ecosystem Synchronizer
 - **Responsibilities**: Cross-project pattern transfers, conflict resolution, ghost management via `cortex/extensions/mejoralo/`
-- **V6 scope**: Ensures v6 patterns (tenant_id, RBAC) propagate consistently across all projects in CORTEX ecosystem
+- **V6 scope**: Ensures v6 patterns (tenant_id, RBAC) propagate consistently across all projects in BABYLON-60 ecosystem
 
 ---
 
@@ -125,7 +125,7 @@
 5. **Specific Exceptions** — No bare `except Exception`. Catch `sqlite3.Error`, `OSError`, `ValueError` specifically.
 6. **Sovereignty** — Dependencies must be local/vendored where possible. Cloud = optional, not required.
 7. **MEJORAlo Gate** — Score must be ≥ 80/100 before shipping any major module. Target: 85+.
-8. **CORTEX First** — All decisions, errors, and learnings persist to CORTEX DB. Memory is the law.
+8. **BABYLON-60 First** — All decisions, errors, and learnings persist to BABYLON-60 DB. Memory is the law.
 
 ---
 

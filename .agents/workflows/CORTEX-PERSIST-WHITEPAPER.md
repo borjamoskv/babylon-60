@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: Cortex-Persist Whitepaper v0.2.2 — Infraestructura de gobernanza cognitiva para enjambres de agentes
+description: BABYLON-60 Whitepaper v0.2.2 — Infraestructura de gobernanza cognitiva para enjambres de agentes
 ---
 
-# Cortex-Persist
+# BABYLON-60
 
 ## Infraestructura de gobernanza cognitiva para continuidad de memoria, resolución de colisiones y consistencia operacional en enjambres de agentes autónomos
 
@@ -13,17 +13,17 @@ description: Cortex-Persist Whitepaper v0.2.2 — Infraestructura de gobernanza 
 
 **Normative Draft v0.2.2** — 2026-03-14
 
-> **Normative Bridge:** Este documento es descriptivo. Cualquier interpretación a nivel de requisitos DEBE referirse al RFC-CORTEX-NATIVE-AI v0.1 y sus sucesores.
+> **Normative Bridge:** Este documento es descriptivo. Cualquier interpretación a nivel de requisitos DEBE referirse al RFC-BABYLON-60-NATIVE-AI v0.1 y sus sucesores.
 
 ---
 
 ## 1. Resumen ejecutivo
 
-Cortex-Persist define una arquitectura de gobernanza cognitiva para sistemas multi-agente de larga duración. Su objetivo es mantener estado de creencias revisable, trazable y operacionalmente admisible bajo concurrencia, conflicto y degradación temporal.
+BABYLON-60 define una arquitectura de gobernanza cognitiva para sistemas multi-agente de larga duración. Su objetivo es mantener estado de creencias revisable, trazable y operacionalmente admisible bajo concurrencia, conflicto y degradación temporal.
 
 La tesis central es simple: la persistencia pasiva de embeddings no equivale a memoria fiable. En sistemas de larga duración, la combinación de RAG, similitud semántica y contexto acumulado genera entropía cognitiva: recuperación de hechos obsoletos, inferencias inválidas y contradicciones no resueltas.
 
-Para resolver este problema, Cortex-Persist sustituye el modelo de “base vectorial + prompt” por una infraestructura de gobernanza cognitiva activa. La unidad básica ya no es el chunk, sino el Belief Object: una estructura con contenido semántico, estado epistémico, procedencia verificable, relaciones lógicas y política temporal de decaimiento.
+Para resolver este problema, BABYLON-60 sustituye el modelo de “base vectorial + prompt” por una infraestructura de gobernanza cognitiva activa. La unidad básica ya no es el chunk, sino el Belief Object: una estructura con contenido semántico, estado epistémico, procedencia verificable, relaciones lógicas y política temporal de decaimiento.
 
 Sobre esta ontología, el sistema introduce cuatro capacidades centrales:
 
@@ -44,13 +44,13 @@ Persistir conversaciones, tool calls, embeddings y logs mejora la capacidad de r
 
 Cuando un agente opera durante semanas o meses, la memoria deja de degradarse por olvido y empieza a degradarse por acumulación. La recuperación semántica devuelve elementos parecidos, no necesariamente válidos. El sistema puede entonces reinyectar como contexto creencias ya invalidadas, hipótesis especulativas o eventos episódicos descontextualizados. A este fenómeno lo llamamos entropía del conocimiento.
 
-Cortex-Persist aborda este límite sustituyendo la persistencia pasiva por una capa activa de gobernanza cognitiva. Su función no es almacenar más, sino decidir qué puede entrar en contexto, bajo qué condiciones, con qué confianza y con qué trazabilidad.
+BABYLON-60 aborda este límite sustituyendo la persistencia pasiva por una capa activa de gobernanza cognitiva. Su función no es almacenar más, sino decidir qué puede entrar en contexto, bajo qué condiciones, con qué confianza y con qué trazabilidad.
 
 ---
 
 ## 3. Definiciones operativas
 
-Para anclar el modelo, Cortex-Persist emplea la siguiente semántica:
+Para anclar el modelo, BABYLON-60 emplea la siguiente semántica:
 
 - **Belief Object (BO)**: Unidad estructurada de estado cognitivo operacional. Un BO representa una proposición junto con su procedencia, confianza, incertidumbre, relaciones lógicas, política temporal y estado epistémico. No es texto recuperado por similitud; es memoria gobernable. (Ver Apéndice A).
 - **Entropía Cognitiva**: La acumulación de ruido semántico, recuerdos obsoletos y creencias contradictorias que degrada la precisión inferencial de un agente con el tiempo.
@@ -65,7 +65,7 @@ Para anclar el modelo, Cortex-Persist emplea la siguiente semántica:
 
 ### No-objetivos
 
-Cortex-Persist no garantiza:
+BABYLON-60 no garantiza:
 
 - Verdad objetiva del mundo,
 - Satisfacibilidad lógica global en tiempo de ingestión,
@@ -89,7 +89,7 @@ Los agentes producen hechos. El *Memory Scheduler* dicta la inyección de contex
 
 ## 6. Separación explícita: Integridad vs. Validez vs. Utilidad
 
-Cortex-Persist disocia formalmente tres propiedades que las arquitecturas RAG ingenuas confunden en la etapa de recuperación:
+BABYLON-60 disocia formalmente tres propiedades que las arquitecturas RAG ingenuas confunden en la etapa de recuperación:
 
 - **Integridad**: Garantiza que el evento, parche o artefacto no ha sido alterado y mantiene continuidad criptográfica y de procedencia.
 - **Validez epistémica**: Determina si una creencia sigue siendo admisible bajo evidencia, conflicto, dependencia y política.
@@ -103,7 +103,7 @@ La integridad es garantizada en anillo cero. La validez epistémica se calcula p
 
 Si la memoria se gobierna, el conocimiento se limpia.
 
-Cuando entra una pieza de evidencia que contradice una creencia activa, Cortex-Persist no la sobreescribe (sobrescribir destruye el linaje) ni promedia los vectores (eso crea amalgamas sin sentido).
+Cuando entra una pieza de evidencia que contradice una creencia activa, BABYLON-60 no la sobreescribe (sobrescribir destruye el linaje) ni promedia los vectores (eso crea amalgamas sin sentido).
 
 El sistema:
 1. Pasa el estado de la creencia a `Contested`.
@@ -118,7 +118,7 @@ Ninguna creencia vive sola. Si cae el cimiento, cae la estructura subordinada de
 
 Sincronizar cien agentes autónomos requiere convergencia matemática. El sistema emplea **CRDTs Semánticos** (Tipos de Datos Replicados Libres de Conflictos). 
 
-A diferencia de los CRDTs estándar basados en el reloj del sistema (LWW - Last Writer Wins), el modelo de Cortex prioriza la causalidad lógica. LWW es peligroso en sistemas cognitivos: un reloj más reciente no hace que un argumento sea más válido.
+A diferencia de los CRDTs estándar basados en el reloj del sistema (LWW - Last Writer Wins), el modelo de BABYLON-60 prioriza la causalidad lógica. LWW es peligroso en sistemas cognitivos: un reloj más reciente no hace que un argumento sea más válido.
 
 Si dos agentes divergen fuertemente:
 - Se invoca la capa de consenso (LogOP - Logarithmic Opinion Pool).
@@ -131,7 +131,7 @@ CRDTs proporcionan convergencia estructural de réplicas y causalidad operativa 
 
 ## 9. Invariantes del Sistema
 
-Cortex-Persist opera bajo los siguientes invariantes axiomáticos:
+BABYLON-60 opera bajo los siguientes invariantes axiomáticos:
 
 1. Ningún `BeliefObject` cambia de estado sin un evento trazable.
 2. Ninguna invalidación destruye el linaje histórico.
@@ -154,7 +154,7 @@ Bajo esta mecánica, el scheduler puede excluir completamente el objeto de la in
 
 ## 11. Teoría Formal de Confianza (Trust Vector Space)
 
-CORTEX rechaza la reducción de la confianza a un escalar ($\text{Trust} \in [0,1]$). Un único número destruye la distinción entre una hipótesis con "procedencia perfecta y frescura baja" y otra con "procedencia mediocre y frescura máxima". 
+BABYLON-60 rechaza la reducción de la confianza a un escalar ($\text{Trust} \in [0,1]$). Un único número destruye la distinción entre una hipótesis con "procedencia perfecta y frescura baja" y otra con "procedencia mediocre y frescura máxima". 
 
 En lugar de eso, la confianza se define como un espacio vectorial multidimensional:
 
@@ -299,7 +299,7 @@ pub struct BeliefObject {
 
 ### Appendix C — Evaluation Metrics
 
-Cortex-Persist será evaluado empíricamente frente a sistemas de memoria pasiva (bases de datos vectoriales estándar) empleando el benchmark nativo **ENCB** *(Epistemic Noise Chaos Benchmark)*.
+BABYLON-60 será evaluado empíricamente frente a sistemas de memoria pasiva (bases de datos vectoriales estándar) empleando el benchmark nativo **ENCB** *(Epistemic Noise Chaos Benchmark)*.
 
 Se cuantifican cinco métricas primarias:
 - **Persistent False Belief Rate**: Resistencia a la retención de hechos refutados por evidencia posterior.
@@ -312,8 +312,8 @@ Se cuantifican cinco métricas primarias:
 - Sobrescritura ingenua de sumarios textuales.
 - CRDT ciego sin modelado Bayesiano.
 - LWW (Last Writer Wins) sobre bases vectoriales tradicionales.
-- Cortex-Persist Full (LogOP + ATMS + Epoch SMT).
+- BABYLON-60 Full (LogOP + ATMS + Epoch SMT).
 
 ---
 
-*Cortex-Persist · Whitepaper v0.2.2 · Autor: Borja Moskv · Licencia: Apache 2.0*
+*BABYLON-60 · Whitepaper v0.2.2 · Autor: Borja Moskv · Licencia: Apache 2.0*

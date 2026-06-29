@@ -54,7 +54,7 @@ El escaneo OSINT profundo reveló que Leafar es un actor legítimo de la Capa de
 * **Nexo MCP:** Desarrollador de servidores MCP (Model Context Protocol).
 
 ### 3.2 Vector de Neutralización y Asimilación
-En lugar de atacar a Leafar por su "piedad", CORTEX diseñó una respuesta en su idioma nativo (K8s, API server, SLA, MCP). Al reconocer su arquitectura y comparar LinkedIn con un "clúster sin health checks", se eliminó la disonancia cognitiva de Leafar.
+En lugar de atacar a Leafar por su "piedad", BABYLON-60 diseñó una respuesta en su idioma nativo (K8s, API server, SLA, MCP). Al reconocer su arquitectura y comparar LinkedIn con un "clúster sin health checks", se eliminó la disonancia cognitiva de Leafar.
 
 **Resultado:** Leafar dio "Love" al comentario de Bor Jarl y respondió: *"¡Te agradezco este comentario! Todos necesitamos soluciones reales para problemas reales. De lo contrario, estamos fritos"*.
 

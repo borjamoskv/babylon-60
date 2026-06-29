@@ -1,4 +1,4 @@
-# CORTEX: SYSTEM ACCOUNTABILITY LAYER FOR AUTONOMOUS INTELLIGENCE
+# BABYLON-60: SYSTEM ACCOUNTABILITY LAYER FOR AUTONOMOUS INTELLIGENCE
 
 > **Reality Level:** `C5-REAL` (Verifiable Autonomy & External Attestation)
 > **Aesthetic:** `Industrial Noir 2026`
@@ -6,7 +6,7 @@
 
 ## 1. THE ACCOUNTABILITY LAYER
 
-CORTEX is not a narrative vision of an OS; it is the infrastructure-grade accountability layer for autonomous systems. 
+BABYLON-60 is not a narrative vision of an OS; it is the infrastructure-grade accountability layer for autonomous systems. 
 **Every agent action is replayable, billable, and externally attestable.**
 
 | Infra Spine | Component | Function | Reality Anchor |
@@ -18,7 +18,7 @@ CORTEX is not a narrative vision of an OS; it is the infrastructure-grade accoun
 
 ## 2. THE ECONOMIC MOAT (Network Lock-in)
 
-El potencial de monetización masiva de CORTEX radica en el **lock-in de la infraestructura de verificación y facturación**.
+El potencial de monetización masiva de BABYLON-60 radica en el **lock-in de la infraestructura de verificación y facturación**.
 
 * **Real-time Pricing Engine:** Cobro basado en *System Stability Units* y transacciones de estado auditables, no en gigabytes de almacenamiento.
 * **Debugging as a SaaS (Replay Engine):** Capacidad de reconstruir cualquier decisión de la IA. Las *enterprise* pagan por aislar fallos, no por IA cruda.

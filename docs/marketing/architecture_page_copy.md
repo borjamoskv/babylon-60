@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX-Persist Architecture Copy
+# BABYLON-60-Persist Architecture Copy
 
 > **URL Target:** `cortexpersist.com/architecture`
 > **Purpose:** Detailed page layout conveying the structural, thermodynamic, and cryptographic foundations of the trust engine.
@@ -8,7 +8,7 @@
 
 ## 1. Hero
 
-### The Epistemic Foundation of CORTEX-Persist
+### The Epistemic Foundation of BABYLON-60-Persist
 
 A sovereign memory substrate for autonomous systems. Built on cryptographic invariants, thermodynamic efficiency, and absolute verification boundaries.
 
@@ -25,13 +25,13 @@ Hallucination is not a bug; it is a structural cost of probabilistic generation.
 
 Expecting an unanchored model to maintain perfect operational memory over thousands of steps is mathematically flawed. Intelligence requires friction with a deterministic environment.
 
-CORTEX-Persist provides that friction. It shifts the ultimate truth of the system from a transient, stochastic context window (C4-SIM) to an immutable, verifiable ledger on disk (C5-REAL).
+BABYLON-60-Persist provides that friction. It shifts the ultimate truth of the system from a transient, stochastic context window (C4-SIM) to an immutable, verifiable ledger on disk (C5-REAL).
 
 ---
 
 ## 3. The Sovereign Laws (Doctrine Overview)
 
-CORTEX-Persist is governed by four absolute thermodynamic and operational pillars designed to expel entropy and preserve state integrity.
+BABYLON-60-Persist is governed by four absolute thermodynamic and operational pillars designed to expel entropy and preserve state integrity.
 
 ### I. Information Thermodynamics (Zero Ontology)
 *   **Exergy Conservation:** Any computation that does not reduce uncertainty is anergy (heat and noise).
@@ -69,10 +69,10 @@ CORTEX-Persist is governed by four absolute thermodynamic and operational pillar
 If a decision, state change, or memory mutation is not tracked in the cryptographic ledger, it does not causally exist. Memory without evidence is discarded.
 
 ### Axiom II: Deterministic Time-Travel
-Autonomy requires absolute failure locality. Invalid state must be rejectable and abortable at any point. Rollbacks in CORTEX map directly to exact checkpoints in time, ensuring clean recovery from agent drift.
+Autonomy requires absolute failure locality. Invalid state must be rejectable and abortable at any point. Rollbacks in BABYLON-60 map directly to exact checkpoints in time, ensuring clean recovery from agent drift.
 
 ### Axiom III: Knowledge Is Crystallized
-Fluid intelligence is not retrieving a pre-trained static concept; it is synthesizing an ad-hoc abstraction at runtime. CORTEX allows swarms to deduce rules dynamically and persist them as invariant facts.
+Fluid intelligence is not retrieving a pre-trained static concept; it is synthesizing an ad-hoc abstraction at runtime. BABYLON-60 allows swarms to deduce rules dynamically and persist them as invariant facts.
 
 ---
 
@@ -80,7 +80,7 @@ Fluid intelligence is not retrieving a pre-trained static concept; it is synthes
 
 Modern agents waste valuable exergy trying to guess solutions through massive, repetitive stochastic inference.
 
-CORTEX-Persist enables **JIT (Just-In-Time) Concept Formation**. Instead of relying on static, pre-trained weights to solve a novel problem, the system allows agents to observe anomalies, deduce the underlying structural rule, and elevate that rule into a permanent, typed memory.
+BABYLON-60-Persist enables **JIT (Just-In-Time) Concept Formation**. Instead of relying on static, pre-trained weights to solve a novel problem, the system allows agents to observe anomalies, deduce the underlying structural rule, and elevate that rule into a permanent, typed memory.
 
 Form the concept programmatically once. Crystallize it in the ledger. Execute forever.
 

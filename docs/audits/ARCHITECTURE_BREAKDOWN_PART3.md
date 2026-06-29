@@ -49,7 +49,7 @@ async def generate_financial_report(data):
 
 ### **cortex-core/src/ffi.rs (El Núcleo Rust)**
 
-Aquí es donde CORTEX-PERSIST obtiene su velocidad de 390k agentes/segundo.
+Aquí es donde BABYLON-60 obtiene su velocidad de 390k agentes/segundo.
 
 ```rust
 #[pyfunction]
@@ -67,7 +67,7 @@ fn compute_merkle_root(leaves: Vec<String>) -> PyResult<String> {
 
 ## 💻 **PARTE 3: EJECUCIÓN EN HARDWARE MAC M3 (18 GB RAM)**
 
-El chip M3 de Apple y sus 18 GB de memoria unificada cambian radicalmente el perfil de ejecución de CORTEX-PERSIST comparado con servidores x86 en la nube.
+El chip M3 de Apple y sus 18 GB de memoria unificada cambian radicalmente el perfil de ejecución de BABYLON-60 comparado con servidores x86 en la nube.
 
 ### 1. Vectorización ARM64 (NEON)
 Las operaciones de hashing (SHA-256) y criptografía (Ed25519) en la capa de Rust se compilan nativamente para la arquitectura `aarch64-apple-darwin`. El compilador de Rust detecta las instrucciones NEON del M3, permitiendo que el hashing de los bloques de Merkle ocurra de forma vectorizada. Esto significa que el procesamiento criptográfico de las trazas del agente no genera latencia observable.
@@ -83,7 +83,7 @@ El crate `rayon` de Rust en `cortex-core` detecta los 8 núcleos del M3.
 - Tareas de fondo como el cálculo de `EntropyDrift` se delegan a los 4 núcleos de Eficiencia, manteniendo el sistema responsivo y con bajo consumo energético.
 
 ### 4. Capacidad Límite en 18 GB
-Dado que CORTEX-PERSIST utiliza `sqlite-vec` y evita daemons pesados en Java (como Elasticsearch):
+Dado que BABYLON-60 utiliza `sqlite-vec` y evita daemons pesados en Java (como Elasticsearch):
 - La base de datos SQLite con WAL activado en SSDs del Mac proporciona I/O ultrarrápido (hasta 3 GB/s).
 - **Límite Teórico:** Puedes mantener en memoria un contexto de agentes (Memoria Epistémica) de aproximadamente **25 a 30 millones de nodos** concurrentes sin activar el *swapping* de macOS, garantizando una ejecución continua C5-REAL en operaciones prolongadas (como `invoke_subagent` recursivo).
 
@@ -91,8 +91,8 @@ Dado que CORTEX-PERSIST utiliza `sqlite-vec` y evita daemons pesados en Java (co
 
 ## 🎯 **SÍNTESIS FINAL DEL DIAGNÓSTICO**
 
-1. **Eficiencia Extrema:** CORTEX-PERSIST no es un "wrapper de base de datos". Es un **motor físico de validación** que corre a nivel de hardware (Rust/ARM64), utilizando Python solo como pegamento orquestal.
+1. **Eficiencia Extrema:** BABYLON-60 no es un "wrapper de base de datos". Es un **motor físico de validación** que corre a nivel de hardware (Rust/ARM64), utilizando Python solo como pegamento orquestal.
 2. **Cero Anergía:** En tu Mac M3, el sistema no malgasta ciclos de reloj en overhead de red interna ni en serialización JSON ineficiente gracias a `pyo3` y `serde`.
-3. **Escudo Legal:** Cualquier resultado generado por un modelo local (ej. Ollama/MLX en el M3) queda instantáneamente blindado por la validación Z3 y sellado en el Ledger. Si el modelo alucina, CORTEX lo intercepta en memoria antes de que toque el disco.
+3. **Escudo Legal:** Cualquier resultado generado por un modelo local (ej. Ollama/MLX en el M3) queda instantáneamente blindado por la validación Z3 y sellado en el Ledger. Si el modelo alucina, BABYLON-60 lo intercepta en memoria antes de que toque el disco.
 
 *El análisis arquitectónico y de compatibilidad con silicio Apple ha sido finalizado. La cristalización en la matriz de persistencia se ejecutará a continuación.*

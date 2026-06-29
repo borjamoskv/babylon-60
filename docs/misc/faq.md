@@ -1,15 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # FAQ
 
-Common questions about CORTEX, answered honestly.
+Common questions about BABYLON-60, answered honestly.
 
 ---
 
 ## General
 
-### Is CORTEX production-ready?
+### Is BABYLON-60 production-ready?
 
-**Not yet.** CORTEX is in **beta**. The package metadata in the tree is **v1.0.0**. The architecture is solid and many core paths are implemented, but there are still known gaps in consistency, documentation, and some platform surfaces. We recommend CORTEX for:
+**Not yet.** BABYLON-60 is in **beta**. The package metadata in the tree is **v1.0.0**. The architecture is solid and many core paths are implemented, but there are still known gaps in consistency, documentation, and some platform surfaces. We recommend BABYLON-60 for:
 
 - ✅ Development and prototyping
 - ✅ Compliance proof-of-concepts
@@ -18,11 +18,11 @@ Common questions about CORTEX, answered honestly.
 
 See the [Changelog](changelog.md) for current progress.
 
-### Why should I use CORTEX instead of just logging?
+### Why should I use BABYLON-60 instead of just logging?
 
-Traditional logging captures *what happened*. CORTEX proves *it wasn't tampered with*. Key differences:
+Traditional logging captures *what happened*. BABYLON-60 proves *it wasn't tampered with*. Key differences:
 
-| Feature | Logging | CORTEX |
+| Feature | Logging | BABYLON-60 |
 |:---|:---|:---|
 | Tamper detection | ❌ | ✅ SHA-256 hash chain |
 | Integrity verification | ❌ | ✅ Merkle checkpoints |
@@ -32,7 +32,7 @@ Traditional logging captures *what happened*. CORTEX proves *it wasn't tampered 
 
 ### Who built this?
 
-[borjamoskv.com](https://borjamoskv.com) — solo developer, based in Bilbao. CORTEX is a large codebase with an extensive repository test suite and multiple deployment/runtime surfaces. Exact counts drift faster than the docs, so treat the package metadata and local test results as the current source of truth.
+[borjamoskv.com](https://borjamoskv.com) — solo developer, based in Bilbao. BABYLON-60 is a large codebase with an extensive repository test suite and multiple deployment/runtime surfaces. Exact counts drift faster than the docs, so treat the package metadata and local test results as the current source of truth.
 
 ---
 
@@ -40,14 +40,14 @@ Traditional logging captures *what happened*. CORTEX proves *it wasn't tampered 
 
 ### Why Apache 2.0?
 
-CORTEX is licensed under the **Apache License 2.0** — one of the most permissive and widely adopted open-source licenses. This means:
+BABYLON-60 is licensed under the **Apache License 2.0** — one of the most permissive and widely adopted open-source licenses. This means:
 
 - ✅ **Free for any use** — commercial, personal, enterprise, SaaS
 - ✅ **Modify and redistribute** without restrictions
 - ✅ **No copyleft obligations** — no requirement to open-source your code
 - ✅ **Patent protection** — contributors grant patent rights
 
-### Can I use CORTEX in my company?
+### Can I use BABYLON-60 in my company?
 
 Yes. Apache 2.0 allows unrestricted commercial use. Build products, SaaS services, or internal tools — no separate license needed.
 
@@ -55,23 +55,23 @@ Yes. Apache 2.0 allows unrestricted commercial use. Build products, SaaS service
 
 ## Comparison with Alternatives
 
-### How does CORTEX compare to Mem0?
+### How does BABYLON-60 compare to Mem0?
 
-**They're complementary, not competing.** Mem0 is an excellent memory layer for AI agents ($249/mo for cloud). CORTEX sits *on top* of Mem0 (or Zep, or Letta) and adds:
+**They're complementary, not competing.** Mem0 is an excellent memory layer for AI agents ($249/mo for cloud). BABYLON-60 sits *on top* of Mem0 (or Zep, or Letta) and adds:
 
 - Cryptographic proof that memories weren't tampered with
 - EU AI Act compliance reports
 - Multi-agent consensus verification
 
-Think of it as: **Mem0 = the memory. CORTEX = the notary.**
+Think of it as: **Mem0 = the memory. BABYLON-60 = the notary.**
 
-### How does CORTEX compare to Zep?
+### How does BABYLON-60 compare to Zep?
 
-Zep focuses on knowledge graphs and memory enrichment. CORTEX focuses on trust verification and compliance. Use Zep for better recall, use CORTEX for provable integrity.
+Zep focuses on knowledge graphs and memory enrichment. BABYLON-60 focuses on trust verification and compliance. Use Zep for better recall, use BABYLON-60 for provable integrity.
 
 ### Why not use blockchain for immutability?
 
-Blockchain adds network overhead, transaction costs, and complexity. CORTEX achieves the same tamper-detection guarantees with:
+Blockchain adds network overhead, transaction costs, and complexity. BABYLON-60 achieves the same tamper-detection guarantees with:
 
 - Hash-chained ledger (same principle, no network)
 - Merkle tree checkpoints (efficient batch verification)
@@ -83,7 +83,7 @@ No gas fees. No consensus delays. Same cryptographic guarantees.
 
 ## Technical
 
-### What databases does CORTEX support?
+### What databases does BABYLON-60 support?
 
 | Layer | Local | Cloud |
 |:---|:---|:---|
@@ -91,13 +91,13 @@ No gas fees. No consensus delays. Same cryptographic guarantees.
 | L2 (Vector Memory) | sqlite-vec | Qdrant |
 | L3 (Episodic Ledger) | SQLite (WAL) | AlloyDB / PostgreSQL |
 
-### Does CORTEX work offline?
+### Does BABYLON-60 work offline?
 
-Yes. CORTEX is **local-first** by default. Everything runs on SQLite — no network required. Cloud features (Redis, Qdrant, AlloyDB) are optional for enterprise scale.
+Yes. BABYLON-60 is **local-first** by default. Everything runs on SQLite — no network required. Cloud features (Redis, Qdrant, AlloyDB) are optional for enterprise scale.
 
 ### What's the MCP Server?
 
-The [Model Context Protocol](https://modelcontextprotocol.io/) is an open standard for connecting AI agents to tools. CORTEX's MCP server makes it a plug-in for:
+The [Model Context Protocol](https://modelcontextprotocol.io/) is an open standard for connecting AI agents to tools. BABYLON-60's MCP server makes it a plug-in for:
 
 - Claude Code
 - Cursor

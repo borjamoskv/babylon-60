@@ -3,7 +3,7 @@
 
 ## 1. Topología del Sistema (Selección Dinámica de Grafos)
 
-CORTEX-Persist es un sistema de ejecución event-sourced con selección dinámica de grafos basado en utilidad marginal de cómputo.
+BABYLON-60-Persist es un sistema de ejecución event-sourced con selección dinámica de grafos basado en utilidad marginal de cómputo.
 La "exergía" equivale a la utilidad esperada de ejecución futura sobre el coste de mantenimiento.
 
 ### 1.1. Regla de Supervivencia de Entidades
@@ -40,4 +40,4 @@ El sistema no consume "energía", sino que:
 1. **Pruning Excesivo**: El sistema colapsa en el "mínimo viable funcional", perdiendo diversidad de rutas y entrando en cristalización (dogma estructural).
 2. **Pruning Permisivo**: El sistema explota en entropía de grafos, perdiendo navegabilidad y entrando en "ruido estructural puro".
 
-*◈ Sealed: 29 May 2026 · CORTEX Sovereign Core*
+*◈ Sealed: 29 May 2026 · BABYLON-60 Sovereign Core*

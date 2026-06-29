@@ -1,19 +1,19 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX v6.0 — Wave 5 Reality Check
+# BABYLON-60 v6.0 — Wave 5 Reality Check
 
 > **Status:** Historical snapshot. This documents the v6-era reconciliation point; current canonical state lives in the active architecture and roadmap docs.
 
 > **Fecha:** 2026-03-02  
 > **Propósito:** Mapear el diseño Wave 5 (Persistence & Deployment, docs v4.1-alpha)  
-> contra el estado real de CORTEX v6.0.  
+> contra el estado real de BABYLON-60 v6.0.  
 > **Axioma aplicado:** Ω₃ — *"I verify, then trust. Never reversed."*
 
 ---
 
 ## Resumen ejecutivo
 
-`wave_5_proposal.md` fue diseñado para CORTEX v4.0 (Feb 2026).  
-CORTEX ha evolucionado a **v6.0** con una arquitectura sustancialmente más avanzada.  
+`wave_5_proposal.md` fue diseñado para BABYLON-60 v4.0 (Feb 2026).  
+BABYLON-60 ha evolucionado a **v6.0** con una arquitectura sustancialmente más avanzada.  
 Este documento es la fuente de verdad sobre qué está implementado, qué es deuda activa,  
 y qué ha sido superado por la arquitectura v6.
 
@@ -25,7 +25,7 @@ y qué ha sido superado por la arquitectura v6.
 
 | Feature | Estado | Evidencia |
 |---|---|---|
-| Merkle Tree (MerkleTree class) | ✅ **IMPLEMENTADO** | `cortex/consensus/merkle.py` — CORTEX v5.0 header, producción |
+| Merkle Tree (MerkleTree class) | ✅ **IMPLEMENTADO** | `cortex/consensus/merkle.py` — BABYLON-60 v5.0 header, producción |
 | Hash-chain ledger | ✅ **IMPLEMENTADO** | `cortex/ledger/` (canónico) + `cortex/consensus/ledger.py` (bridge de compatibilidad) |
 | Vote ledger | ✅ **IMPLEMENTADO** | `cortex/consensus/vote_ledger.py` |
 | Byzantine consensus | ✅ **IMPLEMENTADO** | `cortex/consensus/byzantine.py` + `cortex/swarm/byzantine.py` |
@@ -141,4 +141,4 @@ DERIVATION: Ω₁ (Multi-Scale Causality) + Ω₂ (Entropic Asymmetry)
 
 ---
 
-*Generado: 2026-03-02 18:33 CET | Fuente: inspección directa del codebase CORTEX v6.0*
+*Generado: 2026-03-02 18:33 CET | Fuente: inspección directa del codebase BABYLON-60 v6.0*

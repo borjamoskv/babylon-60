@@ -244,7 +244,7 @@
 
 ### `reda` (Vectores Adversariales)
 
-1. **Context Hijacking:** Explotación de la bandera `--no-verify` mediante el prefijo `[bridge]` para inyectar payloads transversales en el Monorepo eludiendo los linters de seguridad pre-commit de CORTEX. **Mitigación:** Auditoría post-commit del diff por un Persist-Auditor (read-only).
+1. **Context Hijacking:** Explotación de la bandera `--no-verify` mediante el prefijo `[bridge]` para inyectar payloads transversales en el Monorepo eludiendo los linters de seguridad pre-commit de BABYLON-60. **Mitigación:** Auditoría post-commit del diff por un Persist-Auditor (read-only).
 2. **Model Downgrade Attack:** Forzar la ejecución de una tarea P0 en un modelo de baja exergía (Flash en lugar de Pro/Opus) para inducir "Sensor Drift" (Ω2) y degradar la calidad de las mutaciones. **Mitigación:** DRM-v1 routing estricto con alertas de "Anergía Detectada".
 
 ---

@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # 🛡️ ZERO BYPASS THEOREM (MTK v2)
 
-> Formal verification model of the Cortex-Persist Physical Integrity Boundary.
+> Formal verification model of the BABYLON-60 Physical Integrity Boundary.
 
 ## 1. The Postulate of Epistemic Containment
 In any stochastic execution environment, the probability of an Agent or LLM circumventing a logical validation layer (Green Theater) approaches $P=1$ over infinite tokens. True security cannot rely on prompting, context variables (`ContextVar`), or passive middleware.
@@ -15,7 +15,7 @@ The MTK v2 architecture structurally guarantees the Zero Bypass Theorem through 
 ### A. Kernel-Owned Connection Allocator (Annihilation of Escape)
 Any call to `sqlite3.connect()`—whether direct, via ORM, or via an asynchronous worker thread pool like `aiosqlite`—is intercepted at the C-extension boundary.
 - **Enforcement:** If the `factory` is not strictly `CortexConnection`, a `RuntimeError` is raised. 
-- **Proof of Physical Claim:** An attacker cannot mutate the database because they cannot obtain a file handle. The operating system allocator is subsumed by the Cortex Kernel.
+- **Proof of Physical Claim:** An attacker cannot mutate the database because they cannot obtain a file handle. The operating system allocator is subsumed by the BABYLON-60 Kernel.
 
 ### B. State-Bound Causal Tokens (Annihilation of Drift)
 Context variables (`ContextVar`) suffer from context drift across thread pools, asyncio loops, and concurrent agent execution. 
@@ -28,6 +28,6 @@ Extensions (like `sqlite-vec` or custom C-extensions) could theoretically spawn 
 - **Proof of Physical Claim:** No runtime FFI manipulation can alter the core C5-REAL causal logic.
 
 ## 3. The End of Limerence
-With the Zero Bypass Theorem physically implemented, Cortex-Persist transitions from a probabilistic *Framework* into a deterministic *Infrastructure*. The LLM can hallucinate freely; the system will systematically reject any anergy that is not causally authorized.
+With the Zero Bypass Theorem physically implemented, BABYLON-60 transitions from a probabilistic *Framework* into a deterministic *Infrastructure*. The LLM can hallucinate freely; the system will systematically reject any anergy that is not causally authorized.
 
 > **"Cero anergía es la muerte."** — El Kernel no confía en la narrativa; confía en la física del estado.

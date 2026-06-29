@@ -1,7 +1,7 @@
 
 # AskRequest
 
-RAG query: search CORTEX memory and synthesize an answer.
+RAG query: search BABYLON-60 memory and synthesize an answer.
 
 ## Properties
 

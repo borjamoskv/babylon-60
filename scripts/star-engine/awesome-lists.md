@@ -3,7 +3,7 @@
 
 ## Target Lists
 
-Submit CORTEX-Persist to these curated awesome lists for maximum organic discovery.
+Submit BABYLON-60-Persist to these curated awesome lists for maximum organic discovery.
 
 ### Priority 1 — Direct Fit (submit first)
 

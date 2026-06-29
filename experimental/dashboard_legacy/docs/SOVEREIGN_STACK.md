@@ -1,4 +1,4 @@
-# ∴ THE SOVEREIGN CORTEX STACK (v2026.4)
+# ∴ THE SOVEREIGN BABYLON-60 STACK (v2026.4)
 
 ## I. Orchestration Core: Agent-First Architecture
 *   **Thesis**: The elimination of human-in-the-loop latency.

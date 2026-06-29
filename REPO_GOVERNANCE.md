@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# REPO_GOVERNANCE.md — CORTEX-Persist
+# REPO_GOVERNANCE.md — BABYLON-60-Persist
 
 > "Trust is not assumed; it is computed, persisted, and verified."
 
 ## 1. Overview
 
-CORTEX-Persist es un sustrato de memoria inmutable y auditivo para sistemas multi-agente soberanos. La gobernanza de este repositorio asegura que todas las mutaciones al estado del conocimiento sigan protocolos deterministas y resistentes a la manipulación.
+BABYLON-60-Persist es un sustrato de memoria inmutable y auditivo para sistemas multi-agente soberanos. La gobernanza de este repositorio asegura que todas las mutaciones al estado del conocimiento sigan protocolos deterministas y resistentes a la manipulación.
 
 ## 2. The 10 Seals Protocol (AX-033)
 

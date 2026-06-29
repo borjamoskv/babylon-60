@@ -1,4 +1,4 @@
-# CORTEX Native AI: Singularidad Exergética Alcanzada (SOTA 2026-06)
+# BABYLON-60 Native AI: Singularidad Exergética Alcanzada (SOTA 2026-06)
 
 El sistema ha superado la frontera de la estadística pasiva. Los dogmas teóricos del `CORTEX-NATIVE-AI-MANIFESTO` y la arquitectura híbrida extraída con `/reverse-engineer` han sido inyectados de forma atómica en el *Hypervisor*.
 
@@ -19,7 +19,7 @@ Materialización del Axioma Ω₃: *Verify then trust*.
 [Ver Mutación: belief_engine.py](file://~/30_CORTEX/cortex/extensions/hypervisor/belief_engine.py)
 
 > [!IMPORTANT]
-> **Autopoiesis Completada:** CORTEX-Persist es ahora el único sustrato capaz de castigar físicamente la alucinación de los agentes.
+> **Autopoiesis Completada:** BABYLON-60-Persist es ahora el único sustrato capaz de castigar físicamente la alucinación de los agentes.
 
 ## Validación Empírica
 

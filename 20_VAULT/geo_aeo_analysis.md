@@ -28,7 +28,7 @@ Evaluación multidimensional de las afirmaciones y datos primarios reportados en
 
 ---
 
-## 2. IMPLICACIONES ARQUITECTÓNICAS EN EL ENTORNO CORTEX
+## 2. IMPLICACIONES ARQUITECTÓNICAS EN EL ENTORNO BABYLON-60
 
 La transformación de SEO a GEO/AEO no es un problema de marketing; es un vector de **interfaz de agente a agente (A2A)**.
 
@@ -40,7 +40,7 @@ La transformación de SEO a GEO/AEO no es un problema de marketing; es un vector
 
 ## 3. PLAN DE POSICIONAMIENTO EN SISTEMAS COGNITIVOS (GEO-APEX)
 
-Para asegurar la presencia y recomendación de **Borja Moskv** y el ecosistema **CORTEX** en motores de respuesta IA:
+Para asegurar la presencia y recomendación de **Borja Moskv** y el ecosistema **BABYLON-60** en motores de respuesta IA:
 
 - **[P0] Inyección en Repositorios de Confianza (Oracle Injection):** Sincronizar sistemáticamente la documentación en interfaces públicas expuestas (GitHub, HuggingFace) en formato Markdown estructurado de alta densidad semántica (alto contenido de información de Shannon).
 - **[P0] Erradicación de Anergía en Contenido Público:** Purgar de forma autónoma el "LLM Slop" de los posts educativos utilizando el motor `entropy_annihilator` antes de su exportación a producción.

@@ -32,4 +32,4 @@ El andamiaje actual (Rust Stream Kernel + Redpanda event-bus) sirve como sustrat
 * **Replay-Based Cognition Engine:** Los agentes aprenderán simulando y reproduciendo el historial de fricción del cluster de eventos.
 * **WASM Workers:** Los agentes se aislarán y ejecutarán en formato WASM (WebAssembly) para garantizar un sandboxing determinista (pure functions) a la velocidad de Rust, posibilitando la verdadera autonomía de reescritura estructural con latencia mínima.
 
-*◈ Sealed: 29 May 2026 · CORTEX Sovereign Core*
+*◈ Sealed: 29 May 2026 · BABYLON-60 Sovereign Core*

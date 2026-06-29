@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Architectural Audit Report
+# BABYLON-60 Architectural Audit Report
 
 **Date:** 2026-02-24  
 **Scope:** `./cortex/` (42,613+ LOC)  

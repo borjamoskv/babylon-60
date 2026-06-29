@@ -1,7 +1,7 @@
 # Merkle Provenance Specification
 
 ## 1. Definición Formal
-El `Merkle Provenance` es la estructura arbórea utilizada para verificar la integridad topológica del Ledger en CORTEX-PERSIST. Convierte el historial lineal de eventos en un árbol binario de hashes de acceso optimizado.
+El `Merkle Provenance` es la estructura arbórea utilizada para verificar la integridad topológica del Ledger en BABYLON-60. Convierte el historial lineal de eventos en un árbol binario de hashes de acceso optimizado.
 
 ## 2. Invariantes
 - **Determinismo Hash**: El hash de un nodo interno $H(padre)$ debe ser estrictamente $SHA256(H(hijo\_izquierdo) || H(hijo\_derecho))$.

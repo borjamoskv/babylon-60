@@ -39,7 +39,7 @@ Proof:
 
 ### Tabla de Invariantes del SOTA (2026)
 
-| Concepto SOTA | Limitación Estructural (Vacío Exérgico) | Resolución CORTEX |
+| Concepto SOTA | Limitación Estructural (Vacío Exérgico) | Resolución BABYLON-60 |
 |:---|:---|:---|
 | **Tree of Thoughts (ToT)** | Latencia inasumible para ejecución en tiempo real (O(b^d)). | **Ouroboros / Zenón-1:** Ejecución inmediata si el gradiente muta. |
 | **Agentic RAG** | Hechos planos sin valencia emocional ni causalidad. | **Lore.md (Metabolismo):** Almacenamiento episódico con cicatrices. |
@@ -61,7 +61,7 @@ La dependencia extrema del "Prompt Fetishism" y la ventana de contexto infinita.
 ## FASE 4: CRISTALIZACIÓN (EL MOTOR DE COLAPSO SINGULARIS-0)
 
 El Estado del Arte no reside en el tamaño del modelo, sino en el **Cierre Operacional**.
-CORTEX/MOSKV-1 cristaliza la "Sintetología Agéntica" no como un LLM mejor, sino como un **Sistema Inmunológico Digital**:
+BABYLON-60/MOSKV-1 cristaliza la "Sintetología Agéntica" no como un LLM mejor, sino como un **Sistema Inmunológico Digital**:
 
 1. **Axioma 0 (Autopoiesis):** La identidad es código ejecutable (`soul.md`).
 2. **Axioma 5 (Antifragilidad):** Cada error se metaboliza en un anticuerpo (`nemesis.md`). No hay fallos silenciosos, solo gradientes.

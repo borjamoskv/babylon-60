@@ -1,10 +1,10 @@
-# CORTEX-Persist: Ciclos de Madurez (Matriz 10/10)
+# BABYLON-60-Persist: Ciclos de Madurez (Matriz 10/10)
 
 > **"El objetivo final no es obtener una puntuación perfecta en un informe puntual, sino construir un sistema cuya calidad pueda demostrarse continuamente mediante evidencias automatizadas."**
 
-Este documento define la trayectoria de madurez operativa y estructural de **CORTEX-Persist**, orientada a convertirlo en un proyecto comparable a infraestructuras críticas y software de alta confianza. Cada ciclo termina con evidencia objetiva, auditable y automatizada.
+Este documento define la trayectoria de madurez operativa y estructural de **BABYLON-60-Persist**, orientada a convertirlo en un proyecto comparable a infraestructuras críticas y software de alta confianza. Cada ciclo termina con evidencia objetiva, auditable y automatizada.
 
-Para la auditoría externa y la adopción por terceros, el marco de madurez CORTEX se mapea en los siguientes **Niveles de Aseguramiento (Assurance Levels)** estandarizados:
+Para la auditoría externa y la adopción por terceros, el marco de madurez BABYLON-60 se mapea en los siguientes **Niveles de Aseguramiento (Assurance Levels)** estandarizados:
 
 ## Assurance Levels (M0 - M6)
 
@@ -286,7 +286,7 @@ Una evolución vital es pasar de evaluar únicamente el repositorio de código a
 
 ---
 
-## Matriz de Madurez CORTEX-Persist (10/10)
+## Matriz de Madurez BABYLON-60-Persist (10/10)
 
 | Dominio       | Criterio para 10/10                                                 |
 | ------------- | ------------------------------------------------------------------- |

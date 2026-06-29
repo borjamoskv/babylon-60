@@ -1,10 +1,10 @@
-# CORTEX-Persist Quickstart
+# BABYLON-60-Persist Quickstart
 
 A tamper-evident, sovereign memory engine for autonomous AI systems. This guide will get you up and running locally in under 3 minutes.
 
 ## 1. Installation
 
-Install CORTEX via pip. Python 3.10+ is required.
+Install BABYLON-60 via pip. Python 3.10+ is required.
 
 ```bash
 pip install cortex-persist
@@ -14,7 +14,7 @@ pip install cortex-persist
 
 ## 2. Start the Local Memory Server
 
-CORTEX runs locally as a fast API server powered by SQLite and Vector embeddings.
+BABYLON-60 runs locally as a fast API server powered by SQLite and Vector embeddings.
 
 ```bash
 # Initialize the database and start the server on port 8000

@@ -1,4 +1,4 @@
-# Ejemplo Completo de Ciclo L0→L6 (CORTEX Audit Protocol)
+# Ejemplo Completo de Ciclo L0→L6 (BABYLON-60 Audit Protocol)
 
 Este documento ilustra un ciclo completo de ingeniería causal en formato JSON ejecutable, basado en la resolución de una colisión de concurrencia en la base de datos `cortex.db`.
 

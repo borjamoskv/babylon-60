@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # CLI Reference
 
-CORTEX exposes many CLI commands because the repository also contains operator and research
+BABYLON-60 exposes many CLI commands because the repository also contains operator and research
 tooling. For product integrations, start with the verifiable-memory surface below.
 
 ---
@@ -39,7 +39,7 @@ tooling. For product integrations, start with the verifiable-memory surface belo
 
 ### `cortex init`
 
-Initialize the CORTEX database.
+Initialize the BABYLON-60 database.
 
 ```bash
 cortex init [--db PATH]
@@ -200,7 +200,7 @@ When `CORTEX_ENABLE_EXPERIMENTAL_CLI=1`, the root CLI also exposes additional gr
 - `swarm`, `agent`, `handoff`
 - `context`, `compact`, `episodic`
 - top-level commands such as `time` and `heartbeat`, plus groups such as `timeline`
-These advanced commands and groups are useful for operator workflows, but they are not required to adopt CORTEX Persist
+These advanced commands and groups are useful for operator workflows, but they are not required to adopt BABYLON-60 Persist
 as a verifiable-memory layer. Treat them as advanced surfaces unless your workflow explicitly needs
 them.
 

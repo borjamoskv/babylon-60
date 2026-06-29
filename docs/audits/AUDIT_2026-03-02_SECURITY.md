@@ -2,7 +2,7 @@
 # SECURITY AUDIT REPORT — 2026-03-02
 
 > **Auditor:** Antigravity (MOSKV-1 v5)
-> **Target:** CORTEX Core + GitHub Infrastructure
+> **Target:** BABYLON-60 Core + GitHub Infrastructure
 > **Verdict:** 🟢 CONTROLLED (Post-Fix)
 
 ## 1. EXECUTIVE SUMMARY

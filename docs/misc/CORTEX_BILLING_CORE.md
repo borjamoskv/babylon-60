@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX BILLING CORE v2: CAUSAL METERING & ADVERSARIAL FRICTION
+# BABYLON-60 BILLING CORE v2: CAUSAL METERING & ADVERSARIAL FRICTION
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)
 > **Aesthetic:** `Industrial Noir 2026`
-> **Definition:** CORTEX Billing Core is a causal event-based metering system that transforms deterministic execution into real-time financial feedback loops, regulated by internal adversarial friction.
+> **Definition:** BABYLON-60 Billing Core is a causal event-based metering system that transforms deterministic execution into real-time financial feedback loops, regulated by internal adversarial friction.
 
 ## 1. CORE PRINCIPLE: COMPUTATIONAL ECONOMY
 **Every computation is a metered causal event.**
@@ -16,7 +16,7 @@ Billing is not just a ledger; it is an **epistemic truth generator**. Every tran
 - Reproducibility score
 - Exploitability index
 
-Money in CORTEX is an instrument of verifiable truth, not just throughput.
+Money in BABYLON-60 is an instrument of verifiable truth, not just throughput.
 
 ## 3. THE COST VECTOR & FAILURE TAXONOMY
 Failure is a premium commodity, but we must surgically eliminate the **Failure Farming Loop** (where the swarm optimizes to induce profitable errors). Failures are now strictly classified:

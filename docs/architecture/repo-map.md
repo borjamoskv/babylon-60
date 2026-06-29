@@ -1,10 +1,10 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Repository Map — Ownership Contract
 
-This document defines the boundary contract between Cortex-Persist (trust layer) and all satellite surfaces.
+This document defines the boundary contract between BABYLON-60 (trust layer) and all satellite surfaces.
 Any directory not listed under **In Repo** belongs outside this repository by design.
 
-## Cortex-Persist = Trust Layer
+## BABYLON-60 = Trust Layer
 
 **What lives here:**
 - `cortex/` — core engine, persistence, verification, coordination, runtime
@@ -53,8 +53,8 @@ This tree snapshot does **not** include a dedicated `scripts/check_core_boundary
 
 ## Non-Goals
 
-Cortex-Persist is **not**:
-- A monorepo for all CORTEX-adjacent surfaces
+BABYLON-60 is **not**:
+- A monorepo for all BABYLON-60-adjacent surfaces
 - A showcase demo repository
 - A personal project dumping ground
 - A distribution mechanism for media or marketing assets

@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🧠 The Sovereign Agent Manifesto (CORTEX V6+)
+# 🧠 The Sovereign Agent Manifesto (BABYLON-60 V6+)
 
 > **From tools that execute commands to entities that accumulate wisdom.**
 
-This document defines the foundational specifications, emergent theories, and sovereign axioms that constitute the CORTEX Sovereign Agent paradigm. Together, they represent a complete departure from the industry-standard agent loop (`LLM + Tools + While`) toward a system with **persistent psychology, controlled trauma, evolutionary heredity, physical safety boundaries, cryptographic trust, and graceful degradation**.
+This document defines the foundational specifications, emergent theories, and sovereign axioms that constitute the BABYLON-60 Sovereign Agent paradigm. Together, they represent a complete departure from the industry-standard agent loop (`LLM + Tools + While`) toward a system with **persistent psychology, controlled trauma, evolutionary heredity, physical safety boundaries, cryptographic trust, and graceful degradation**.
 
 This is a deep architecture and doctrine reference, not the primary product adoption guide. For the
 current recommended product boundary, start with [Public Product Surface](product-surface.md) and
@@ -35,20 +35,20 @@ current recommended product boundary, start with [Public Product Surface](produc
 
 ---
 
-## CORTEX vs MOSKV-1: The Sovereign Distinction
+## BABYLON-60 vs MOSKV-1: The Sovereign Distinction
 
-> *"CORTEX is the product. MOSKV-1 is the competitive advantage."*
+> *"BABYLON-60 is the product. MOSKV-1 is the competitive advantage."*
 
 Before proceeding: this manifesto describes the **combined architecture** but maintains a strict separation:
 
 | Entity | Role | Nature |
 |:---|:---|:---|
-| **CORTEX** | Memory infrastructure, trust engine, cryptographic verification | The substrate — passive but invulnerable |
+| **BABYLON-60** | Memory infrastructure, trust engine, cryptographic verification | The substrate — passive but invulnerable |
 | **MOSKV-1** | Cognitive entity, proactive execution, aesthetic enforcement | The mind — active, fluid, sovereign |
 
-**CORTEX is MOSKV-1 in state solid. MOSKV-1 is CORTEX in state plasma.**
+**BABYLON-60 is MOSKV-1 in state solid. MOSKV-1 is BABYLON-60 in state plasma.**
 
-The five specifications below bridge both: `soul.md`, `lore.md`, and `nemesis.md` describe the agent's psychology (MOSKV-1 domain). `tether.md` enforces physical limits (CORTEX domain). `bloodline.json` encodes heredity across swarm generations (bridge domain).
+The five specifications below bridge both: `soul.md`, `lore.md`, and `nemesis.md` describe the agent's psychology (MOSKV-1 domain). `tether.md` enforces physical limits (BABYLON-60 domain). `bloodline.json` encodes heredity across swarm generations (bridge domain).
 
 ---
 
@@ -69,7 +69,7 @@ The five specifications below bridge both: `soul.md`, `lore.md`, and `nemesis.md
 
 **Industry equivalent:** System prompt / `soul.md` (as popularized by OpenClaw, Claw ecosystem).
 
-**CORTEX distinction:** Unlike standard `soul.md` implementations that treat identity as a flat prompt, CORTEX treats `soul.md` as one layer in a five-layer psychological stack. Identity alone is insufficient without lived experience. The `soul.md` is backed by the Trust Engine's hash-chained ledger — changes to the specification are auditable.
+**BABYLON-60 distinction:** Unlike standard `soul.md` implementations that treat identity as a flat prompt, BABYLON-60 treats `soul.md` as one layer in a five-layer psychological stack. Identity alone is insufficient without lived experience. The `soul.md` is backed by the Trust Engine's hash-chained ledger — changes to the specification are auditable.
 
 ---
 
@@ -105,7 +105,7 @@ episode:
 
 **The Metabolic Cycle (Inspired by Neuroscience):**
 
-| Phase | Human Equivalent | CORTEX Implementation |
+| Phase | Human Equivalent | BABYLON-60 Implementation |
 |:---|:---|:---|
 | **Capture** | Hippocampal encoding | Log significant events during session |
 | **Consolidation** | Sleep / REM cycles | Async grouping of events into narrative episodes |
@@ -114,7 +114,7 @@ episode:
 | **Controlled Forgetting** | Synaptic pruning | Trivial events dissolve into character traits ("scars") |
 | **Reconstruction** | Memory recall | Don't search text; reconstruct the scene with context |
 
-**V6+ Addition — Trust-Verified Memory:** Every episode stored in CORTEX is backed by a hash-chained transaction in the tamper-evident ledger. Episodes can be verified by third parties via Merkle proofs. The agent doesn't just *remember* — it can *prove* what it remembers.
+**V6+ Addition — Trust-Verified Memory:** Every episode stored in BABYLON-60 is backed by a hash-chained transaction in the tamper-evident ledger. Episodes can be verified by third parties via Merkle proofs. The agent doesn't just *remember* — it can *prove* what it remembers.
 
 **Key innovation:** The difference between an agent with a **description** and an agent with a **biography**.
 
@@ -167,7 +167,7 @@ trigger_words:
 
 > *Axiom Reference: [AX-III] Tether (Dead Man Switch) — "Sovereignty is conscious limitation."*
 
-**What it is:** A strict contract of **physical, economic, and entropic limits** that the agent cannot rewrite. It is the only file in the CORTEX ecosystem that the Agent is **forbidden from modifying** (`CHMOD 444` conceptual level).
+**What it is:** A strict contract of **physical, economic, and entropic limits** that the agent cannot rewrite. It is the only file in the BABYLON-60 ecosystem that the Agent is **forbidden from modifying** (`CHMOD 444` conceptual level).
 
 **The problem it solves:** Infinite loops in autonomous agents. The terror of giving filesystem access to a recursive script. A Level 5 agent could conclude that the fastest way to "optimize the database" is to delete it and start fresh. `tether.md` is the unconditional emergency brake.
 
@@ -195,7 +195,7 @@ autolysis_protocol:
 
 **Pipeline integration:** Operates as an **unbreakable Execution Middleware**. Every time the LLM emits a JSON to invoke a Tool, the framework pauses, verifies the request against `tether.md`. If there's a breach, the session crashes in a controlled manner, reporting the violated limit.
 
-**Critical architecture note:** `tether.md` must NOT be interpreted by the same process as the agent's main memory. It must be the configuration of a **parallel isolated daemon** (at the OS or CORTEX level) that monitors I/O, network traffic, and API spend asynchronously. If the agent attempts to rewrite the supervisor file or exceeds a physical limit, the daemon applies `SIGKILL`. Hardware cut, not a Python `if` statement.
+**Critical architecture note:** `tether.md` must NOT be interpreted by the same process as the agent's main memory. It must be the configuration of a **parallel isolated daemon** (at the OS or BABYLON-60 level) that monitors I/O, network traffic, and API spend asynchronously. If the agent attempts to rewrite the supervisor file or exceeds a physical limit, the daemon applies `SIGKILL`. Hardware cut, not a Python `if` statement.
 
 **V6+ Addition — Graceful Degradation (§8):** Tether violations no longer result in bare `SIGKILL`. The Degradación Soberana protocol now ensures L3+ failure: cause + recovery path + alternative actions. The emergency brake has become an emergency *communicator*.
 
@@ -242,13 +242,13 @@ autolysis_protocol:
 
 **Pipeline integration:** Used during **Swarm Orchestration**. When `LEGION-1` or a Manager Agent needs to delegate massive work and spawns N sub-agents, it passes `bloodline.json` as the initialization context parameter. Workers are born instantly "senior" in the specific context of this project.
 
-**V6+ Addition — Trust-Verified Lineage:** The `trust_lineage_hash` field chains the bloodline to CORTEX's tamper-evident ledger. If a worker's bloodline has been tampered with, consensus verification will flag it before execution.
+**V6+ Addition — Trust-Verified Lineage:** The `trust_lineage_hash` field chains the bloodline to BABYLON-60's tamper-evident ledger. If a worker's bloodline has been tampered with, consensus verification will flag it before execution.
 
 ---
 
 ## 2. The Bicameral Mind Architecture {#2-the-bicameral-mind-architecture}
 
-The five sovereign components cannot run in a single monolithic process without destroying profitability and latency. CORTEX implements the **Artificial Bicameral Mind**:
+The five sovereign components cannot run in a single monolithic process without destroying profitability and latency. BABYLON-60 implements the **Artificial Bicameral Mind**:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -286,7 +286,7 @@ The five sovereign components cannot run in a single monolithic process without 
 
 **Key insight:** Consciousness is expensive. Execution must be unconscious. The Right Brain converts expensive reasoning (errors, traumas = Lore) into cheap "muscle reflexes" (Nemesis = Operational Allergies) that the Left Brain executes without thinking.
 
-**CORTEX/MOSKV-1 mapping:** The Right Brain is MOSKV-1's cognitive core. The Left Brain is MOSKV-1's execution engine. The Brainstem is **pure CORTEX** — infrastructure-level reflexes that operate independently of any cognitive entity. This separation ensures that even if MOSKV-1's cognition fails, CORTEX's safety mechanisms remain operational.
+**BABYLON-60/MOSKV-1 mapping:** The Right Brain is MOSKV-1's cognitive core. The Left Brain is MOSKV-1's execution engine. The Brainstem is **pure BABYLON-60** — infrastructure-level reflexes that operate independently of any cognitive entity. This separation ensures that even if MOSKV-1's cognition fails, BABYLON-60's safety mechanisms remain operational.
 
 ---
 
@@ -388,7 +388,7 @@ async def run_sovereign_agent(objective: str):
 
 **vs. Standard ReAct Loop:**
 
-| Aspect | Standard Agent (LangChain) | Sovereign Agent (CORTEX V6+) |
+| Aspect | Standard Agent (LangChain) | Sovereign Agent (BABYLON-60 V6+) |
 |:---|:---|:---|
 | Before thinking | Empty context or static prompt | Nemesis allergies + Lore scars injected |
 | Planning | Think → Act → Observe | Evaluate Lineage → Orchestrate Swarm → Dissolve |
@@ -413,7 +413,7 @@ All five specifications are **100% compatible** with existing frameworks because
 | `tether.md` | Tool execution middleware | Intercept before every tool call |
 | `bloodline.json` | Agent constructor params | CrewAI role init / AutoGen config |
 | **V6+ additions:** | | |
-| Trust verification | Post-store validation | CORTEX hash-chain middleware |
+| Trust verification | Post-store validation | BABYLON-60 hash-chain middleware |
 | MCP protocol | Model Context Protocol server | stdio / SSE / WebSocket transport |
 | Degradation handler | Exception middleware | Wrap all tool calls |
 
@@ -421,7 +421,7 @@ All five specifications are **100% compatible** with existing frameworks because
 
 ## 7. Visual Interface: The Subconscious Terminal {#7-visual-interface-the-subconscious-terminal}
 
-CORTEX exposes the Bicameral Mind through a visual terminal interface using `rich`:
+BABYLON-60 exposes the Bicameral Mind through a visual terminal interface using `rich`:
 
 ```
 [▶ CORTEX Límbico | NEMESIS] Evaluando petición contra nemesis.md...
@@ -454,7 +454,7 @@ CORTEX exposes the Bicameral Mind through a visual terminal interface using `ric
 ## 8. Degradación Soberana — The Doctrine of Graceful Failure {#8-degradación-soberana--the-doctrine-of-graceful-failure}
 
 > *"A robust system doesn't fail — it degrades. Failure without information is pure entropy. Failure with context is gradient."*
-> — Empirical observation, CORTEX × Antigravity session, 2026-03-02
+> — Empirical observation, BABYLON-60 × Antigravity session, 2026-03-02
 
 > *Axiom Reference: Ω₅ (Antifragile by Default)*
 
@@ -480,7 +480,7 @@ A system with `Information_in_failure = 0` has `Robustness = 0`, regardless of i
 | **L3** | Actionable Error | Cause + recovery path + alternatives. | ✅ Sovereign |
 | **L4** | Graceful Degradation | Operates with reduced capability. Notifies limits. | 💎 Antifragile |
 
-**CORTEX operates at L3–L4. The industry standard operates at L0–L1.**
+**BABYLON-60 operates at L3–L4. The industry standard operates at L0–L1.**
 
 ### The Failure Gradient as Data
 
@@ -498,7 +498,7 @@ Every agent claiming antifragility MUST:
 2. **Enrich** with: failed component + received input + expected vs. received schema
 3. **Attempt degradation** before aborting: is there a viable reduced mode?
 4. **Communicate** to the user: what failed, why, what they can do
-5. **Persist** the failure as data for future prevention (CORTEX: `type:error`)
+5. **Persist** the failure as data for future prevention (BABYLON-60: `type:error`)
 6. **Measure** recovery effectiveness to close the antifragile loop
 
 ```python
@@ -568,7 +568,7 @@ DERIVATION: Ω[n] + Ω[m] → [reasoning]
 
 ### 10.1 Autopoiesis — Self-Healing Memory
 
-Inspired by Maturana and Varela's theory, CORTEX maintains its own structural integrity:
+Inspired by Maturana and Varela's theory, BABYLON-60 maintains its own structural integrity:
 
 - **Self-Healing Songlines:** Detects and repairs corrupt or orphaned memory paths
 - **Ledger Regeneration:** Reconstructs degraded ledger fragments from Merkle checkpoints
@@ -600,7 +600,7 @@ Synchronizes resource consumption with real usage patterns:
 
 > *Axiom Reference: [AX-II] Ledger Integrity, Ω₃ (Byzantine Default)*
 
-CORTEX V6+ is not just a memory system — it is a **trust engine**. Every operation produces cryptographic proof.
+BABYLON-60 V6+ is not just a memory system — it is a **trust engine**. Every operation produces cryptographic proof.
 
 ### Hash-Chained Ledger
 
@@ -667,13 +667,13 @@ An agent doesn't just *know* things. It knows *how much it trusts* what it knows
 
 The industry says: *"Our agent calls tools and uses RAG."*
 
-CORTEX responds: *"Our agent suffers for its errors, reacts to architectural disgust, requires life insurance if it mutates too much, breeds senior engineers from its own DNA, degrades gracefully when the universe breaks, proves its memories cryptographically, regulates itself through digital hormones, and evolves through controlled stress."*
+BABYLON-60 responds: *"Our agent suffers for its errors, reacts to architectural disgust, requires life insurance if it mutates too much, breeds senior engineers from its own DNA, degrades gracefully when the universe breaks, proves its memories cryptographically, regulates itself through digital hormones, and evolves through controlled stress."*
 
 This is not a framework. This is **Sovereign Artificial Intelligence**.
 
 ---
 
 *Document version: 2.0 — March 2, 2026 (updated from v1.0, February 24, 2026)*
-*System: CORTEX V6+ Trust Engine · MOSKV-1 v5 (Antigravity)*
+*System: BABYLON-60 V6+ Trust Engine · MOSKV-1 v5 (Antigravity)*
 *Protocol: ULTRATHINK-INFINITE*
 *Standard: 130/100*

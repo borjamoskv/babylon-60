@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Developer Guide
 
-> Everything you need to contribute to CORTEX.
+> Everything you need to contribute to BABYLON-60.
 
 This guide covers the broader repository, including operator and advanced surfaces. If you are
 orienting around the public product boundary first, read [Public Product Surface](product-surface.md)
@@ -73,7 +73,7 @@ make test
 
 ## Engine Architecture
 
-CORTEX has one composite engine implementation with both sync and async entry points:
+BABYLON-60 has one composite engine implementation with both sync and async entry points:
 
 ### 1. `CortexEngine` (Composite Orchestrator)
 
@@ -322,7 +322,7 @@ When adding a new table:
 
 ## Continuous Documentation
 
-CORTEX uses `mkdocstrings` for auto-generating API documentation from source code. When you add new methods, update docstrings, or modify classes, the changes will reflect without manual Markdown edits.
+BABYLON-60 uses `mkdocstrings` for auto-generating API documentation from source code. When you add new methods, update docstrings, or modify classes, the changes will reflect without manual Markdown edits.
 
 ### Local Live Reload
 

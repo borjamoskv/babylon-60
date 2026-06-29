@@ -68,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎉 General Availability — First Stable Release
 
-CORTEX Persist graduates from beta to production-stable. This release represents 38 completed milestones, 2620+ passing tests, TLA+ formal verification of concurrent primitives, and a Rust FFI substrate delivering 22.5M agent dispatches per second.
+BABYLON-60 Persist graduates from beta to production-stable. This release represents 38 completed milestones, 2620+ passing tests, TLA+ formal verification of concurrent primitives, and a Rust FFI substrate delivering 22.5M agent dispatches per second.
 
 ### Architecture
 - **LEGION-10k Swarm Engine**: Lock-free `ZeroCopyRingBuffer` (Rust/PyO3) for O(1) multi-agent dispatch, formally verified via TLA+ model checking (C6-FORMAL).
@@ -234,7 +234,7 @@ CORTEX Persist graduates from beta to production-stable. This release represents
 - **Self-reflection engine** (`reflection.py`): Meta-cognitive session analysis
 - **Obsidian vault sync** (`sync/obsidian.py`): Bidirectional note sync
 - **GitOps sync** (`sync/gitops.py`): Git-based state management
-- **Federation protocol** (`federation.py`): Cross-instance CORTEX federation
+- **Federation protocol** (`federation.py`): Cross-instance BABYLON-60 federation
 
 ### Changed
 - **Engine mixin architecture**: Full migration to `StoreMixin`, `QueryMixin`, `ConsensusMixin`, `SearchMixin`, `AgentMixin`

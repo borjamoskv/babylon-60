@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🚀 Launch Posts — CORTEX-Persist
+# 🚀 Launch Posts — BABYLON-60-Persist
 
 > **Timing:** Tuesday–Thursday, 9:00 AM PST (17:00 CET)
 > **Strategy:** Post on HN + Reddit within the same 4-hour window for momentum

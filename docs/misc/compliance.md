@@ -3,13 +3,13 @@
 
 **Document Version:** 2.0
 **Date:** 2026-06-06
-**System:** CORTEX Trust Engine v1.0.0 (Apache-2.0)
+**System:** BABYLON-60 Trust Engine v1.0.0 (Apache-2.0)
 
 ---
 
 ## Scope
 
-This document maps CORTEX Trust Engine capabilities to the requirements of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12** (Record-Keeping) and related provisions for high-risk AI systems.
+This document maps BABYLON-60 Trust Engine capabilities to the requirements of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12** (Record-Keeping) and related provisions for high-risk AI systems.
 
 **Enforcement Date:** August 2, 2026
 
@@ -21,7 +21,7 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 
 ### Art. 12.1 — Automatic Logging of Events
 
-| Requirement | CORTEX Implementation | Evidence |
+| Requirement | BABYLON-60 Implementation | Evidence |
 |:---|:---|:---|
 | High-risk AI systems shall technically allow for the automatic recording of events (logs) | Every `store()` operation creates a transaction in the tamper-evident ledger with SHA-256 hash linking | `cortex/engine/ledger.py` — `EnterpriseAuditLedger` |
 | Logs shall be generated throughout the lifetime of the system | Transaction ledger operates continuously; every fact insertion, update, or deletion is recorded | `transactions` table |
@@ -30,7 +30,7 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 
 ### Art. 12.2 — Content of Logs
 
-| Requirement | CORTEX Implementation | Evidence |
+| Requirement | BABYLON-60 Implementation | Evidence |
 |:---|:---|:---|
 | Recording of the period of each use | `created_at` timestamp on every fact and transaction | `facts.created_at`, `transactions.timestamp` |
 | Reference database against which input data has been checked | Project-scoped fact database with full history | `facts.project` scoping |
@@ -38,7 +38,7 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 
 ### Art. 12.2d — Agent Traceability
 
-| Requirement | CORTEX Implementation | Evidence |
+| Requirement | BABYLON-60 Implementation | Evidence |
 |:---|:---|:---|
 | Identification of agents involved in verification | Agent tagging system with automatic source detection | `facts.source`, `facts.tags` |
 | Agent responsibility tracking | Consensus votes linked to agent IDs with reputation weights | `consensus_votes_v2` table |
@@ -47,7 +47,7 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 
 ### Art. 12.3 — Tamper-Proof Storage
 
-| Requirement | CORTEX Implementation | Evidence |
+| Requirement | BABYLON-60 Implementation | Evidence |
 |:---|:---|:---|
 | Logs shall be kept for an appropriate period | Facts are never physically deleted (soft-delete via `valid_until`) | `facts.valid_until` field |
 | Logs must be tamper-evident | SHA-256 hash chain: each transaction includes the previous hash | `transactions.hash`, `transactions.prev_hash` |
@@ -60,7 +60,7 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 
 ### Art. 12.4 — Periodic Verification
 
-| Requirement | CORTEX Implementation | Evidence |
+| Requirement | BABYLON-60 Implementation | Evidence |
 |:---|:---|:---|
 | Providers shall implement means for periodic integrity verification | Merkle tree checkpoints created at configurable intervals | `EnterpriseAuditLedger.create_checkpoint_sync()` |
 | Verification results shall be recorded | `integrity_checks` table stores every verification result | `integrity_checks` table |
@@ -73,7 +73,7 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 
 ### Decision Lineage (Explainability)
 
-CORTEX maintains a `decision_edges` graph that links decisions chronologically within projects. This enables full **chain-of-reasoning reconstruction** — a key requirement for explainability audits.
+BABYLON-60 maintains a `decision_edges` graph that links decisions chronologically within projects. This enables full **chain-of-reasoning reconstruction** — a key requirement for explainability audits.
 
 **MCP Tool:** `cortex_decision_lineage`
 
@@ -90,7 +90,7 @@ The **Reputation-Weighted Consensus (RWC)** system allows multiple agents to ver
 
 ### Data Sovereignty (GDPR Art. 22)
 
-CORTEX is **100% local-first** (SQLite). No data leaves the deployment environment. This inherently satisfies data residency and sovereignty requirements.
+BABYLON-60 is **100% local-first** (SQLite). No data leaves the deployment environment. This inherently satisfies data residency and sovereignty requirements.
 
 For cloud deployments, multi-tenant isolation ensures data boundaries with cryptographic scoping.
 
@@ -131,8 +131,8 @@ $ cortex compliance-report
 ## Limitations
 
 1. **No formal audit:** This mapping has not been reviewed by a certified EU AI Act auditor.
-2. **High-risk classification:** Whether a system using CORTEX qualifies as "high-risk" depends on its use case, not on CORTEX.
-3. **Organizational measures:** CORTEX provides technical measures only. Organizational compliance (policies, training, governance) is the deployer's responsibility.
+2. **High-risk classification:** Whether a system using BABYLON-60 qualifies as "high-risk" depends on its use case, not on BABYLON-60.
+3. **Organizational measures:** BABYLON-60 provides technical measures only. Organizational compliance (policies, training, governance) is the deployer's responsibility.
 4. **Legal advice:** This document is for informational purposes. Consult legal counsel for binding compliance guidance.
 
 ---

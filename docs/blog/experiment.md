@@ -2,7 +2,7 @@
 # Experimento de Blog para cortexpersist.org
 
 ## Introducción
-Este documento describe un **experimento de blog** para el dominio **cortexpersist.org**. El objetivo es validar la infraestructura de publicación, medir la interacción de los lectores y explorar contenido técnico‑avanzado que refleje la visión de CORTEX.
+Este documento describe un **experimento de blog** para el dominio **cortexpersist.org**. El objetivo es validar la infraestructura de publicación, medir la interacción de los lectores y explorar contenido técnico‑avanzado que refleje la visión de BABYLON-60.
 
 ## Objetivos del experimento
 1. **Validar pipeline de generación** – usar el generador de contenido de Antigravity para crear artículos automáticamente.
@@ -35,4 +35,4 @@ Este documento describe un **experimento de blog** para el dominio **cortexpersi
 Al finalizar el experimento, se redactará un informe con insights y se decidirá si escalar la estrategia a contenido semanal permanente.
 
 ---
-*Este documento forma parte del repositorio interno de CORTEX y está pensado para ser versionado y revisado por el equipo de desarrollo.*
+*Este documento forma parte del repositorio interno de BABYLON-60 y está pensado para ser versionado y revisado por el equipo de desarrollo.*

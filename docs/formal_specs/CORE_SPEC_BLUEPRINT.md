@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Core Specification Blueprint v1.0
+# BABYLON-60 Core Specification Blueprint v1.0
 
 ## Status
 
 **Document Status:** Conceptual Architecture (Frozen)
 
-This document defines the architectural invariants and abstract execution model of CORTEX. It is intentionally independent of any implementation language, machine learning model, storage engine or execution runtime.
+This document defines the architectural invariants and abstract execution model of BABYLON-60. It is intentionally independent of any implementation language, machine learning model, storage engine or execution runtime.
 
 It is **not** an implementation specification. Its purpose is to define the properties that every conforming implementation shall preserve.
 
@@ -13,7 +13,7 @@ It is **not** an implementation specification. Its purpose is to define the prop
 
 # Design Goal
 
-CORTEX is an architecture for governing computational knowledge under explicit uncertainty.
+BABYLON-60 is an architecture for governing computational knowledge under explicit uncertainty.
 
 Its objective is not to maximize the probability of producing correct answers, but to maximize the traceability, reproducibility and auditability of every inference performed by the system.
 
@@ -102,7 +102,7 @@ Future specifications shall define these components independently while preservi
 
 # Conformance Principle
 
-An implementation conforms to CORTEX if—and only if—it preserves the architectural invariants defined in this document.
+An implementation conforms to BABYLON-60 if—and only if—it preserves the architectural invariants defined in this document.
 
 Performance, implementation language, hardware architecture and underlying language models are intentionally outside the scope of conformance.
 
@@ -110,10 +110,10 @@ Performance, implementation language, hardware architecture and underlying langu
 
 # Engineering Governance Lifecycle
 
-The evolution of CORTEX is strictly decoupled from implementation volatility via the following separation of concerns:
+The evolution of BABYLON-60 is strictly decoupled from implementation volatility via the following separation of concerns:
 
 * **Blueprint (Current):** Defines principles, invariants, and abstract architecture.
-* **CEP (CORTEX Enhancement Proposals):** Refine and formalize concrete components (Trust Algebra, EDL, CPG, etc.).
+* **CEP (BABYLON-60 Enhancement Proposals):** Refine and formalize concrete components (Trust Algebra, EDL, CPG, etc.).
 * **Core Specification:** Consolidates approved CEPs into a single normative standard.
 * **Reference Kernel:** Canonical implementation demonstrating the specification is executable.
 * **Conformance Test Suite:** Independent verification suite any implementation must pass to declare conformance.

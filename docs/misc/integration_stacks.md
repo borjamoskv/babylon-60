@@ -1,13 +1,13 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# How CORTEX Fits Existing Stacks
+# How BABYLON-60 Fits Existing Stacks
 
-Adopting cryptographic memory doesn't mean ripping out your existing infrastructure. CORTEX is designed to sit alongside your current vector databases and orchestration frameworks, wrapping your final state mutations in a **Verification Membrane**.
+Adopting cryptographic memory doesn't mean ripping out your existing infrastructure. BABYLON-60 is designed to sit alongside your current vector databases and orchestration frameworks, wrapping your final state mutations in a **Verification Membrane**.
 
 For the recommended adoption boundary, see [Public Product Surface](product-surface.md).
 
 ## 1. Architectural Position
 
-CORTEX acts as the *Source of Truth* (Layer 3) for decisions, distinct from your *Working Memory* (Layer 1) and your *Semantic Matcher* (Layer 2). You **do not** replace Qdrant or Pinecone. You add CORTEX specifically for verifiable actions and core identity facts.
+BABYLON-60 acts as the *Source of Truth* (Layer 3) for decisions, distinct from your *Working Memory* (Layer 1) and your *Semantic Matcher* (Layer 2). You **do not** replace Qdrant or Pinecone. You add BABYLON-60 specifically for verifiable actions and core identity facts.
 
 ```mermaid
 flowchart TD
@@ -31,7 +31,7 @@ flowchart TD
 
 ## 2. Integration with Major Orchestrators
 
-CORTEX Persist provides out-of-the-box MCP (Model Context Protocol) compatibility. It can be integrated directly into any modern multi-agent environment with minimal lines of code.
+BABYLON-60 Persist provides out-of-the-box MCP (Model Context Protocol) compatibility. It can be integrated directly into any modern multi-agent environment with minimal lines of code.
 
 ### Using AutoGen or LangGraph
 
@@ -58,7 +58,7 @@ async def orchestrate_decision(context: str, agent_name: str):
 
 ### Flow via Model Context Protocol (MCP)
 
-If you are using Anthropic tools or anything compatible with the MCP spec, CORTEX ships a native `mcp/` server:
+If you are using Anthropic tools or anything compatible with the MCP spec, BABYLON-60 ships a native `mcp/` server:
 
 ```bash
 # Local stdio server for IDE integrations
@@ -75,6 +75,6 @@ tool families require `CORTEX_ENABLE_EXPERIMENTAL_MCP=1`.
 
 ## 3. What changes in your workflow?
 
-1. **You stop using Vector DBs for logs.** Ephemeral RAG data stays in your semantic vector store. Critical decisions, API calls, tool uses, and core facts move to the CORTEX ledger.
-2. **You add Guards to API paths.** CORTEX requires inputs to pass validation boundaries—preventing an agent's hallucination from becoming permanent memory.
+1. **You stop using Vector DBs for logs.** Ephemeral RAG data stays in your semantic vector store. Critical decisions, API calls, tool uses, and core facts move to the BABYLON-60 ledger.
+2. **You add Guards to API paths.** BABYLON-60 requires inputs to pass validation boundaries—preventing an agent's hallucination from becoming permanent memory.
 3. **You export rather than explain.** Instead of digging through Datadog to explain to stakeholders why an agent sent an email, you export the exact `cortex verify <fact_id>` cryptographic receipt.

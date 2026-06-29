@@ -1,7 +1,7 @@
 # Evidence Model Definition
 
 ## Overview
-This schema formalizes the data structure required to persist an event in the CORTEX Persist Master Ledger. It is the core primitive for Phase 1 enterprise cryptography.
+This schema formalizes the data structure required to persist an event in the BABYLON-60 Persist Master Ledger. It is the core primitive for Phase 1 enterprise cryptography.
 
 ## JSON Schema
 

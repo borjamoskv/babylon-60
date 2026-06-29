@@ -3,11 +3,11 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/marketing/social-preview.png">
     <source media="(prefers-color-scheme: light)" srcset="assets/marketing/social-preview-light.png">
-    <img src="assets/marketing/social-preview.png" alt="CORTEX Persist — Tamper-evident memory for AI agents" width="100%">
+    <img src="assets/marketing/social-preview.png" alt="BABYLON-60 Persist — Tamper-evident memory for AI agents" width="100%">
   </picture>
 </div>
 
-<h1 align="center">█ CORTEX-PERSIST</h1>
+<h1 align="center">█ BABYLON-60</h1>
 
 <p align="center">
   <strong>Tamper-evident memory, cryptographic audit trails, and deterministic state formulation for AI agents.</strong><br>
@@ -49,11 +49,11 @@ Every AI agent framework answers *"what should the agent do next?"*
 None of them answer *"can you **prove** what the agent did, and that it hasn't been altered by entropy?"*
 
 Generative AI output is fundamentally **probabilistic conjecture**. Traditional logs blindly trust stochastic output.
-CORTEX-PERSIST intercepts that output, enforces a deterministic shield via **Z3 SMT Guards**, and commits the resulting state to an append-only Hash-chain Ledger. 
+BABYLON-60 intercepts that output, enforces a deterministic shield via **Z3 SMT Guards**, and commits the resulting state to an append-only Hash-chain Ledger. 
 
-- **LangGraph** gives you checkpoints. CORTEX gives you **cryptographic proof those checkpoints haven't been tampered with.**
-- **Mem0** gives you semantic memory. CORTEX gives you **a hash-chain ledger of every memory access and mutation.**
-- **Traditional logs** give you text. CORTEX gives you **a metric space of execution trajectories where divergence is measurable.**
+- **LangGraph** gives you checkpoints. BABYLON-60 gives you **cryptographic proof those checkpoints haven't been tampered with.**
+- **Mem0** gives you semantic memory. BABYLON-60 gives you **a hash-chain ledger of every memory access and mutation.**
+- **Traditional logs** give you text. BABYLON-60 gives you **a metric space of execution trajectories where divergence is measurable.**
 
 > If your agent made a decision that cost money, changed state, or affected a user — you need more than a log. You need a cryptographic proof.
 
@@ -96,9 +96,9 @@ async def apex_agent(prompt: str):
 
 ## ▀▄ THERMODYNAMIC ARCHITECTURE (SAGA & OUROBOROS)
 
-CORTEX-PERSIST treats an agent's execution history not as a log, but as a **point in a high-dimensional metric space**. Two runs are either equivalent or measurably divergent. 
+BABYLON-60 treats an agent's execution history not as a log, but as a **point in a high-dimensional metric space**. Two runs are either equivalent or measurably divergent. 
 
-To maintain **C5-REAL** execution in the face of stocastic variance, CORTEX applies the **Ouroboros Consensus** and the **SAGA Write-Path Contract**.
+To maintain **C5-REAL** execution in the face of stocastic variance, BABYLON-60 applies the **Ouroboros Consensus** and the **SAGA Write-Path Contract**.
 
 ### The Write-Path Contract (SAGA)
 All non-trivial state mutations MUST follow this unidirectional flow. If a proposal fails validation or lacks a valid `CORTEX-TAINT` signature, it executes the compensating Saga sequence in reverse and aborts immediately.
@@ -123,7 +123,7 @@ All non-trivial state mutations MUST follow this unidirectional flow. If a propo
 
 ### Core Primitives & LEGION-10k
 
-CORTEX includes native support for **LEGION-10k Swarms**, enabling 390k agents/sec throughput via Rust-FFI. It operates according to the **APEX_CORE** sovereign primitives.
+BABYLON-60 includes native support for **LEGION-10k Swarms**, enabling 390k agents/sec throughput via Rust-FFI. It operates according to the **APEX_CORE** sovereign primitives.
 
 | Primitive | Role |
 | :--- | :--- |
@@ -137,7 +137,7 @@ CORTEX includes native support for **LEGION-10k Swarms**, enabling 390k agents/s
 
 ## ▀▄ COGNITIVE ROUTING PROTOCOL
 
-CORTEX enforces a rigid Thermodynamic Routing matrix based on Exergy constraints to prevent AI agents from "Context Rot" and limerence loops.
+BABYLON-60 enforces a rigid Thermodynamic Routing matrix based on Exergy constraints to prevent AI agents from "Context Rot" and limerence loops.
 
 - **UltraThink (P0 Singularity):** Reserved EXCLUSIVELY for cascading failures, system-level security incidents, and irreversible architectural collapses. Maximum exergy consumed.
 - **Deep Research:** Used when the system lacks sufficient domain information (e.g., state of the art surveys, new APIs).
@@ -148,7 +148,7 @@ CORTEX enforces a rigid Thermodynamic Routing matrix based on Exergy constraints
 
 ## ▀▄ DEPLOYMENT INVARIANTS
 
-**CORTEX Operates under Strict Physical Laws (Singularity Nexus):**
+**BABYLON-60 Operates under Strict Physical Laws (Singularity Nexus):**
 
 1. **Cloudflare-Only Perimeter:** Absolute prohibition of Vercel ecosystems (`vercel.json`, `@vercel/*`). All edge/front deployments MUST target Cloudflare Pages/Workers (`wrangler.toml`). Violation triggers P0 Abort due to thermodynamic fracture.
 2. **SQLite WAL Concurrency:** Concurrent thread interactions mandate strict connection factors (`busy_timeout: 5000ms`, `WAL` mode active) to eradicate deadlocks.
@@ -172,9 +172,9 @@ pip install cortex-persist
 | :--- | :--- | :--- |
 | `[embeddings]` | `sentence-transformers` (~120MB weights), `onnxruntime`. | **Local Vector Engine:** Deterministic indexing and cosine similarity. Zero network calls. Pure CPU/GPU inference. |
 | `[knowledge]` | `chromadb` (C++ bindings). Generates `.chroma/` dir. | **Ontological Sync:** Long-term semantic retention. BFT validation of retrieved knowledge graphs. |
-| `[api,mcp,daemon]` | `fastapi`, `uvicorn`, `mcp-sdk`. Opens local ports (e.g. `8765`). | **Network Gateway:** Mounts CORTEX as a Sovereign MCP Server. Exposes REST/MCP endpoints for external Swarm mutation. |
+| `[api,mcp,daemon]` | `fastapi`, `uvicorn`, `mcp-sdk`. Opens local ports (e.g. `8765`). | **Network Gateway:** Mounts BABYLON-60 as a Sovereign MCP Server. Exposes REST/MCP endpoints for external Swarm mutation. |
 | `[cloud]` | C-bindings: `asyncpg`, `redis`, `qdrant-client`. | **Distributed Scale:** Displaces local SQLite WAL consensus to external PostgreSQL/Qdrant clusters. |
-| `[secure]` | `keyring` (OS-native bind), `cryptography` (AES-GCM). | **Vault:** Hard-links CORTEX to the Secure Enclave (macOS Keychain) or TPM. Mandatory for financial tokens or keys. |
+| `[secure]` | `keyring` (OS-native bind), `cryptography` (AES-GCM). | **Vault:** Hard-links BABYLON-60 to the Secure Enclave (macOS Keychain) or TPM. Mandatory for financial tokens or keys. |
 | `[acceleration]` | Pre-compiled Rust FFI wheels. Bypasses Python GIL. | **Hyper-Throughput:** Enables LEGION-10k mode. Sustains >390k operations/sec under extreme asymmetric load. |
 
 ```bash
@@ -186,7 +186,7 @@ pip install "cortex-persist[embeddings,secure,acceleration]"
 
 ## ▀▄ NATIVE MCP INTEGRATION
 
-CORTEX-PERSIST acts as a **Sovereign MCP Server**, serving deterministic cryptographic states to external tools (Claude Desktop, custom swarms):
+BABYLON-60 acts as a **Sovereign MCP Server**, serving deterministic cryptographic states to external tools (Claude Desktop, custom swarms):
 
 ```bash
 cortex mcp serve --port 8765
@@ -207,14 +207,14 @@ cortex mcp serve --port 8765
 
 ## ▀▄ EPISTEMIC EVALUATION & STANDARDIZATION
 
-> **CORTEX no debería evaluarse por la calidad de las respuestas que produce, sino por las propiedades que garantiza sobre el proceso que las produce.**
+> **BABYLON-60 no debería evaluarse por la calidad de las respuestas que produce, sino por las propiedades que garantiza sobre el proceso que las produce.**
 
-The success criteria for this architecture is not *"Is CORTEX smarter than an LLM?"* but rather: **"Can a CORTEX implementation formally prove it preserves its invariants for any valid execution?"**
+The success criteria for this architecture is not *"Is BABYLON-60 smarter than an LLM?"* but rather: **"Can a BABYLON-60 implementation formally prove it preserves its invariants for any valid execution?"**
 
-To decouple the ecosystem's evolution from underlying LLM volatility, CORTEX governs its growth through a rigorous standard discipline:
+To decouple the ecosystem's evolution from underlying LLM volatility, BABYLON-60 governs its growth through a rigorous standard discipline:
 
 - **Core Specification**: Invariants, semantics, and execution model.
-- **CEP (CORTEX Enhancement Proposals)**: Evolution proposals demanding formal impact arguments.
+- **CEP (BABYLON-60 Enhancement Proposals)**: Evolution proposals demanding formal impact arguments.
 - **Reference Kernel**: Minimal implementation serving as an executable specification.
 - **Conformance Levels**: Objective compliance tiers (e.g., Core, Verified Provenance, Full Trust Algebra).
 - **Proof Obligations Registry**: Properties every component must formally demonstrate.

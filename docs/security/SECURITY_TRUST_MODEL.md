@@ -1,29 +1,29 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# SECURITY_TRUST_MODEL.md — CORTEX Persist
+# SECURITY_TRUST_MODEL.md — BABYLON-60 Persist
 
 Package: cortex-persist v1.0.0
 License: Apache-2.0 · Python: >=3.10 · Execution: C5-REAL
 
 This document describes trust boundaries, verification surfaces, and cognitive/state-mutation risks
-for the CORTEX-Persist sovereign persistence substrate.
+for the BABYLON-60-Persist sovereign persistence substrate.
 
 For vulnerability disclosure policy and repository security reporting, see
 [`SECURITY.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md).
 
 ## Purpose: The Doctrinal Formula
 
-> **CORTEX-Persist no confía en outputs.**
+> **BABYLON-60-Persist no confía en outputs.**
 > La probabilidad puede sugerir. Solo la verificación puede gobernar.
 
-This document defines the trust boundaries, guarantees, non-guarantees, and verification surfaces of CORTEX Persist.
+This document defines the trust boundaries, guarantees, non-guarantees, and verification surfaces of BABYLON-60 Persist.
 
-The fundamental problem of modern AI agents is not that they hallucinate; it is that their probabilistic output is granted ontological status before being verified. **We do not build systems that trust the model. We build systems where unverified probabilistic output cannot survive long enough to matter.** CORTEX treats all generative output as *thermodynamically unstable conjecture* (`Void-State`).
+The fundamental problem of modern AI agents is not that they hallucinate; it is that their probabilistic output is granted ontological status before being verified. **We do not build systems that trust the model. We build systems where unverified probabilistic output cannot survive long enough to matter.** BABYLON-60 treats all generative output as *thermodynamically unstable conjecture* (`Void-State`).
 
-CORTEX is not secure because it stores data. CORTEX is secure to the extent that it constrains who may mutate state, under which conditions, forcing probabilistic suggestions to cross a deterministic admission pipeline—formal schema validation, cryptographic ledger inscription, Ed25519 sovereign sealing, and causal taint tracking—before becoming actionable memory.
+BABYLON-60 is not secure because it stores data. BABYLON-60 is secure to the extent that it constrains who may mutate state, under which conditions, forcing probabilistic suggestions to cross a deterministic admission pipeline—formal schema validation, cryptographic ledger inscription, Ed25519 sovereign sealing, and causal taint tracking—before becoming actionable memory.
 
 ## Security Posture
 
-CORTEX assumes that non-trivial inputs may be malformed, deceptive, stale,
+BABYLON-60 assumes that non-trivial inputs may be malformed, deceptive, stale,
 contradictory, or adversarial.
 
 This includes:
@@ -85,7 +85,7 @@ The persistence and trust layer is organized into sovereign domains under the ro
 
 ## Security Goals
 
-CORTEX aims to provide:
+BABYLON-60 aims to provide:
 
 - durable auditability of write behavior via dual-layer ledger (SQLite + AOF binary)
 - cryptographic continuity across facts via SHA-256 hash-chain
@@ -102,7 +102,7 @@ CORTEX aims to provide:
 
 ## Guarantees
 
-CORTEX is designed to guarantee, within correct implementation and deployment:
+BABYLON-60 is designed to guarantee, within correct implementation and deployment:
 
 ### 1. Cryptographic Traceability
 
@@ -192,7 +192,7 @@ The `ZeroCopyRingBuffer` relies on `cortex_rs` Rust-FFI memory mapping, complete
 
 ## Non-Guarantees
 
-CORTEX does not guarantee:
+BABYLON-60 does not guarantee:
 
 - semantic truth
 - correctness of external models
@@ -280,7 +280,7 @@ preserve C5-REAL thermodynamic bounds rather than silently queued.
 
 ## Defense in Depth
 
-CORTEX relies on layered control, not a single magic wall.
+BABYLON-60 relies on layered control, not a single magic wall.
 
 ### Guards Layer
 
@@ -495,7 +495,7 @@ It is the condition that makes correctness failures inspectable.
 
 ## Compliance Posture
 
-CORTEX positions audit trails, decision traceability, and deterministic validation
+BABYLON-60 positions audit trails, decision traceability, and deterministic validation
 as foundations for regulated AI environments, including EU AI Act-adjacent needs.
 
 This should be stated carefully.
@@ -560,7 +560,7 @@ Before release, review:
 
 ## Guiding Rule
 
-CORTEX does not make models truthful.
+BABYLON-60 does not make models truthful.
 It reduces their freedom to contaminate persistent state.
 
 ---
@@ -585,10 +585,10 @@ It reduces their freedom to contaminate persistent state.
 This section provides explicit answers to critical infrastructure threat scenarios:
 
 ### 1. ¿Qué pasa si el agente miente?
-El sistema no evalúa la verdad semántica (CORTEX no es un oráculo). Sin embargo, exige el `causal_graph` de la mentira. El agente debe aportar pruebas estructurales (nodos previos) de por qué tomó esa decisión. La mentira queda criptográficamente sellada a su identidad. Si el agente "alucina" repetidamente, el `EntropyDriftThresholdExceeded` bloquea su ejecución.
+El sistema no evalúa la verdad semántica (BABYLON-60 no es un oráculo). Sin embargo, exige el `causal_graph` de la mentira. El agente debe aportar pruebas estructurales (nodos previos) de por qué tomó esa decisión. La mentira queda criptográficamente sellada a su identidad. Si el agente "alucina" repetidamente, el `EntropyDriftThresholdExceeded` bloquea su ejecución.
 
 ### 2. ¿Qué pasa si el operador modifica el ledger (SQLite o AOF)?
-Cualquier modificación manual (UPDATE/DELETE) altera el hash criptográfico del bloque. Al intentar leer o añadir un nuevo evento, el cálculo de `Hash(Prev_Hash + Payload)` no coincidirá con el `block_hash` almacenado. CORTEX lanzará `MerkleChainMismatchError` y el proceso colapsará intencionadamente (SIGKILL) para evitar operar en estado corrupto.
+Cualquier modificación manual (UPDATE/DELETE) altera el hash criptográfico del bloque. Al intentar leer o añadir un nuevo evento, el cálculo de `Hash(Prev_Hash + Payload)` no coincidirá con el `block_hash` almacenado. BABYLON-60 lanzará `MerkleChainMismatchError` y el proceso colapsará intencionadamente (SIGKILL) para evitar operar en estado corrupto.
 
 ### 3. ¿Qué pasa si el disco se corrompe?
 Idéntico comportamiento al punto 2. La corrupción de bytes invalidará el hash SHA-256 o la firma Ed25519 (`Ed25519SignatureInvalid`). El sistema se detendrá. Se requiere restaurar desde un backup verificado y/o ejecutar `cortex ledger heal` para bifurcar el ledger desde el último bloque válido.
@@ -600,7 +600,7 @@ Si un atacante roba la clave Ed25519 (`cortex_sovereign.pem`), puede firmar even
 El `seq_id` y el `prev_hash` imponen una topología estrictamente lineal y unidireccional. Cambiar el orden de dos bloques A y B invalida inmediatamente todos los hashes subsiguientes.
 
 ### 6. ¿Qué pasa si aparecen bifurcaciones (Forks)?
-CORTEX detecta los forks a través del `MetaArbiter`. Si dos procesos intentan derivar del mismo `prev_hash`, el sistema entra en "Topological Collapse": el árbitro selecciona la rama con mayor *exergy yield* (o por convención de timestamp) como la rama canónica. La rama descartada se clasifica como *Divergente* pero nunca se elimina (se mantiene como evidencia).
+BABYLON-60 detecta los forks a través del `MetaArbiter`. Si dos procesos intentan derivar del mismo `prev_hash`, el sistema entra en "Topological Collapse": el árbitro selecciona la rama con mayor *exergy yield* (o por convención de timestamp) como la rama canónica. La rama descartada se clasifica como *Divergente* pero nunca se elimina (se mantiene como evidencia).
 
 ### 7. ¿Qué pasa si se eliminan entradas?
 El `MerkleChainMismatchError` detectará que el hash anterior esperado no coincide con el último bloque presente en el disco. La eliminación es detectada en tiempo $O(1)$ en la siguiente validación.

@@ -6,7 +6,7 @@
 | ID | Primitiva HitL | Mecanismo Causal | Activación (Trigger) | Sensor (Síntoma) | Escala Temporal | Gravedad | Intervención |
 |:---|:---|:---|:---|:---|:---|:---|:---|
 | **HITL-P01** | `OP_GATE_SUSPEND` | Suspensión atómica de Event Loop del Agente. | Detección de mutación irreversible. | Corrutina `AWAIT_HUMAN` inactiva. | Indefinida | P0 | Notificación Push al Demiurgo. |
-| **HITL-P02** | `OP_TAINT_CHALLENGE` | Generación de SHA3-256 para el payload. | Artefacto empaquetado para firma. | Hash CORTEX-TAINT en stdout. | MS | P0 | El usuario recibe el Taint. |
+| **HITL-P02** | `OP_TAINT_CHALLENGE` | Generación de SHA3-256 para el payload. | Artefacto empaquetado para firma. | Hash BABYLON-60-TAINT en stdout. | MS | P0 | El usuario recibe el Taint. |
 | **HITL-P03** | `OP_SIGN_VERIFY` | Aserción ED25519 del Operador. | Input de aprobación de la UI/CLI. | Desbloqueo del Mutex. | MS | P0 | Autorización criptográfica. |
 | **HITL-P04** | `OP_SAGA_ABORT` | Desenrollado SAGA ante rechazo. | Firma humana = False. | Limpieza de `/scratch/`. | O(N) | P1 | Rollback al Snapshot RAM. |
 | **HITL-P05** | `OP_UI_RENDER_DIFF` | Extracción de Delta puro. | Preparación visual para HitL. | Unified Diff en pantalla. | MS | P2 | Visualización humana (C4). |

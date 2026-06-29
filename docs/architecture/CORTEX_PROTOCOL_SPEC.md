@@ -1,4 +1,4 @@
-# CORTEX-Persist Protocol Specification (Normative)
+# BABYLON-60-Persist Protocol Specification (Normative)
 
 **Version:** 1.0.0-draft
 **Status:** PROPOSED STANDARD
@@ -6,13 +6,13 @@
 
 ## 1. Introduction
 
-This document specifies the normative architecture of the CORTEX-Persist protocol. It is intended for implementers building CORTEX-compatible nodes in languages other than Python (e.g., Rust, Go, Java) and defines the exact ledger format, cryptographic primitives, and validation invariants required to interoperate within the CORTEX ecosystem.
+This document specifies the normative architecture of the BABYLON-60-Persist protocol. It is intended for implementers building BABYLON-60-compatible nodes in languages other than Python (e.g., Rust, Go, Java) and defines the exact ledger format, cryptographic primitives, and validation invariants required to interoperate within the BABYLON-60 ecosystem.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
 
 ## 2. Cryptographic Primitives
 
-All CORTEX implementations MUST use the following primitives to ensure cross-platform reproducibility of hashes and signatures:
+All BABYLON-60 implementations MUST use the following primitives to ensure cross-platform reproducibility of hashes and signatures:
 
 1. **Hashing Algorithm:** `SHA-256` (FIPS 180-4).
 2. **Signature Scheme:** `Ed25519` (RFC 8032).

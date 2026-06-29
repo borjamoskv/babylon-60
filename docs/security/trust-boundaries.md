@@ -1,6 +1,6 @@
 # Trust Boundaries
 
-This document defines the strict trust boundaries within the CORTEX Persist ecosystem. Any crossing of these boundaries requires cryptographic validation and adherence to the system axioms.
+This document defines the strict trust boundaries within the BABYLON-60 Persist ecosystem. Any crossing of these boundaries requires cryptographic validation and adherence to the system axioms.
 
 ## Boundary 1: The Epistemic Boundary (Generative vs. Deterministic)
 - **Untrusted (C4-SIM)**: LLM outputs, agent reasoning, generative text, external API responses.
@@ -23,5 +23,5 @@ This document defines the strict trust boundaries within the CORTEX Persist ecos
 ## Boundary 4: The Execution Boundary
 - **Untrusted**: Shell commands, filesystem reads from agents.
 - **Boundary Control**: OS sandboxes, MAC isolation, Workspace paths (`~/10_PROJECTS`, `~/20_VAULT`).
-- **Trusted**: The CORTEX Execution Kernel.
+- **Trusted**: The BABYLON-60 Execution Kernel.
 - **Rule**: Absolute restriction against modifying system paths (`/private/var/db`, `/System`).

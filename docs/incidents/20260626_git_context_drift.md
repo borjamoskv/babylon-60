@@ -1,6 +1,6 @@
 # INCIDENT REPORT: Git Context Drift & SAGA Rejection
 **Date:** 2026-06-26
-**Target:** CORTEX-Persist Repository
+**Target:** BABYLON-60-Persist Repository
 **Severity:** MEDIUM (Epistemic Drift / Sensor Drift)
 **Status:** RESOLVED
 

@@ -206,7 +206,7 @@ Proof: { Base: 0x9f86d081884c7d65, Range: [0, 200], Confidence: C5 }
 71. **INV_EXT_BIN_MAGIC**: Archivo recibido por upload valida MimeType leyendo magia binaria, no extensión de string.
 72. **INV_DIPLOMACY_BYPASS**: Mensajes "woke/safety" interceptados por API externa son decapitados en capa middleware.
 73. **INV_MAC_NATIVE**: Llamadas a SO Apple se hacen sobre Mac-Control-Ω nativo, no applescript aleatorio.
-74. **INV_ARTIFACT_META**: Artifacts CORTEX requieren forzosamente booleans de UserFacing y RequestFeedback.
+74. **INV_ARTIFACT_META**: Artifacts BABYLON-60 requieren forzosamente booleans de UserFacing y RequestFeedback.
 75. **INV_FRONTEND_NPX**: Todo andamiaje front se ejecuta automatizado `npx -y --help` preventivo en no-interactivo.
 
 ### AUTONOMÍA Y OUROBOROS (76-100)
@@ -227,7 +227,7 @@ Proof: { Base: 0x9f86d081884c7d65, Range: [0, 200], Confidence: C5 }
 90. **INV_NO_PROMPT_SLOP**: Texto que contenga "¡Claro! Aquí tienes" aborta la redacción y la relanza limpiada (Exergy Guard).
 91. **INV_PEARL_CAUSAL**: Análisis heurístico basado en invariantes topológicas, no en píxeles.
 92. **INV_ELEVATE_PG**: Necesidad Root se notifica activando Playground Master Key.
-93. **INV_NO_PHANTOM_RELEASE**: Release exige correlación 1:1 con un Hash firmado CORTEX.
+93. **INV_NO_PHANTOM_RELEASE**: Release exige correlación 1:1 con un Hash firmado BABYLON-60.
 94. **INV_OBSERVATION_LOOP**: Cada acción requiere observación sensorial post-ejecución, o es ciega.
 95. **INV_TOKEN_BOUND**: El gasto in-memory thinking nunca excede el delta informativo persistido en disco.
 96. **INV_CLEAN_ABORT**: Todo estado efímero se destruye con un aborto limpio SAGA.

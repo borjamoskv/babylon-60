@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🏗️ AGENTS.md — CORTEX Migrations Domain (v2.0)
+# 🏗️ AGENTS.md — BABYLON-60 Migrations Domain (v2.0)
 
 > **"La RAM es frágil; el estado físico es sagrado."** — *Ley de Tolerancia Bizantina*
 

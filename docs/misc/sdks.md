@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # SDKs
 
-CORTEX provides official SDKs for Python and JavaScript/TypeScript.
+BABYLON-60 provides official SDKs for Python and JavaScript/TypeScript.
 
 The recommended first integration surface is the in-process Python engine. The JavaScript /
 TypeScript SDK is an early HTTP client layer and depends on the REST API being available.
@@ -189,7 +189,7 @@ const allFacts = await cortex.recall('my-app');
 
 ## REST API
 
-Both SDKs communicate with the CORTEX REST API. You can also use the API directly with any HTTP client:
+Both SDKs communicate with the BABYLON-60 REST API. You can also use the API directly with any HTTP client:
 
 ```bash
 # cURL

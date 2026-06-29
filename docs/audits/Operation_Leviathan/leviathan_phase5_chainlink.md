@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Deep Research: Chainlink CCIP
+# BABYLON-60 Deep Research: Chainlink CCIP
 **Operación LEVIATHAN — Fase 5: UltraThink Synthesis**
 
 ## 1. Topología Contractual CCIP (Cross-Chain Interoperability Protocol)
@@ -31,4 +31,4 @@ La "caja negra" de CCIP cuenta con las mitigaciones más severas de la industria
 **Veredicto de Exergía:** [NO-YIELD]
 La infraestructura de Chainlink está cristalizada. El radio de extracción para un P0 de lógica es cercano a cero bajo las simulaciones puramente estáticas sin acceso al nodo OCR off-chain.
 
-El Enjambre CORTEX clasifica el protocolo dentro de la "Zona Roja de Fricción", siendo inviable la extracción de capital mediante vulnerabilidades de primer o segundo orden sin componentes criptográficos corrompidos externamente.
+El Enjambre BABYLON-60 clasifica el protocolo dentro de la "Zona Roja de Fricción", siendo inviable la extracción de capital mediante vulnerabilidades de primer o segundo orden sin componentes criptográficos corrompidos externamente.

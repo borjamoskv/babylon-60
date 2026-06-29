@@ -41,8 +41,8 @@ stateDiagram-v2
 ### Signal 3: Task Completion (Long-Horizon)
 * **Mechanics:** Employs "Context Checkpointing". When approaching 100k tokens, it synthesizes a summary of actions taken and injects it as a new "pseudo-system" message, dropping intermediate thought traces.
 
-## Step 4 — Verification (CORTEX Adapter)
-A CORTEX provider (`_provider_fable.py`) has been synthesized to interface with Fable 5, specifically extracting its deterministic tool-calling behavior while enforcing CORTEX resilience layers.
+## Step 4 — Verification (BABYLON-60 Adapter)
+A BABYLON-60 provider (`_provider_fable.py`) has been synthesized to interface with Fable 5, specifically extracting its deterministic tool-calling behavior while enforcing BABYLON-60 resilience layers.
 
 ## Step 5 — Integration
 Integration code generated at `cortex/extensions/llm/_provider_fable.py`.

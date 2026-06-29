@@ -14,7 +14,7 @@ Method | HTTP request | Description
 > serde_json::Value stream_events_v1_events_stream_get(types, authorization)
 Stream Events
 
-Subscribe to CORTEX coordination events via SSE.
+Subscribe to BABYLON-60 coordination events via SSE.
 
 ### Parameters
 
@@ -45,7 +45,7 @@ No authorization required
 > serde_json::Value stream_events_v1_public_events_stream_get()
 Stream Events
 
-Server-Sent Events endpoint for real-time CORTEX telemetry.
+Server-Sent Events endpoint for real-time BABYLON-60 telemetry.
 
 ### Parameters
 

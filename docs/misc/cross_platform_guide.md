@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Cross-Platform Architecture
 
-CORTEX runs natively on **macOS, Linux, and Windows** without Docker. This guide covers the platform abstraction layer that makes this possible.
+BABYLON-60 runs natively on **macOS, Linux, and Windows** without Docker. This guide covers the platform abstraction layer that makes this possible.
 
 ---
 
@@ -48,7 +48,7 @@ The Notifier component (`cortex/daemon/notifier.py`) uses adaptive dispatch for 
 
 ## Daemons & Service Managers
 
-The CLI command `moskv-daemon install` supports three system orchestrators, injecting CORTEX as a background service that starts automatically on boot:
+The CLI command `moskv-daemon install` supports three system orchestrators, injecting BABYLON-60 as a background service that starts automatically on boot:
 
 ### macOS — launchd
 
@@ -103,4 +103,4 @@ DATA_PATH = MODULE_DIR / "data" / "target.json"
 DATA_PATH = "./data/target.json"
 ```
 
-This ensures CORTEX remains deployable on any machine without code changes — the foundation of a truly sovereign, cross-platform agent infrastructure.
+This ensures BABYLON-60 remains deployable on any machine without code changes — the foundation of a truly sovereign, cross-platform agent infrastructure.

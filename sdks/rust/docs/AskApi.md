@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**ask_cortex_v1_ask_post**](AskApi.md#ask_cortex_v1_ask_post) | **POST** /v1/ask | Ask Cortex
+[**ask_cortex_v1_ask_post**](AskApi.md#ask_cortex_v1_ask_post) | **POST** /v1/ask | Ask BABYLON-60
 [**ask_stream_v1_ask_stream_post**](AskApi.md#ask_stream_v1_ask_stream_post) | **POST** /v1/ask/stream | Ask Stream
 [**llm_status_v1_llm_status_get**](AskApi.md#llm_status_v1_llm_status_get) | **GET** /v1/llm/status | Llm Status
 
@@ -13,9 +13,9 @@ Method | HTTP request | Description
 ## ask_cortex_v1_ask_post
 
 > models::AskResponse ask_cortex_v1_ask_post(ask_request, authorization)
-Ask Cortex
+Ask BABYLON-60
 
-RAG endpoint: search → synthesize → answer.  Searches CORTEX memory for relevant facts, then uses the configured LLM to synthesize an answer grounded in those facts.  Returns 503 if no LLM provider is configured.
+RAG endpoint: search → synthesize → answer.  Searches BABYLON-60 memory for relevant facts, then uses the configured LLM to synthesize an answer grounded in those facts.  Returns 503 if no LLM provider is configured.
 
 ### Parameters
 

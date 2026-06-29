@@ -1,14 +1,14 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# RFC: CORTEX Memory OS (Axiom Ω₁₃ Enforcement)
+# RFC: BABYLON-60 Memory OS (Axiom Ω₁₃ Enforcement)
 
 **Status:** Draft / Active
 **Date:** March 2026
-**Target Architecture:** MOSKV-1 v5 / CORTEX v8
+**Target Architecture:** MOSKV-1 v5 / BABYLON-60 v8
 > **Classification:** Active RFC. This document defines proposed memory-OS constraints, not current release state.
 
 ## 1. Context and Motivation
 
-Currently, CORTEX memory operations lack explicit thermodynamic separation between working context and persistent state, operating closer to a flat vector store. To achieve truly scalable, long-horizon autonomous agents without context collapse or excessive token consumption (Entropic Decay), we must transition memory from a mere "store" to a true **Cognitive Operating System**. 
+Currently, BABYLON-60 memory operations lack explicit thermodynamic separation between working context and persistent state, operating closer to a flat vector store. To achieve truly scalable, long-horizon autonomous agents without context collapse or excessive token consumption (Entropic Decay), we must transition memory from a mere "store" to a true **Cognitive Operating System**. 
 
 This redesign integrates the architectural principles of three specialized systems, strictly filtered through **Axiom Ω₁₃ (Termodinámica Cognitiva)**:
 - **Mem0:** For the physics of tokens (cost/latency extraction pipelining).
@@ -31,7 +31,7 @@ Any new memory module must satisfy the following constraints:
 The Memory OS is composed of four heavily isolated modules:
 
 ### 3.1. `cortex/compaction/mem0_pipeline.py` (The Thermodynamic Filter)
-Responsible for preventing unverified, low-exergy conversational data from entering the CORTEX Ledger. 
+Responsible for preventing unverified, low-exergy conversational data from entering the BABYLON-60 Ledger. 
 - **Extract:** Parses entities, intent, and relationships from the episodic context.
 - **Consolidate:** Resolves collisions, contradictions, and redundancy (compresses `H(X)`).
 - **Store:** Commits to the local L3 memory ledger in `cortex/memory/ledger.py` as semantic/persistent memory.

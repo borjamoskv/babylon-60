@@ -1,9 +1,9 @@
 <!-- [C5-REAL] MCP Integration Reference — Industrial Noir 2026 -->
 
-# █ CORTEX-PERSIST · MCP INTEGRATION GUIDE
+# █ BABYLON-60 · MCP INTEGRATION GUIDE
 
 > **Model Context Protocol (MCP)** is the open standard for exposing tool surfaces to AI agents.  
-> CORTEX-PERSIST ships a native MCP server that gives any compliant client — Perplexity, Claude, custom A2A orchestrators — direct access to the full cryptographic memory substrate.
+> BABYLON-60 ships a native MCP server that gives any compliant client — Perplexity, Claude, custom A2A orchestrators — direct access to the full cryptographic memory substrate.
 
 ```yaml
 PROTOCOL: MCP 2025-11 (latest)
@@ -68,7 +68,7 @@ cortex mcp ping
 
 ### 2.1 Perplexity Agent
 
-Add CORTEX-PERSIST as an MCP server in your Perplexity agent config. The server exposes all 14 tools automatically via the standard `tools/list` handshake.
+Add BABYLON-60 as an MCP server in your Perplexity agent config. The server exposes all 14 tools automatically via the standard `tools/list` handshake.
 
 ```json
 {
@@ -85,7 +85,7 @@ Add CORTEX-PERSIST as an MCP server in your Perplexity agent config. The server 
 }
 ```
 
-> **Perplexity-specific:** CORTEX tools will appear in the tool picker under `cortex-persist.*`. Every tool call is automatically sealed into the C5-REAL ledger — Perplexity's reasoning trace is cryptographically bound.
+> **Perplexity-specific:** BABYLON-60 tools will appear in the tool picker under `cortex-persist.*`. Every tool call is automatically sealed into the C5-REAL ledger — Perplexity's reasoning trace is cryptographically bound.
 
 ### 2.2 Claude Desktop / Claude Code
 
@@ -237,7 +237,7 @@ All tools follow the MCP `tools/call` spec. Each call is intercepted by the Z3 S
 
 ## 4. Prompt Catalog
 
-CORTEX exposes 4 reusable MCP prompts for common agent workflows.
+BABYLON-60 exposes 4 reusable MCP prompts for common agent workflows.
 
 | Prompt Name | Description |
 | :--- | :--- |
@@ -394,7 +394,7 @@ When Perplexity or Claude calls `cortex_seal_decision`, the returned `block_hash
 
 ## 10. Advanced: A2A Mesh Mode
 
-In **LEGION-10k** configuration, multiple CORTEX nodes form a mesh where each MCP server cross-anchors its Merkle roots with peers. This enables cryptographic consensus across distributed agent swarms.
+In **LEGION-10k** configuration, multiple BABYLON-60 nodes form a mesh where each MCP server cross-anchors its Merkle roots with peers. This enables cryptographic consensus across distributed agent swarms.
 
 ```bash
 # Node 1

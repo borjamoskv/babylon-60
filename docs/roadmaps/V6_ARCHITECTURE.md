@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX v6 Architecture: The Sovereign Cloud
+# BABYLON-60 v6 Architecture: The Sovereign Cloud
 
 > **Status:** Historical v6 architecture snapshot. Refer to current architecture docs for live behavior.
 
@@ -30,7 +30,7 @@ v6 introduces strict cryptographic and logical isolation. Data belonging to a `t
 
 ## 2. Distributed RBAC Engine
 
-CORTEX v6 moves beyond simple API keys to a granular permission system.
+BABYLON-60 v6 moves beyond simple API keys to a granular permission system.
 
 ### Role Definitions
 

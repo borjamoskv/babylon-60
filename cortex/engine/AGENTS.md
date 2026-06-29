@@ -8,7 +8,7 @@
 
 ## ⚠️ CRITICAL: Engine Mutation Safety Gate
 
-The `engine/` directory is the **highest-risk surface** in CORTEX. Every mutation here has potential ledger and state integrity consequences.
+The `engine/` directory is the **highest-risk surface** in BABYLON-60. Every mutation here has potential ledger and state integrity consequences.
 
 **Before touching ANY file in this directory:**
 1. Read the root Write-Path Contract (Saga Pattern) — no exceptions.

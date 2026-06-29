@@ -7,7 +7,7 @@ Accepted
 2026-06-29
 
 ## Context
-CORTEX Persist contains 77 sub-modules under `cortex/extensions/`. This massive surface area created several architectural risks:
+BABYLON-60 Persist contains 77 sub-modules under `cortex/extensions/`. This massive surface area created several architectural risks:
 1. **Uncontrolled Imports:** Sub-modules could be imported implicitly or loaded at startup, increasing memory footprint and initialization times.
 2. **Interpretive Ambiguity:** Experimental or speculative extensions (e.g., `dopamine_loop`, `wealth`, `cuatrida`) were structurally indistinguishable from core runtime extensions (e.g., `llm`, `swarm`, `mcp`).
 3. **Byzantine Fault Risk:** Experimental code could execute in production or high-security environments, bypassing isolation boundaries.

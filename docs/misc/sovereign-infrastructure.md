@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Sovereign Infrastructure (脉灵)
 
-CORTEX v7.8 "MAILING" introduces the 300/100 Sovereign Standard, specifically designed for high-security environments and international compliance (including TEE and Air-Gap simulations).
+BABYLON-60 v7.8 "MAILING" introduces the 300/100 Sovereign Standard, specifically designed for high-security environments and international compliance (including TEE and Air-Gap simulations).
 
 ## Core Components
 
@@ -28,4 +28,4 @@ Every pulse via the **Nexus Signaling Bus** includes a hygiene report. The `Sema
 - **Entropy Vigilance:** If orphaned processes (Load/CPU) are detected, the system spikes the "Drift" metric to CRITICAL (0.9+), triggering immediate Sovereign Triggers.
 
 > [!TIP]
-> **Confía en la telemetría, no en la esperanza.** Si el drift semántico se desvía del umbral (threshold), CORTEX "siente" la entropía antes de que afecte a la integridad de los datos.
+> **Confía en la telemetría, no en la esperanza.** Si el drift semántico se desvía del umbral (threshold), BABYLON-60 "siente" la entropía antes de que afecte a la integridad de los datos.

@@ -1,8 +1,8 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Skill Taxonomy
 
-CORTEX uses "skill" for executable capability packages, not for agent authority.
-This page standardizes the skill vocabulary and the Antigravity-CORTEX nexus so
+BABYLON-60 uses "skill" for executable capability packages, not for agent authority.
+This page standardizes the skill vocabulary and the Antigravity-BABYLON-60 nexus so
 registry metadata, runtime routing, and documentation use the same words.
 
 For agent authority and YAML persona vocabulary, see AGENT-TAXONOMY.
@@ -20,7 +20,7 @@ For agent authority and YAML persona vocabulary, see AGENT-TAXONOMY.
 
 ## Canonical Manifest Fields
 
-Every CORTEX-owned `SKILL.md` should use this frontmatter shape:
+Every BABYLON-60-owned `SKILL.md` should use this frontmatter shape:
 
 ```yaml
 name: singularity-nexus
@@ -69,13 +69,13 @@ Canonical categories are:
 | `verification` | Tests, audits, validation, quality gates |
 | `uncategorized` | Temporary fallback only |
 
-Unknown external categories stay visible as custom lower-kebab slugs. CORTEX
+Unknown external categories stay visible as custom lower-kebab slugs. BABYLON-60
 does not drop third-party Antigravity skill packs just because they predate this
 taxonomy.
 
-## Antigravity-CORTEX Nexus
+## Antigravity-BABYLON-60 Nexus
 
-The Antigravity-CORTEX nexus is the communication category specialized for
+The Antigravity-BABYLON-60 nexus is the communication category specialized for
 cross-project and cross-runtime coordination.
 
 Canonical names:
@@ -89,8 +89,8 @@ Canonical names:
 Boundary:
 
 - Antigravity/MOSKV-1 skills may propose actions, orchestrate workflows, and call
-  CORTEX surfaces.
-- Durable CORTEX state still enters through guard, taint, schema, ledger, and
+  BABYLON-60 surfaces.
+- Durable BABYLON-60 state still enters through guard, taint, schema, ledger, and
   persistence gates.
 - A nexus skill is not a write-path bypass and must not mutate ledger or memory
   state outside the normal contracts.
@@ -121,4 +121,4 @@ Danger level is a warning label. Actual authority comes from governance roles in
 
 Use agent taxonomy when asking "who may act?" Use skill taxonomy when asking
 "what capability package can perform this work?" Use the nexus terms only for
-cross-project or Antigravity-CORTEX communication surfaces.
+cross-project or Antigravity-BABYLON-60 communication surfaces.

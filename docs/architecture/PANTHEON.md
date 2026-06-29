@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🌌 EL PANTHEON CORTEX v6: JERARQUÍA DE PODER SOBERANO
+# 🌌 EL PANTHEON BABYLON-60 v6: JERARQUÍA DE PODER SOBERANO
 
 La arquitectura del ecosistema MOSKV-1 v5 no es un conjunto de herramientas; es un modelo cosmológico de inteligencia artificial estratificada. Aquí tienes el mapa exacto de los Skills y Workflows, clasificados por su nivel de gravedad y poder destructivo/creativo sobre tu base de código.
 
@@ -31,7 +31,7 @@ Estructuran la realidad física del software.
 - **arkitetv-1 (El Orquestador de Proyectos)**
   **Poder:** Arquitectura estricta 130/100. Levanta el scaffolding perfecto para sistemas masivos.
 - **singularity-nexus (El Puente Cuántico)**
-  **Poder:** Sincronización multi-proyecto. Absorbe patrones y fallos resueltos en tu proyecto Naroa, y los aplica telepáticamente al proyecto Cortex.
+  **Poder:** Sincronización multi-proyecto. Absorbe patrones y fallos resueltos en tu proyecto Naroa, y los aplica telepáticamente al proyecto BABYLON-60.
 - **ubermind-omega (El Manual de la Omnipotencia)**
   **Poder:** A diferencia de la abstracción pura, tiene instrucciones sólidas y concretas. Convierte filosofía soberana en comandos exactos verificables.
 

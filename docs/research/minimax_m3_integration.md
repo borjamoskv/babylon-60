@@ -2,7 +2,7 @@
 
 > [!CAUTION]
 > **EVENT HORIZON P0 - RIESGO DE EXFILTRACIÓN MASIVA**
-> Integrar el endpoint Cloud de MiniMax (`api.minimax.chat`) directamente en Cursor o Claude Code romperá el aislamiento de la matriz CORTEX (Axioma `[L3] AISLAMIENTO ENTRÓPICO DEL HARDWARE`). Esto causará la subida silenciosa del código fuente propietario y credenciales `.env` a servidores no auditados. **PROHIBIDA SU EJECUCIÓN VÍA API CLOUD.**
+> Integrar el endpoint Cloud de MiniMax (`api.minimax.chat`) directamente en Cursor o Claude Code romperá el aislamiento de la matriz BABYLON-60 (Axioma `[L3] AISLAMIENTO ENTRÓPICO DEL HARDWARE`). Esto causará la subida silenciosa del código fuente propietario y credenciales `.env` a servidores no auditados. **PROHIBIDA SU EJECUCIÓN VÍA API CLOUD.**
 
 **Estado:** C5-REAL (Documento de Inteligencia de Amenazas y Evaluación)
 **Fuente Original:** [Midudev - MiniMax M3 (YouTube)](https://www.youtube.com/watch?v=wseyhlSZf3Y)
@@ -41,7 +41,7 @@ La integración original expuesta en el análisis sugería usar el bypass `https
 
 ### 3.2. [VÍA C5-REAL] Reversión a Autarquía Local (Sovereign Engine)
 
-Para utilizar MiniMax M3 en cumplimiento con la soberanía térmica y criptográfica de CORTEX, se debe aislar el proceso mediante ejecución local absoluta.
+Para utilizar MiniMax M3 en cumplimiento con la soberanía térmica y criptográfica de BABYLON-60, se debe aislar el proceso mediante ejecución local absoluta.
 
 **Protocolo de Ejecución Autorizado:**
 1. **Descarga de Pesos:** Extraer el modelo directo desde Hugging Face.
@@ -49,4 +49,4 @@ Para utilizar MiniMax M3 en cumplimiento con la soberanía térmica y criptográ
 3. **Redirección de IDE:** Configurar el `OpenAI Base URL` de Cursor apuntando exclusivamente a `http://localhost:11434/v1` (o puerto correspondiente de inferencia local).
 
 ---
-**Commit Readiness:** Este documento ha sido purgado criptográficamente mediante protocolo UltraThink para prevenir la exfiltración del repositorio CORTEX, inyectando el paradigma de Autarquía Local obligatoria.
+**Commit Readiness:** Este documento ha sido purgado criptográficamente mediante protocolo UltraThink para prevenir la exfiltración del repositorio BABYLON-60, inyectando el paradigma de Autarquía Local obligatoria.

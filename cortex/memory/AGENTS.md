@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🧠 AGENTS.md — CORTEX Memory Domain (v2.0)
+# 🧠 AGENTS.md — BABYLON-60 Memory Domain (v2.0)
 
-> **"La memoria no es almacenamiento pasivo; es gobernanza activa."** — *Cortex-Persist Whitepaper (Fase 1)*
+> **"La memoria no es almacenamiento pasivo; es gobernanza activa."** — *BABYLON-60 Whitepaper (Fase 1)*
 
 Este manifiesto gobierna la superficie `cortex/memory/`. Cualquier agente mutando esta ruta debe cumplir estrictamente las siguientes Invariantes Termodinámicas (NATIVE-THINKING-ARCHITECTURES).
 

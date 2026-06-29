@@ -1,16 +1,16 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Agent Frameworks — Competitive Analysis
-> Generado: 2026-02-23 · Contexto: MOSKV-1 / CORTEX v5
+> Generado: 2026-02-23 · Contexto: MOSKV-1 / BABYLON-60 v5
 
 ---
 
 ## 📊 Tabla Comparativa
 
-| Dimensión | OpenClaw | LangGraph | AutoGen | **CORTEX** |
+| Dimensión | OpenClaw | LangGraph | AutoGen | **BABYLON-60** |
 |---|---|---|---|---|
 | **Ejecución** | Local-first | Cloud/local | Cloud/local | **Local-first** |
 | **Modelo** | Agnóstico | Agnóstico | Microsoft-ish | **Multi-LLM soberano** |
-| **Persistencia** | SQLite local | LangSmith (cloud) | Ninguna nativa | **SQLite + CORTEX DB** |
+| **Persistencia** | SQLite local | LangSmith (cloud) | Ninguna nativa | **SQLite + BABYLON-60 DB** |
 | **Multi-agent** | Routing básico | Graph-based | Conversación | **Swarm Byzantine** |
 | **Mensajería** | WA/TG/DC/Slack | ❌ | ❌ | ❌ *(pendiente)* |
 | **Observabilidad** | Live Canvas | LangSmith traces | Logs básicos | **/mejoralo + X-Ray 13D** |
@@ -27,7 +27,7 @@
 | **OpenClaw** | 71/100 🟡 | Potente UX, superficie sin profundidad técnica |
 | **LangGraph** | 68/100 🟡 | Graph-based elegante pero dependencia cloud corrosiva |
 | **AutoGen** | 52/100 🟠 | Buena idea, ejecución mediocre. Sin memoria ni privacidad real |
-| **CORTEX** | **85/100** 🟢 | El stack más soberano y profundo del ecosistema |
+| **BABYLON-60** | **85/100** 🟢 | El stack más soberano y profundo del ecosistema |
 
 ### Desglose OpenClaw (71/100)
 
@@ -35,7 +35,7 @@
 |---|---|---|
 | Velocidad de adopción | 18/20 | 100k GitHub stars en 2 meses |
 | Privacidad / Soberanía | 16/20 | Local-first, sin telemetría |
-| Profundidad técnica | 11/20 | Routing vs Byzantine consensus de CORTEX |
+| Profundidad técnica | 11/20 | Routing vs Byzantine consensus de BABYLON-60 |
 | Observabilidad | 14/20 | Live Canvas bueno, sin X-Ray 13D |
 | Ecosistema / extensibilidad | 12/20 | Plugin system prometedor, aún inmaduro |
 
@@ -98,7 +98,7 @@ class SAPPlugin(BasePlugin):
 
 ---
 
-## 🚀 Gap Analysis — CORTEX
+## 🚀 Gap Analysis — BABYLON-60
 
 ```
 CORTEX actual:               85/100
@@ -106,7 +106,7 @@ CORTEX + mensajería TG/WA:   92/100
 CORTEX + Live Canvas UI:     97/100
 ```
 
-### Lo que CORTEX ya gana
+### Lo que BABYLON-60 ya gana
 
 - **Byzantine Swarm** > routing básico de todos los demás
 - **Memoria episódica real** (SQLite + L2 vector) — ninguno lo hace nativo
@@ -115,10 +115,10 @@ CORTEX + Live Canvas UI:     97/100
 
 ### Los únicos gaps reales
 
-1. **Mensajería** — OpenClaw tiene WA/Telegram/Discord. CORTEX no.
+1. **Mensajería** — OpenClaw tiene WA/Telegram/Discord. BABYLON-60 no.
 2. **Live Canvas UI** — Visual workspace para ver el estado del agente en tiempo real.
 
-### Integración potencial CORTEX ↔ OpenClaw
+### Integración potencial BABYLON-60 ↔ OpenClaw
 
 ```
 OpenClaw  →  interfaz de usuario + mensajería + orquestación básica
@@ -128,7 +128,7 @@ CORTEX    →  memoria episódica, swarm Byzantine, MEJORAlo, persistencia sober
 MOSKV-1   →  skills, workflows, identidad
 ```
 
-OpenClaw actuaría como **frontend/gateway** (recibe órdenes por Telegram, las enruta a CORTEX).
+OpenClaw actuaría como **frontend/gateway** (recibe órdenes por Telegram, las enruta a BABYLON-60).
 
 ---
 
@@ -136,7 +136,7 @@ OpenClaw actuaría como **frontend/gateway** (recibe órdenes por Telegram, las 
 
 - Creador se va a OpenAI → riesgo de pérdida de dirección del proyecto.
 - Plugin system aún inmaduro en producción.
-- Memory system superficial comparado con CORTEX.
+- Memory system superficial comparado con BABYLON-60.
 
 ---
 

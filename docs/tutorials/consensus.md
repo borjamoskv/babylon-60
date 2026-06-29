@@ -1,13 +1,13 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Tutorial: Multi-Agent Consensus (WBFT)
 
-Use CORTEX's Weighted Byzantine Fault Tolerant consensus to have multiple AI agents vote on facts, building collective confidence.
+Use BABYLON-60's Weighted Byzantine Fault Tolerant consensus to have multiple AI agents vote on facts, building collective confidence.
 
 ## The Problem
 
 When multiple AI agents collaborate — in a LangChain chain, CrewAI crew, or AutoGen swarm — they may disagree. Agent A says "chose PostgreSQL", Agent B says "chose MySQL". Which decision is the truth?
 
-Traditional systems pick the last write. CORTEX lets agents **vote**, weighting each vote by the agent's reputation.
+Traditional systems pick the last write. BABYLON-60 lets agents **vote**, weighting each vote by the agent's reputation.
 
 ## How WBFT Consensus Works
 

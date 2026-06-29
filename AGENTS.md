@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized — Last verified: 2026-06-06 -->
-# 🤖 AGENTS.md — CORTEX Persist v10.0 (LEGION-10k)
+# 🤖 AGENTS.md — BABYLON-60 Persist v10.0 (LEGION-10k)
 
 **Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment.**
 
@@ -44,11 +44,11 @@ Injecting knowledge to store?        → Purge conversational slop to pass Exerg
 
 ## 1. 🎯 Scope & Epistemic Posture
 
-**CORTEX Persist** is a local-first trust substrate for autonomous, tool-using, and multi-agent AI systems. It persists facts, enforces deterministic validation boundaries, maintains cryptographic auditability, and treats generative output as conjecture until externally verified.
+**BABYLON-60 Persist** is a local-first trust substrate for autonomous, tool-using, and multi-agent AI systems. It persists facts, enforces deterministic validation boundaries, maintains cryptographic auditability, and treats generative output as conjecture until externally verified.
 
 - **Epistemic Containment:** Generative output is a probabilistic proposal — useful, invalid, partial, or dangerous. System state may only be mutated after crossing deterministic validation boundaries: guards, typed interfaces, schemas, tests, cryptographic logging, and external verification when required.
-- **The Python Paradox (🛑):** CORTEX is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, SQLite-Vec and ONNX as tamper-evident cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; cryptographic primitives are Ed25519 (signatures), SHA-256 (ledger hash-chain), and SHA3-256 (taint engine, guard seals).
-- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for MCP — not "Tamper-Proof" (an architectural illusion), but **Tamper-Evident**. The Master Ledger commits every action to an tamper-evident hash chain.
+- **The Python Paradox (🛑):** BABYLON-60 is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, SQLite-Vec and ONNX as tamper-evident cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; cryptographic primitives are Ed25519 (signatures), SHA-256 (ledger hash-chain), and SHA3-256 (taint engine, guard seals).
+- **Audit Trails vs. Authorization (📜):** BABYLON-60 is a **Forensic Audit Sidecar** for MCP — not "Tamper-Proof" (an architectural illusion), but **Tamper-Evident**. The Master Ledger commits every action to an tamper-evident hash chain.
 
 ---
 

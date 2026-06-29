@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Governance
+# BABYLON-60 Governance
 
 > How decisions are made, who maintains what, and how to become a contributor.
 
 ## Decision-Making
 
-CORTEX uses **lazy consensus with benevolent dictator (BD) override**:
+BABYLON-60 uses **lazy consensus with benevolent dictator (BD) override**:
 
 1. **Proposals** are submitted as GitHub Issues or Discussions
 2. **Review period** is 7 days for non-trivial changes

@@ -41,7 +41,7 @@ Los 7 no operan todos en el mismo momento:
 
 > Un spike exploatorio que aumenta complejidad temporalmente NO viola α₃ — viola una lectura puntual errónea de α₃. α₃ es de trayectoria: la secuencia debe converger a menor complejidad.
 
-CORTEX opera con tres capas axiomáticas conectadas. Cada capa genera la siguiente sin repetirla:
+BABYLON-60 opera con tres capas axiomáticas conectadas. Cada capa genera la siguiente sin repetirla:
 
 ```
 AGENTICA (5 ontológicos)  →  Peano Soberano (7 operativos)  →  Registry (22 CI-enforced)

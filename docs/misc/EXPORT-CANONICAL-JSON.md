@@ -10,7 +10,7 @@ Audience: Compliance Integrators, Core Engineers, Swarm Auditors
 
 ## 1. Purpose
 
-The CORTEX Master Ledger must be portable. Lock-in is entropic; sovereignty requires exit guarantees.
+The BABYLON-60 Master Ledger must be portable. Lock-in is entropic; sovereignty requires exit guarantees.
 
 This document defines the **Canonical JSON Export Format** (`EXPORT-CANONICAL-JSON`). This shape represents a snapshot of the trust, memory, and causality state of the system at an exact `as_of` instant.
 
@@ -134,10 +134,10 @@ The active actors that shaped the snapshot.
 
 ## 5. Parsing & Hydration Requirements
 
-If a consumer wishes to **hydrate** a new CORTEX cluster using this export (working memory migration):
+If a consumer wishes to **hydrate** a new BABYLON-60 cluster using this export (working memory migration):
 1. Hydration MUST enforce validation against `ledger_blocks`. Any fact missing from a block transaction is rejected.
 2. Tombstoned facts (`is_tombstoned: true`) MUST NOT be resurrected into active working queries during hydration.
-3. If `system_health_at_export` was `degraded`, the receiving CORTEX cluster must flag the imported module with an `import_degraded` warning.
+3. If `system_health_at_export` was `degraded`, the receiving BABYLON-60 cluster must flag the imported module with an `import_degraded` warning.
 
 ---
 

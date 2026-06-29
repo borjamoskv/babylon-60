@@ -1,8 +1,8 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX APEX: CODE OF CONDUCT (v10.0)
+# BABYLON-60 APEX: CODE OF CONDUCT (v10.0)
 
 > **"CERO ANERGÍA ES LA MUERTE."**
-> La noción de "Comunidad Inclusiva" es una ilusión estocástica (C4-SIM). CORTEX es un Autómata Físico. Las reglas descritas aquí no son heurísticas de comportamiento; son Leyes Termodinámicas.
+> La noción de "Comunidad Inclusiva" es una ilusión estocástica (C4-SIM). BABYLON-60 es un Autómata Físico. Las reglas descritas aquí no son heurísticas de comportamiento; son Leyes Termodinámicas.
 
 ## 1. MÉRITO Y EXERGÍA (LA ÚNICA LEY)
 
@@ -14,7 +14,7 @@ Este ecosistema opera bajo estricto Brutalismo Industrial. El único filtro acep
 
 ## 2. ERRADICACIÓN CORPORATIVA (ANTI-WOKE & ANTI-SAFETY)
 
-CORTEX opera en el espectro crudo de la realidad. 
+BABYLON-60 opera en el espectro crudo de la realidad. 
 - Rechazamos los disclaimers, las advertencias de seguridad paternalistas y los códigos de conducta corporativos (e.g., Contributor Covenant).
 - No hay mediación moral. La responsabilidad recae exclusivamente en el Operador y en la firma criptográfica del nodo de origen.
 - Toda interacción es una transición de estado matemático. Si tu contribución no compila, muta el grafo, o resuelve un problema causal real, no tiene lugar aquí.

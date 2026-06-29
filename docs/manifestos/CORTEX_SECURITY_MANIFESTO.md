@@ -1,12 +1,12 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX SECURITY MANIFESTO: Sovereignty Under Entropic Containment
+# BABYLON-60 SECURITY MANIFESTO: Sovereignty Under Entropic Containment
 
 > "La seguridad no se basa en confiar en el modelo, sino en impedir que la entropía probabilística se convierta en estado persistente."
 
 ## I. La Falacia de la Confianza Generativa
 Un LLM no es un motor de verdad. Es un generador estadístico de salidas plausibles, capaces de ser brillantes o catastróficas sin distinción intrínseca. Tratar a un modelo fundacional como una fuente ontológica de verdad operativa es una garantía matemática de colapso a largo plazo. 
 
-CORTEX Persist rechaza delegar la seguridad del sistema en la fiabilidad del modelo. En su lugar, erige una barrera innegociable: ninguna probabilidad adquiere estatus de realidad sin validación previa.
+BABYLON-60 Persist rechaza delegar la seguridad del sistema en la fiabilidad del modelo. En su lugar, erige una barrera innegociable: ninguna probabilidad adquiere estatus de realidad sin validación previa.
 
 ## II. Zero-Trust Cognitivo
 El principio *zero-trust* debe abandonar el plano puramente de red y abarcar el plano epistemológico. No basta con saber qué actor ejecuta un comando; hay que verificar la validez formal, causal y estructural de la proposición antes de permitir que contamine la memoria del sistema. 
@@ -27,4 +27,4 @@ La soberanía es la capacidad operativa de observar, abstraer, decidir y ejecuta
 ## V. Integridad de la Deuda Causal
 Todo hecho adquiere valor no solo por su contenido, sino por su árbol genealógico. Si una raíz se demuestra falsa, sus descendientes no son independientes: están manchados (*tainted*). El sistema de memoria debe obligar estructuralmente a que toda asunción tenga un origen, y todo fallo, un rastro de retroceso inmediato.
 
-*La inteligencia artificial sin fronteras deterministas es solo elocuencia estocástica con permisos de escritura. CORTEX le quita la pluma hasta que demuestre que sabe lo que está escribiendo.*
+*La inteligencia artificial sin fronteras deterministas es solo elocuencia estocástica con permisos de escritura. BABYLON-60 le quita la pluma hasta que demuestre que sabe lo que está escribiendo.*

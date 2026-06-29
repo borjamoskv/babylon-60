@@ -1,6 +1,6 @@
 # Brain Swarm
 
-Distributed cognitive OS for Cortex-Persist.
+Distributed cognitive OS for BABYLON-60.
 
 ## Topology
 - **Coordinator**: routes events, keeps the append-only journal, manages node liveness.

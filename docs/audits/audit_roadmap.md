@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-I've created a comprehensive **Strategic Roadmap** for CORTEX v6. Here's the executive summary:
+I've created a comprehensive **Strategic Roadmap** for BABYLON-60 v6. Here's the executive summary:
 
 ---
 
-## 🎯 CORTEX Strategic Roadmap — 3 Waves
+## 🎯 BABYLON-60 Strategic Roadmap — 3 Waves
 
 ### 🌊 Wave 1: Foundation & Hardening (0-1 Month)
 **Goal:** Production-ready enterprise self-hosting, SOC 2 prep

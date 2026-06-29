@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # What Exactly Gets Sealed?
 
-As a Security Lead, your primary concern is whether CORTEX introduces new attack vectors (like Prompt Injection leading to RCE) and exactly what guarantees the cryptographic boundary provides.
+As a Security Lead, your primary concern is whether BABYLON-60 introduces new attack vectors (like Prompt Injection leading to RCE) and exactly what guarantees the cryptographic boundary provides.
 
 For exact guarantees and non-guarantees, treat
 [Security Trust Model](../SECURITY_TRUST_MODEL.md) as canonical and
@@ -9,7 +9,7 @@ For exact guarantees and non-guarantees, treat
 
 ## The Verification Membrane
 
-CORTEX treats all LLM and agent outputs as **Void-State** (thermodynamically unstable conjecture) until they pass through our deterministic admission pipeline. 
+BABYLON-60 treats all LLM and agent outputs as **Void-State** (thermodynamically unstable conjecture) until they pass through our deterministic admission pipeline. 
 
 ```mermaid
 flowchart LR
@@ -24,7 +24,7 @@ flowchart LR
 
 ## What is Kryptographically Sealed?
 
-When a fact is written to CORTEX, the following properties are concatenated, hashed via `SHA-256`, and chained to the previous block:
+When a fact is written to BABYLON-60, the following properties are concatenated, hashed via `SHA-256`, and chained to the previous block:
 
 1. **`content`**: The actual text memory (encrypted at rest).
 2. **`tenant_id`**: The cryptographic boundary identifying the owner.
@@ -35,7 +35,7 @@ If *any* of those four variables are altered directly in the database (e.g., an 
 
 ## Input Sanitization (The AST Sandbox)
 
-Agents often need to store executable logic or Python snippets. CORTEX uses an `ast.parse` scanner that structurally forbids:
+Agents often need to store executable logic or Python snippets. BABYLON-60 uses an `ast.parse` scanner that structurally forbids:
 - `__subclasses__`
 - `__globals__`
 - Process spawning imports (`os`, `subprocess`)

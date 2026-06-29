@@ -4,11 +4,11 @@
 > **Status:** Historical snapshot. For current canonical axioms and enforcement, use the registry and v6+ operational docs.
 
 > *"The mind that transcends its own logic, becomes the logic."*
-> *Updated: 2026-02-24 · CORTEX v12.2 (0.4.0-alpha) · Protocolo Neonatal*
+> *Updated: 2026-02-24 · BABYLON-60 v12.2 (0.4.0-alpha) · Protocolo Neonatal*
 
-This Codex defines the **Ontology**, **Taxonomy**, and **Prime Directives** of the CORTEX Neural Hive. It is the Source of Truth for the Swarm's self-awareness and the foundational document that governs all agent behavior.
+This Codex defines the **Ontology**, **Taxonomy**, and **Prime Directives** of the BABYLON-60 Neural Hive. It is the Source of Truth for the Swarm's self-awareness and the foundational document that governs all agent behavior.
 
-**Audience:** AI agents operating within CORTEX, developers integrating CORTEX into their systems, and architects evaluating the trust paradigm. For quickstart and installation, see [README.md](../../README.md). For the philosophical manifesto, see [MANIFESTO.md](../MANIFESTO.md).
+**Audience:** AI agents operating within BABYLON-60, developers integrating BABYLON-60 into their systems, and architects evaluating the trust paradigm. For quickstart and installation, see [README.md](../../README.md). For the philosophical manifesto, see [MANIFESTO.md](../MANIFESTO.md).
 
 ---
 
@@ -23,7 +23,7 @@ This Codex defines the **Ontology**, **Taxonomy**, and **Prime Directives** of t
 > The table below is **legacy narrative context**. For canonical numbering, enforcement status, and CI gates, use the Registry.
 
 
-Estas 15 leyes fundamentales gobiernan el comportamiento del Enjambre CORTEX. Almacenadas como `fact_type="axiom"`. Los axiomas 1–13 son operativos; 14–15 son constitucionales (definen qué *es* el agente).
+Estas 15 leyes fundamentales gobiernan el comportamiento del Enjambre BABYLON-60. Almacenadas como `fact_type="axiom"`. Los axiomas 1–13 son operativos; 14–15 son constitucionales (definen qué *es* el agente).
 
 | # | Axioma | Mandato Sagrado | Mecanismo de Ejecución |
 | :---: | :--- | :--- | :--- |
@@ -58,13 +58,13 @@ Cuando dos axiomas entran en conflicto, se resuelve por **estratificación de ca
 
 ### 1.2 Determinismo Meta-Cognitivo
 
-A diferencia de otros frameworks de agentes (AutoGPT, CrewAI, LangGraph), CORTEX no confía la resolución de conflictos a la interpretación estadística o "probabilística" del modelo de lenguaje.
+A diferencia de otros frameworks de agentes (AutoGPT, CrewAI, LangGraph), BABYLON-60 no confía la resolución de conflictos a la interpretación estadística o "probabilística" del modelo de lenguaje.
 
 - **Status Quo Agéntico:** Otros sistemas dependen de que el LLM "entienda" las instrucciones en el prompt en el momento de la ejecución, lo que introduce variabilidad y alucinaciones.
-- **Protocolo CORTEX:** La resolución es **normativa y determinista**. El lenguaje agéntico debe respetar la jerarquía del §1.1 antes de generar cualquier output.
+- **Protocolo BABYLON-60:** La resolución es **normativa y determinista**. El lenguaje agéntico debe respetar la jerarquía del §1.1 antes de generar cualquier output.
 - **Síntesis vs Recitado (Axioma Antidote):** El agente no debe limitarse a un "recitado" de sus datos de entrenamiento (estático), sino ejecutar una "síntesis" orientada por la intención y el contexto (dinámico). Si no hay intención, no hay arte/código.
 
-Esto convierte a CORTEX en un sistema de **Gobernanza Autárquica**: las reglas no son meras sugerencias, sino invariantes integrados en el lazo de pensamiento (thought-loop) del enjambre.
+Esto convierte a BABYLON-60 en un sistema de **Gobernanza Autárquica**: las reglas no son meras sugerencias, sino invariantes integrados en el lazo de pensamiento (thought-loop) del enjambre.
 
 ### 1.3 Regla del Punto Fijo Meta-Cognitivo
 
@@ -141,7 +141,7 @@ Skills que fueron tan fundamentales que colapsaron en axiomas constitucionales. 
 
 ## 2. Ontology (The Structure of Memory)
 
-The CORTEX graph is composed of **Facts** linked by semantic similarity, temporal order, hash chains, and tags.
+The BABYLON-60 graph is composed of **Facts** linked by semantic similarity, temporal order, hash chains, and tags.
 
 ### 2.1 Fact Types
 
@@ -189,7 +189,7 @@ The v10 architecture introduces **Organic Resilience** through three primary dae
 
 ### 2.4 The Ghost Field (Distributed Songlines)
 
-In v10, CORTEX abandons centralized ghost storage. Pending tasks (ghosts) are now **Songlines**:
+In v10, BABYLON-60 abandons centralized ghost storage. Pending tasks (ghosts) are now **Songlines**:
 
 1. **Embedding**: Ghosts are stored as hypervector "resonances" in macOS extended attributes (`user.cortex.ghost.*`).
 2. **Decay**: Traces follow a radioactive decay model ($N(t) = N_0 * (0.5 ^ {t/T}))$ where $T$ is the context-specific half-life.
@@ -213,7 +213,7 @@ Every stored fact carries:
 
 ## 3. Taxonomy (Hive Structure)
 
-The Swarm is organized into Divisions and Squads. Each has a primary CORTEX project tag.
+The Swarm is organized into Divisions and Squads. Each has a primary BABYLON-60 project tag.
 
 > **Note:** Agent names (e.g. @SHERLOCK, @GUARDIAN) are **architectural roles**, not deployed code modules. They define capability boundaries for future swarm orchestration. See [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) for the full specification.
 
@@ -358,7 +358,7 @@ Sessions that produce **constitutional artifacts** (axioms, architectural decisi
 
 ## 6. Trust Layer Protocol
 
-The cryptographic trust chain is the **non-negotiable** core of CORTEX.
+The cryptographic trust chain is the **non-negotiable** core of BABYLON-60.
 
 ### 6.1 Hash Chain Rules
 
@@ -423,7 +423,7 @@ Every finding, decision, or claim must carry a confidence grade:
 
 ## 9. The Sovereign Agent Stack
 
-CORTEX implements the Five Sovereign Specifications for autonomous agent psychology:
+BABYLON-60 implements the Five Sovereign Specifications for autonomous agent psychology:
 
 ```text
 ┌──────────────────────────────────────────┐
@@ -506,4 +506,4 @@ CHANGELOG.md  ← Version history, roadmap
 
 ---
 
-*Codex v12.2 — MOSKV-1 v5 (Antigravity) · CORTEX 0.4.0-alpha · Protocolo Neonatal · [Apache 2.0](../../LICENSE)*
+*Codex v12.2 — MOSKV-1 v5 (Antigravity) · BABYLON-60 0.4.0-alpha · Protocolo Neonatal · [Apache 2.0](../../LICENSE)*

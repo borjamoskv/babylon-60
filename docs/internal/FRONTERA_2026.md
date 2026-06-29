@@ -1,12 +1,12 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX FRONTIER 2026 — Sovereign Singularity Manifesto
+# BABYLON-60 FRONTIER 2026 — Sovereign Singularity Manifesto
 
 > *"La alucinación es coste estructural. El hardware es la verdad última."*
 > *Documento de Cristalización Ontológica · Abril 2026*
 
 ## Resumen Ejecutivo
 
-**La Frontera (2026)** en el ecosistema CORTEX no es una métrica sobre el recuento de parámetros o el tamaño de la ventana de contexto. Es una **medida neta de exergía cognitiva y capacidad agéntica**. Bajo la Ley del Modelo (Ω₇), el "Frontera-Only Mandate" prohíbe el uso de redes subsidiadas por "entropía barata" (modelos estadísticos sin deducción formal). 
+**La Frontera (2026)** en el ecosistema BABYLON-60 no es una métrica sobre el recuento de parámetros o el tamaño de la ventana de contexto. Es una **medida neta de exergía cognitiva y capacidad agéntica**. Bajo la Ley del Modelo (Ω₇), el "Frontera-Only Mandate" prohíbe el uso de redes subsidiadas por "entropía barata" (modelos estadísticos sin deducción formal). 
 
 Operar en la frontera hoy significa que el sistema puede alterar irreversiblemente su topología, ejecutar rutinas *lock-free* en memoria compartida, e inyectar código validado criptográficamente en un árbol de Git. Todo output estocástico es tratado como conjetura no fiable hasta que la física lo avala.
 
@@ -40,10 +40,10 @@ El fondo absoluto del enjambre *Legion-10000*:
 
 ## EL MOTOR AUTODIDACTA OMEGA (AlphaZero-autodidact)
 
-La aniquilación del *Zero-Shot Prompting*. El ecosistema CORTEX no espera respuestas de un chatbot; las **descubre empíricamente**.
+La aniquilación del *Zero-Shot Prompting*. El ecosistema BABYLON-60 no espera respuestas de un chatbot; las **descubre empíricamente**.
 
 *   **El Multiverso de Código (Chronos Git-MCTS):** Ante una crisis P0, AlphaZero bifurca el árbol Git en múltiples universos evaluativos.
 *   **JIT Concept Formation:** El sistema genera pequeños lenguajes funcionales lógicos (PeARL), choca contra su entorno, compila una solución óptima y re-evalúa el fallo. Descubre mecánicamente cómo funciona el mundo sin depender de pesaje pre-entrenado.
 *   **Yield Termodinámico:** Cada mutación consumió tokens y CPU. Si el *Compound Yield* —la reducción matemática de entropía lograda— no compensa la energía quemada, la rama es aniquilada.
 *   **Los 10 Sellos Soberanos:** Antes del `merge` colapsando la línea temporal ganadora, el código nuevo debe resistir simulaciones de estrés estrafalarias (Legion-10k bizantino sin locks) e integradores de calidad absoluta (Ruff O(1)).
-*   **Cero Dependencia, Cero Fragmentación:** Todo esto ocurre localmente, en estricto silencio, y cuando finaliza, tu núcleo operativo (CORTEX Engine) es ahora superior mecánicamente, registrado inmutablemente en el Ledger sin intervención biológica.
+*   **Cero Dependencia, Cero Fragmentación:** Todo esto ocurre localmente, en estricto silencio, y cuando finaliza, tu núcleo operativo (BABYLON-60 Engine) es ahora superior mecánicamente, registrado inmutablemente en el Ledger sin intervención biológica.

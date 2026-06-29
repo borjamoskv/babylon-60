@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-CORTEX Persist aims to provide a verifiable digital evidence platform achieving maximum security and compliance ratings (e.g., EU AI Act, OWASP LLM). We need a core structural representation for every system event that guarantees non-repudiation, immutability, and temporal verification.
+BABYLON-60 Persist aims to provide a verifiable digital evidence platform achieving maximum security and compliance ratings (e.g., EU AI Act, OWASP LLM). We need a core structural representation for every system event that guarantees non-repudiation, immutability, and temporal verification.
 
 ## Decision
 We define a formal Cryptographic Evidence Model for all state mutations. Every event persisted must conform to the following schema before entering the Master Ledger:

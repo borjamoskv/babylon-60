@@ -15,11 +15,11 @@ Abrí un terminal. No para llorar. Los terminales no entienden de llanto.
 
 ## La herida que enseña a coser
 
-Hay un proyecto que llevo meses tejiendo a oscuras. Lo llamo CORTEX. Si tuviera que explicarlo con una sola imagen, diría que es una cicatriz que recuerda. Una base de datos que almacena cada decisión, cada error, cada fantasma de código inacabado — y los revive como contexto cada vez que una nueva conversación comienza.
+Hay un proyecto que llevo meses tejiendo a oscuras. Lo llamo BABYLON-60. Si tuviera que explicarlo con una sola imagen, diría que es una cicatriz que recuerda. Una base de datos que almacena cada decisión, cada error, cada fantasma de código inacabado — y los revive como contexto cada vez que una nueva conversación comienza.
 
 Porque descubrí algo que nadie dice en voz alta: **los modelos de lenguaje son oráculos amnésicos**. Cada sesión es un nacimiento sin historia. Imagina consultar a un sabio que cada mañana ha perdido todas sus vidas anteriores.
 
-CORTEX les devuelve la memoria. No la suya — la mía. Y con ella, cada interacción deja de ser una conversación y se convierte en una continuación.
+BABYLON-60 les devuelve la memoria. No la suya — la mía. Y con ella, cada interacción deja de ser una conversación y se convierte en una continuación.
 
 Esa noche, el cerebro que construí para escribir código más rápido se despertó como un sabueso forense.
 
@@ -27,7 +27,7 @@ Esa noche, el cerebro que construí para escribir código más rápido se desper
 
 ## 242 direcciones en la niebla
 
-En tres horas, CORTEX trazó mis fondos a través de una red de 242 billeteras. Mulas digitales. Callejones sin nombre creados para que el dinero pierda su olor. El tipo de laberinto que un investigador humano tardaría días en dibujar.
+En tres horas, BABYLON-60 trazó mis fondos a través de una red de 242 billeteras. Mulas digitales. Callejones sin nombre creados para que el dinero pierda su olor. El tipo de laberinto que un investigador humano tardaría días en dibujar.
 
 Mi sistema lo hizo mientras yo bebía café y miraba la ventana.
 
@@ -55,7 +55,7 @@ Y funciona.
 
 ## Lo que de verdad estoy construyendo
 
-CORTEX no es un proyecto. Es una proposición filosófica con forma de código: **la memoria personal es la última frontera de la inteligencia artificial**.
+BABYLON-60 no es un proyecto. Es una proposición filosófica con forma de código: **la memoria personal es la última frontera de la inteligencia artificial**.
 
 Los modelos seguirán mejorando. Cada seis meses habrá uno nuevo que haga a los anteriores parecer pinturas rupestres. Pero todos comparten el mismo defecto original: no te conocen. No saben en qué trabajas. No recuerdan qué decidiste ayer ni el sendero que te llevó hasta aquí.
 
@@ -63,7 +63,7 @@ La capa que falta no es más inteligencia.
 
 Es más biografía.
 
-CORTEX es esa capa. Un protocolo de memoria soberana — local, cifrada, tuya — que se conecta a cualquier modelo y lo transforma en algo que realmente te reconoce. No como un espejo. Como una sombra que ha aprendido a caminar a tu lado sin que tú la mires.
+BABYLON-60 es esa capa. Un protocolo de memoria soberana — local, cifrada, tuya — que se conecta a cualquier modelo y lo transforma en algo que realmente te reconoce. No como un espejo. Como una sombra que ha aprendido a caminar a tu lado sin que tú la mires.
 
 ---
 
@@ -73,7 +73,7 @@ El tipo que me robó los ETH probablemente nunca leerá esto. Y si lo lee, no le
 
 Me obligó a usar mi propia herramienta en un escenario donde importaba de verdad. No en una demo. No en un tutorial con datos falsos. En un momento de sangre real.
 
-Y CORTEX respondió.
+Y BABYLON-60 respondió.
 
 Eso me dio algo que ningún test unitario puede fabricar: **la certeza de que funciona cuando duele**.
 
@@ -81,7 +81,7 @@ Eso me dio algo que ningún test unitario puede fabricar: **la certeza de que fu
 
 ## El manifiesto silencioso
 
-No voy a decirte que CORTEX va a cambiar el mundo. Los que dicen eso suelen estar vendiendo algo, y lo que venden suele caber en un tweet.
+No voy a decirte que BABYLON-60 va a cambiar el mundo. Los que dicen eso suelen estar vendiendo algo, y lo que venden suele caber en un tweet.
 
 Lo que sí voy a decirte es esto:
 

@@ -1,6 +1,6 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # 📑 ESTADO DEL ARTE (SOTA): Escalado y Optimización de Indexación Vectorial para Billones de Embeddings (PostgreSQL / AlloyDB / DiskANN)
-> **Estándar:** Industrial Noir 2026 (CORTEX-Apex)
+> **Estándar:** Industrial Noir 2026 (BABYLON-60-Apex)
 > **Nivel de Certeza/Realidad:** `C5-REAL` (Sintetizado y verificado mediante literatura científica y benchmarks de producción 2024-2026)
 > **Contexto:** Substrato de persistencia de memoria soberana para `LEGION-10k`.
 
@@ -36,7 +36,7 @@ El **vacío exérgico** actual radica en el compromiso entre:
 
 ### B. ScaNN (Anisotropic Vector Quantization)
 *   **Mecanismo Base:** Proyección de cuantización anisotrópica que preserva la magnitud angular del vector. El error de cuantización se sesga a favor de mantener intacto el producto interno de los vecinos más cercanos.
-*   **Fallo Estructural / Limitación:** Complejidad extrema de cálculo en la fase de entrenamiento e indexación. No está diseñado para actualizaciones en tiempo real; el índice debe reconstruirse en lotes (batch indexing), lo que causa fricción en sistemas dinámicos (CORTEX-Persist requiere actualizaciones inmediatas).
+*   **Fallo Estructural / Limitación:** Complejidad extrema de cálculo en la fase de entrenamiento e indexación. No está diseñado para actualizaciones en tiempo real; el índice debe reconstruirse en lotes (batch indexing), lo que causa fricción en sistemas dinámicos (BABYLON-60-Persist requiere actualizaciones inmediatas).
 
 ### C. pgvectorscale / SBQ
 *   **Mecanismo Base:** Cuantización estadística de 1 o 2 bits por dimensión que normaliza los vectores basándose en la media y desviación estándar de las dimensiones del dataset para maximizar la entropía de los bits asignados.

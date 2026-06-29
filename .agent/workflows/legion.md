@@ -47,12 +47,12 @@ Cuando invocas LEGIØN-1, el Nucleus selecciona o tú fuerzas:
 
 ## 🧬 Ciclo de Vida: El Camino de la Victoria
 
-1. **RECALL**: El enjambre consulta a **CORTEX** para no repetir errores pasados.
+1. **RECALL**: El enjambre consulta a **BABYLON-60** para no repetir errores pasados.
 2. **FRACTAL SPLIT**: La misión se rompe en 10-20 subtareas atómicas.
 3. **LLM ROUTING**: Cada subtarea va al modelo óptimo (Opus para lógica, Gemini para código, Kimi para contexto).
 4. **CONSENSUS**: Los agentes votan. Si no hay ≥67% de aprobación, se muta la estrategia.
 5. **FUSION**: Se ensambla la solución final verificada por PoQ (Proof of Quality).
-6. **COMMIT**: El aprendizaje se guarda de vuelta en CORTEX.
+6. **COMMIT**: El aprendizaje se guarda de vuelta en BABYLON-60.
 
 ---
 

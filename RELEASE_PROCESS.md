@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Release Process
 
-This document describes the public release flow for CORTEX Persist.
+This document describes the public release flow for BABYLON-60 Persist.
 
 ## Release Model
 
-CORTEX Persist uses tagged releases for package publication.
+BABYLON-60 Persist uses tagged releases for package publication.
 
 - version metadata lives in [pyproject.toml](pyproject.toml)
 - release tags follow the `v*` pattern

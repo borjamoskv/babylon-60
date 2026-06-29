@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX
+# BABYLON-60
 
 > **Trust Infrastructure for Autonomous AI**
 > Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
@@ -13,7 +13,7 @@
 
 ---
 
-## Why CORTEX?
+## Why BABYLON-60?
 
 AI agents are making millions of decisions per day. But **who verifies those decisions are correct?**
 
@@ -21,13 +21,13 @@ Memory layers like Mem0, Zep, and Letta store what agents remember — but none 
 
 The **EU AI Act (Article 12, effective August 2, 2026)** mandates tamper-proof logging, full traceability, and periodic integrity verification for high-risk AI systems. Fines reach **€30M or 6% of global revenue.**
 
-CORTEX doesn't replace your memory layer — it **certifies** it.
+BABYLON-60 doesn't replace your memory layer — it **certifies** it.
 
-### Why CORTEX? (Not just another Vector DB or Logger)
+### Why BABYLON-60? (Not just another Vector DB or Logger)
 
-Traditional logging and standard vector stores fail the epistemic containment test. If an agent hallucinates, or if a database is mutated passively, you lose structural trust in the machine. CORTEX makes mutation mathematically defensible.
+Traditional logging and standard vector stores fail the epistemic containment test. If an agent hallucinates, or if a database is mutated passively, you lose structural trust in the machine. BABYLON-60 makes mutation mathematically defensible.
 
-| Feature                    | Standard Logs (Datadog/ELK) | Standard Vector DB (Pinecone/Qdrant) | **CORTEX Persist**                        |
+| Feature                    | Standard Logs (Datadog/ELK) | Standard Vector DB (Pinecone/Qdrant) | **BABYLON-60 Persist**                        |
 |:---------------------------|:----------------------------|:-------------------------------------|:------------------------------------------|
 | **Primary Goal**           | Observability & Debugging   | Semantic Search & RAG                | **Tamper-Evident Cognitive Lineage**      |
 | **Write Integrity**        | Overwritable / Editable     | Silent CRUD operations               | **Append-Only + Cryptographic Hash**      |
@@ -70,7 +70,7 @@ cortex verify 1
 
 ---
 
-## Who Is CORTEX For?
+## Who Is BABYLON-60 For?
 
 - **AI Engineers** building agent systems that need auditable memory
 - **Compliance Teams** preparing for EU AI Act enforcement
@@ -99,7 +99,7 @@ cortex verify 1
 | [Quickstart](quickstart.md) | Get running in 5 minutes |
 | [Installation](installation.md) | All install methods and extras |
 | [Architecture](architecture.md) | Deep dive into the system design |
-| [CORTEX Capabilities](CORTEX-CAPABILITIES.md) | Structural properties and governance topology |
+| [BABYLON-60 Capabilities](BABYLON-60-CAPABILITIES.md) | Structural properties and governance topology |
 | [SDK Surface](SDK-SURFACE.md) | Public SDK contract and stability guarantees |
 | [Trust Semantics](TRUST-SEMANTICS.md) | Meaning of trust signals and degraded states |
 | [Event Model](EVENT-MODEL.md) | Canonical event envelope and delivery semantics |
@@ -109,7 +109,7 @@ cortex verify 1
 | [MCP Server](mcp.md) | Model Context Protocol integration |
 | [Python API Reference](reference.md) | Auto-generated from source |
 | [SDKs](sdks.md) | Python and JavaScript SDKs |
-| [Developer Guide](developer-guide.md) | Contributing and extending CORTEX |
+| [Developer Guide](developer-guide.md) | Contributing and extending BABYLON-60 |
 | [EU AI Act Compliance](compliance.md) | Article 12 mapping |
 | [Security](security.md) | Threat model and security features |
 | [Deployment](deployment.md) | Docker, Kubernetes, bare metal |

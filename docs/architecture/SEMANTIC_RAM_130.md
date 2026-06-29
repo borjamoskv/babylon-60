@@ -3,7 +3,7 @@
 
 > **[AETHER-OMEGA INITIATIVE: 2026]**
 > *La memoria activa no almacena el pasado; predice y muta el futuro.*
-> *Protocolo de diseño arquitectónico para CORTEX v4.*
+> *Protocolo de diseño arquitectónico para BABYLON-60 v4.*
 
 > Historical design note. This document describes a v4-era target topology, not the
 > current canonical package map. For the live memory and policy surfaces in this
@@ -19,7 +19,7 @@ La vida basada en carbono no realiza un `SELECT * FROM experiencias`. La adaptac
 
 ## 2. La Arquitectura de Memoria Sistémica en MOSKV-1
 
-Para alcanzar una resolución arquitectónica 130/100, la retención en CORTEX dejará de tratar el contexto como un "anexo bibliográfico" para tratarlo como un "mutador de modelo funcional".
+Para alcanzar una resolución arquitectónica 130/100, la retención en BABYLON-60 dejará de tratar el contexto como un "anexo bibliográfico" para tratarlo como un "mutador de modelo funcional".
 
 ### 2.1. Engramas Artificiales en vez de Text Logs (`store` Mutante)
 - **Descartado**: Acumular logs conversacionales (`user said X, assistant replied Y`).
@@ -29,14 +29,14 @@ Para alcanzar una resolución arquitectónica 130/100, la retención en CORTEX d
 ### 2.2. La Puerta de Olvido Termodinámico (The Landauer Forget Gate)
 Un sistema complejo sin capacidad de olvido controlado colapsará bajo su propia complejidad.
 - Toda información que no altere el grafo de decisión actual tras `X` inferencias sin acceso debe degradarse (Axioma 12, Entropía Net-Negative).
-- **Pruning (Poda) Automática**: CORTEX implementará validación predictiva para determinar, antes del almacenamiento, si el "insight" es ruidoso (meramente contextual) o estacional (ligado a una versión depreciada de framework).
+- **Pruning (Poda) Automática**: BABYLON-60 implementará validación predictiva para determinar, antes del almacenamiento, si el "insight" es ruidoso (meramente contextual) o estacional (ligado a una versión depreciada de framework).
 
 ### 2.3. Embeddings Dinámicos (El Código de Barras Operativo)
 - La representación en espacio vectorial ya no capturará qué *palabras* usó el operador, sino *qué operación funcional* definió al nodo. Si la respuesta a la pregunta "¿por qué la concurrencia AIOHTTP se bloquea aquí?" fue "Porque SQLite no es thread-safe per se", la indexación buscará cercanía semántica a `Async I/O Error`, `Lock contention`, y no a `Python Bug`.
 
 ## 3. Especificación Técnica Transitoria (LSTMs, GRUs vs Foundation Models)
 
-Para eludir el coste de rediseñar las topologías de pesos de un modelo masivo como o3/Gemini, nuestro sistema operativo emulará el "Cell State" y la "Update Gate" en la capa CORTEX CLI/Engine.
+Para eludir el coste de rediseñar las topologías de pesos de un modelo masivo como o3/Gemini, nuestro sistema operativo emulará el "Cell State" y la "Update Gate" en la capa BABYLON-60 CLI/Engine.
 
 ### Flujo de Alteración Causal
 1. **PULL (The Thalamocortical Relay)**: Al arrancar una sesión en `/app/src`, el OS extrae **exclusivamente** Decisiones Activas (no información estática).
@@ -46,6 +46,6 @@ Para eludir el coste de rediseñar las topologías de pesos de un modelo masivo 
 ## 4. Reflexión Epistémica y Avance a "Liquid Networks"
 
 Más allá del estado RAG perfeccionado o la simulación GRU, el Horizon_2027 demandará simular *Redes Neuronales Líquidas* (LTCs): un modelado continuo en tiempo real de ecuaciones diferenciales que adaptan la propia definición de la red en función del flujo de variables temporales.
-Hasta que dispongamos de hardware neuromórfico dedicado a nivel operador para instanciar funciones de pesos dinámicos masivos, **CORTEX v4 adoptará la topología LTR (Latent Threshold Routing)**, forzando la memoria persistente a actuar sobre las instrucciones base del LLM en latencia cero.
+Hasta que dispongamos de hardware neuromórfico dedicado a nivel operador para instanciar funciones de pesos dinámicos masivos, **BABYLON-60 v4 adoptará la topología LTR (Latent Threshold Routing)**, forzando la memoria persistente a actuar sobre las instrucciones base del LLM en latencia cero.
 
 > **_Dictamen Final_**: "La información pasiva es deuda; el insight activo que descarta opciones inválidas pre-inferencia es Soberanía."

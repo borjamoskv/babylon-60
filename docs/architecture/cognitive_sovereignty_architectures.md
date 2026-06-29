@@ -4,7 +4,7 @@
 **Optimización, Persistencia y Verificabilidad en Agentes de IA de Próxima Generación**
 
 > [!NOTE]
-> Este documento establece el marco teórico-práctico que sustenta la arquitectura de [CORTEX](file://.) y el [Enjambre Centauro](file://~/game/moskv-swarm). Cada sección mapea directamente a componentes implementados o en roadmap.
+> Este documento establece el marco teórico-práctico que sustenta la arquitectura de [BABYLON-60](file://.) y el [Enjambre Centauro](file://~/game/moskv-swarm). Cada sección mapea directamente a componentes implementados o en roadmap.
 
 ---
 
@@ -65,7 +65,7 @@ graph TB
 HNSW reestructura el espacio vectorial como un grafo multicapa. En las capas superiores, los nodos están conectados de manera escasa, permitiendo "saltos" largos a través del espacio semántico. A medida que la búsqueda desciende a capas inferiores, la densidad aumenta, permitiendo refinamiento local. Esto transforma la complejidad a **O(log N)**.
 
 > [!IMPORTANT]
-> **Mapeo a CORTEX:** El módulo `sqlite-vec` integrado en CORTEX utiliza HNSW como índice primario para la tabla `vec_facts`. La configuración actual contempla `M=16` conexiones por nodo y `efConstruction=200` para balancear recall vs. velocidad de indexación.
+> **Mapeo a BABYLON-60:** El módulo `sqlite-vec` integrado en BABYLON-60 utiliza HNSW como índice primario para la tabla `vec_facts`. La configuración actual contempla `M=16` conexiones por nodo y `efConstruction=200` para balancear recall vs. velocidad de indexación.
 
 ### 1.2 Cuantización Binaria: Compresión Radical y Aceleración por Hardware
 
@@ -95,7 +95,7 @@ Para escenarios hiperescala donde el índice excede la RAM — situación común
 - Rompe la dependencia de hardware costoso
 
 > [!IMPORTANT]
-> **Mapeo a CORTEX:** El `EmbeddingPrunerMixin` implementado en `cortex/engine/embeddings.py` gestiona la compresión adaptativa. Cuando se alcanza el umbral de embeddings (`CORTEX_MAX_EMBEDDINGS`), el pruner aplica cuantización escalar y eliminación de vectores de baja utilidad.
+> **Mapeo a BABYLON-60:** El `EmbeddingPrunerMixin` implementado en `cortex/engine/embeddings.py` gestiona la compresión adaptativa. Cuando se alcanza el umbral de embeddings (`CORTEX_MAX_EMBEDDINGS`), el pruner aplica cuantización escalar y eliminación de vectores de baja utilidad.
 
 ---
 
@@ -129,13 +129,13 @@ graph LR
 ```
 
 > [!IMPORTANT]
-> **Mapeo a CORTEX:** El módulo `cortex/engine/graph/` implementa un grafo de conocimiento con aristas temporales via `valid_from`/`valid_until` en cada fact. El `QueryMixin.search()` combina búsqueda vectorial + filtrado temporal via `as_of`.
+> **Mapeo a BABYLON-60:** El módulo `cortex/engine/graph/` implementa un grafo de conocimiento con aristas temporales via `valid_from`/`valid_until` en cada fact. El `QueryMixin.search()` combina búsqueda vectorial + filtrado temporal via `as_of`.
 
 ### 2.2 Arquitectura Unificada de Memoria: El Modelo PostgreSQL
 
 La fragmentación de la infraestructura introduce latencia y complejidad que obstaculizan la autonomía del agente. La arquitectura de referencia unifica **tres tipos de memoria cognitiva**:
 
-| Tipo de Memoria | Función Cognitiva | Implementación en CORTEX |
+| Tipo de Memoria | Función Cognitiva | Implementación en BABYLON-60 |
 |-----------------|-------------------|--------------------------|
 | **Episódica** | Registro autobiográfico secuencial (*"¿Qué tarea realizamos ayer?"*) | Tabla `facts` con `created_at` como series temporales. Consultas de rango temporal via `time_travel()` |
 | **Semántica** | Conocimiento cristalizado y hechos recuperables | `vec_facts` con embeddings `all-MiniLM-L6-v2` (384d) + HNSW index |
@@ -156,7 +156,7 @@ LIMIT 5;
 ```
 
 > [!IMPORTANT]
-> **Mapeo a CORTEX:** El pipeline verificado en el smoke test (`smoke_test_cortex_pipeline.py`) demostró la unificación: `post_fact` (semántica), `persist_mission_insight` (procedimental) y `get_summary` (episódica) operan sobre la misma base SQLite con integridad ACID.
+> **Mapeo a BABYLON-60:** El pipeline verificado en el smoke test (`smoke_test_cortex_pipeline.py`) demostró la unificación: `post_fact` (semántica), `persist_mission_insight` (procedimental) y `get_summary` (episódica) operan sobre la misma base SQLite con integridad ACID.
 
 ### 2.3 Búsqueda Híbrida y Fusión de Rangos (RRF)
 
@@ -171,7 +171,7 @@ RRF_score(d) = Σ 1 / (k + rank_i(d))
 Donde `k` es una constante de suavizado (típicamente 60) y `rank_i(d)` es la posición del documento `d` en la lista de resultados del método `i`.
 
 > [!IMPORTANT]
-> **Mapeo a CORTEX:** El `SearchMixin` en `cortex/engine/search.py` implementa búsqueda híbrida combinando `sqlite-vec` (vectorial) + FTS5 (léxica) con RRF. El `recall_context()` del bridge actual usa fallback de texto (LIKE queries) cuando `sqlite-vec` no está disponible.
+> **Mapeo a BABYLON-60:** El `SearchMixin` en `cortex/engine/search.py` implementa búsqueda híbrida combinando `sqlite-vec` (vectorial) + FTS5 (léxica) con RRF. El `recall_context()` del bridge actual usa fallback de texto (LIKE queries) cuando `sqlite-vec` no está disponible.
 
 ---
 
@@ -217,7 +217,7 @@ La **simulación mental** permite al agente proyectar consecuencias antes de eje
 - Antes de `execute_trade` → simular impacto en portfolio bajo varios escenarios
 
 > [!IMPORTANT]
-> **Mapeo a CORTEX:** La surface de aprobación soberana hoy se expone desde `cortex/routes/gate.py`, con soporte operativo en `cortex/cli/gate_interact.py`. No existe un módulo monolítico `cortex/sovereign_gate.py` en este árbol.
+> **Mapeo a BABYLON-60:** La surface de aprobación soberana hoy se expone desde `cortex/routes/gate.py`, con soporte operativo en `cortex/cli/gate_interact.py`. No existe un módulo monolítico `cortex/sovereign_gate.py` en este árbol.
 
 ---
 
@@ -251,7 +251,7 @@ ZK-Audit Log = Proof(
 **ZKSQL** extiende esto a consultas analíticas — un regulador puede lanzar queries SQL sobre la base de datos privada y recibir respuestas con prueba criptográfica de corrección y completitud, sin acceso de lectura a registros individuales.
 
 > [!IMPORTANT]
-> **Mapeo a CORTEX:** El ledger soberano canónico vive hoy en `cortex/ledger/` (`ledger_core.py`), mientras la reconstrucción temporal reside en `cortex/engine/history.py` y `QueryMixin.time_travel()`. No hay un `cortex/engine/ledger.py` canónico en este árbol.
+> **Mapeo a BABYLON-60:** El ledger soberano canónico vive hoy en `cortex/ledger/` (`ledger_core.py`), mientras la reconstrucción temporal reside en `cortex/engine/history.py` y `QueryMixin.time_travel()`. No hay un `cortex/engine/ledger.py` canónico en este árbol.
 
 ### 4.3 Consenso en Enjambres Multi-Agente
 
@@ -294,7 +294,7 @@ graph LR
     style E fill:#000,stroke:#16c79a,stroke-width:3px
 ```
 
-| Pilar | Tecnología Clave | Estado en CORTEX |
+| Pilar | Tecnología Clave | Estado en BABYLON-60 |
 |-------|-----------------|------------------|
 | Velocidad | HNSW + Cuantización Binaria | ✅ `sqlite-vec` + `EmbeddingPrunerMixin` |
 | Memoria | Unificada (Episódica + Semántica + Procedimental) | ✅ Smoke test 10/10 verificado |
@@ -305,5 +305,5 @@ La convergencia de estas tecnologías define el nuevo estado del arte: **agentes
 
 ---
 
-> *Documento generado para el proyecto CORTEX — Febrero 2026*
+> *Documento generado para el proyecto BABYLON-60 — Febrero 2026*
 > *by [borjamoskv.com](https://borjamoskv.com) · Arquitecturas de Soberanía Cognitiva*

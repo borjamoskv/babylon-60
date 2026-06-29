@@ -11,4 +11,4 @@ description: [Membrana de Cisne Negro — Defensa Cognitiva y Financiera]
 2. Si detecta anomalía, alimentar `psychohistory-fracture-simulator` con los parámetros para simular el fallo en cascada probable a 72h.
 3. Ejecutar `memetic-warfare-omega` para modelar qué narrativas virales justificarán el pánico y neutralizarlas mentalmente por adelantado.
 4. Usar `blockchain-forensics-omega` para trazar los movimientos O(1) de capital de grandes ballenas (smart money).
-5. Activar de emergencia el `epistemic-circuit-breaker` cortando la ingesta de ruido y cerrando los puertos de CORTEX.
+5. Activar de emergencia el `epistemic-circuit-breaker` cortando la ingesta de ruido y cerrando los puertos de BABYLON-60.

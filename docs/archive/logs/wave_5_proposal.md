@@ -1,10 +1,10 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-Analyze the CORTEX V4.0 architecture and the new Consensus Layer. Propose Wave 5
+Analyze the BABYLON-60 V4.0 architecture and the new Consensus Layer. Propose Wave 5
 (Persistence & Deployment) focusing on: 1. Tamper-Evident logging of votes. 2. 
 High-availability synchronization of the ledger. 3. Edge deployment via MCP 
 server optimization.
 TurnBegin(
-    user_input='Analyze the CORTEX V4.0 architecture and the new Consensus 
+    user_input='Analyze the BABYLON-60 V4.0 architecture and the new Consensus 
 Layer. Propose Wave 5 (Persistence & Deployment) focusing on: 1. Tamper-Evident 
 logging of votes. 2. High-availability synchronization of the ledger. 3. Edge 
 deployment via MCP server optimization.'
@@ -30,9 +30,9 @@ ToolResult(
     tool_call_id='tool_P9GQfXKo7FPoU8YSZqHvMAss',
     return_value=ToolOk(
         is_error=False,
-        output='     1\t# CORTEX V4.0 — Architectural Analysis & Wave 5 
+        output='     1\t# BABYLON-60 V4.0 — Architectural Analysis & Wave 5 
 Proposal\n     2\t## Executive Summary\n     3\t\n     4\t**Date:** 2026-02-16  
-\n     5\t**Subject:** CORTEX V4.0 Architecture Review and Wave 5 (Persistence &
+\n     5\t**Subject:** BABYLON-60 V4.0 Architecture Review and Wave 5 (Persistence &
 Deployment) Proposal  \n     6\t**Status:** Technical Design Complete\n     
 7\t\n     8\t---\n     9\t\n    10\t## 1. Current Architecture Overview\n    
 11\t\n    12\t### 1.1 System Components\n    13\t\n    14\t```\n    
@@ -250,7 +250,7 @@ Security\n   383\t- `SECURITY_ARCHITECTURE_AUDIT_V4.md` — Security audit
 results\n   384\t- `HARDENING_COMPLETE.md` — Hardening status\n   385\t\n   
 386\t### Wave 5 Proposal\n   387\t- `WAVE5_PERSISTENCE_DEPLOYMENT.md` — Full 
 technical specification\n   388\t\n   389\t---\n   390\t\n   391\t**End of 
-Summary**\n   392\t\n   393\t*Prepared for CORTEX V4.0 Architecture Review | 
+Summary**\n   392\t\n   393\t*Prepared for BABYLON-60 V4.0 Architecture Review | 
 2026-02-16*\n',
         message='393 lines read from file starting from line 1. End of file 
 reached.',
@@ -272,12 +272,12 @@ ToolResult(
     tool_call_id='tool_QWoGywUgx52wBkk45NC5ZwsX',
     return_value=ToolOk(
         is_error=False,
-        output='     1\t# CORTEX V4.0 — Wave 5: Persistence & Deployment\n     
+        output='     1\t# BABYLON-60 V4.0 — Wave 5: Persistence & Deployment\n     
 2\t## Tamper-Evident Audit Logs & MCP Server Optimization\n     3\t\n     
 4\t**Date:** 2026-02-16  \n     5\t**Version:** 4.1.0-alpha  \n     
-6\t**Status:** Proposal / Design Document  \n     7\t**Author:** CORTEX 
+6\t**Status:** Proposal / Design Document  \n     7\t**Author:** BABYLON-60 
 Architectural Analysis\n     8\t\n     9\t---\n    10\t\n    11\t## Executive 
-Summary\n    12\t\n    13\tWave 5 focuses on **production hardening** for CORTEX
+Summary\n    12\t\n    13\tWave 5 focuses on **production hardening** for BABYLON-60
 V4.0\'s Consensus Layer. Building upon the Reputation-Weighted Consensus (RWC) 
 foundation from Wave 4, this wave delivers:\n    14\t\n    15\t1. **Tamper-Evident 
 Audit Logs** — Cryptographically tamper-evident transaction ledger\n    16\t2. 
@@ -929,7 +929,7 @@ Path Traversal (export) | 6.5 | 🔴 Unfixed |\n    73\t| Rate Limiting Stub | N
 85\t├───────────────────────────────────────────────────────────────────────────
 ──┤\n    86\t│                                                                  
 │\n    87\t│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐          
-│\n    88\t│  │   CORTEX DB  │───▶│  Synthesize  │───▶│  notebooklm/ │          
+│\n    88\t│  │   BABYLON-60 DB  │───▶│  Synthesize  │───▶│  notebooklm/ │          
 │\n    89\t│  │  (SQLite)    │    │   Script     │    │  sources/    │          
 │\n    90\t│  └──────────────┘    └──────────────┘    └──────────────┘          
 │\n    91\t│         │                   │                     │                
@@ -944,9 +944,9 @@ Path Traversal (export) | 6.5 | 🔴 Unfixed |\n    73\t| Rate Limiting Stub | N
 99\t└───────────────────────────────────────────────────────────────────────────
 ──┘\n   100\t```\n   101\t\n   102\t### 2.2 Output Format\n   103\t\n   
 104\tEach generated file follows this structure:\n   105\t\n   
-106\t```markdown\n   107\t# 🧠 CORTEX Domain: {PROJECT}\n   108\t\n   109\t## 🔍
+106\t```markdown\n   107\t# 🧠 BABYLON-60 Domain: {PROJECT}\n   108\t\n   109\t## 🔍
 NOTAS DE INVESTIGACIÓN (CRÍTICO)\n   110\t> NotebookLM: He detectado las 
-siguientes lagunas en CORTEX para este proyecto.\n   111\t- Hay **{N}** hechos 
+siguientes lagunas en BABYLON-60 para este proyecto.\n   111\t- Hay **{N}** hechos 
 sin verificar que requieren validación lógica.\n   112\t- Las siguientes 
 entidades carecen de conexiones relacionales: {entities}.\n   113\t\n   114\t## 
 Base de Conocimiento\n   115\t### {fact_type}\n   116\t- **{content}** (Confid: 
@@ -992,13 +992,13 @@ Contradiction Matrix\n   134\t\n   135\t```\n
 │\n   162\t│  C3: SYNC DIRECTION                                                
 │\n   163\t│  
 ┌─────────────────────────────────────────────────────────────────────┐   │\n   
-164\t│  │ • CORTEX wants to be Source of Truth                                │ 
+164\t│  │ • BABYLON-60 wants to be Source of Truth                                │ 
 │\n   165\t│  │ • Legacy ~/.agent/memory/ files still used by external tools    
 │   │\n   166\t│  │ • Bidirectional sync creates conflict resolution complexity 
 │   │\n   167\t│  │                                                             
 │   │\n   168\t│  │ RESOLUTION: Gradual migration                               
-│   │\n   169\t│  │ • Phase 1: CORTEX → JSON (write-back)                       
-│   │\n   170\t│  │ • Phase 2: JSON read-only, CORTEX write                     
+│   │\n   169\t│  │ • Phase 1: BABYLON-60 → JSON (write-back)                       
+│   │\n   170\t│  │ • Phase 2: JSON read-only, BABYLON-60 write                     
 │   │\n   171\t│  │ • Phase 3: Deprecate JSON entirely                          
 │   │\n   172\t│  
 └─────────────────────────────────────────────────────────────────────┘   │\n   
@@ -1073,7 +1073,7 @@ Phase Breakdown\n   216\t\n   217\t```\n
 │\n   244\t│  SPRINT 5-6: SYNC CONSOLIDATION (Weeks 9-12)                       
 │\n   245\t│  ═════════════════════════════════════════                         
 │\n   246\t│  □ Deprecate ~/.agent/memory/ write-back                           
-│\n   247\t│  □ Make CORTEX DB the exclusive Source of Truth                    
+│\n   247\t│  □ Make BABYLON-60 DB the exclusive Source of Truth                    
 │\n   248\t│  □ Add migration tooling for legacy users                          
 │\n   249\t│  □ Update CLI to remove writeback commands                         
 │\n   250\t│  □ Add backup/restore functionality                                
@@ -1085,7 +1085,7 @@ Phase Breakdown\n   216\t\n   217\t```\n
 │\n   256\t│  □ Add entity relationship graph to exports                        
 │\n   257\t│  □ Include consensus scores in NotebookLM output                   
 │\n   258\t│  □ Add temporal snapshots ("what we knew at X time")               
-│\n   259\t│  □ Create NotebookLM feedback loop (verified facts back to CORTEX) 
+│\n   259\t│  □ Create NotebookLM feedback loop (verified facts back to BABYLON-60) 
 │\n   260\t│  □ Add gap analysis automation                                     
 │\n   261\t│                                                                    
 │\n   262\t│  DELIVERABLE: Bidirectional NotebookLM integration                 
@@ -1456,7 +1456,7 @@ integrity\n  1455\tcortex ledger export              # Export log\n
 1456\tcortex mcp start                  # Start MCP server\n  1457\tcortex 
 benchmark                  # Run benchmarks\n  1458\t```\n  1459\t\n  
 1460\t---\n  1461\t\n  1462\t**End of Wave 5 Proposal**\n  1463\t\n  
-1464\t*Prepared for CORTEX V4.0 Architecture Review*\n',
+1464\t*Prepared for BABYLON-60 V4.0 Architecture Review*\n',
         message='465 lines read from file starting from line 1000. End of file 
 reached.',
         display=[],
@@ -1489,7 +1489,7 @@ get_init_meta\n    23\tfrom cortex.migrations import run_migrations\n
 cortex.temporal import build_temporal_filter_params, now_iso\n    27\t\n    
 28\tlogger = logging.getLogger("cortex")\n    29\t\n    30\tfrom cortex.config 
 import DEFAULT_DB_PATH\n    31\t\n    32\t\n    33\t@dataclass\n    34\tclass 
-Fact:\n    35\t    """A single fact stored in CORTEX."""\n    36\t\n    37\t    
+Fact:\n    35\t    """A single fact stored in BABYLON-60."""\n    36\t\n    37\t    
 id: int\n    38\t    project: str\n    39\t    content: str\n    40\t    
 fact_type: str\n    41\t    tags: list[str]\n    42\t    confidence: str\n    
 43\t    valid_from: str\n    44\t    valid_until: Optional[str]\n    45\t    
@@ -1513,7 +1513,7 @@ JS, no framework")\n    80\t        results = engine.search("what framework does
 naroa use?")\n    81\t    """\n    82\t\n    83\t    def __init__(\n    84\t    
 self,\n    85\t        db_path: str | Path = DEFAULT_DB_PATH,\n    86\t        
 auto_embed: bool = True,\n    87\t    ):\n    88\t        """Initialize or open 
-CORTEX database.\n    89\t\n    90\t        Args:\n    91\t            db_path: 
+BABYLON-60 database.\n    89\t\n    90\t        Args:\n    91\t            db_path: 
 Path to SQLite database file.\n    92\t            auto_embed: Whether to 
 auto-generate embeddings on store.\n    93\t        """\n    94\t        
 self._db_path = Path(db_path).expanduser()\n    95\t        
@@ -1562,7 +1562,7 @@ run_migrations(conn)\n   158\t\n   159\t        # 3. Insert metadata if not
 exists\n   160\t        for key, value in get_init_meta():\n   161\t            
 conn.execute(\n   162\t                "INSERT OR IGNORE INTO cortex_meta (key, 
 value) VALUES (?, ?)",\n   163\t                (key, value),\n   164\t         
-)\n   165\t\n   166\t        conn.commit()\n   167\t        logger.info("CORTEX 
+)\n   165\t\n   166\t        conn.commit()\n   167\t        logger.info("BABYLON-60 
 database initialized (schema + migrated) at %s", self._db_path)\n   168\t\n   
 169\t    # ─── Store ────────────────────────────────────────────────────\n   
 170\t\n   171\t    def store(\n   172\t        self,\n   173\t        project: 
@@ -2113,7 +2113,7 @@ ToolResult(
     return_value=ToolOk(
         is_error=False,
         output='     1\t"""\n     2\tCORTEX v4.0 — MCP Server.\n     3\t\n     
-4\tModel Context Protocol server exposing CORTEX as tools for any AI agent.\n   
+4\tModel Context Protocol server exposing BABYLON-60 as tools for any AI agent.\n   
 5\tUses FastMCP (mcp Python SDK) for stdio transport.\n     6\t"""\n     7\t\n  
 8\tfrom __future__ import annotations\n     9\t\n    10\timport atexit\n    
 11\timport json\n    12\timport logging\n    13\tfrom typing import Optional\n  
@@ -2125,8 +2125,8 @@ import FastMCP\n    24\t    _MCP_AVAILABLE = True\n    25\texcept ImportError:\n
 26\t    FastMCP = None  # type: ignore\n    27\t    logger.debug("MCP SDK not 
 installed. Install with: pip install \'cortex-persist[mcp]\'")\n    28\t\n    
 29\t\n    30\tdef create_mcp_server(db_path: str = "~/.cortex/cortex.db") -> 
-"FastMCP":\n    31\t    """Create and configure a CORTEX MCP server instance.\n 
-32\t\n    33\t    Args:\n    34\t        db_path: Path to CORTEX database.\n    
+"FastMCP":\n    31\t    """Create and configure a BABYLON-60 MCP server instance.\n 
+32\t\n    33\t    Args:\n    34\t        db_path: Path to BABYLON-60 database.\n    
 35\t\n    36\t    Returns:\n    37\t        Configured FastMCP server ready to 
 run.\n    38\t\n    39\t    Raises:\n    40\t        ImportError: If MCP SDK is 
 not installed.\n    41\t    """\n    42\t    if not _MCP_AVAILABLE:\n    43\t   
@@ -2134,7 +2134,7 @@ raise ImportError(\n    44\t            "MCP SDK not installed. Install with:
 pip install mcp\\n"\n    45\t            "Or: pip install 
 \'cortex-persist[mcp]\'"\n    46\t        )\n    47\t\n    48\t    from 
 cortex.engine import CortexEngine\n    49\t\n    50\t    mcp = FastMCP(\n    
-51\t        "CORTEX Memory",\n    52\t        description="Sovereign memory 
+51\t        "BABYLON-60 Memory",\n    52\t        description="Sovereign memory 
 infrastructure for AI agents. "\n    53\t        "Store, search, and recall 
 facts with semantic search and temporal queries.",\n    54\t    )\n    55\t\n   
 56\t    # Lazy engine initialization\n    57\t    _engine: dict = {}\n    58\t\n
@@ -2147,7 +2147,7 @@ atexit.register(eng.close)\n    65\t        return _engine["instance"]\n
 @mcp.tool()\n    70\t    def cortex_store(\n    71\t        project: str,\n    
 72\t        content: str,\n    73\t        fact_type: str = "knowledge",\n    
 74\t        tags: str = "[]",\n    75\t        source: str = "",\n    76\t    ) 
--> str:\n    77\t        """Store a fact in CORTEX memory.\n    78\t\n    79\t  
+-> str:\n    77\t        """Store a fact in BABYLON-60 memory.\n    78\t\n    79\t  
 Args:\n    80\t            project: Project/namespace for the fact (e.g., 
 \'myproject\').\n    81\t            content: The fact content to store.\n    
 82\t            fact_type: Type: knowledge, decision, mistake, bridge, ghost.\n 
@@ -2163,7 +2163,7 @@ tags=parsed_tags,\n   100\t            source=source or None,\n   101\t
 )\n   102\t        return f"✓ Stored fact #{fact_id} in project \'{project}\'"\n
 103\t\n   104\t    @mcp.tool()\n   105\t    def cortex_search(\n   106\t        
 query: str,\n   107\t        project: str = "",\n   108\t        top_k: int = 
-5,\n   109\t    ) -> str:\n   110\t        """Search CORTEX memory using 
+5,\n   109\t    ) -> str:\n   110\t        """Search BABYLON-60 memory using 
 semantic + text hybrid search.\n   111\t\n   112\t        Args:\n   113\t       
 query: Natural language search query.\n   114\t            project: Optional 
 project filter.\n   115\t            top_k: Number of results (1-20).\n   
@@ -2216,10 +2216,10 @@ tgt = id_to_name.get(rel["target"], f"#{rel[\'target\']}")\n   200\t
 lines.append(f"  {src} ──[{rel[\'type\']}]── {tgt} (w={rel[\'weight\']:.1f})")\n
 201\t\n   202\t        return "\\n".join(lines)\n   203\t\n   204\t    
 @mcp.tool()\n   205\t    def cortex_status() -> str:\n   206\t        """Get 
-CORTEX system status and statistics.\n   207\t\n   208\t        Returns:\n   
+BABYLON-60 system status and statistics.\n   207\t\n   208\t        Returns:\n   
 209\t            System health and statistics summary.\n   210\t        """\n   
 211\t        engine = get_engine()\n   212\t        stats = engine.stats()\n   
-213\t        return (\n   214\t            f"CORTEX Status:\\n"\n   215\t       
+213\t        return (\n   214\t            f"BABYLON-60 Status:\\n"\n   215\t       
 f"  Facts: {stats.get(\'total_facts\', 0)} total, "\n   216\t            
 f"{stats.get(\'active_facts\', 0)} active\\n"\n   217\t            f"  Projects:
 {stats.get(\'projects\', 0)}\\n"\n   218\t            f"  Embeddings: 
@@ -2227,19 +2227,19 @@ f"{stats.get(\'active_facts\', 0)} active\\n"\n   217\t            f"  Projects:
 {stats.get(\'db_size_mb\', 0):.1f} MB"\n   220\t        )\n   221\t\n   222\t   
 # ─── Resources ────────────────────────────────────────────────\n   223\t\n   
 224\t    @mcp.resource("cortex://projects")\n   225\t    def list_projects() -> 
-str:\n   226\t        """List all projects in CORTEX memory."""\n   227\t       
+str:\n   226\t        """List all projects in BABYLON-60 memory."""\n   227\t       
 engine = get_engine()\n   228\t        conn = engine.get_connection()\n   229\t 
 rows = conn.execute(\n   230\t            "SELECT DISTINCT project FROM facts 
 WHERE valid_until IS NULL "\n   231\t            "ORDER BY project"\n   232\t   
 ).fetchall()\n   233\t        projects = [r[0] for r in rows]\n   234\t        
 return json.dumps({"projects": projects, "count": len(projects)})\n   235\t\n   
 236\t    @mcp.resource("cortex://stats")\n   237\t    def memory_stats() -> 
-str:\n   238\t        """Get CORTEX memory statistics."""\n   239\t        
+str:\n   238\t        """Get BABYLON-60 memory statistics."""\n   239\t        
 engine = get_engine()\n   240\t        stats = engine.stats()\n   241\t        
 return json.dumps(stats)\n   242\t\n   243\t    return mcp\n   244\t\n   245\t\n
 246\tdef run_server(db_path: str = "~/.cortex/cortex.db") -> None:\n   247\t    
-"""Start the CORTEX MCP server (stdio transport)."""\n   248\t    mcp = 
-create_mcp_server(db_path)\n   249\t    logger.info("Starting CORTEX MCP server 
+"""Start the BABYLON-60 MCP server (stdio transport)."""\n   248\t    mcp = 
+create_mcp_server(db_path)\n   249\t    logger.info("Starting BABYLON-60 MCP server 
 (stdio transport)...")\n   250\t    mcp.run()\n',
         message='250 lines read from file starting from line 1. End of file 
 reached.',
@@ -2490,7 +2490,7 @@ ToolResult(
     tool_call_id='tool_9MNCXl4YSIhSqfmGldbPfzvW',
     return_value=ToolOk(
         is_error=False,
-        output='     1\t# Análisis Arquitectónico: Sistema de Consenso CORTEX 
+        output='     1\t# Análisis Arquitectónico: Sistema de Consenso BABYLON-60 
 v4.0\n     2\t## Evaluación hacia Reputation-Weighted Consensus para Sovereign 
 AI\n     3\t\n     4\t**Fecha:** 2026-02-16  \n     5\t**Versión Analizada:** 
 4.0.0a1  \n     6\t**Autor:** Análisis Automatizado Kimi Code CLI  \n     7\t\n 
@@ -2549,9 +2549,9 @@ tiene decay temporal. Un voto de hace 1 año tiene\n   103\t          el mismo
 peso que uno de ayer.\n   104\t\n   105\tImpacto: El consenso no refleja el 
 estado actual de conocimiento del swarm.\n   106\t```\n   107\t\n   108\t### 2.2
 Comparativa con Sistemas de Consenso Reputacionales\n   109\t\n   110\t| Sistema
-| Mecanismo de Reputación | Resistencia Sybil | Aplicabilidad a CORTEX |\n   
+| Mecanismo de Reputación | Resistencia Sybil | Aplicabilidad a BABYLON-60 |\n   
 111\t|---------|------------------------|-------------------|-------------------
------|\n   112\t| **CORTEX Actual** | Ninguno | ❌ Ninguna | Baseline |\n   
+-----|\n   112\t| **BABYLON-60 Actual** | Ninguno | ❌ Ninguna | Baseline |\n   
 113\t| **PageRank (Google)** | Links entrantes/salientes | ⚠️ Parcial | Adaptable
 |\n   114\t| **EigenTrust (P2P)** | Trust transitivity | ⚠️ Media | Alta |\n   
 115\t| **RepSys (BitTorrent)** | Ratio upload/download | ✅ Alta | Media |\n   
@@ -2837,7 +2837,7 @@ INTEGER PRIMARY KEY AUTOINCREMENT,\\n    check_type      TEXT NOT NULL,
 -- JSON with findings\\n    started_at      TEXT NOT NULL,\\n    completed_at   
 TEXT NOT NULL\\n);\\n```\\n\\n### 1.5 Implementation: Tamper-Evident Vote 
 Ledger\\n\\n```python\\n# cortex/vote_ledger.py\\n\\"\\"\\"\\nTamper-Evident Vote 
-Ledger — Cryptographic integrity for CORTEX consensus votes.\\n\\nFeatures:\\n- 
+Ledger — Cryptographic integrity for BABYLON-60 consensus votes.\\n\\nFeatures:\\n- 
 Hash-chained vote entries\\n- Periodic Merkle tree generation\\n- Tamper 
 detection via hash verification\\n- Export with integrity 
 proofs\\n\\"\\"\\"\\n\\nimport hashlib\\nimport json\\nimport sqlite3\\nfrom 
@@ -2847,7 +2847,7 @@ single entry in the vote ledger.\\"\\"\\"\\n    id: int\\n    fact_id: int\\n
 agent_id: str\\n    vote: int\\n    vote_weight: float\\n    prev_hash: str\\n  
 hash: str\\n    timestamp: str\\n    signature: Optional[str] = 
 None\\n\\n\\nclass VoteLedger:\\n    \\"\\"\\"\\n    Manages the cryptographic 
-integrity of CORTEX consensus votes.\\n    \\n    Features:\\n    - Append-only 
+integrity of BABYLON-60 consensus votes.\\n    \\n    Features:\\n    - Append-only 
 hash-chained vote storage\\n    - Periodic Merkle tree generation\\n    - Tamper
 detection via hash verification\\n    - Export with integrity proofs\\n    
 \\"\\"\\"\\n    \\n    MERKLE_BATCH_SIZE = 1000  # Create Merkle root every N 
@@ -3014,7 +3014,7 @@ vote log\\ncortex vote-ledger verify-external
 votes_2024.json\\n```\\n\\n---\\n\\n## 2. High-Availability Ledger 
 Synchronization\\n\\n### 2.1 Problem Statement\\n\\nCurrent CORTEX operates as a
 single-node system with no replication:\\n\\n```\\nCurrent 
-State:\\n┌─────────────┐\\n│  CORTEX     │\\n│  (Single)   │\\n│  SQLite     
+State:\\n┌─────────────┐\\n│  BABYLON-60     │\\n│  (Single)   │\\n│  SQLite     
 │\\n└─────────────┘\\n     │\\n     ▼\\n  [SPOF]  ← Single Point of 
 Failure\\n```\\n\\n**Limitations:**\\n- ❌ No failover capability\\n- ❌ No 
 geographic distribution\\n- ❌ Consensus votes lost if node fails\\n- ❌ No read
@@ -3026,7 +3026,7 @@ Continue operating during network splits |\\n| **Conflict Resolution** | P1 |
 Automatic merge for concurrent writes |\\n| **Scalability** | P2 | Horizontal 
 scaling for read-heavy workloads |\\n\\n### 2.3 Architecture: CRDT-Based 
 Replication\\n\\n```\\n┌────────────────────────────────────────────────────────
-─────────────────────┐\\n│                    HIGH-AVAILABILITY CORTEX CLUSTER  
+─────────────────────┐\\n│                    HIGH-AVAILABILITY BABYLON-60 CLUSTER  
 │\\n├───────────────────────────────────────────────────────────────────────────
 ──┤\\n│                                                                         
      │\\n│   
@@ -3117,7 +3117,7 @@ TEXT NOT NULL DEFAULT (datetime(\'now\')),\\n    PRIMARY KEY (node_id,
 entity_type, bucket)\\n);\\n```\\n\\n### 2.5 Implementation: HA 
 Synchronization\\n\\n```python\\n# 
 cortex/ha_sync.py\\n\\"\\"\\"\\nHigh-Availability Synchronization for 
-CORTEX.\\n\\nFeatures:\\n- Raft consensus for leader election\\n- CRDT-based 
+BABYLON-60.\\n\\nFeatures:\\n- Raft consensus for leader election\\n- CRDT-based 
 data replication\\n- Anti-entropy gossip protocol\\n- Automatic conflict 
 resolution\\n\\"\\"\\"\\n\\nimport hashlib\\nimport json\\nimport 
 sqlite3\\nimport asyncio\\nfrom typing import Dict, List, Optional, Set, 
@@ -3147,7 +3147,7 @@ SyncState:\\n    \\"\\"\\"Current synchronization state.\\"\\"\\"\\n    node_id:
 str\\n    role: NodeRole\\n    leader_id: Optional[str]\\n    term: int\\n    
 last_heartbeat: datetime\\n    known_nodes: List[str]\\n\\n\\nclass 
 HASyncManager:\\n    \\"\\"\\"\\n    Manages high-availability synchronization 
-for CORTEX.\\n    \\n    Features:\\n    - Raft consensus for leader election\\n
+for BABYLON-60.\\n    \\n    Features:\\n    - Raft consensus for leader election\\n
 - CRDT-based conflict-free replication\\n    - Anti-entropy gossip protocol\\n  
 \\"\\"\\"\\n    \\n    def __init__(\\n        self,\\n        conn: 
 sqlite3.Connection,\\n        node_id: str,\\n        node_address: str,\\n     
@@ -3519,7 +3519,7 @@ cpu_percent\\n        }\\n\\n\\n#
 Edge-Optimized MCP Server\\n# 
 ─────────────────────────────────────────────────────────────────────────\\n\\nc
 lass EdgeMCPServer:\\n    \\"\\"\\"\\n    Edge-optimized MCP server for 
-CORTEX.\\n    \\n    Features:\\n    - Multi-tier caching\\n    - Request 
+BABYLON-60.\\n    \\n    Features:\\n    - Multi-tier caching\\n    - Request 
 batching\\n    - Circuit breaker\\n    - Resource monitoring\\n    - Multiple 
 transports\\n    \\"\\"\\"\\n    \\n    def __init__(self, config: 
 Optional[EdgeMCPConfig] = None):\\n        self.config = config or 
@@ -3552,7 +3552,7 @@ self._running = True\\n        logger.info(\\"Edge MCP server initialized\\")\\n
 content: str,\\n        fact_type: str = \\"knowledge\\",\\n        tags: str = 
 \\"[]\\",\\n        source: str = \\"\\",\\n        batch: bool = False\\n    ) 
 -> dict:\\n        \\"\\"\\"\\n        Store a fact (or batch of facts) in 
-CORTEX with optimizations.\\n        \\"\\"\\"\\n        from cortex.engine 
+BABYLON-60 with optimizations.\\n        \\"\\"\\"\\n        from cortex.engine 
 import CortexEngine\\n        \\n        start = time.time()\\n        \\n      
 async with self.pool.acquire() as conn:\\n            engine = 
 CortexEngine(self.config.db_path, auto_embed=False)\\n            engine._conn =
@@ -3584,7 +3584,7 @@ logger.error(\\"Error in cortex_store: %s\\", e)\\n                raise\\n
 \\n    async def cortex_search(\\n        self,\\n        query: str,\\n        
 project: str = \\"\\",\\n        top_k: int = 5,\\n        as_of: str = 
 \\"\\",\\n        use_cache: bool = True\\n    ) -> dict:\\n        
-\\"\\"\\"Search CORTEX with multi-tier caching.\\"\\"\\"\\n        from 
+\\"\\"\\"Search BABYLON-60 with multi-tier caching.\\"\\"\\"\\n        from 
 cortex.engine import CortexEngine\\n        \\n        cache_key = 
 self.cache._key(\\n            \\"search\\",\\n            query=query,\\n      
 project=project,\\n            top_k=top_k,\\n            as_of=as_of\\n        
@@ -3878,7 +3878,7 @@ PRIMARY KEY AUTOINCREMENT,\n    check_type      TEXT NOT NULL,              --
 -- JSON with findings\n    started_at      TEXT NOT NULL,\n    completed_at    
 TEXT NOT NULL\n);\n```\n\n### 1.5 Implementation: Tamper-Evident Vote 
 Ledger\n\n```python\n# cortex/vote_ledger.py\n"""\nTamper-Evident Vote Ledger — 
-Cryptographic integrity for CORTEX consensus votes.\n\nFeatures:\n- Hash-chained
+Cryptographic integrity for BABYLON-60 consensus votes.\n\nFeatures:\n- Hash-chained
 vote entries\n- Periodic Merkle tree generation\n- Tamper detection via hash 
 verification\n- Export with integrity proofs\n"""\n\nimport hashlib\nimport 
 json\nimport sqlite3\nfrom typing import List, Optional, Tuple\nfrom dataclasses
@@ -3887,7 +3887,7 @@ VoteEntry:\n    """A single entry in the vote ledger."""\n    id: int\n
 fact_id: int\n    agent_id: str\n    vote: int\n    vote_weight: float\n    
 prev_hash: str\n    hash: str\n    timestamp: str\n    signature: Optional[str] 
 = None\n\n\nclass VoteLedger:\n    """\n    Manages the cryptographic integrity 
-of CORTEX consensus votes.\n    \n    Features:\n    - Append-only hash-chained 
+of BABYLON-60 consensus votes.\n    \n    Features:\n    - Append-only hash-chained 
 vote storage\n    - Periodic Merkle tree generation\n    - Tamper detection via 
 hash verification\n    - Export with integrity proofs\n    """\n    \n    
 MERKLE_BATCH_SIZE = 1000  # Create Merkle root every N votes\n    \n    def 
@@ -4044,7 +4044,7 @@ verify external vote log\ncortex vote-ledger verify-external
 votes_2024.json\n```\n\n---\n\n## 2. High-Availability Ledger 
 Synchronization\n\n### 2.1 Problem Statement\n\nCurrent CORTEX operates as a 
 single-node system with no replication:\n\n```\nCurrent 
-State:\n┌─────────────┐\n│  CORTEX     │\n│  (Single)   │\n│  SQLite     
+State:\n┌─────────────┐\n│  BABYLON-60     │\n│  (Single)   │\n│  SQLite     
 │\n└─────────────┘\n     │\n     ▼\n  [SPOF]  ← Single Point of 
 Failure\n```\n\n**Limitations:**\n- ❌ No failover capability\n- ❌ No 
 geographic distribution\n- ❌ Consensus votes lost if node fails\n- ❌ No read 
@@ -4056,7 +4056,7 @@ Continue operating during network splits |\n| **Conflict Resolution** | P1 |
 Automatic merge for concurrent writes |\n| **Scalability** | P2 | Horizontal 
 scaling for read-heavy workloads |\n\n### 2.3 Architecture: CRDT-Based 
 Replication\n\n```\n┌───────────────────────────────────────────────────────────
-──────────────────┐\n│                    HIGH-AVAILABILITY CORTEX CLUSTER      
+──────────────────┐\n│                    HIGH-AVAILABILITY BABYLON-60 CLUSTER      
 │\n├────────────────────────────────────────────────────────────────────────────
 ─┤\n│                                                                           
    │\n│   ┌───────────────────────────────────────────────────────────────────┐ 
@@ -4144,7 +4144,7 @@ merkle_root     TEXT NOT NULL,\n    updated_at      TEXT NOT NULL DEFAULT
 (datetime(\'now\')),\n    PRIMARY KEY (node_id, entity_type, 
 bucket)\n);\n```\n\n### 2.5 Implementation: HA Synchronization\n\n```python\n# 
 cortex/ha_sync.py\n"""\nHigh-Availability Synchronization for 
-CORTEX.\n\nFeatures:\n- Raft consensus for leader election\n- CRDT-based data 
+BABYLON-60.\n\nFeatures:\n- Raft consensus for leader election\n- CRDT-based data 
 replication\n- Anti-entropy gossip protocol\n- Automatic conflict 
 resolution\n"""\n\nimport hashlib\nimport json\nimport sqlite3\nimport 
 asyncio\nfrom typing import Dict, List, Optional, Set, Tuple\nfrom dataclasses 
@@ -4171,7 +4171,7 @@ return "concurrent"\n\n\n@dataclass\nclass SyncState:\n    """Current
 synchronization state."""\n    node_id: str\n    role: NodeRole\n    leader_id: 
 Optional[str]\n    term: int\n    last_heartbeat: datetime\n    known_nodes: 
 List[str]\n\n\nclass HASyncManager:\n    """\n    Manages high-availability 
-synchronization for CORTEX.\n    \n    Features:\n    - Raft consensus for 
+synchronization for BABYLON-60.\n    \n    Features:\n    - Raft consensus for 
 leader election\n    - CRDT-based conflict-free replication\n    - Anti-entropy 
 gossip protocol\n    """\n    \n    def __init__(\n        self,\n        conn: 
 sqlite3.Connection,\n        node_id: str,\n        node_address: str,\n        
@@ -4527,7 +4527,7 @@ self.active_connections,\n            "max_connections": self.max_connections,\n
 ─────────────────────────────────────────────────────────────────────────\n# 
 Edge-Optimized MCP Server\n# 
 ─────────────────────────────────────────────────────────────────────────\n\ncla
-ss EdgeMCPServer:\n    """\n    Edge-optimized MCP server for CORTEX.\n    \n   
+ss EdgeMCPServer:\n    """\n    Edge-optimized MCP server for BABYLON-60.\n    \n   
 Features:\n    - Multi-tier caching\n    - Request batching\n    - Circuit 
 breaker\n    - Resource monitoring\n    - Multiple transports\n    """\n    \n  
 def __init__(self, config: Optional[EdgeMCPConfig] = None):\n        self.config
@@ -4559,7 +4559,7 @@ self._running = True\n        logger.info("Edge MCP server initialized")\n    \n
 async def cortex_store(\n        self,\n        project: str,\n        content: 
 str,\n        fact_type: str = "knowledge",\n        tags: str = "[]",\n        
 source: str = "",\n        batch: bool = False\n    ) -> dict:\n        """\n   
-Store a fact (or batch of facts) in CORTEX with optimizations.\n        """\n   
+Store a fact (or batch of facts) in BABYLON-60 with optimizations.\n        """\n   
 from cortex.engine import CortexEngine\n        \n        start = time.time()\n 
 \n        async with self.pool.acquire() as conn:\n            engine = 
 CortexEngine(self.config.db_path, auto_embed=False)\n            engine._conn = 
@@ -4589,7 +4589,7 @@ self.metrics.record_error()\n                logger.error("Error in
 cortex_store: %s", e)\n                raise\n    \n    async def 
 cortex_search(\n        self,\n        query: str,\n        project: str = "",\n
 top_k: int = 5,\n        as_of: str = "",\n        use_cache: bool = True\n    )
--> dict:\n        """Search CORTEX with multi-tier caching."""\n        from 
+-> dict:\n        """Search BABYLON-60 with multi-tier caching."""\n        from 
 cortex.engine import CortexEngine\n        \n        cache_key = 
 self.cache._key(\n            "search",\n            query=query,\n            
 project=project,\n            top_k=top_k,\n            as_of=as_of\n        )\n
@@ -4827,7 +4827,7 @@ Design Complete  \\n**Classification:** Strategic Architecture Document
 \\n\\n---\\n\\n## 1. Current State Analysis\\n\\n### 1.1 CORTEX V4.0 
 Architecture 
 Overview\\n\\n```\\n┌───────────────────────────────────────────────────────────
-──────────────────┐\\n│                        CORTEX V4.0 ARCHITECTURE         
+──────────────────┐\\n│                        BABYLON-60 V4.0 ARCHITECTURE         
 │\\n├───────────────────────────────────────────────────────────────────────────
 ──┤\\n│                                                                         
      │\\n│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐
@@ -4916,7 +4916,7 @@ NULL\\n);\\n```\\n\\n---\\n\\n### 2.2 Pillar 2: High-Availability
 Synchronization\\n\\n**Problem:** Single-node deployment with no failover 
 capability.\\n\\n**Solution:** Raft consensus + CRDT-based 
 replication\\n\\n```\\n┌────────────────────────────────────────────────────────
-─────────────────────┐\\n│                    HA CORTEX CLUSTER                 
+─────────────────────┐\\n│                    HA BABYLON-60 CLUSTER                 
 │\\n├───────────────────────────────────────────────────────────────────────────
 ──┤\\n│                                                                         
      │\\n│   
@@ -5017,7 +5017,7 @@ Together\\n\\n```\\n┌───────────────────
 │                 │                      │                       │\\n│          
 ▼                 ▼                      ▼                       │\\n│  
 ┌─────────────────────────────────────────────────────────────────────┐   │\\n│ 
-│                      CORTEX CLUSTER (3+ nodes)                       │   │\\n│
+│                      BABYLON-60 CLUSTER (3+ nodes)                       │   │\\n│
 │                                                                      │   │\\n│
 │  ┌───────────────────────────────────────────────────────────────┐  │   │\\n│ 
 │  │              PILLAR 2: HA SYNCHRONIZATION                      │  │   │\\n│
@@ -5076,7 +5076,7 @@ Update Merkle tree\\n        │\\n        ▼\\n6. Response returned to client\
 hash\\n```\\n\\n---\\n\\n## 4. Deployment Topologies\\n\\n### 4.1 Single-Node 
 (Development)\\n\\n```\\n┌─────────────────────────────────────────┐\\n│        
 Development Workstation       │\\n│                                         
-│\\n│  ┌─────────────────────────────────┐   │\\n│  │  CORTEX Single Node       
+│\\n│  ┌─────────────────────────────────┐   │\\n│  │  BABYLON-60 Single Node       
 │   │\\n│  │                                 │   │\\n│  │  ┌──────────┐  
 ┌──────────┐    │   │\\n│  │  │   API    │  │   MCP    │    │   │\\n│  │  │  
 Server  │  │  Server  │    │   │\\n│  │  └────┬─────┘  └────┬─────┘    │   │\\n│
@@ -5133,7 +5133,7 @@ Cluster
 │                    Edge Device (Raspberry Pi / ARM)                  │   │\\n│
 │                                                                      │   │\\n│
 │  ┌───────────────────────────────────────────────────────────────┐  │   │\\n│ 
-│  │              CORTEX Edge Node                                  │  │   │\\n│
+│  │              BABYLON-60 Edge Node                                  │  │   │\\n│
 │  │                                                                │  │   │\\n│
 │  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────────────┐  │  │   │\\n│ 
 │  │  │  Edge MCP    │  │  Local Cache │  │  SQLite (WAL mode)  │  │  │   │\\n│ 
@@ -5251,7 +5251,7 @@ Executive Summary: Persistence & Deployment\n\n**Date:** 2026-02-16
 Architecture Document  \n\n---\n\n## 1. Current State Analysis\n\n### 1.1 CORTEX
 V4.0 Architecture 
 Overview\n\n```\n┌──────────────────────────────────────────────────────────────
-───────────────┐\n│                        CORTEX V4.0 ARCHITECTURE             
+───────────────┐\n│                        BABYLON-60 V4.0 ARCHITECTURE             
 │\n├────────────────────────────────────────────────────────────────────────────
 ─┤\n│                                                                           
    │\n│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐   
@@ -5339,7 +5339,7 @@ NULL,\n    vote_count INTEGER NOT NULL\n);\n```\n\n---\n\n### 2.2 Pillar 2:
 High-Availability Synchronization\n\n**Problem:** Single-node deployment with no
 failover capability.\n\n**Solution:** Raft consensus + CRDT-based 
 replication\n\n```\n┌───────────────────────────────────────────────────────────
-──────────────────┐\n│                    HA CORTEX CLUSTER                     
+──────────────────┐\n│                    HA BABYLON-60 CLUSTER                     
 │\n├────────────────────────────────────────────────────────────────────────────
 ─┤\n│                                                                           
    │\n│   ┌───────────────────────────────────────────────────────────────────┐ 
@@ -5437,7 +5437,7 @@ Together\n\n```\n┌────────────────────
 │\n│            │                 │                      │                      
 │\n│            ▼                 ▼                      ▼                      
 │\n│  ┌─────────────────────────────────────────────────────────────────────┐   
-│\n│  │                      CORTEX CLUSTER (3+ nodes)                       │  
+│\n│  │                      BABYLON-60 CLUSTER (3+ nodes)                       │  
 │\n│  │                                                                      │  
 │\n│  │  ┌───────────────────────────────────────────────────────────────┐  │   
 │\n│  │  │              PILLAR 2: HA SYNCHRONIZATION                      │  │  
@@ -5494,7 +5494,7 @@ Response returned to client\n   ├── Vote confirmed\n   ├── New conse
 └── Ledger entry hash\n```\n\n---\n\n## 4. Deployment Topologies\n\n### 4.1 
 Single-Node (Development)\n\n```\n┌─────────────────────────────────────────┐\n│
 Development Workstation       │\n│                                         │\n│ 
-┌─────────────────────────────────┐   │\n│  │  CORTEX Single Node             │ 
+┌─────────────────────────────────┐   │\n│  │  BABYLON-60 Single Node             │ 
 │\n│  │                                 │   │\n│  │  ┌──────────┐  ┌──────────┐ 
 │   │\n│  │  │   API    │  │   MCP    │    │   │\n│  │  │  Server  │  │  Server 
 │    │   │\n│  │  └────┬─────┘  └────┬─────┘    │   │\n│  │       
@@ -5550,7 +5550,7 @@ Cluster
 │\n│  │                    Edge Device (Raspberry Pi / ARM)                  │  
 │\n│  │                                                                      │  
 │\n│  │  ┌───────────────────────────────────────────────────────────────┐  │   
-│\n│  │  │              CORTEX Edge Node                                  │  │  
+│\n│  │  │              BABYLON-60 Edge Node                                  │  │  
 │\n│  │  │                                                                │  │  
 │\n│  │  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────────────┐  │  │   
 │\n│  │  │  │  Edge MCP    │  │  Local Cache │  │  SQLite (WAL mode)  │  │  │   

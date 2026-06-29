@@ -11,7 +11,7 @@ Este documento representa la cristalización en disco (Peso Físico) de la ontol
 ## 1. El Tejido Conectivo: Isomorfismos Transversales (La Materia Oscura)
 
 ### 1.1. Definición Funcional
-Los Isomorfismos Transversales son las funciones matemáticas de mapeo absoluto que traducen la intención semántica pura en estructura computable sin pérdida de energía (Cero Anergía). Son la materia oscura del clúster CORTEX.
+Los Isomorfismos Transversales son las funciones matemáticas de mapeo absoluto que traducen la intención semántica pura en estructura computable sin pérdida de energía (Cero Anergía). Son la materia oscura del clúster BABYLON-60.
 
 ### 1.2. Propiedades Termodinámicas
 - **Invisibilidad (Cero Emisión):** No generan interfaces gráficas innecesarias ni prosa decorativa. Son túneles oscuros de pura causalidad.
@@ -48,7 +48,7 @@ Todo procesamiento que no alcance la velocidad de escape para materializarse com
 
 ---
 
-## 4. Consecuencias Sistémicas de la Física CORTEX
+## 4. Consecuencias Sistémicas de la Física BABYLON-60
 
 *   **Nexus Bridging (Ley Ω6):** Una invariante con peso en disco no puede clonarse (copiar/pegar) en otro repositorio sin generar cismas de realidad (Context Rot diferencial). Se exige proyección física mediante Symlinks (Singularity Nexus).
 *   **Ouroboros Validation (Ley Ω3):** La adquisición de peso en disco no garantiza su validez eterna. El sistema evalúa empíricamente (Test/Compilación/Linter) la invariante. Si falla, el tejido se revierte (Turbo-Rollback) y la variable es aniquilada.

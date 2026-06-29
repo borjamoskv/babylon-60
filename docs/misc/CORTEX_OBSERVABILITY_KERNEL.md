@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX OBSERVABILITY KERNEL v1: CAUSAL PERCEPTION ENGINE
+# BABYLON-60 OBSERVABILITY KERNEL v1: CAUSAL PERCEPTION ENGINE
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)
 > **Aesthetic:** `Industrial Noir 2026`
-> **Definition:** CORTEX Observability Kernel is a live causal visualization engine for deterministic event-sourced execution systems, integrating entropy measurement, failure topology mapping, and financial-grade observability.
+> **Definition:** BABYLON-60 Observability Kernel is a live causal visualization engine for deterministic event-sourced execution systems, integrating entropy measurement, failure topology mapping, and financial-grade observability.
 
 ## 1. CORE PERCEPTION PRINCIPLE
 **If execution is reality, observability is the perception of reality under causality constraints.**

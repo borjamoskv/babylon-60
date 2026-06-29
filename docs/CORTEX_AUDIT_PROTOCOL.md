@@ -1,11 +1,11 @@
 ---
-title: "CORTEX Audit Protocol v2.0 (L0-L6 Pipeline)"
+title: "BABYLON-60 Audit Protocol v2.0 (L0-L6 Pipeline)"
 level: "C5-REAL"
 author: "borjamoskv (via MOSKV-1)"
 status: "Active"
 ---
 
-# CORTEX AUDIT PROTOCOL: Ciclo de Ingeniería Causal L0-L6
+# BABYLON-60 AUDIT PROTOCOL: Ciclo de Ingeniería Causal L0-L6
 
 > **Nota:** Este documento describe un protocolo de ingeniería. Las hipótesis generadas por el protocolo deben distinguirse de hechos observados y validarse mediante evidencia empírica.
 

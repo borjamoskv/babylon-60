@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Changelog
 
-All notable changes to CORTEX, derived from the git history.
+All notable changes to BABYLON-60, derived from the git history.
 
 Current package metadata in the tree is `v1.0.0`.
 Historical entries below reflect release notes captured at the time and may describe preview features

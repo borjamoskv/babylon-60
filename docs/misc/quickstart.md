@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Quickstart
 
-Get the CORTEX trust core running in 5 minutes.
+Get the BABYLON-60 trust core running in 5 minutes.
 
 > 🐍 **Python demo:** For a self-contained script that walks through the supported trust-core flow, run `python examples/demo_canonical.py` after installing.
 
@@ -144,7 +144,7 @@ The consensus score is automatically updated based on agent reputation weights.
 
 ## 9. Run as MCP Server
 
-CORTEX speaks the **Model Context Protocol**, making it a plug-in for any compatible AI IDE:
+BABYLON-60 speaks the **Model Context Protocol**, making it a plug-in for any compatible AI IDE:
 
 ```bash
 python -m cortex.mcp
@@ -237,5 +237,5 @@ results = engine.search_sync("greeting")
 - **[CLI Reference](cli.md)** — Core commands documented
 - **[REST API Reference](api.md)** — Versioned REST endpoints and models
 - **[MCP Server](mcp.md)** — Deep dive into MCP integration
-- **[Architecture](architecture.md)** — How CORTEX works under the hood
+- **[Architecture](architecture.md)** — How BABYLON-60 works under the hood
 - **[EU AI Act Compliance](compliance.md)** — Full Article 12 mapping

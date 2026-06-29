@@ -3,7 +3,7 @@ Now I have a comprehensive understanding of the codebase. Let me provide the cod
 
 ---
 
-# 🔍 CODE REVIEW: CORTEX Recent Changes
+# 🔍 CODE REVIEW: BABYLON-60 Recent Changes
 
 ## Summary
 

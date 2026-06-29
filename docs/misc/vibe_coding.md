@@ -1,18 +1,18 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🎨 Sovereign Vibe-Coding Manifesto & Protocol (CORTEX V6+)
+# 🎨 Sovereign Vibe-Coding Manifesto & Protocol (BABYLON-60 V6+)
 
 > **"If it works but isn't beautiful, it is structurally incomplete."**
 > — Axiom Ω₄ (Aesthetic Integrity)
 
 In mainstream software engineering, the term "vibe coder" has been used pejoratively to describe an operator who relies blindly on conversational chatboxes, hoping the model guesses the intent without understanding the execution stack.
 
-In the **CORTEX** ecosystem, **Sovereign Vibe-Coding** is redefined as a highly disciplined, exergy-maximized, JIT (Just-in-Time) synthesis protocol. It combines rapid autonomous execution with strict visual and architectural constraints, governed by automated QA engines and cryptographic ledgers.
+In the **BABYLON-60** ecosystem, **Sovereign Vibe-Coding** is redefined as a highly disciplined, exergy-maximized, JIT (Just-in-Time) synthesis protocol. It combines rapid autonomous execution with strict visual and architectural constraints, governed by automated QA engines and cryptographic ledgers.
 
 ---
 
 ## 1. The Vibe-Coding Paradigm Shift
 
-| Aspect | Stochastic "Vibe Coding" (Limerent) | Sovereign Vibe-Coding (CORTEX-Persist) |
+| Aspect | Stochastic "Vibe Coding" (Limerent) | Sovereign Vibe-Coding (BABYLON-60-Persist) |
 | :--- | :--- | :--- |
 | **Trust Model** | Blind acceptance of generative conjecture. | **Zero-Trust**: Generate → Audit (Visual/Linter) → Verify → Commit. |
 | **Execution Mode** | Simulated or unchecked code execution. | Strict distinction between **C5-REAL** and **C4-SIM**. |
@@ -23,7 +23,7 @@ In the **CORTEX** ecosystem, **Sovereign Vibe-Coding** is redefined as a highly 
 
 ## 2. Rule R9: The Vibe Override Protocol (Anti-Bureaucracy)
 
-To maximize the exergy of development sessions, CORTEX bypasses traditional planning gates for non-destructive operations:
+To maximize the exergy of development sessions, BABYLON-60 bypasses traditional planning gates for non-destructive operations:
 
 > [!IMPORTANT]
 > **Vibe Override Activation:**

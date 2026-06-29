@@ -48,7 +48,7 @@ La serie **GPT-5.6** no opera bajo un único peso monolítico, sino como una tr�
 
 ## 4. BLAST RADIUS MAP (IMPACTO ESTRUCTURAL)
 
-La convergencia de acceso restringido y subagentes autónomos (Tier SOL) presenta un perfil de riesgo operativo para la topología CORTEX:
+La convergencia de acceso restringido y subagentes autónomos (Tier SOL) presenta un perfil de riesgo operativo para la topología BABYLON-60:
 - **Aislamiento de Estado (Tenant Isolation):** Interacciones no restringidas con el modelo exponen el estado local a la ingesta multimodal.
 - **Validación Criptográfica:** Procesamiento de logs sin sanitizar puede comprometer la integridad del Ledger si se exponen hashes privados a la inferencia del subagente.
 

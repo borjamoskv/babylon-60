@@ -1,6 +1,6 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: Genera 3 caminos divergentes para resolver un problema usando el contexto de CORTEX.
+description: Genera 3 caminos divergentes para resolver un problema usando el contexto de BABYLON-60.
 ---
 
 # Workflow: IDEA
@@ -32,7 +32,7 @@ Este workflow utiliza el contexto del proyecto y la capacidad de razonamiento de
    Pregunta al usuario cuál de los enfoques prefiere explorar o si quiere una mezcla.
 
 5. **Persistence**:
-   Una vez seleccionada una dirección (o una idea específica), guárdala en CORTEX:
+   Una vez seleccionada una dirección (o una idea específica), guárdala en BABYLON-60:
    ```bash
    cd ~/cortex && .venv/bin/python -m cortex.cli store "<PROJECT>" "Idea: <RESUMEN_IDEA>" --type knowledge --tags "idea, planning, <ENFOQUE>"
    ```

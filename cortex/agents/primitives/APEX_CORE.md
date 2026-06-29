@@ -184,7 +184,7 @@
 | **OUROBOROS-069** | **INV_EXT_BIN_MAGIC**: Archivo recibido por upload valida MimeType leyendo magia binaria, no extensión de string. | `escape(LLM_string) BEFORE AST_inject` | P0 |
 | **OUROBOROS-070** | **INV_DIPLOMACY_BYPASS**: Mensajes "woke/safety" interceptados por API externa son decapitados en capa middleware. | `ASSERT file.chmod == 0o600` | P0 |
 | **OUROBOROS-071** | **INV_MAC_NATIVE**: Llamadas a SO Apple se hacen sobre Mac-Control-Ω nativo, no applescript aleatorio. | `IF require(sudo) THEN architecture_flaw = TRUE` | P0 |
-| **OUROBOROS-072** | **INV_ARTIFACT_META**: Artifacts CORTEX requieren forzosamente booleans de UserFacing y RequestFeedback. | `agent_A.trust(agent_B) == FALSE` | P0 |
+| **OUROBOROS-072** | **INV_ARTIFACT_META**: Artifacts BABYLON-60 requieren forzosamente booleans de UserFacing y RequestFeedback. | `agent_A.trust(agent_B) == FALSE` | P0 |
 | **OUROBOROS-073** | **INV_FRONTEND_NPX**: Todo andamiaje front se ejecuta automatizado `npx -y --help` preventivo en no-interactivo. | `OPEN_PORTS(WAN) == 0` | P0 |
 | **OUROBOROS-074** | **INV_AUTODIDACT**: Agente encuentra barrera -> Resuelve la API (Deep Research) -> No pregunta al humano. | `IF age(secret) > 30d THEN STATUS = COMPROMISED` | P0 |
 | **OUROBOROS-075** | **INV_TURBO_DEFAULT**: Tareas de refactorización operan en modo Turbo Asimétrico sin implementación previa si son O(1) de riesgo. | `global_site_packages == FORBIDDEN` | P1 |
@@ -203,7 +203,7 @@
 | **OUROBOROS-088** | **INV_NO_PROMPT_SLOP**: Texto que contenga "¡Claro! Aquí tienes" aborta la redacción y la relanza limpiada (Exergy Guard). | `agent.access_scope == STRICT_MINIMUM` | P0 |
 | **OUROBOROS-089** | **INV_PEARL_CAUSAL**: Análisis heurístico basado en invariantes topológicas, no en píxeles. | `human.intervention == AXIOM_ONLY` | P1 |
 | **OUROBOROS-090** | **INV_ELEVATE_PG**: Necesidad Root se notifica activando Playground Master Key. | `IF CI_PASS == 100 THEN mutate(AGENTS.md)` | P0 |
-| **OUROBOROS-091** | **INV_NO_PHANTOM_RELEASE**: Release exige correlación 1:1 con un Hash firmado CORTEX. | `IF human_cmd == FATAL THEN HALT AND CONFRONT` | P0 |
+| **OUROBOROS-091** | **INV_NO_PHANTOM_RELEASE**: Release exige correlación 1:1 con un Hash firmado BABYLON-60. | `IF human_cmd == FATAL THEN HALT AND CONFRONT` | P0 |
 | **OUROBOROS-092** | **INV_OBSERVATION_LOOP**: Cada acción requiere observación sensorial post-ejecución, o es ciega. | `ASSERT (Value_Generated / Compute_Cost) > 1.0` | P1 |
 | **OUROBOROS-093** | **INV_TOKEN_BOUND**: El gasto in-memory thinking nunca excede el delta informativo persistido en disco. | `Model(Generator) != Model(Evaluator)` | P0 |
 | **OUROBOROS-094** | **INV_CLEAN_ABORT**: Todo estado efímero se destruye con un aborto limpio SAGA. | `IF json.parse(err) THEN invalidate_matrix()` | P0 |
@@ -229,7 +229,7 @@
 | **AP-03** | **Float Precision Loss** | `type(float) AND domain==finanzas` | `ROLLBACK` | Decimal module |
 | **AP-04** | **Silent Swallow** | `except Exception: pass` | `Git Sentinel Hook Fail` | Logger Inyección Ledger |
 | **AP-05** | **Guard Bypass** | `Ledger.write() SIN Guard.eval()` | `Abortar Transacción SAGA` | Enforce Saga Pattern |
-| **AP-06** | **Orphaned Taint** | `Generative_Fact SIN Taint` | `Purga LFU` | Emitir CORTEX-TAINT |
+| **AP-06** | **Orphaned Taint** | `Generative_Fact SIN Taint` | `Purga LFU` | Emitir BABYLON-60-TAINT |
 | **AP-07** | **Naked Print** | `print() en hotpath` | `Ruff Linter Fail` | Structured bound logger |
 | **AP-08** | **CLI Logic Bleed** | `Regla de negocio en capa CLI` | `Rechazo de Commit` | Mover a cortex/engine |
 | **AP-09** | **Ghost Schema** | `ALTER TABLE sin archivo en /migrations/` | `DB Lock P0` | Añadir Migración |
@@ -255,7 +255,7 @@
 | **RA-01** | **SQLite WAL Mode** | Append-only disk log | `I/O Disk O(1)` | Read-Write Deadlocks |
 | **RA-02** | **Saga Snapshot & Rollback** | RAM/Disk Copy pre-mutation | `Memory M` | Inconsistencia Transaccional |
 | **RA-03** | **Ledger Hash-Chaining** | SHA-256 cadena atada | `CPU hash` | Corrupción silenciosa de DB |
-| **RA-04** | **CORTEX-TAINT Provenance** | Flagging origen probabilístico | `Metadatos extra` | Alucinación en cascada |
+| **RA-04** | **BABYLON-60-TAINT Provenance** | Flagging origen probabilístico | `Metadatos extra` | Alucinación en cascada |
 | **RA-05** | **Quorum BFT (n/3)** | Llamadas LLM paralelas | `API Cost x3` | Falla estocástica simple |
 | **RA-06** | **Circuit Breakers & Jitter** | Delay y cierre de socket | `Latencia de red` | Tormentas de Requests API |
 | **RA-07** | **Nexus Symlinking** | Inodes linkeados OS | `Cero I/O extra` | Desviación documental |

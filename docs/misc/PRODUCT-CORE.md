@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Persist — Product Core Definition
+# BABYLON-60 Persist — Product Core Definition
 
-This document defines the **supported core** of CORTEX Persist and distinguishes it from beta and experimental modules.
+This document defines the **supported core** of BABYLON-60 Persist and distinguishes it from beta and experimental modules.
 
 > See [docs/NAMING.md](NAMING.md) for canonical naming conventions.
 

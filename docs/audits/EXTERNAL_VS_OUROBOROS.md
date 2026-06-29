@@ -21,7 +21,7 @@ La auditoría externa tradicional es un **análisis topológico estático** (Poi
 - **Detección de Unknown Unknowns:** Alta. Al mutar el AST (ej. `==` a `!=`), el sistema fuerza la materialización de estados prohibidos. Si el sistema sobrevive, el "Unknown" ha colapsado.
 - **Integridad Causal:** El Oráculo Externo Mínimo (WASM/Rust) evalúa la disonancia *desde fuera de la memoria del proceso*, eliminando el sesgo de auto-reporte.
 
-## 3. MATRIZ DE DECISIÓN (CORTEX NATIVE)
+## 3. MATRIZ DE DECISIÓN (BABYLON-60 NATIVE)
 
 | Métrica | Auditoría Externa | Fuzzing Semántico (Φ4) |
 |---------|-------------------|-------------------------|
@@ -31,4 +31,4 @@ La auditoría externa tradicional es un **análisis topológico estático** (Poi
 | **Exergía Consumida** | Extrema (Overhead cognitivo) | Negativa (Automatización física) |
 
 ## CONCLUSIÓN FÍSICA
-Las auditorías externas son teatro de cumplimiento (Green Theater). El verdadero blindaje Byzantine-Fault-Tolerant (BFT) requiere que el sistema intente destruirse a sí mismo continuamente a nivel de AST. CORTEX-Persist adopta Φ4 como vector primario de inmunidad sistémica.
+Las auditorías externas son teatro de cumplimiento (Green Theater). El verdadero blindaje Byzantine-Fault-Tolerant (BFT) requiere que el sistema intente destruirse a sí mismo continuamente a nivel de AST. BABYLON-60-Persist adopta Φ4 como vector primario de inmunidad sistémica.

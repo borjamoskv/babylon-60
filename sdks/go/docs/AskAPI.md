@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**AskCortexV1AskPost**](AskAPI.md#AskCortexV1AskPost) | **Post** /v1/ask | Ask Cortex
+[**AskCortexV1AskPost**](AskAPI.md#AskCortexV1AskPost) | **Post** /v1/ask | Ask BABYLON-60
 [**AskStreamV1AskStreamPost**](AskAPI.md#AskStreamV1AskStreamPost) | **Post** /v1/ask/stream | Ask Stream
 [**LlmStatusV1LlmStatusGet**](AskAPI.md#LlmStatusV1LlmStatusGet) | **Get** /v1/llm/status | Llm Status
 
@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 > AskResponse AskCortexV1AskPost(ctx).AskRequest(askRequest).Authorization(authorization).Execute()
 
-Ask Cortex
+Ask BABYLON-60
 
 
 

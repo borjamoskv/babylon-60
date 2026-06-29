@@ -5,7 +5,7 @@
 
 ## 1. Introduction to the Consensus Substrate
 
-To maintain Byzantine Fault Tolerance (BFT) across multi-agent swarms without relying on a centralized coordinator, CORTEX-Persist implements a layered consensus substrate. This substrate guarantees that fact injections, state transitions, and execution outcomes are validated by a supermajority of agents before being committed to the immutable Ledger.
+To maintain Byzantine Fault Tolerance (BFT) across multi-agent swarms without relying on a centralized coordinator, BABYLON-60-Persist implements a layered consensus substrate. This substrate guarantees that fact injections, state transitions, and execution outcomes are validated by a supermajority of agents before being committed to the immutable Ledger.
 
 The three core layers are:
 1. **WBFT** (Weighted Byzantine Fault Tolerance) — Model response filtering.

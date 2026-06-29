@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Configuration Reference
 
-All CORTEX settings are loaded from environment variables at import time via `cortex/config.py`. Call `config.reload()` to refresh at runtime.
+All BABYLON-60 settings are loaded from environment variables at import time via `cortex/config.py`. Call `config.reload()` to refresh at runtime.
 
 Most adopters only need the local database path plus optional `api` or `mcp`
 extras. The rest of this page includes broader runtime and operator settings;
@@ -39,7 +39,7 @@ the recommended public boundary remains the one described in
 | `GOOGLE_API_KEY` | — | Google Gemini API key (for API embeddings) |
 | `OPENAI_API_KEY` | — | OpenAI API key (for API embeddings) |
 
-When set to `local`, CORTEX uses `all-MiniLM-L6-v2` via ONNX Runtime for fast
+When set to `local`, BABYLON-60 uses `all-MiniLM-L6-v2` via ONNX Runtime for fast
 local vector generation with no network calls.
 
 ---

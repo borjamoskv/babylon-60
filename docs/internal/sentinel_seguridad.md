@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: Security sentinel — checklist for auditing and hardening CORTEX before any release
+description: Security sentinel — checklist for auditing and hardening BABYLON-60 before any release
 ---
 
-# 🛡️ Sentinel de Seguridad — CORTEX
+# 🛡️ Sentinel de Seguridad — BABYLON-60
 
 Checklist soberana de seguridad. Ejecutar antes de cada release o deploy.
 
@@ -111,4 +111,4 @@ cd ~/cortex && .venv/bin/pip audit 2>&1 | tail -20
 - [ ] All 14 checks pass
 - [ ] Security headers verified via `curl -I https://api.cortex.dev/health`
 - [ ] No new `# nosec` or `# noqa: S` annotations without documented justification
-- [ ] CORTEX fact stored: `cortex store --type decision cortex "Security audit passed for release vX.Y.Z"`
+- [ ] BABYLON-60 fact stored: `cortex store --type decision cortex "Security audit passed for release vX.Y.Z"`

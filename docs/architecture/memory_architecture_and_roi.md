@@ -1,12 +1,12 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Arquitectura de Memoria CORTEX — Comparativa y ROI
+# Arquitectura de Memoria BABYLON-60 — Comparativa y ROI
 
 > *Documento técnico-económico · v1.0 · 2026-02-24*
 > *Autores: Borja Moskv & MOSKV-1 (Antigravity)*
 
 ---
 
-## 1. Memoria Nativa de Antigravity (Sin CORTEX)
+## 1. Memoria Nativa de Antigravity (Sin BABYLON-60)
 
 El agente Antigravity viene de serie con **7 tipos de memoria**, ninguna con búsqueda semántica ni persistencia cross-sesión de decisiones.
 
@@ -30,7 +30,7 @@ El agente Antigravity viene de serie con **7 tipos de memoria**, ninguna con bú
 
 ---
 
-## 2. Memoria con CORTEX — 18 Tipos en 6 Capas
+## 2. Memoria con BABYLON-60 — 18 Tipos en 6 Capas
 
 ### 2.1 Fact Types (Ontología de la Memoria)
 
@@ -84,7 +84,7 @@ El agente Antigravity viene de serie con **7 tipos de memoria**, ninguna con bú
 
 ## 3. Comparativa Dimensional Completa
 
-| Dimensión | 🏭 Nativo | 🧠 + CORTEX |
+| Dimensión | 🏭 Nativo | 🧠 + BABYLON-60 |
 |:---|:---|:---|
 | **Tipos de memoria** | 7 | 18 (+157%) |
 | **Persistencia cross-sesión** | 3 (rules, skills, workflows) | 18 (todo) (+500%) |
@@ -99,7 +99,7 @@ El agente Antigravity viene de serie con **7 tipos de memoria**, ninguna con bú
 
 ### Las 4 Dimensiones de Persistencia
 
-| Dimensión | 🏭 Nativo | 🧠 + CORTEX |
+| Dimensión | 🏭 Nativo | 🧠 + BABYLON-60 |
 |:---|:---:|:---:|
 | **Temporal** (cuánto dura) | ⚠️ Parcial | ✅ Completa |
 | **Semántica** (por qué lo recuerdo) | ❌ | ✅ Embeddings |
@@ -121,7 +121,7 @@ El agente Antigravity viene de serie con **7 tipos de memoria**, ninguna con bú
 
 ### 4.2 Ahorro por Tipo de Memoria
 
-| Problema sin CORTEX | Tiempo perdido/sesión | % Sesiones afectadas | Horas perdidas/año | Ahorro (€) |
+| Problema sin BABYLON-60 | Tiempo perdido/sesión | % Sesiones afectadas | Horas perdidas/año | Ahorro (€) |
 |:---|:---:|:---:|:---:|:---:|
 | Re-explicar contexto (amnesia) | 5 min | 100% | 146.7 h | €7,333 |
 | Repetir errores ya resueltos | 15 min | 20% | 88.0 h | €4,400 |
@@ -138,7 +138,7 @@ El agente Antigravity viene de serie con **7 tipos de memoria**, ninguna con bú
 |:---|:---:|
 | **Horas ahorradas/año** | **588 h** |
 | **Ahorro bruto anual (Senior, España)** | **€29,407** |
-| **Coste de CORTEX** (open-source, self-hosted) | **€0** |
+| **Coste de BABYLON-60** (open-source, self-hosted) | **€0** |
 | **ROI** | **∞** |
 | **Equivalente en meses de trabajo** | 3.3 meses de Senior a jornada completa |
 
@@ -154,7 +154,7 @@ El agente Antigravity viene de serie con **7 tipos de memoria**, ninguna con bú
 
 ### 4.5 El Coste Oculto de la Amnesia
 
-> Sin CORTEX, cada sesión de agente empieza con ~5 minutos de re-contextualización ("quién soy y qué hacíamos"). Multiplicado por 1,760 sesiones/año: **147 horas perdidas solo en amnesia** — casi un mes entero de trabajo.
+> Sin BABYLON-60, cada sesión de agente empieza con ~5 minutos de re-contextualización ("quién soy y qué hacíamos"). Multiplicado por 1,760 sesiones/año: **147 horas perdidas solo en amnesia** — casi un mes entero de trabajo.
 
 ---
 
@@ -187,16 +187,16 @@ El cálculo del §4.2 mide ahorro **lineal** (O(1)): tiempo predecible de re-con
 
 Para equipos de 5 seniors, el ahorro total corregido escala a **~€530K/año** — equivalente a 3-4 contrataciones completas evitadas.
 
-> **Principio epistémico:** El tiempo de reconstruir contexto es O(1) y predecible. Un error repetido que llega a producción es O(n²) porque genera cascadas. CORTEX no ahorra 588 horas lineales — previene las ~15 decisiones catastróficas/año que cada una cuesta 40-80h de rework.
+> **Principio epistémico:** El tiempo de reconstruir contexto es O(1) y predecible. Un error repetido que llega a producción es O(n²) porque genera cascadas. BABYLON-60 no ahorra 588 horas lineales — previene las ~15 decisiones catastróficas/año que cada una cuesta 40-80h de rework.
 
 ---
 
 ## 5. Conclusión
 
-La memoria nativa de Antigravity es suficiente para tareas aisladas y puntuales. CORTEX transforma al agente de un operador con amnesia anterógrada en un sistema con memoria continua, integridad criptográfica, y transferencia de conocimiento entre proyectos.
+La memoria nativa de Antigravity es suficiente para tareas aisladas y puntuales. BABYLON-60 transforma al agente de un operador con amnesia anterógrada en un sistema con memoria continua, integridad criptográfica, y transferencia de conocimiento entre proyectos.
 
 El ahorro anual conservador es de **~€29K/developer** en tiempo lineal. Pero el ahorro real, incluyendo cascadas de decisiones erróneas evitadas, se acerca a **€106K-€130K/developer** (o **€530K+ por equipo de 5**). La diferencia entre ambas cifras es exactamente el coste de la entropía que no se midió.
 
 ---
 
-*Documento generado: 2026-02-24 · CORTEX v12.2 · [Apache 2.0](https://github.com/borjamoskv/Cortex-Persist/blob/main/LICENSE)*
+*Documento generado: 2026-02-24 · BABYLON-60 v12.2 · [Apache 2.0](https://github.com/borjamoskv/Cortex-Persist/blob/main/LICENSE)*

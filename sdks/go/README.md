@@ -74,7 +74,7 @@ Class | Method | HTTP request | Description
 *AgentsAPI* | [**GetAgentV1AgentsAgentIdGet**](docs/AgentsAPI.md#getagentv1agentsagentidget) | **Get** /v1/agents/{agent_id} | Get Agent
 *AgentsAPI* | [**ListAgentsV1AgentsGet**](docs/AgentsAPI.md#listagentsv1agentsget) | **Get** /v1/agents | List Agents
 *AgentsAPI* | [**RegisterAgentV1AgentsPost**](docs/AgentsAPI.md#registeragentv1agentspost) | **Post** /v1/agents | Register Agent
-*AskAPI* | [**AskCortexV1AskPost**](docs/AskAPI.md#askcortexv1askpost) | **Post** /v1/ask | Ask Cortex
+*AskAPI* | [**AskCortexV1AskPost**](docs/AskAPI.md#askcortexv1askpost) | **Post** /v1/ask | Ask BABYLON-60
 *AskAPI* | [**AskStreamV1AskStreamPost**](docs/AskAPI.md#askstreamv1askstreampost) | **Post** /v1/ask/stream | Ask Stream
 *AskAPI* | [**LlmStatusV1LlmStatusGet**](docs/AskAPI.md#llmstatusv1llmstatusget) | **Get** /v1/llm/status | Llm Status
 *ContextAPI* | [**ContextHistoryV1ContextHistoryGet**](docs/ContextAPI.md#contexthistoryv1contexthistoryget) | **Get** /v1/context/history | Context History

@@ -1,11 +1,11 @@
-# CORTEX-Persist: Formalization of Trust Boundaries and Cryptographic Invariants
+# BABYLON-60-Persist: Formalization of Trust Boundaries and Cryptographic Invariants
 
 **Author / Demiurgo:** Borja Moskv (`borjamoskv`)
 **System Level:** KETER-∞ Metal-Level
 **Date:** 2026-06-26
 
 ## 1. Abstract
-This paper formalizes the topological and cryptographic trust boundaries of the CORTEX-Persist architecture. By modeling the transition from stochastic probabilistic inference (LLMs) to a deterministic C5-REAL execution kernel, we prove that arbitrary generative entropy cannot corrupt the immutable fact ledger without violating the hash-chain or the Byzantine validation quorum.
+This paper formalizes the topological and cryptographic trust boundaries of the BABYLON-60-Persist architecture. By modeling the transition from stochastic probabilistic inference (LLMs) to a deterministic C5-REAL execution kernel, we prove that arbitrary generative entropy cannot corrupt the immutable fact ledger without violating the hash-chain or the Byzantine validation quorum.
 
 ## 2. Topological Substrate & Actor Mapping
 Let the system be defined as a directed acyclic graph $G = (N, E)$ where nodes $N$ represent states or execution environments, and edges $E$ represent state transitions (mutations).
@@ -13,7 +13,7 @@ Let the system be defined as a directed acyclic graph $G = (N, E)$ where nodes $
 ### 2.1 Sets of Actors
 - $\mathcal{S}$: The set of stochastic actors (e.g., Agent Swarm, LLM inference).
 - $\mathcal{V}$: The deterministic validation boundary (Virgo Guard).
-- $\mathcal{K}$: The CORTEX Kernel (Execution layer).
+- $\mathcal{K}$: The BABYLON-60 Kernel (Execution layer).
 - $\mathcal{L}$: The Append-Only Cryptographic Ledger.
 
 ### 2.2 Epistemic Transition Function
@@ -23,7 +23,7 @@ Let $v: \mathcal{S} \rightarrow \mathcal{K} \cup \{\bot\}$ be the Virgo validati
 \[ v(x) = \begin{cases} k_{valid} & \text{if } x \text{ satisfies schema } \Sigma \text{ and passes deterministic guard seals.} \\ \bot & \text{otherwise.} \end{cases} \]
 
 ## 3. The Taint Engine (Cryptographic Provenance)
-Every fact $F$ entering $\mathcal{K}$ must carry a sovereign cryptographic seal (CORTEX-TAINT).
+Every fact $F$ entering $\mathcal{K}$ must carry a sovereign cryptographic seal (BABYLON-60-TAINT).
 
 Let $\tau(x)$ be the taint assignment function:
 \[ \tau(x) = \text{SHA3-256}( \text{AgentID} \ || \ \text{SessionID} \ || \ \text{Timestamp} \ || \ x ) \]
@@ -33,7 +33,7 @@ For any fact $F$ persisted in $\mathcal{L}$, $F$ is invalid iff $\tau(F) = \empt
 \[ \forall F \in \mathcal{L}, \exists \tau(F) \neq \emptyset \]
 
 ## 4. The Write-Path Saga Protocol (State Transition)
-State transitions in CORTEX-Persist are modeled as a reversible, strictly ordered sequence (Saga Pattern).
+State transitions in BABYLON-60-Persist are modeled as a reversible, strictly ordered sequence (Saga Pattern).
 
 Let a Saga transaction $T$ be an ordered sequence of operations $O = (o_1, o_2, ..., o_n)$ where $n=7$.
 For every operation $o_i$, there exists a compensatory idempotent operation $o_i^{-1}$.
@@ -59,4 +59,4 @@ To maintain chain validity, the adversary must compute $L_{k+1}' = \text{SHA-256
 Because $\text{SHA-256}(L_k \ || \ \dots) \neq \text{SHA-256}(L_k' \ || \ \dots)$, the root hash $L_t'$ diverges from the public timestamped $L_t$. Therefore, the tampering is detected in $O(1)$ verification time.
 
 ## 6. Conclusion
-The CORTEX-Persist architecture forces all non-deterministic input to collapse into a strictly typed, cryptographically signed algebraic structure before state persistence. The system operates not on trust, but on verifiable topological constraints.
+The BABYLON-60-Persist architecture forces all non-deterministic input to collapse into a strictly typed, cryptographically signed algebraic structure before state persistence. The system operates not on trust, but on verifiable topological constraints.

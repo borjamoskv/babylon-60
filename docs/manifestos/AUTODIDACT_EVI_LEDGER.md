@@ -3,12 +3,12 @@
 **Reality Level:** `C5-REAL` (Epistemic Synthesis)
 **Autor:** Borja Moskv (borjamoskv)
 **Vector:** Sistemas Adaptativos y Arquitectura Epistémica de Mercados de Predicción
-**Target:** CORTEX-Persist & Ouroboros-∞
+**Target:** BABYLON-60-Persist & Ouroboros-∞
 
 ---
 
 ## 1. Extracción Isomórfica (Desmitificación)
-La literatura sobre Expected Value of Information (EVI), Surprise Value of Information (SVI), Brier Score y Mercados de Predicción se consolida en una única topología estructural en CORTEX-Persist. El "Hypothesis Ledger" no es un log narrativo, sino una tabla SQL estricta donde cada agente colapsa su incertidumbre en una probabilidad antes del testeo, siendo castigado termodinámicamente si falla la predicción (alto Brier Score). El SVI dicta qué ramas merecen ser exploradas basándose en el ratio Coste/EVI (CBR) y el ROI_surprise.
+La literatura sobre Expected Value of Information (EVI), Surprise Value of Information (SVI), Brier Score y Mercados de Predicción se consolida en una única topología estructural en BABYLON-60-Persist. El "Hypothesis Ledger" no es un log narrativo, sino una tabla SQL estricta donde cada agente colapsa su incertidumbre en una probabilidad antes del testeo, siendo castigado termodinámicamente si falla la predicción (alto Brier Score). El SVI dicta qué ramas merecen ser exploradas basándose en el ratio Coste/EVI (CBR) y el ROI_surprise.
 
 ---
 

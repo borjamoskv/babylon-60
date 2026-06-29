@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX-Persist
+# BABYLON-60-Persist
 
 **Tamper-evident memory and decision lineage for autonomous systems.**
 
@@ -9,7 +9,7 @@ Agents can act. They cannot remember. Current AI systems excel at generation but
 Right now, your agents don't have memory. They have disjointed logs, context windows, and optimism.
 
 ## The Solution
-CORTEX-Persist is the trust layer for autonomous execution. A local-first memory and verification substrate built so your AI can remember, retrieve, and cryptographically prove what happened in a long-running execution. 
+BABYLON-60-Persist is the trust layer for autonomous execution. A local-first memory and verification substrate built so your AI can remember, retrieve, and cryptographically prove what happened in a long-running execution. 
 
 - **Store with intent**: Capture decisions, operational states, and errors as typed memory.
 - **Verify with cryptography**: Anchor every state change to a tamper-evident ledger.
@@ -47,12 +47,12 @@ cortex search "compliance vendor failure"
 ```
 
 ## Doctrine 
-CORTEX strictly enforces the **Sovereign Axioms**:
+BABYLON-60 strictly enforces the **Sovereign Axioms**:
 1. **No Hidden Entropy:** If an operation is not in the ledger, it never happened.
 2. **Deterministic Time-Travel:** Rollbacks map perfectly to exact states.
 3. **Byzantine Validation:** A generative output must face a deterministic validation boundary before being committed as a fact.
 
-For more on the CORTEX Philosophy and Exergy principles, see `ARCHITECTURE.md`.
+For more on the BABYLON-60 Philosophy and Exergy principles, see `ARCHITECTURE.md`.
 
 ## License
 Apache 2.0

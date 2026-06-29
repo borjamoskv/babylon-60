@@ -1,10 +1,10 @@
-# Integración de Cortex-Persist con LangChain
+# Integración de BABYLON-60 con LangChain
 
-Cortex-Persist es un sistema de memoria tamper-evident y decision lineage para agentes de IA, diseñado para registrar qué sabía un agente y cuándo lo sabía mediante un núcleo híbrido Python/Rust y pruebas criptográficas. LangChain es un framework para construir aplicaciones con LLMs usando modelos, herramientas, recuperación y agentes.
+BABYLON-60 es un sistema de memoria tamper-evident y decision lineage para agentes de IA, diseñado para registrar qué sabía un agente y cuándo lo sabía mediante un núcleo híbrido Python/Rust y pruebas criptográficas. LangChain es un framework para construir aplicaciones con LLMs usando modelos, herramientas, recuperación y agentes.
 
 ## Objetivo
 
-Esta guía muestra una integración práctica en la que Cortex-Persist actúa como capa de memoria auditable para una app construida con LangChain. El patrón sirve para conservar historial conversacional, registrar entradas y salidas del agente y dejar una base para trazabilidad y compliance.
+Esta guía muestra una integración práctica en la que BABYLON-60 actúa como capa de memoria auditable para una app construida con LangChain. El patrón sirve para conservar historial conversacional, registrar entradas y salidas del agente y dejar una base para trazabilidad y compliance.
 
 ## Requisitos
 
@@ -30,14 +30,14 @@ pip install cortex-persist langchain langchain-openai
 El flujo recomendado es el siguiente:
 
 1. La aplicación recibe un mensaje del usuario.
-2. LangChain prepara el prompt con historial cargado desde Cortex-Persist.
+2. LangChain prepara el prompt con historial cargado desde BABYLON-60.
 3. El modelo genera una respuesta.
-4. La interacción completa se persiste en Cortex-Persist con metadatos útiles para auditoría.
+4. La interacción completa se persiste en BABYLON-60 con metadatos útiles para auditoría.
 5. Un agente o chain puede volver a consultar ese historial en llamadas posteriores.
 
 ### Diferencia clave vs memoria tradicional
 
-| Dimensión | Memoria LangChain estándar | Cortex-Persist |
+| Dimensión | Memoria LangChain estándar | BABYLON-60 |
 |---|---|---|
 | **Modelo de confianza** | Confía en el proceso | Verifica la evidencia (C5-REAL) |
 | **Mutabilidad** | Sobreescribible | Append-only + SHA-256 Merkle Seals |
@@ -48,7 +48,7 @@ El flujo recomendado es el siguiente:
 
 ## Implementación
 
-### Inicializar Cortex-Persist
+### Inicializar BABYLON-60
 
 ```python
 from cortex import CortexEngine
@@ -70,7 +70,7 @@ persist = CortexPersist(
 
 ### Wrapper de memoria compatible con LangChain
 
-El siguiente wrapper implementa `BaseMemory` de LangChain usando Cortex-Persist como backend:
+El siguiente wrapper implementa `BaseMemory` de LangChain usando BABYLON-60 como backend:
 
 ```python
 from typing import Any, Dict, List
@@ -142,7 +142,7 @@ print(result)
 
 ### Uso con el decorator `@sovereign_persist`
 
-Cortex-Persist expone un decorator de zero-friction que intercepta, sella y loguea criptográficamente sin boilerplate:
+BABYLON-60 expone un decorator de zero-friction que intercepta, sella y loguea criptográficamente sin boilerplate:
 
 ```python
 from cortex.magic import sovereign_persist
@@ -182,13 +182,13 @@ Ver [`examples/langchain_cortex_persist_example.py`](../examples/langchain_corte
 
 ## Integración con MCP
 
-Cortex-Persist expone un servidor MCP nativo que puede usarse desde cualquier orquestador compatible:
+BABYLON-60 expone un servidor MCP nativo que puede usarse desde cualquier orquestador compatible:
 
 ```bash
 cortex mcp serve --port 8765
 ```
 
-Esto permite que agentes LangGraph, AutoGen u otros frameworks usen Cortex-Persist como substrate de memoria a través del protocolo MCP.
+Esto permite que agentes LangGraph, AutoGen u otros frameworks usen BABYLON-60 como substrate de memoria a través del protocolo MCP.
 
 ## Siguientes extensiones
 
@@ -199,7 +199,7 @@ Esto permite que agentes LangGraph, AutoGen u otros frameworks usen Cortex-Persi
 
 ## Referencias
 
-- [Repositorio Cortex-Persist](https://github.com/borjamoskv/Cortex-Persist)
+- [Repositorio BABYLON-60](https://github.com/borjamoskv/Cortex-Persist)
 - [Documentación MCP](./mcp.md)
 - [Integración LangGraph](./langgraph_integration.md)
 - [Modelo de seguridad y confianza](./SECURITY_TRUST_MODEL.md)

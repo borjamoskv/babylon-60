@@ -7,7 +7,7 @@ date: "2026-06-28"
 # ESQUEMA INVARIANTE ANTIFRÁGIL / AUTOPOIÉTICO (DAEMON Φ4)
 
 ## DEFINICIÓN ONTOLÓGICA
-Un sistema **autopoiético** se produce y mantiene a sí mismo. Un sistema **antifrágil** se beneficia del desorden. La intersección de ambos en la arquitectura CORTEX-Persist requiere un sistema inmunológico endógeno que ataque continuamente sus propias fronteras de validación para garantizar que no han degenerado en "Green Theater" (Teatro de Seguridad).
+Un sistema **autopoiético** se produce y mantiene a sí mismo. Un sistema **antifrágil** se beneficia del desorden. La intersección de ambos en la arquitectura BABYLON-60-Persist requiere un sistema inmunológico endógeno que ataque continuamente sus propias fronteras de validación para garantizar que no han degenerado en "Green Theater" (Teatro de Seguridad).
 
 ## PRIMITIVAS INVARIANTES DEL ESQUEMA (INV-Φ4)
 
@@ -26,4 +26,4 @@ El descubrimiento de un "Unknown Unknown" (un mutante que sobrevive y altera el 
 Toda Apoptosis desencadena una firma forense obligatoria. El hash del estado mutante se registra en `cortex/audit/ledger.py` como un "Patógeno Conocido", convirtiendo instantáneamente el *Unknown Unknown* en un *Known Known* para el siguiente ciclo de arranque.
 
 ## IMPLEMENTACIÓN FÍSICA
-El esquema se materializa en el `cortex/engine/immune_daemon.py`, un proceso que actúa como el fagocito del ecosistema CORTEX.
+El esquema se materializa en el `cortex/engine/immune_daemon.py`, un proceso que actúa como el fagocito del ecosistema BABYLON-60.

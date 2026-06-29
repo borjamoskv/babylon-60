@@ -42,7 +42,7 @@ Mecanismos de aislamiento y continuidad operativa para maximizar el trabajo úti
 
 | ID | Redundancia C5 | Función Topológica | Riesgo Mitigado | Coste (Overhead) | Dependencias |
 |---|---|---|---|---|---|
-| REDUN-EXG-001 | Captura de Estado (Snapshotting) | Cristaliza el estado de máxima exergía antes de ejecutar transformaciones entrópicas. | Corrupción irreversible de estado por ejecución errónea. | Almacenamiento (SQLite WAL/Ledger). | Git Sentinel / Cortex Vault |
+| REDUN-EXG-001 | Captura de Estado (Snapshotting) | Cristaliza el estado de máxima exergía antes de ejecutar transformaciones entrópicas. | Corrupción irreversible de estado por ejecución errónea. | Almacenamiento (SQLite WAL/Ledger). | Git Sentinel / BABYLON-60 Vault |
 | REDUN-EXG-002 | Compresión Landauer | Condensación de señales caóticas a sus invariantes causales antes de la asimilación. | Saturación del ancho de banda y degradación de memoria. | Latencia inicial de filtrado. | Taint Engine |
 
 ## MATRIZ 5: VECTORES DE ATAQUE ADVERSARIAL (`reda`)

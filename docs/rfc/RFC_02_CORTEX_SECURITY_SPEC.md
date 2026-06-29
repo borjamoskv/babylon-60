@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# RFC 02: CORTEX Security Architecture & Epistemic Control Plane (Spec)
+# RFC 02: BABYLON-60 Security Architecture & Epistemic Control Plane (Spec)
 
 **Title:** Verifiable State Transition Control under Uncertainty
 **Status:** Architecture Draft
@@ -9,7 +9,7 @@
 
 ## 1. Abstract
 
-CORTEX separates security into four distinct but interdependent planes. This specification formally defines the invariants, capabilities, risk tiers, and threat models necessary to maintain long-term operational continuity under controlled degradation, shifting the focus from generation to verification.
+BABYLON-60 separates security into four distinct but interdependent planes. This specification formally defines the invariants, capabilities, risk tiers, and threat models necessary to maintain long-term operational continuity under controlled degradation, shifting the focus from generation to verification.
 
 ## 2. Four Planes of Security
 
@@ -64,7 +64,7 @@ All operational behaviors are bucketed by thermodynamic and operational cost.
 |---|---|---|---|
 | **Tier 0** | Read-Only Cognition | Summarization, query parsing, classification, planning (no side effects). | Epistemic validation; fast execution; no persistence. |
 | **Tier 1** | Reversible Local Writes | Temporary caching, scratchpad updates, output drafting. | Local capability scope; TTL eviction. |
-| **Tier 2** | Persistent Internal State | CORTEX Ledger writes, knowledge crystallization, memory updates. | Invariants 1 & 2 applied; Cryptographic hash chain updated. |
+| **Tier 2** | Persistent Internal State | BABYLON-60 Ledger writes, knowledge crystallization, memory updates. | Invariants 1 & 2 applied; Cryptographic hash chain updated. |
 | **Tier 3** | External Side Effects | Tool use, email dispatch, config updates, non-critical API requests. | Invariant 4 enforced. Required capability signature. |
 | **Tier 4** | Irreversible / Critical | Production deployment, financial transactions, credentials, destructive modifications. | Two-Phase Commit; Explicit Human Consensus or Hardware-Level Gate required. |
 
@@ -72,7 +72,7 @@ All operational behaviors are bucketed by thermodynamic and operational cost.
 
 ## 5. Threat Model
 
-CORTEX actively mitigates the following threat classes.
+BABYLON-60 actively mitigates the following threat classes.
 
 ### Threat Class A: Generative Faults (Internal Entropy)
 - **Vectors:** Schema drift, hallucinated payloads, invalid tool arguments, fabricated provenance, state inconsistency under loop pressure.
@@ -98,8 +98,8 @@ CORTEX actively mitigates the following threat classes.
 
 ## 6. Persistence Semantics & Consensus
 
-- **Immutability vs State Correctness:** The CORTEX Ledger is append-only and tamper-evident. If an incorrect state is committed, the hashes prove who committed what, and when. State correction is handled via **Supersession Semantics** (a new fact supersedes the old) while maintaining the original forensic trail.
+- **Immutability vs State Correctness:** The BABYLON-60 Ledger is append-only and tamper-evident. If an incorrect state is committed, the hashes prove who committed what, and when. State correction is handled via **Supersession Semantics** (a new fact supersedes the old) while maintaining the original forensic trail.
 - **Consensus does not equal Truth:** If a 5-agent swarm achieves 100% consensus on a fact, the system tags the confidence high but STILL records it as probabilistic conjecture until it crosses an empirical validation test. 
 
 ---
-*CORTEX Security Spec v1 - Approved for implementation in System Gates.*
+*BABYLON-60 Security Spec v1 - Approved for implementation in System Gates.*

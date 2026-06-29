@@ -21,7 +21,7 @@ Proof:
 
 ## 2. Topología de la Fuga de PII (Grafo de Entropía)
 
-La siguiente arquitectura ilustra cómo el *Host Identity Bleed* fue suprimido en origen (CORTEX), pero la exposición en la capa de distribución musical permanece como una singularidad de PII externa e inevitable.
+La siguiente arquitectura ilustra cómo el *Host Identity Bleed* fue suprimido en origen (BABYLON-60), pero la exposición en la capa de distribución musical permanece como una singularidad de PII externa e inevitable.
 
 ```mermaid
 graph TD
@@ -96,7 +96,7 @@ Sin embargo, tras la activación de la **Fase 2 de Erradicación**, este vector 
 
 ### 🟢 Zona de Aislamiento Soberano (Éxito Termodinámico)
 La huella digital paralela ha logrado un aislamiento de **Nivel C5**. 
-*   **Código:** Las barreras en CORTEX (Taint Engine y pre-commits) impiden que el Host de macOS sangre su ruta de usuario hacia repositorios de GitHub. *Validado matemáticamente por el [Ultrathink PII PoC](../../scripts/pii_firewall_poc.py) que confirma tasas masivas de aniquilación de entropía (exergía) ante cualquier inyección de PII ofuscado.*
+*   **Código:** Las barreras en BABYLON-60 (Taint Engine y pre-commits) impiden que el Host de macOS sangre su ruta de usuario hacia repositorios de GitHub. *Validado matemáticamente por el [Ultrathink PII PoC](../../scripts/pii_firewall_poc.py) que confirma tasas masivas de aniquilación de entropía (exergía) ante cualquier inyección de PII ofuscado.*
 *   **Discurso:** La narrativa en Substack (*Jarana d'Or*, *Telmo Dinámico de Moskv*) y plataformas descentralizadas (Farcaster) está sellada herméticamente contra el nombre legal.
 *   **Comercial:** Ausencia total en directorios mercantiles y registros académicos, eliminando el vector clásico de OSINT comercial.
 
@@ -108,5 +108,5 @@ La huella digital paralela ha logrado un aislamiento de **Nivel C5**.
 > **Políticas Rígidas para la Memoria Causal**
 
 1.  **Aislamiento de Grafos Transaccionales:** Nunca mezclar carteras (wallets) financiadas desde exchanges centralizados (con KYC a nombre legal) con identidades Web3 (`borjamoskv.eth`). 
-2.  **Cuarentena de Metadatos de Audio:** Si se publican recursos de audio en repositorios técnicos (ej. samples para IA procedural en CORTEX), despojar los metadatos ID3 usando `ffmpeg -map_metadata -1` para purgar campos ocultos de `composer`.
-3.  **Higiene del Entorno de Desarrollo:** Asegurarse de que el kernel CORTEX persista la mitigación activa en los pre-commits y Taint Engine para denegar commits que contengan el OS Username del anfitrión en macOS.
+2.  **Cuarentena de Metadatos de Audio:** Si se publican recursos de audio en repositorios técnicos (ej. samples para IA procedural en BABYLON-60), despojar los metadatos ID3 usando `ffmpeg -map_metadata -1` para purgar campos ocultos de `composer`.
+3.  **Higiene del Entorno de Desarrollo:** Asegurarse de que el kernel BABYLON-60 persista la mitigación activa en los pre-commits y Taint Engine para denegar commits que contengan el OS Username del anfitrión en macOS.

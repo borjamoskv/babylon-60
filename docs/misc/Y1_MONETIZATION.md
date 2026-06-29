@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX PERSIST 2.0: MONETIZATION & GTM ENGINE
+# BABYLON-60 2.0: MONETIZATION & GTM ENGINE
 
 > **Reality Level:** `C4-SIM` (Projection)
 > **Aesthetic:** `Industrial Noir 2026`

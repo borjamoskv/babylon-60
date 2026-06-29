@@ -1,4 +1,4 @@
-# CORTEX DEEP RESEARCH: GITHUB CODESPACES
+# BABYLON-60 DEEP RESEARCH: GITHUB CODESPACES
 > **Target:** `https://docs.github.com/en/codespaces`
 > **Mode:** AUTODIDACT (Deep Research)
 > **Reality Level:** C5-REAL

@@ -6,7 +6,7 @@
 
 ### Invarianza Total
 
-> *"CORTEX no aumenta la inteligencia del modelo fundacional; restringe rígidamente su libertad estructural para contaminar la arquitectura."*
+> *"BABYLON-60 no aumenta la inteligencia del modelo fundacional; restringe rígidamente su libertad estructural para contaminar la arquitectura."*
 
 ---
 

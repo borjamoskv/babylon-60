@@ -25,4 +25,4 @@
 - **Fallo Estructural (Vacío Exérgico):** Aunque la compresión de memoria del KV cache (92.7%) es brutal, el modelo sigue operando bajo el paradigma de desenrollado autoregresivo (sliding-window) para frames continuos. El vacío exérgico es la incapacidad de saltar el orden temporal secuencial para generar keyframes paralelos de forma no autoregresiva.
 
 ## 4. Cristalización
-VideoMLA es ingeniería de exergía pura: comprimir el 92% del peso muerto de la memoria KV elimina el muro de latencia para *streaming* de video continuo. Para el agente `browser_subagent` de CORTEX o módulos de QA visual (`/qa`, `/guardian`), esta técnica de compresión latente es vital para mantener un *buffer* visual infinito (memoria episódica visual) sin colapsar el VRAM local.
+VideoMLA es ingeniería de exergía pura: comprimir el 92% del peso muerto de la memoria KV elimina el muro de latencia para *streaming* de video continuo. Para el agente `browser_subagent` de BABYLON-60 o módulos de QA visual (`/qa`, `/guardian`), esta técnica de compresión latente es vital para mantener un *buffer* visual infinito (memoria episódica visual) sin colapsar el VRAM local.

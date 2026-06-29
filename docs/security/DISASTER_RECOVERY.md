@@ -1,6 +1,6 @@
-# [C5-REAL] CORTEX Disaster Recovery and Key Rotation Runbook
+# [C5-REAL] BABYLON-60 Disaster Recovery and Key Rotation Runbook
 
-This document details the diagnostic steps and operational recovery procedures for ledger corruption and cryptographic key rotation in CORTEX.
+This document details the diagnostic steps and operational recovery procedures for ledger corruption and cryptographic key rotation in BABYLON-60.
 
 ---
 
@@ -28,7 +28,7 @@ sqlite3 cortex_data.db "PRAGMA foreign_key_check;"
 
 ## 2. Ledger Corruption Recovery
 
-CORTEX persistence is dual-layered (SQLite database file + Append-Only File binary log). If the SQLite database is corrupted, it can be re-synthesized from the tamper-evident binary AOF.
+BABYLON-60 persistence is dual-layered (SQLite database file + Append-Only File binary log). If the SQLite database is corrupted, it can be re-synthesized from the tamper-evident binary AOF.
 
 ```mermaid
 flowchart TD

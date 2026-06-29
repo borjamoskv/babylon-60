@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX v5 Sovereign Era — Deep Architectural & Strategic Analysis
+# BABYLON-60 v5 Sovereign Era — Deep Architectural & Strategic Analysis
 
 **Date:** 2026-02-23  
 **Version:** 5.0.0 (Sovereign Era)  
-**Analyst:** CORTEX Sovereign Engine  
+**Analyst:** BABYLON-60 Sovereign Engine  
 **Classification:** Internal Strategic Document
 
 > Historical analysis snapshot. Many file paths below use the pre-package or
@@ -15,7 +15,7 @@
 
 ## Executive Summary
 
-CORTEX v5 represents a mature local-first memory infrastructure for AI agents, featuring cryptographic verification, temporal versioning, and emergent cognitive capabilities. The codebase demonstrates sophisticated architectural patterns but carries significant structural debt accumulated through rapid Wave 1-5 development. This analysis identifies critical bottlenecks, evaluates recent integrations, and provides a strategic roadmap for the next 3 waves of evolution.
+BABYLON-60 v5 represents a mature local-first memory infrastructure for AI agents, featuring cryptographic verification, temporal versioning, and emergent cognitive capabilities. The codebase demonstrates sophisticated architectural patterns but carries significant structural debt accumulated through rapid Wave 1-5 development. This analysis identifies critical bottlenecks, evaluates recent integrations, and provides a strategic roadmap for the next 3 waves of evolution.
 
 ---
 
@@ -284,7 +284,7 @@ The **Industrial Noir 130/100** standard defines requirements for production-gra
 | **Maintainability** | Tests, docs, type safety | 20 pts |
 | **Sovereignty** | Local-first, no external deps | 30 pts (bonus) |
 
-### 5.2 CORTEX v5 Scorecard
+### 5.2 BABYLON-60 v5 Scorecard
 
 | Category | Score | Assessment | Gap Analysis |
 |----------|-------|------------|--------------|
@@ -410,7 +410,7 @@ The **Industrial Noir 130/100** standard defines requirements for production-gra
 
 ## 8. Conclusion
 
-CORTEX v5 is a sophisticated memory infrastructure with strong cryptographic foundations and innovative cognitive features. The Episodic Memory and Perception integration represents a significant architectural advancement. However, the system carries critical technical debt—particularly the complete absence of tests and dual consensus systems—that must be addressed before production scaling.
+BABYLON-60 v5 is a sophisticated memory infrastructure with strong cryptographic foundations and innovative cognitive features. The Episodic Memory and Perception integration represents a significant architectural advancement. However, the system carries critical technical debt—particularly the complete absence of tests and dual consensus systems—that must be addressed before production scaling.
 
 **Current State:** Beta-grade architecture with production-grade aspirations  
 **Target State:** Industrial Noir 130/100 compliant sovereign infrastructure  

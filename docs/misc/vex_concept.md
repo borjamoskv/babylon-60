@@ -6,7 +6,7 @@
 **Date:** 2026-03-02  
 **Version:** 0.1.0-concept  
 **Status:** Concept / Pre-Design  
-**Author:** CORTEX Architecture Team  
+**Author:** BABYLON-60 Architecture Team  
 
 > Concept note only. For the current supported public product boundary, see
 > [`docs/product-surface.md`](product-surface.md).
@@ -15,7 +15,7 @@
 
 ## Executive Summary
 
-VEX (Verifiable Execution) is a proposed extension to CORTEX that transforms it from a **trust infrastructure for agent memory** into a **trust infrastructure for agent execution**. VEX does not compete with LLM providers (inference). It competes in a category that does not yet exist: **cryptographically verifiable agent task execution**.
+VEX (Verifiable Execution) is a proposed extension to BABYLON-60 that transforms it from a **trust infrastructure for agent memory** into a **trust infrastructure for agent execution**. VEX does not compete with LLM providers (inference). It competes in a category that does not yet exist: **cryptographically verifiable agent task execution**.
 
 Every action an agent takes during VEX execution produces an **Execution Receipt** — a hash-chained, Merkle-anchored, consensus-scored proof that the agent did exactly what it claims to have done.
 
@@ -33,7 +33,7 @@ All existing agent runners (AutoGPT, CrewAI, OpenAI Operator, Gemini Code Assist
 | CrewAI | In-memory | stdout | ❌ None | ❌ None |
 | OpenAI Operator | Ephemeral | API log | ❌ None | ❌ None |
 | Gemini ADK | Context window | Session | ❌ None | ❌ None |
-| **CORTEX VEX** | **L1+L2+L3 Tripartite** | **Hash-chained Ledger** | **✅ SHA-256 + Merkle** | **✅ WBFT** |
+| **BABYLON-60 VEX** | **L1+L2+L3 Tripartite** | **Hash-chained Ledger** | **✅ SHA-256 + Merkle** | **✅ WBFT** |
 
 The implications for **regulated industries** (finance, healthcare, law, government) are stark:
 
@@ -41,11 +41,11 @@ The implications for **regulated industries** (finance, healthcare, law, governm
 - **SOC 2 Type II**: Requires demonstrable evidence that controls operated effectively.
 - **ISO 42001**: Demands traceability of AI decision-making processes.
 
-No existing runner satisfies these requirements. CORTEX already does — for memory. VEX extends it to execution.
+No existing runner satisfies these requirements. BABYLON-60 already does — for memory. VEX extends it to execution.
 
 ---
 
-## What CORTEX Already Has (The 80%)
+## What BABYLON-60 Already Has (The 80%)
 
 | Component | Module | Role in VEX |
 |:---|:---|:---|
@@ -173,7 +173,7 @@ class ExecutionReceipt:
 
 ---
 
-## Architecture: VEX in the CORTEX Stack
+## Architecture: VEX in the BABYLON-60 Stack
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -260,7 +260,7 @@ GET  /v1/vex/history      — List executions with filters
 
 ### Market Category
 
-**Verifiable Agent Infrastructure** — CORTEX occupies the same structural position for AI agents that **Certificate Authorities** occupy for HTTPS, or that **Git** occupies for source code. Not the content. The trust layer around the content.
+**Verifiable Agent Infrastructure** — BABYLON-60 occupies the same structural position for AI agents that **Certificate Authorities** occupy for HTTPS, or that **Git** occupies for source code. Not the content. The trust layer around the content.
 
 ---
 
@@ -288,7 +288,7 @@ GET  /v1/vex/history      — List executions with filters
 2. **Step Granularity**: How fine-grained should steps be? (per-tool-call vs. per-subtask)
 3. **Cost Model**: Should each VEX execution have a cost ceiling enforced by `tether.md`?
 4. **External Anchoring**: When to introduce blockchain/timestamping anchoring for Merkle roots?
-5. **Naming**: Is "VEX" the right name? Alternatives: CORTEX Execute, CORTEX Prove, CORTEX Audit.
+5. **Naming**: Is "VEX" the right name? Alternatives: BABYLON-60 Execute, BABYLON-60 Prove, BABYLON-60 Audit.
 
 ---
 
@@ -306,6 +306,6 @@ DERIVATION:
 
 ---
 
-*Prepared for CORTEX Architecture Review | 2026-03-02*  
+*Prepared for BABYLON-60 Architecture Review | 2026-03-02*  
 *Protocol: ULTRATHINK-INFINITE*  
 *Standard: 130/100*

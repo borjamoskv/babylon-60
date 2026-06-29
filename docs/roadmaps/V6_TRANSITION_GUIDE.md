@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX v6: Sovereign Cloud Transition Guide
+# BABYLON-60 v6: Sovereign Cloud Transition Guide
 
 > **Status:** Historical transition guide. Useful for v6 context; not the current release contract.
 
 ## 1. The Vision: From Daemon to Platform
 
-CORTEX v5 established the foundation for a truly sovereign local AI agent system. It proved that complex cognitive memory, multi-model routing, and autonomous goal-seeking can run entirely on-device.
+BABYLON-60 v5 established the foundation for a truly sovereign local AI agent system. It proved that complex cognitive memory, multi-model routing, and autonomous goal-seeking can run entirely on-device.
 
 **v6 is the scale-up.** We are transitioning from a single-user local daemon to an enterprise-grade, multi-tenant "Sovereign Cloud" platform.
 

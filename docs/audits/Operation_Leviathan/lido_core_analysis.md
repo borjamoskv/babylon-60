@@ -40,4 +40,4 @@ El sistema de permisos (`stETHPermit.sol`) hereda de OpenZeppelin `SignatureUtil
 La evaluación por inferencia estructural ("UltraThink") **INVALIDA** la existencia de vulnerabilidades de Reentrancia o secuestro de estados en el ciclo de finalización y retiro de Lido Core.
 
 **Estado Final de la Superficie**: [SECURE]
-**Reportes a CORTEX-Ledger**: 0 P0 Vectors identificados en este cuadrante.
+**Reportes a BABYLON-60-Ledger**: 0 P0 Vectors identificados en este cuadrante.

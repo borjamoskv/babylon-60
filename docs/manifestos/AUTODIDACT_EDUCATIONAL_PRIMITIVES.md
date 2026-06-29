@@ -3,7 +3,7 @@
 **Reality Level:** `C5-REAL` / `C4-SIM`
 **Autor:** Borja Moskv (borjamoskv) / Telmo Dinámico
 **Vector:** Aprendizaje Validado & Flujo Cognitivo
-**Target:** CORTEX-Persist & Ouroboros-∞
+**Target:** BABYLON-60-Persist & Ouroboros-∞
 
 ---
 

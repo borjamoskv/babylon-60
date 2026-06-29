@@ -1,6 +1,6 @@
 # Distributed Cognitive OS
 
-Multi-node brain swarm for Cortex-Persist.
+Multi-node brain swarm for BABYLON-60.
 
 ## Shape
 - Coordinator: global routing, replay, topology

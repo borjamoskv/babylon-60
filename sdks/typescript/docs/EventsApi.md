@@ -15,7 +15,7 @@ All URIs are relative to *http://localhost*
 
 Stream Events
 
-Subscribe to CORTEX coordination events via SSE.
+Subscribe to BABYLON-60 coordination events via SSE.
 
 ### Example
 
@@ -86,7 +86,7 @@ No authorization required
 
 Stream Events
 
-Server-Sent Events endpoint for real-time CORTEX telemetry.
+Server-Sent Events endpoint for real-time BABYLON-60 telemetry.
 
 ### Example
 

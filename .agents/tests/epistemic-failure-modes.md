@@ -1,8 +1,8 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Cortex-Persist: Epistemic Failure Modes Test Specifications
+# BABYLON-60: Epistemic Failure Modes Test Specifications
 
 > **Status:** Draft Test Specs  
-> **Parent RFC:** [RFC-CORTEX-NATIVE-AI v0.1](file:///.agents/workflows/RFC-CORTEX-NATIVE-AI.md)  
+> **Parent RFC:** [RFC-BABYLON-60-NATIVE-AI v0.1](file:///.agents/workflows/RFC-BABYLON-60-NATIVE-AI.md)  
 > **Last Updated:** 2026-03-14
 
 ---

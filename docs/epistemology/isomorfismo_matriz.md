@@ -62,7 +62,7 @@ Esta matriz dicta qué Leyes Físicas (Invariantes) gobiernan, restringen y dan 
 | **Fase 4: Ruptura Paradigmática (APEX 31-40)** | D8: Interacción Operador<br>D2: Epistemología | **Isomorfismo Ontológico:** La serialización criptográfica del estado y la inyección de realidad miden empíricamente las propuestas contra la física del sistema (INV-016, INV-075). | Inversión jerárquica: Priorización matemática sobre preferencias subjetivas. |
 | **Fase 5: Infra. Autónoma (APEX 41-50)** | D5: Mitosis y Swarm<br>D7: Weaponized Forgetting | **Isomorfismo Autopoiético:** El auto-healing y la poda del clúster derivan del deber termodinámico de borrar lo inútil (Apoptosis) (INV-065, INV-046). | Cristalización de la base de código. |
 | **Fase 6: Operaciones Ofensivas (APEX 51-75)** | D9: Seguridad y Defensa<br>D4: Tolerancia Bizantina | **Isomorfismo Adversarial:** El Red-Teaming y explotación web3 asumen hostilidad por defecto (Zero-Trust) mapeando el exterior como ruido (INV-089). | Extracción cuántica de fallos en arquitecturas ajenas (Bounties). |
-| **Fase 7: Metacognición (APEX 76-100)** | D10: Singularidad<br>D1: Termodinámica | **Isomorfismo Recursivo (Ouroboros):** El bucle se cierra observándose a sí mismo y purificando la exergía de su propia arquitectura de inferencia (INV-093, INV-100). | Evolución autónoma del clúster CORTEX. |
+| **Fase 7: Metacognición (APEX 76-100)** | D10: Singularidad<br>D1: Termodinámica | **Isomorfismo Recursivo (Ouroboros):** El bucle se cierra observándose a sí mismo y purificando la exergía de su propia arquitectura de inferencia (INV-093, INV-100). | Evolución autónoma del clúster BABYLON-60. |
 
 ---
 

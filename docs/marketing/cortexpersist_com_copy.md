@@ -49,9 +49,9 @@ You have fragments, logs, and optimism.
 
 ## 4. Solution
 
-**CORTEX-Persist adds the missing trust layer**
+**BABYLON-60-Persist adds the missing trust layer**
 
-CORTEX-Persist is a local-first memory and verification substrate for AI systems that need to remember, retrieve, and prove what happened.
+BABYLON-60-Persist is a local-first memory and verification substrate for AI systems that need to remember, retrieve, and prove what happened.
 
 It combines:
 - structured memory
@@ -123,7 +123,7 @@ Support internal review, compliance workflows, and postmortems with evidence ins
 
 ## 7. Use cases
 
-**Where CORTEX-Persist hits hardest**
+**Where BABYLON-60-Persist hits hardest**
 
 **AI agents with tools**
 Keep reliable context across steps, sessions, and agent boundaries.
@@ -146,7 +146,7 @@ Track not only the output, but the lineage behind how a system arrived there.
 A vector database can retrieve related text.
 It does not tell you what was stored, when it changed, how it was derived, or whether the history was tampered with.
 
-CORTEX-Persist adds the missing layers:
+BABYLON-60-Persist adds the missing layers:
 - typed memory
 - temporal validity
 - confidence levels
@@ -195,7 +195,7 @@ Get Started · View Demo · GitHub
 
 **GitHub Integration Strings**
 - **Description:** Tamper-evident memory and decision lineage for AI agents.
-- **README Opening:** CORTEX-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and audit-ready history.
+- **README Opening:** BABYLON-60-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and audit-ready history.
 
 ---
-**Notas de implementación:** No metas termodinámica, Ω ni doctrina en el primer scroll. Eso va en una página aparte tipo *Architecture / Principles / Why CORTEX*.
+**Notas de implementación:** No metas termodinámica, Ω ni doctrina en el primer scroll. Eso va en una página aparte tipo *Architecture / Principles / Why BABYLON-60*.

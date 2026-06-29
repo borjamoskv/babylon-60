@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX Deep Research: Lido Simple DVT (SDVT)
+# BABYLON-60 Deep Research: Lido Simple DVT (SDVT)
 **Operación LEVIATHAN — Fase 4: UltraThink Synthesis**
 
 ## 1. Topología de la Arquitectura SDVT
@@ -29,4 +29,4 @@ La revolución del módulo ocurre off-chain y en la capa de recompensas:
 ## 3. Conclusión de UltraThink
 El módulo SDVT está diseñado como un **sandbox termodinámico**. Carece de riesgos sistémicos de *smart contract* (dado el reuso de `NodeOperatorsRegistry` y `SSV/0xSplits` ya auditados). Las verdaderas vulnerabilidades radican en la ingeniería social del DKG y en ataques de cartel inter-operador off-chain.
 
-El veredicto estructural de CORTEX sobre Lido Simple DVT es: **Altamente Resiliente**. El aislamiento del riesgo en el `StakingRouter` descarta cualquier vector de contención cruzada.
+El veredicto estructural de BABYLON-60 sobre Lido Simple DVT es: **Altamente Resiliente**. El aislamiento del riesgo en el `StakingRouter` descarta cualquier vector de contención cruzada.

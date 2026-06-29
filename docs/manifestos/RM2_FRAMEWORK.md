@@ -209,4 +209,4 @@ El sistema ya no elige solo qué memoria retener, sino que busca la trayectoria 
 Esto somete la inferencia bajo restricciones de capacidad a ecuaciones análogas a Euler-Lagrange en tiempo discreto.
 
 ---
-> **Conclusión**: RM² es formalmente una teoría matemática de inferencia sobre grafos bajo restricciones topológicas y termodinámicas. Las intuiciones quedan descartadas; solo el análisis funcional, el control estocástico y el principio de mínima acción rigen la persistencia del estado en CORTEX.
+> **Conclusión**: RM² es formalmente una teoría matemática de inferencia sobre grafos bajo restricciones topológicas y termodinámicas. Las intuiciones quedan descartadas; solo el análisis funcional, el control estocástico y el principio de mínima acción rigen la persistencia del estado en BABYLON-60.

@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX REST API Reference (LEGION-10k)
+# BABYLON-60 REST API Reference (LEGION-10k)
 
-CORTEX exposes a high-throughput, C5-REAL verified FastAPI application via `cortex.api:app`.
+BABYLON-60 exposes a high-throughput, C5-REAL verified FastAPI application via `cortex.api:app`.
 
 By default, the FastAPI app mounts the core verifiable-memory and trust surface described here.
 Broader operator/runtime routes are gated behind `CORTEX_ENABLE_EXPERIMENTAL_API=1`.

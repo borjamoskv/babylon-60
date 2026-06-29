@@ -29,7 +29,7 @@ These courses are not generic AI content. They are anchored to real slices of th
 
 ## Architect Bonus
 
-If you want a deeper repo-first architecture bootcamp focused on CORTEX itself, start here:
+If you want a deeper repo-first architecture bootcamp focused on BABYLON-60 itself, start here:
 
 - [Public Product Surface](../product-surface.md)
 - [Architecture](../architecture.md)

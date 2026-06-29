@@ -2,7 +2,7 @@
 # Appendix: ATMS Dependency Indexing Formalism
 
 > **Status:** EXPERIMENTAL — Open Formal Appendix v0.1
-> **Parent RFC:** [RFC-CORTEX-NATIVE-AI v0.1](file:///.agents/workflows/RFC-CORTEX-NATIVE-AI.md)
+> **Parent RFC:** [RFC-BABYLON-60-NATIVE-AI v0.1](file:///.agents/workflows/RFC-BABYLON-60-NATIVE-AI.md)
 > **Date:** 2026-03-14
 
 ---
@@ -10,7 +10,7 @@
 ## 0. Preamble
 
 This appendix formalizes the Assumption-Based Truth Maintenance System (ATMS) semantics
-for Cortex-Persist. An ATMS maintains a record of which assumptions underlie each belief,
+for BABYLON-60. An ATMS maintains a record of which assumptions underlie each belief,
 enabling efficient dependency-directed backtracking when assumptions are invalidated.
 
 Unlike a standard TMS which tracks a single consistent worldview, the ATMS
@@ -23,7 +23,7 @@ to reason about multiple hypothetical states without reconstruction cost.
 
 ### 1.1 Definitions
 
-- **Node** $n$: A `BeliefObject` in the CORTEX ontology.
+- **Node** $n$: A `BeliefObject` in the BABYLON-60 ontology.
 - **Assumption** $a$: A node with no justifications — accepted axiomatically.
 - **Justification** $J = \langle \{a_1, \ldots, a_k\}, n \rangle$: Node $n$ is believed if all assumptions $a_1, \ldots, a_k$ hold.
 - **Environment** $E = \{a_1, \ldots, a_m\}$: A consistent set of assumptions.
@@ -169,4 +169,4 @@ a node with a later timestamp (causal violation → reject at ingestion).
 
 ---
 
-*CORTEX-Persist · ATMS Semantics Appendix v0.1 · EXPERIMENTAL · 2026-03-14*
+*BABYLON-60-Persist · ATMS Semantics Appendix v0.1 · EXPERIMENTAL · 2026-03-14*

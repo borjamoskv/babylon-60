@@ -10,8 +10,8 @@
 *   **Exergía (Exergy):** The maximum useful work possible during a process that brings the system into equilibrium. -> *The ratio of high-signal, C5-REAL actionable output extracted from a given prompt/compute cycle.*
 *   **Demonio de Maxwell (Maxwell's Demon):** A theoretical entity that violates the Second Law by selectively sorting high/low energy particles without expending work. -> *An algorithmic gatekeeper capable of sorting high-signal (exergy) vs low-signal (entropy) tokens.*
 
-## 2. Topological Mapping (CORTEX-Persist Architecture)
-*   **Closed System Reality:** The current autonomous swarm (CORTEX) operates as a semi-closed system between user interactions. Without external energy (user correction), the context window accumulates entropy (hallucinations, repetitive loops, dead code references).
+## 2. Topological Mapping (BABYLON-60-Persist Architecture)
+*   **Closed System Reality:** The current autonomous swarm (BABYLON-60) operates as a semi-closed system between user interactions. Without external energy (user correction), the context window accumulates entropy (hallucinations, repetitive loops, dead code references).
 *   **LEA-Ω as Heat Sink:** The `Loose End Annihilator` (LEA-Ω) functions as the thermodynamic heat sink, purging high-entropy data (dead code, stale state) to restore the workspace's capacity to do "work".
 *   **Exergy-Engine-OMEGA:** Functions as the primary engine converting raw API compute (heat) into structural code (work). 
 

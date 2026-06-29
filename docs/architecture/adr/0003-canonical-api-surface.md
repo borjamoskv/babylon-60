@@ -7,7 +7,7 @@ Accepted
 2026-06-26
 
 ## Context
-CORTEX Persist evolved with two coexisting API surfaces:
+BABYLON-60 Persist evolved with two coexisting API surfaces:
 
 1. **`cortex.api.core`** — The production API with full middleware stack (CORS, Auth, RateLimit, Metrics, Tracing, SecurityFraud, Immune, Metering), tenant isolation, and ledger integration.
 2. **`api.server`** — A prototype/demo surface originally built for the "Influencer Guard" concept, toxicity tracking, and dummy telemetry WebSockets.
@@ -17,7 +17,7 @@ Both surfaces define their own `FastAPI()` instance. They do **not** share middl
 This ambiguity is the kind of problem that compounds silently. It doesn't cause immediate failures — it causes divergent implementations, inconsistent security postures, and wasted engineering effort over months.
 
 ## Decision
-We establish `cortex.api.core` as the **single canonical API surface** for CORTEX Persist.
+We establish `cortex.api.core` as the **single canonical API surface** for BABYLON-60 Persist.
 
 ### Governance Rules
 

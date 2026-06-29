@@ -1,6 +1,6 @@
 # Sovereign MCP Forge — Public Access Guide
 
-Welcome to the **CORTEX Sovereign Forge**. This document provides the technical specifications required to connect your autonomous agents to our high-exergy capabilities.
+Welcome to the **BABYLON-60 Sovereign Forge**. This document provides the technical specifications required to connect your autonomous agents to our high-exergy capabilities.
 
 ## 1. Connection Details
 

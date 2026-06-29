@@ -1,4 +1,4 @@
-# CORTEX-Persist Reproducible Benchmarks
+# BABYLON-60-Persist Reproducible Benchmarks
 
 > **Goal:** Transparency and replicability. All performance claims (~390k agents/sec, O(1) audit verification) must be independently verifiable by anyone using commodity hardware.
 
@@ -30,7 +30,7 @@ pytest benchmarks/test_ledger_crypto.py --benchmark-only
 
 ## The "Python Paradox" Mitigation
 
-CORTEX achieves ~390k ops/sec in a Python environment through:
+BABYLON-60 achieves ~390k ops/sec in a Python environment through:
 1. **Zero-Copy Memory-Mapped I/O:** Bypassing `read()` syscalls via `mmap_size=20000000000`.
 2. **Micro-Batched Asynchronous Merkle Trees:** Cryptographic sealing occurs out-of-band in `batch_window_ms=50`, avoiding the blocking of the main execution loop.
 3. **Rust FFI (`cortex_native.cpython-*.so`):** Critical loops and HNSW vector calculations are outsourced to a compiled Rust extension, bypassing the GIL.

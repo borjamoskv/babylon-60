@@ -1,7 +1,7 @@
 # Execution Model Specification
 
 ## 1. Definición Formal
-El Modelo de Ejecución de CORTEX-PERSIST instaura un límite bizantino ("Byzantine Boundary") entre la capa estocástica (Inferencia de LLM) y la capa física determinista (Persistencia y Verificación Criptográfica).
+El Modelo de Ejecución de BABYLON-60 instaura un límite bizantino ("Byzantine Boundary") entre la capa estocástica (Inferencia de LLM) y la capa física determinista (Persistencia y Verificación Criptográfica).
 
 ## 2. Invariantes
 - **Conjetura Generativa**: Ninguna salida generativa muta el estado sin atravesar las SMT Guards (Z3).

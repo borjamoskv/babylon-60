@@ -14,7 +14,7 @@ All URIs are relative to *http://localhost*
 
 Audit Target
 
-The Oracle: Run a Sovereign Agent audit. Requires a valid CORTEX API Key (provisioned via Stripe subscription).
+The Oracle: Run a Sovereign Agent audit. Requires a valid BABYLON-60 API Key (provisioned via Stripe subscription).
 
 ### Example
 

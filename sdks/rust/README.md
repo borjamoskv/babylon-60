@@ -29,7 +29,7 @@ Class | Method | HTTP request | Description
 *AgentsApi* | [**get_agent_v1_agents_agent_id_get**](docs/AgentsApi.md#get_agent_v1_agents_agent_id_get) | **GET** /v1/agents/{agent_id} | Get Agent
 *AgentsApi* | [**list_agents_v1_agents_get**](docs/AgentsApi.md#list_agents_v1_agents_get) | **GET** /v1/agents | List Agents
 *AgentsApi* | [**register_agent_v1_agents_post**](docs/AgentsApi.md#register_agent_v1_agents_post) | **POST** /v1/agents | Register Agent
-*AskApi* | [**ask_cortex_v1_ask_post**](docs/AskApi.md#ask_cortex_v1_ask_post) | **POST** /v1/ask | Ask Cortex
+*AskApi* | [**ask_cortex_v1_ask_post**](docs/AskApi.md#ask_cortex_v1_ask_post) | **POST** /v1/ask | Ask BABYLON-60
 *AskApi* | [**ask_stream_v1_ask_stream_post**](docs/AskApi.md#ask_stream_v1_ask_stream_post) | **POST** /v1/ask/stream | Ask Stream
 *AskApi* | [**llm_status_v1_llm_status_get**](docs/AskApi.md#llm_status_v1_llm_status_get) | **GET** /v1/llm/status | Llm Status
 *ContextApi* | [**context_history_v1_context_history_get**](docs/ContextApi.md#context_history_v1_context_history_get) | **GET** /v1/context/history | Context History

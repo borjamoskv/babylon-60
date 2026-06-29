@@ -4,8 +4,8 @@
 Status: draft
 
 This document defines the minimum contract for an offline public verifier for
-CORTEX ledger exports. The verifier must validate exported bytes without
-accessing SQLite, network services, or a running CORTEX process.
+BABYLON-60 ledger exports. The verifier must validate exported bytes without
+accessing SQLite, network services, or a running BABYLON-60 process.
 
 The matching package layout is documented in
 [`PUBLIC_LEDGER_EXPORT_PACKAGE.md`](PUBLIC_LEDGER_EXPORT_PACKAGE.md).
@@ -123,7 +123,7 @@ cortex verify-ledger-export ./legacy_v0_vector_1.json
 The command must:
 
 - read exported files only;
-- avoid SQLite, network calls, and a running CORTEX process;
+- avoid SQLite, network calls, and a running BABYLON-60 process;
 - emit deterministic JSON with `profile`, `result`, `guarantees`, `counts`,
   `artifacts`, `event_hashes`, `errors`, and `warnings`;
 - exit `0` for `VALID_FULL_STRICT`;

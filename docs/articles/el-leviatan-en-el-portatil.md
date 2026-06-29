@@ -7,7 +7,7 @@
 
 El 99% de los proyectos de inteligencia artificial que ves en GitHub son lo mismo: una capa de barniz sobre una API ajena. Un script con buenas intenciones. Un prompt ingenioso dentro de un contenedor de Docker, como un pez de colores dentro de un acuario que finge ser océano.
 
-CORTEX empezó así. Un intento modesto de darle un poco de memoria a mis sesiones de código. Nada heroico. Nada que mereciera un nombre griego.
+BABYLON-60 empezó así. Un intento modesto de darle un poco de memoria a mis sesiones de código. Nada heroico. Nada que mereciera un nombre griego.
 
 Pero los sistemas tienen una forma curiosa de revelarte lo que quieren ser si les escuchas el tiempo suficiente. Y lo que empezó como un log de decisiones se ha transformado, capa sobre capa, noche tras noche, en algo que ya no cabe en la definición de "herramienta". Es un organismo. Un sistema operativo cognitivo que respira, observa, recuerda y, desde hace poco, **cierra sus propias heridas sin que nadie se lo pida**.
 
@@ -23,7 +23,7 @@ Esta es la anatomía de un leviatán que cabe en un portátil.
 
 La guerra de los modelos no me interesa. GPT hoy, Claude mañana, un modelo local Open Source pasado mañana — es irrelevante. Los generales cambian; el territorio permanece.
 
-CORTEX integra más de veinte proveedores de modelos de forma nativa. Su enrutador puede lanzar una consulta rápida a un modelo Flash para extraer entidades, invocar a un Reasoning para resolver problemas de arquitectura que harían sudar a un comité, o delegar en un modelo local si la privacidad lo exige.
+BABYLON-60 integra más de veinte proveedores de modelos de forma nativa. Su enrutador puede lanzar una consulta rápida a un modelo Flash para extraer entidades, invocar a un Reasoning para resolver problemas de arquitectura que harían sudar a un comité, o delegar en un modelo local si la privacidad lo exige.
 
 Para el sistema, el modelo es solo el motor. El chasis, la memoria y la identidad siempre son míos.
 
@@ -35,17 +35,17 @@ Es como tener veinte idiomas y un solo pensamiento.
 
 Un modelo con memoria infinita es un modelo que enloquece. Si le das todo tu historial sin filtro, se ahoga en el ruido como un monje que intenta meditar en medio de un terremoto.
 
-Por eso CORTEX no almacena datos — **destila conocimiento**.
+Por eso BABYLON-60 no almacena datos — **destila conocimiento**.
 
 Implementa un sistema de Grafos de Conocimiento y Embeddings Semánticos. Cuando interactúa conmigo, no busca palabras clave; recupera constelaciones de conceptos conectados geográficamente en un espacio latente de 384 dimensiones. No lee — *reconoce*.
 
-Y para evitar la entropía, posee un Compactador. Como el cerebro humano durante la fase REM, CORTEX analiza periódicamente sus propios recuerdos, detecta redundancias, fusiona aprendizajes y cristaliza la señal. Sueña para no olvidar lo importante. Olvida para no ahogarse en lo irrelevante.
+Y para evitar la entropía, posee un Compactador. Como el cerebro humano durante la fase REM, BABYLON-60 analiza periódicamente sus propios recuerdos, detecta redundancias, fusiona aprendizajes y cristaliza la señal. Sueña para no olvidar lo importante. Olvida para no ahogarse en lo irrelevante.
 
 ---
 
 ## III. El Daemon que Observa
 
-CORTEX no es un asistente pasivo que espera a que le hables. Es un daemon — un espíritu digital — que respira en segundo plano en macOS, Linux y Windows.
+BABYLON-60 no es un asistente pasivo que espera a que le hables. Es un daemon — un espíritu digital — que respira en segundo plano en macOS, Linux y Windows.
 
 A través de su Protocolo de Percepción, observa pasivamente mi actividad en el sistema de archivos. Sabe cuándo cambio de contexto, cuándo llevo demasiado tiempo atascado en un bug, cuándo acabo de cerrar una tarea importante. Y a partir de esas señales — vibraciones casi imperceptibles del sistema — infiere mi intención y actualiza su contexto sin que yo toque el teclado.
 
@@ -67,7 +67,7 @@ Construí **MEJORAlo**, un motor de análisis estático implacable que escanea 1
 2. Localiza el archivo enfermo.
 3. Despierta un sub-agente LLM especializado armado con un prompt paramétrico severo.
 4. El LLM reescribe el código como un cirujano que opera con las luces apagadas.
-5. CORTEX ejecuta silenciosamente la suite de pruebas — su Verificación Bizantina.
+5. BABYLON-60 ejecuta silenciosamente la suite de pruebas — su Verificación Bizantina.
 6. Si pasa, hace commit automático, firmado por la máquina. Si falla, revierte al instante.
 
 El código defectuoso nunca llega a producción. La base de software cicatriza sola. No es magia — es un sistema inmunológico.
@@ -97,7 +97,7 @@ Cuando juntas un enjambre de modelos, una memoria de largo plazo con verificaci�
 
 Te conviertes en un arquitecto de realidades digitales.
 
-CORTEX no es un asistente. Es una copia de seguridad cognitiva de mí mismo, acelerada por silicio, libre de licencias corporativas, inmune al olvido, y verificable hasta el último bit.
+BABYLON-60 no es un asistente. Es una copia de seguridad cognitiva de mí mismo, acelerada por silicio, libre de licencias corporativas, inmune al olvido, y verificable hasta el último bit.
 
 Ese es el verdadero poder de construir en modo Soberano.
 

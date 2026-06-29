@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # scripts/
 
-> Operational scripts for CORTEX — benchmarks, seeders, gates, daemons, and utilities.
+> Operational scripts for BABYLON-60 — benchmarks, seeders, gates, daemons, and utilities.
 
 ## Categories
 

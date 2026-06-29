@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🌌 CORTEX MILESTONES — 2026 Execution Matrix
+# 🌌 BABYLON-60 MILESTONES — 2026 Execution Matrix
 > **Protocol:** C5-REAL / Direct-Silicon JIT
 > **Aesthetic:** Industrial Noir 2026 (`#0A0A0A` / `#2B3BE5`)
 > **Última actualización:** 2 Junio 2026
@@ -84,7 +84,7 @@ Proof: { Base: "10000/10000 in 0.041s via ZeroCopyRingBuffer", Range: [200000, 3
 
 ### Hito 10: Inevitable Infrastructure & Zero-Friction SDK
 - **Target:** `sdk/cortex/magic.py`, `scripts/telemetry_ws_bridge.py`
-- **Objective:** Transición de CORTEX de capa de persistencia a Infraestructura Inevitable. Magic Decorator `@sovereign_persist` para inyección en 1 línea. Daemon WebSocket 20Hz para telemetría en `agents.archi`.
+- **Objective:** Transición de BABYLON-60 de capa de persistencia a Infraestructura Inevitable. Magic Decorator `@sovereign_persist` para inyección en 1 línea. Daemon WebSocket 20Hz para telemetría en `agents.archi`.
 - **Yield Target:** ~390,000 agentes/seg + fricción de adopción negativa.
 - **Reality Level:** `C5-REAL`
 - **Evidence:** KI `cortex_inevitable_infrastructure_strike`
@@ -100,7 +100,7 @@ Proof: { Base: "10000/10000 in 0.041s via ZeroCopyRingBuffer", Range: [200000, 3
 
 ### Hito 12: Máxima Exergía y Autopoiesis
 - **Target:** `cortex/extensions/evolution/ouroboros_omega.py`, `cortex-core/ouroboros_engine.py`
-- **Objective:** Formalización de CORTEX como estructura disipativa viva. Ouroboros 3 capas (Gate → Omega → Engine). Death Protocol de 4 fases (Active → Quarantined → Tombstoned → Purged).
+- **Objective:** Formalización de BABYLON-60 como estructura disipativa viva. Ouroboros 3 capas (Gate → Omega → Engine). Death Protocol de 4 fases (Active → Quarantined → Tombstoned → Purged).
 - **Yield Target:** Software que metaboliza su propio código muerto bajo límites de Landauer/Bremermann.
 - **Reality Level:** `C5-REAL`
 - **Evidence:** KI `cortex_hito_12_autopoiesis_2026`
@@ -179,9 +179,9 @@ Proof:
 
 ---
 
-### Hito 17: Labyrinth Proxy & CORTEX LIVE Integration
+### Hito 17: Labyrinth Proxy & BABYLON-60 LIVE Integration
 - **Target:** `cortex/routes/llm_proxy.py`, `scripts/live_emit.py`
-- **Objective:** Transformar CORTEX en un middleware LLM universal (OpenAI Proxy) con filtrado termodinámico (Deterministic Labyrinth). Emisión de exergía en vivo a CORTEX LIVE vía Aether Matrix (SSE bus) mediante `AsyncSignalBus`.
+- **Objective:** Transformar BABYLON-60 en un middleware LLM universal (OpenAI Proxy) con filtrado termodinámico (Deterministic Labyrinth). Emisión de exergía en vivo a BABYLON-60 LIVE vía Aether Matrix (SSE bus) mediante `AsyncSignalBus`.
 - **Yield Target:** Filtrado 100% libre de prosa estocástica. Emisión SSE en O(1).
 - **Reality Level:** `C5-REAL`
 - **Evidence:** Commit `feat(api): emit events to live event bus`
@@ -270,7 +270,7 @@ Proof:
 ---
 ### Hito 22: Redpanda Stream Kernel (Direct-Silicon Producer)
 - **Target:** `cortex_rs/src/py_stream.rs`, `cortex_rs/Cargo.toml`
-- **Objective:** Inyección de capa nativa Kafka/Redpanda vía PyO3 (`rdkafka` C-extensions) eliminando el peaje del GIL de Python para retransmisión de eventos asíncronos en Cortex.
+- **Objective:** Inyección de capa nativa Kafka/Redpanda vía PyO3 (`rdkafka` C-extensions) eliminando el peaje del GIL de Python para retransmisión de eventos asíncronos en BABYLON-60.
 - **Yield Target:** Emitir señales de fricción en O(1) tiempo real directo al kernel Redpanda.
 - **Reality Level:** `C5-REAL`
 - **Evidence:** Commit de `OuroborosStreamKernel` y compilación correcta de `rdkafka`.
@@ -356,7 +356,7 @@ Proof:
 
 ---
 
-### Hito 27: CORTEX-SWARM-10K Error Erasure & Indentation Alignment
+### Hito 27: BABYLON-60-SWARM-10K Error Erasure & Indentation Alignment
 - **Target:** `cortex/cli/swarm_10k_cmds.py`, `cortex/engine/shared_bus.py`
 - **Objective:** Fix the `TypeError` and indentation syntax errors on the L0 -> L2 hierarchical swarm memory tear-down, enabling seamless dispatch of 10,000 parallel agents under C5-REAL execution standards.
 - **Yield Target:** 0 crashes on 10,000-agent deployment, complete compatibility with `pytest` suite.
@@ -441,8 +441,8 @@ Proof:
 ---
 
 ### Hito 32: Strategic Capability Audit & Product Crystallization
-- **Target:** CORTEX ecosystem completo vs Antigravity 2 vanilla
-- **Objective:** Auditoría exhaustiva de capacidades CORTEX vs AGY2. Inversión del marco conceptual: CORTEX no es add-on de AGY2 — AGY2 es un substrate de ejecución de CORTEX (~20-25% del sistema combinado). Identificación del producto killer: Sovereign Digital Worker (Mac Maestro + Memory + Swarm + Ledger + SICA).
+- **Target:** BABYLON-60 ecosystem completo vs Antigravity 2 vanilla
+- **Objective:** Auditoría exhaustiva de capacidades BABYLON-60 vs AGY2. Inversión del marco conceptual: BABYLON-60 no es add-on de AGY2 — AGY2 es un substrate de ejecución de BABYLON-60 (~20-25% del sistema combinado). Identificación del producto killer: Sovereign Digital Worker (Mac Maestro + Memory + Swarm + Ledger + SICA).
 - **Yield Target:** Mapa de potenciación completo, validación de 2613 tests al 100%, definición de roadmap de 3 fases.
 - **Reality Level:** `C5-REAL`
 - **Evidence:** Análisis v3 en artifact `cortex_vs_antigravity_analysis.md`. pytest 2613/2613 passed.
@@ -451,7 +451,7 @@ Proof:
   - 36+ subsistemas de memoria, embeddings ONNX, vector+hybrid search, CRDTs, BFT consensus
   - Rust FFI: 22.5M agents/sec, Merkle 3.96µs, WASM <0.1ms
   - 6/6 gaps previos eran FALSOS (todos implementados)
-  - Producto: Sovereign Digital Worker = Mac Maestro + CORTEX Memory + Swarm + Ledger
+  - Producto: Sovereign Digital Worker = Mac Maestro + BABYLON-60 Memory + Swarm + Ledger
 ```yaml
 Claim: CORTEX aporta ~75-80% del sistema combinado CORTEX+AGY2
 Proof:
@@ -558,7 +558,7 @@ Proof:
 ---
 ### Hito 41: AGY2 Planning Context Injection (Path A Integration)
 - **Target:** `cortex/extensions/daemon/monitors/agy2_planner.py`, `cortex/extensions/daemon/core_support.py`, `cortex/extensions/daemon/event_loop.py`
-- **Objective:** Erradicar la amnesia semántica durante la fase de planificación de AGY2 (Gemini). Creación de un daemon asíncrono que intercepta la generación de `implementation_plan.md`, extrae el `Goal Description`, consulta el oráculo semántico (CORTEX Memory) y reescribe el plan inyectando el contexto C5-REAL recuperado.
+- **Objective:** Erradicar la amnesia semántica durante la fase de planificación de AGY2 (Gemini). Creación de un daemon asíncrono que intercepta la generación de `implementation_plan.md`, extrae el `Goal Description`, consulta el oráculo semántico (BABYLON-60 Memory) y reescribe el plan inyectando el contexto C5-REAL recuperado.
 - **Yield Target:** Integración "Zero-Prompt" con AGY2. Reducción a 0 de las desviaciones de contexto en la ejecución delegada.
 - **Reality Level:** `C5-REAL`
 - **Evidence:** Commit `feat(adk): intercept AGY2 implementation plans for automatic cortex memory injection`.
@@ -576,8 +576,8 @@ Proof:
 
 ### Hito 42: Subagent MCP Membrane Integration (Path B)
 - **Target:** `cortex/adk/agents.py`, `cortex/adk/runner.py`
-- **Objective:** Asegurar que todos los subagentes del Enjambre (Swarm) de AGY2 hereden automáticamente el servidor MCP local de CORTEX. Esto expone las herramientas extendidas (mega tools, singularity tools) directamente a los subagentes, sin tener que "hardcodearlas" vía `adk/tools.py`.
-- **Yield Target:** Universalización del Toolset. Cualquier oráculo o subagente adquiere acceso completo al servidor MCP de CORTEX.
+- **Objective:** Asegurar que todos los subagentes del Enjambre (Swarm) de AGY2 hereden automáticamente el servidor MCP local de BABYLON-60. Esto expone las herramientas extendidas (mega tools, singularity tools) directamente a los subagentes, sin tener que "hardcodearlas" vía `adk/tools.py`.
+- **Yield Target:** Universalización del Toolset. Cualquier oráculo o subagente adquiere acceso completo al servidor MCP de BABYLON-60.
 - **Reality Level:** `C5-REAL`
 - **Evidence:** Commit `feat(adk): inject CORTEX MCP tools directly into ADK subagents swarm`.
 ```yaml
@@ -622,7 +622,7 @@ Proof:
 *∴ "The architecture refines its own truth."*
 
 
-### Hito 38: The Omega Singularity (CORTEX v10.0 Metabolism)
+### Hito 38: The Omega Singularity (BABYLON-60 v10.0 Metabolism)
 - **Target:** `cortex/engine/omega_daemon.py`, `cortex/cli/omega_cmds.py`
 - **Objective:** Fusión del Swarm, Autopoiesis y Ledger en un único macro-organismo `OmegaDaemon` que reside en memoria y evalúa la termodinámica del sistema permanentemente.
 - **Yield Target:** Autonomous execution sin intervención humana (Zero-Prompt Operation) mediante el uso de `ExergyGuard` y `EntropySensor`.
@@ -747,7 +747,7 @@ Proof:
 
 ### Hito 45: Decentralized Gossip Federation
 - **Target:** `cortex/extensions/federation/gossip.py`, `tests/extensions/federation/test_gossip.py`
-- **Objective:** Implement a real UDP-based decentralized gossip protocol for independent node discovery, routing table propagation, and state version synchronization in a federated CORTEX cluster.
+- **Objective:** Implement a real UDP-based decentralized gossip protocol for independent node discovery, routing table propagation, and state version synchronization in a federated BABYLON-60 cluster.
 - **Yield Target:** Zero-master network discovery and version convergence tested under real loopback datagram execution.
 - **Reality Level:** `C5-REAL`
 - **Status:** ✅ COMPLETE — 6 Junio 2026

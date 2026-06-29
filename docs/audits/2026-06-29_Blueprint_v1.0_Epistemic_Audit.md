@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# Epistemic Audit: CORTEX Core Specification Blueprint v1.0
+# Epistemic Audit: BABYLON-60 Core Specification Blueprint v1.0
 
 **Date:** 2026-06-29
 **Auditor:** borjamoskv (Operator)
@@ -28,7 +28,7 @@ The dependency on `domain_prior` requires an omniscient calibration model extern
 | **Dynamic Domain Priors** | **Calibration Paradox** | **Indeterminate** |
 
 ## 5. Architectural Verdict
-The CORTEX v1.0 Blueprint is **not** cryptographically frozen. It is in a state of **elegant hypothesis (DORMANT)**.
+The BABYLON-60 v1.0 Blueprint is **not** cryptographically frozen. It is in a state of **elegant hypothesis (DORMANT)**.
 
 The true limiting factor is the **Theory of Trust** (Trust Algebra, Epistemic Independence, and Domain Calibration). These are not implementation details; they are fundamental open problems in computational epistemology.
 

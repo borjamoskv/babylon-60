@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX — Launch Copy
+# BABYLON-60 — Launch Copy
 
 > **Optimal publish window: Monday–Tuesday, 14:00–16:00 UTC**
 

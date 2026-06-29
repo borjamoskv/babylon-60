@@ -2,7 +2,7 @@
 # RFC 003: Void-State Security Architecture & ZK-Swarm Consensus
 
 ## Abstract
-This document introduces the **Void-State Security Architecture**, an operating paradigm that moves the CORTEX multi-agent ecosystem away from soft "rules" and "guardrails" towards rigorous **cryptographic execution proofs** (ZK-Swarm consensus). The overarching objective is to resolve the Epistemic Containment Problem natively: mitigating LLM hallucinations and drift not through prompt engineering, but through Byzantine-resilient verification and zero-knowledge evidence anchored to an tamper-evident ledger.
+This document introduces the **Void-State Security Architecture**, an operating paradigm that moves the BABYLON-60 multi-agent ecosystem away from soft "rules" and "guardrails" towards rigorous **cryptographic execution proofs** (ZK-Swarm consensus). The overarching objective is to resolve the Epistemic Containment Problem natively: mitigating LLM hallucinations and drift not through prompt engineering, but through Byzantine-resilient verification and zero-knowledge evidence anchored to an tamper-evident ledger.
 
 ## 1. El Teorema de la Contención Epistémica (Epistemic Containment Theorem)
 
@@ -11,11 +11,11 @@ At `Legion-100` and eventually `Legion-10000` scale, inference entropy (hallucin
 **Postulate:** Purely linguistic constraints (prompts, constitutional AI, soft guardrails) form a permeable membrane. Under sustained thermodynamic friction, any LLM layer will eventually leak entropy.
 **Corollary:** The only acceptable containment boundary in a "Void-State" environment is hard cryptographic verification. The cost of generating a false trajectory must become mathematically or algorithmically prohibitive. 
 
-If a subagent hallucinates a module change or a tensor shift, it must be discarded *before* it propagates to the CORTEX memory ledger.
+If a subagent hallucinates a module change or a tensor shift, it must be discarded *before* it propagates to the BABYLON-60 memory ledger.
 
 ## 2. ZK-Swarm Consensus: Byzantine Tolerance over LLM Inference
 
-In distributed systems, Byzantine Fault Tolerance (BFT) ensures consensus despite malicious or faulty nodes. In the CORTEX protocol, "faulty nodes" translate directly to "hallucinating subagents." 
+In distributed systems, Byzantine Fault Tolerance (BFT) ensures consensus despite malicious or faulty nodes. In the BABYLON-60 protocol, "faulty nodes" translate directly to "hallucinating subagents." 
 
 ### The Mechanism
 Instead of trusting a single inference run to generate a deterministic truth:
@@ -40,7 +40,7 @@ The new **Void-State Transition Cycle** operates under 4 atomic phases:
 
 ## 4. The Thermodynamics of Byzantine Consensus
 
-In CORTEX Axioms (Ω₂), exergy is the supreme currency. 
+In BABYLON-60 Axioms (Ω₂), exergy is the supreme currency. 
 Why spend additional tokens or compute cycles to generate ZK proofs and run parallel quorums?
 
 **The Blast Radius Equation:**
@@ -49,7 +49,7 @@ If `Ep < (Er * Pfailure)` then the action is thermodynamically positive.
 
 A `Pfailure` in a 10,000-agent swarm approaches `1.0` continuously. Therefore, ZK-Swarm consensus is not just a security measure; it is a **thermodynamic necessity** to prevent cascading systemic collapse.
 
-## 5. CORTEX-Native Implementation Blueprint
+## 5. BABYLON-60-Native Implementation Blueprint
 
 To materialize this theory into the existing `Cortex-Persist` ecosystem, the following phased architectural adjustments are mapped:
 
@@ -61,10 +61,10 @@ To materialize this theory into the existing `Cortex-Persist` ecosystem, the fol
 
 ### Phase 2: Distributed Ledger Alignment (DVT Parity)
 - Move to an architecture fundamentally inspired by Ethereum's SSV (Secret Shared Validators).
-- Expose the CORTEX Event Bus as a verifiable P2P substrate.
+- Expose the BABYLON-60 Event Bus as a verifiable P2P substrate.
 - Shard validation tasks across multiple virtual nodes. 
 - Operations mutating `cortex.db` require a threshold of `k-of-n` cryptographic signatures from the decentralized local network. 
 
 ---
 > *Nueve leyes. La última es el fin del software.*
-> *Compresión Shannon v6.0 — CORTEX Unified Substrate.*
+> *Compresión Shannon v6.0 — BABYLON-60 Unified Substrate.*

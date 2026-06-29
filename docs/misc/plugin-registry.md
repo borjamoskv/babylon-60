@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Plugin Registry Architecture
 
-> Specification for the CORTEX Plugin Registry — how plugins are discovered, verified, and distributed.
+> Specification for the BABYLON-60 Plugin Registry — how plugins are discovered, verified, and distributed.
 
 ## Overview
 
-The plugin registry is CORTEX's mechanism for discovering, distributing, and verifying plugins. It operates on a **trust-tiered model** where plugins earn verification levels through code review, automated scanning, and production usage.
+The plugin registry is BABYLON-60's mechanism for discovering, distributing, and verifying plugins. It operates on a **trust-tiered model** where plugins earn verification levels through code review, automated scanning, and production usage.
 
 ## Trust Levels
 
@@ -81,6 +81,6 @@ cortex plugin install acme/internal-plugin
 
 ## Governance
 
-- **Core plugins** (maintained by CORTEX team): Standard review process
+- **Core plugins** (maintained by MOSKV team): Standard review process
 - **Community plugins**: PR-based review for "Community" level promotion
 - **Dispute resolution**: GitHub Issues on the registry repository

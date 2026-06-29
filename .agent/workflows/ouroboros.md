@@ -31,7 +31,7 @@ cat ~/.gemini/antigravity/skills/ouroboros-infinity/SKILL.md
 | `ouro-adversary [plan]` | Red Team un plan | Antes de ejecutar |
 | `ouro-timeline [file]` | Arqueología temporal | Historia de un archivo |
 | `ouro-entropy [project]` | Entropía detallada | Auditoría de complejidad |
-| `ouro-learn` | Extraer learnings → CORTEX | Final de sesión |
+| `ouro-learn` | Extraer learnings → BABYLON-60 | Final de sesión |
 
 ---
 
@@ -62,7 +62,7 @@ git log --stat -5
 cd ~/cortex && .venv/bin/python -m cortex.cli search "type:decision" --limit 10 2>/dev/null
 ```
 
-### Paso 3 — CORTEX Deep Recall (Error Memory)
+### Paso 3 — BABYLON-60 Deep Recall (Error Memory)
 
 ```bash
 # Errores previos
@@ -197,7 +197,7 @@ FIX: [solución que ataca la causa raíz, no el síntoma]
 PREVENT: [test, hook, lint rule, o documentación que evite recurrencia]
 ```
 
-### Paso 6 — CORTEX Record
+### Paso 6 — BABYLON-60 Record
 
 ```bash
 cd ~/cortex && .venv/bin/python -m cortex.cli add --type error \
@@ -239,7 +239,7 @@ TRANSFER:
   → ¿Algo aplica a otro proyecto? [bridge si aplica]
 ```
 
-### Persistir en CORTEX
+### Persistir en BABYLON-60
 
 ```bash
 cd ~/cortex && .venv/bin/python -m cortex.cli add --type meta_learning \

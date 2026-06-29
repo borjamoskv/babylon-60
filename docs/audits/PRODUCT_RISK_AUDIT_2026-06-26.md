@@ -1,10 +1,10 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX-Persist: Product Risk & Strategic Positioning Audit (Capa 2)
+# BABYLON-60-Persist: Product Risk & Strategic Positioning Audit (Capa 2)
 
 > **Auditor:** MOSKV-1 APEX / Borja Moskv
 > **Date:** 2026-06-26
 > **Reality Level:** `C5-REAL`
-> **Target:** Product Market Fit, Scope Rationalization, and Verification Defendability for Cortex-Persist.
+> **Target:** Product Market Fit, Scope Rationalization, and Verification Defendability for BABYLON-60.
 
 ```yaml
 Claim: "Cortex-Persist exhibits high conceptual value but suffers from architectural surface-area bloat (66 subdirectories) and high cognitive friction for enterprise CTO adoption."
@@ -22,8 +22,8 @@ Proof:
 *   **Symptom:** The `cortex/` package includes 66 subdirectories, ranging from core databases and ledgers to `evm/`, `darknet/`, `mac_maestro/`, `mcts/`, and `shannon/`. Trying to build a runtime, memory, ledger, FFI layer, compliance engine, and EVM bridge in a single repo increases complexity exponentially.
 *   **Assessment:** If not pruned, the codebase will become unmaintainable, increasing the risk of dependency conflicts and failing the AST/Pyright gates.
 *   **Remediation (Core vs Extensions):**
-    *   **Cortex Core:** Retain only `engine/`, `audit/`, `guards/`, `crypto/`, `database/`, and `cli/`.
-    *   **Cortex Extensions:** Move peripheral modules (`evm/`, `darknet/`, `mac_maestro/`, `mcts/`) to `cortex_extensions/` or separate packages.
+    *   **BABYLON-60 Core:** Retain only `engine/`, `audit/`, `guards/`, `crypto/`, `database/`, and `cli/`.
+    *   **BABYLON-60 Extensions:** Move peripheral modules (`evm/`, `darknet/`, `mac_maestro/`, `mcts/`) to `cortex_extensions/` or separate packages.
 
 ### Risk 2 — Value Proposition Complexity
 *   **Symptom:** Presenting the product as "AI Trust Infrastructure using topological collapse over execution manifolds" creates high cognitive friction for enterprise decision-makers.
@@ -84,15 +84,15 @@ Proof:
     *   Command to execute and reproduce locally: `python benchmarks/run_suite.py`.
 
 ### Risk 8 — Category Education
-*   **Symptom:** Cortex-Persist does not fit cleanly into existing categories (it is not just a DB, nor just a framework like LangGraph).
+*   **Symptom:** BABYLON-60 does not fit cleanly into existing categories (it is not just a DB, nor just a framework like LangGraph).
 *   **Assessment:** If you don't define your category, competitors will define you as a slow vector store or a complex log wrapper.
 *   **Remediation (Strategic Positioning Matrix):**
-    | Technology | Primary Purpose | Cortex-Persist Separation |
+    | Technology | Primary Purpose | BABYLON-60 Separation |
     | :--- | :--- | :--- |
-    | **Git** | Code Version Control | Cortex version-controls agent *decisions* and *states*. |
-    | **CI/CD** | Static/Dynamic Testing | Cortex tests execution path conformance *in real-time*. |
-    | **OpenTelemetry** | Logs, Metrics, Traces | Cortex provides *cryptographic verification* of trace validity. |
-    | **Temporal** | Durable Execution / Workflows | Cortex guarantees *tamper-evidence* of execution history. |
+    | **Git** | Code Version Control | BABYLON-60 version-controls agent *decisions* and *states*. |
+    | **CI/CD** | Static/Dynamic Testing | BABYLON-60 tests execution path conformance *in real-time*. |
+    | **OpenTelemetry** | Logs, Metrics, Traces | BABYLON-60 provides *cryptographic verification* of trace validity. |
+    | **Temporal** | Durable Execution / Workflows | BABYLON-60 guarantees *tamper-evidence* of execution history. |
 
 ---
 
@@ -116,4 +116,4 @@ To resolve these product risks, the following immediate steps are prioritized:
 *   **Product positioning:** `6.0/10` (Needs alignment from academic jargon to developer/enterprise terminology).
 
 ---
-*Credit: Formalized under the authority of **Borja Moskv** (borjamoskv) for the CORTEX-Persist ecosystem.*
+*Credit: Formalized under the authority of **Borja Moskv** (borjamoskv) for the BABYLON-60-Persist ecosystem.*

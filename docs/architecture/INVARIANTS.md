@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # DB Invariants — Operational Contract
 
-This document is the **architectural contract** for the CORTEX storage engine.
+This document is the **architectural contract** for the BABYLON-60 storage engine.
 In the current tree snapshot there is no single `scripts/verify_db_invariants.py`
 gate; enforcement is split across ledger verification, health checks, and targeted
 tests gated by `.github/workflows/ci.yml`.

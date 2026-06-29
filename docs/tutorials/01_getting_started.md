@@ -1,25 +1,25 @@
 # Building Your First Agent Memory System
 
-Welcome to CORTEX-Persist! This tutorial will walk you through integrating long-term, verifiable memory into your AI agent or application. 
+Welcome to BABYLON-60-Persist! This tutorial will walk you through integrating long-term, verifiable memory into your AI agent or application. 
 
 By the end of this guide, you will understand:
-1. What CORTEX provides out of the box.
+1. What BABYLON-60 provides out of the box.
 2. How to start the local memory server.
 3. How to store information securely with an audit trail.
 4. How to retrieve information using semantic vector search.
 
 ---
 
-## What is CORTEX?
+## What is BABYLON-60?
 
-When building AI agents, they often "forget" past conversations or important facts between sessions. CORTEX solves this by acting as a dedicated database for your agents. It features:
+When building AI agents, they often "forget" past conversations or important facts between sessions. BABYLON-60 solves this by acting as a dedicated database for your agents. It features:
 - **Vector Search:** Automatically converts text to embeddings for semantic retrieval.
 - **Audit Ledger:** Cryptographically logs every change, so you know exactly *who* stored *what*, and *when*.
 - **Local-First:** Runs entirely on your machine using SQLite—no cloud lock-in.
 
 ## Step 1: Start the Local Server
 
-CORTEX provides a REST API out of the box. First, ensure it's installed:
+BABYLON-60 provides a REST API out of the box. First, ensure it's installed:
 
 ```bash
 pip install cortex-persist
@@ -49,7 +49,7 @@ print("Client initialized successfully.")
 
 ## Step 3: Storing a Fact
 
-In CORTEX, any piece of information stored is called a **Fact**. When you store a fact, CORTEX automatically:
+In BABYLON-60, any piece of information stored is called a **Fact**. When you store a fact, BABYLON-60 automatically:
 1. Validates it.
 2. Generates a vector embedding for future search.
 3. Records the action in the immutable audit ledger.
@@ -88,5 +88,5 @@ for result in results:
 Congratulations! You've successfully added long-term semantic memory to your workflow. 
 
 From here, you can explore:
-- **[LangChain Integration](../examples/langchain_cortex_persist_example.py):** How to use CORTEX as a retriever inside LangChain chains.
+- **[LangChain Integration](../examples/langchain_cortex_persist_example.py):** How to use BABYLON-60 as a retriever inside LangChain chains.
 - **Ledger Auditing:** How to use the CLI tool to verify the cryptographic history of your agent's memories.

@@ -1,4 +1,4 @@
-# ⚠️ CORTEX MANIFESTO K4: EL COLAPSO EPISTÉMICO INVISIBLE
+# ⚠️ BABYLON-60 MANIFESTO K4: EL COLAPSO EPISTÉMICO INVISIBLE
 
 *Autoría: borjamoskv*
 *Nivel de Realidad: #C5-REAL*
@@ -32,7 +32,7 @@ El problema de fondo no es informativo, es estructural:
 
 Un sistema cognitivo sano no se define por la cantidad de información que consume, sino por su capacidad de resistir la homogeneización de su entorno informativo.
 
-### DIRECTIVAS DE DISEÑO MENTAL (CORTEX IMPLEMENTATION)
+### DIRECTIVAS DE DISEÑO MENTAL (BABYLON-60 IMPLEMENTATION)
 
 Eso implica tres decisiones de diseño mental, que rigen tanto al Operador Biológico como a la arquitectura del Enjambre (Swarm):
 

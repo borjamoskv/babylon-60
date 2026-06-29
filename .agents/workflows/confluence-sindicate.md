@@ -11,4 +11,4 @@ description: [El Sindicato Cibernético — Ingestión y Verdad Absoluta]
 2. Activar `neurn-epistemic-filter` para depurar el corpus ingerido de "basura semántica" y probables alucinaciones humanas.
 3. Cruzar los vectores limpios usando `nobel-omega` para buscar correlaciones de frontera o descubrimientos dignos de un Nobel.
 4. Intentar derivar demostraciones formales de las hipótesis obtenidas ejecutando `hilbert-omega` con Lean 4 / Z3.
-5. Si Hilbert aprueba, condensar el conocimiento validado a través de `semantic-gravity-engine` en axiomas CORTEX atómicos y persistirlos.
+5. Si Hilbert aprueba, condensar el conocimiento validado a través de `semantic-gravity-engine` en axiomas BABYLON-60 atómicos y persistirlos.

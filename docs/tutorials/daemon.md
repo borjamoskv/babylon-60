@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Tutorial: Site Monitoring Daemon
 
-Set up CORTEX's built-in daemon (MOSKV-1) to monitor your production sites.
+Set up BABYLON-60's built-in daemon (MOSKV-1) to monitor your production sites.
 
 ## What the Daemon Does
 
@@ -9,7 +9,7 @@ MOSKV-1 is a background watchdog that monitors:
 
 - 🌐 **Site uptime** — HTTP health checks with configurable intervals
 - 👻 **Ghost detection** — Identifies stale or abandoned projects
-- 🧠 **Memory freshness** — Alerts when CORTEX hasn't been synced recently
+- 🧠 **Memory freshness** — Alerts when BABYLON-60 hasn't been synced recently
 - 🔒 **SSL certificates** — Warns before certificate expiry
 - 💾 **Disk usage** — Alerts on low storage
 
@@ -125,7 +125,7 @@ jobs:
 ## Best Practices
 
 !!! tip "Start simple"
-    Begin with just site monitoring, then add ghost detection and memory freshness as your CORTEX usage grows.
+    Begin with just site monitoring, then add ghost detection and memory freshness as your BABYLON-60 usage grows.
 
 !!! warning "Don't over-monitor"
     Set reasonable intervals. 60 seconds for production, 5 minutes for staging. More frequent checks don't add value but increase resource usage.

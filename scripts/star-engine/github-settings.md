@@ -58,7 +58,7 @@ Set to: `https://cortexpersist.com` (or your docs URL)
    - 📢 **Announcements** (only maintainers post)
    - 💡 **Ideas** (feature requests from community)
    - 🙏 **Q&A** (support questions)
-   - 🙌 **Show and Tell** (community projects using CORTEX)
+   - 🙌 **Show and Tell** (community projects using BABYLON-60)
    - 💬 **General** (open discussion)
 
 ## 6. Good First Issues

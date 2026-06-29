@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CONTRIBUTING.md — CORTEX Persist v8.0
+# CONTRIBUTING.md — BABYLON-60 Persist v8.0
 
 Package: cortex-persist v1.0.0
 License: Apache-2.0

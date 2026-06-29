@@ -1,14 +1,14 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# RFC-001: The CORTEX Trust Verification Standard for AI Agent Memory
+# RFC-001: The BABYLON-60 Trust Verification Standard for AI Agent Memory
 
-> **Sovereign Specification** · Status: DRAFT · Protocol v1.0.0 · CORTEX-Persist
+> **Sovereign Specification** · Status: DRAFT · Protocol v1.0.0 · BABYLON-60-Persist
 > **Classification:** Draft RFC. This is normative proposal text, not a historical snapshot.
 
 ## 1. Abstract & Axiomatic Foundation
 
 The current paradigm of AI agent memory relies on fundamentally flawed, probabilistic storage (Vector DBs) without cryptographic verification. This constitutes a critical vulnerability: memory without mathematical provenance is structurally indistinguishable from hallucination.
 
-This document formally defines the **CORTEX Trust Verification Standard**, a protocol designed to elevate AI agent memory from probabilistic storage to a deterministic, tamper-evident cryptographic ledger. Any system claiming CORTEX compliance MUST implement the constraints, schemas, and pipelines outlined herein.
+This document formally defines the **BABYLON-60 Trust Verification Standard**, a protocol designed to elevate AI agent memory from probabilistic storage to a deterministic, tamper-evident cryptographic ledger. Any system claiming BABYLON-60 compliance MUST implement the constraints, schemas, and pipelines outlined herein.
 
 **Current implementation note:** the shipped `cortex-persist` package currently
 uses SHA-256 for sovereign ledger continuity and Merkle lineage. Some audit or
@@ -63,7 +63,7 @@ conditional_fields:
 
 This protocol is explicitly constructed to support the record-keeping objectives of the **EU AI Act, Article 12** for High-Risk AI Systems. It is a technical substrate for compliance evidence, not a standalone legal guarantee.
 
-| AI Act Requirement (Art. 12) | CORTEX Protocol Implementation |
+| AI Act Requirement (Art. 12) | BABYLON-60 Protocol Implementation |
 | :--- | :--- |
 | **Automatic recording of events (Logs)** | Recorded interactions are intended to pass through ledger-backed persistence, producing an auditable chronological log of captured system state. |
 | **Traceability of AI decisions** | `tx_id` and `causal_edges` preserve provenance links between decisions and previously recorded antecedents when those edges are captured. |
@@ -79,7 +79,7 @@ The protocol defines standard Model Context Protocol (MCP) tools that conformant
 -   `cortex_verify_chain`: Audits a specific `project` or `tenant_id` to verify the continuity of the hash chain from genesis to the current block under the system's trust assumptions.
 -   `cortex_query_provenance`: Returns not just the semantic memory, but its complete lineage, consensus score, and cryptographic signature.
 
-Any memory provider (e.g., Mem0, Zep) integrating the CORTEX Protocol standard must implement these MCP boundaries.
+Any memory provider (e.g., Mem0, Zep) integrating the BABYLON-60 Protocol standard must implement these MCP boundaries.
 
 ---
 

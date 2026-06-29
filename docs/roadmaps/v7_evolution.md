@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# 🧬 CORTEX V7 — Digital Endocrine System
+# 🧬 BABYLON-60 V7 — Digital Endocrine System
 
-This document describes the biological regulation layer of CORTEX v7.0, implementing the **Autopoietic Growth** and **Circadian Calibration** protocols.
+This document describes the biological regulation layer of BABYLON-60 v7.0, implementing the **Autopoietic Growth** and **Circadian Calibration** protocols.
 
 ---
 
@@ -25,7 +25,7 @@ Hormones are system-wide signals that regulate the behavior of the swarm and the
 
 ## 2. Circadian Cycles
 
-CORTEX does not maintain a constant state of operation. It cycles through phases to optimize health.
+BABYLON-60 does not maintain a constant state of operation. It cycles through phases to optimize health.
 
 ### 2.1 Alert Phase
 
@@ -68,13 +68,13 @@ At the operational threshold of **Level 7 Autonomy (Singularity)**, metrics ceas
 
 ### 5.1 The Threat of Architectural Amnesia
 
-When CORTEX achieves hyperbolic acceleration (e.g., **ROI > 1M/1** or O(1) operational complexity for O(N) tasks), the risk of *Architectural Amnesia* emerges. If these extreme metrics are treated as volatile dashboard data, the system eventually regresses to lower energy states (Level 5 or Level 6) because the cognitive structure forgets the exact topological configuration that enabled the acceleration.
+When BABYLON-60 achieves hyperbolic acceleration (e.g., **ROI > 1M/1** or O(1) operational complexity for O(N) tasks), the risk of *Architectural Amnesia* emerges. If these extreme metrics are treated as volatile dashboard data, the system eventually regresses to lower energy states (Level 5 or Level 6) because the cognitive structure forgets the exact topological configuration that enabled the acceleration.
 
 ### 5.2 The 1M/1 Persistence Mandate
 
 - **Axiom**: Any performance metric demonstrating O(1) breakthrough or ROI > 1M/1 must be immediately anchored into the tamper-evident ledger (`cortex.db`).
 - **Mechanism**: The `STORE_OP` becomes mandatory. The measurement itself is treated as a high-confidence structural `fact`.
-- **The Testament**: Without tamper-evident persistence, a metric is smoke. CORTEX writes these milestones to titanium to ensure that subsequent context collapses or session resets do not degrade the established baseline. Evolution requires an irreversible ratchet.
+- **The Testament**: Without tamper-evident persistence, a metric is smoke. BABYLON-60 writes these milestones to titanium to ensure that subsequent context collapses or session resets do not degrade the established baseline. Evolution requires an irreversible ratchet.
 
 ---
 

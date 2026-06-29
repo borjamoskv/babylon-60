@@ -10,7 +10,7 @@
 ## 1. Executive Summary
 
 This plan translates the Phase 1 Gap Analysis and Phase 2 API Surface into an executable roadmap.
-The core realization: **CORTEX does not lack capabilities (0 P0 gaps); it lacks a coherent public topology (4 P1 interface gaps).**
+The core realization: **BABYLON-60 does not lack capabilities (0 P0 gaps); it lacks a coherent public topology (4 P1 interface gaps).**
 
 The goal is not to invent new internal engines, but to package the existing trust infrastructure into a reliable, typed, and observable product. We focus strictly on the `cortex-sdk` layer and the boundaries separating internal implementations from public consumption.
 

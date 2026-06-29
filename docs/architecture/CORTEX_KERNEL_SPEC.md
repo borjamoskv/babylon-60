@@ -1,9 +1,9 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX KERNEL BUILD v1: FINANCIAL-GRADE EXECUTION TRUTH MACHINE
+# BABYLON-60 KERNEL BUILD v1: FINANCIAL-GRADE EXECUTION TRUTH MACHINE
 
 > **Reality Level:** `C5-REAL` (Executable Infrastructure Spec)
 > **Aesthetic:** `Industrial Noir 2026`
-> **Definition:** CORTEX Kernel is an event-sourced deterministic execution engine with causal ordering and financial-grade auditability.
+> **Definition:** BABYLON-60 Kernel is an event-sourced deterministic execution engine with causal ordering and financial-grade auditability.
 
 ## 1. CORE PRINCIPLE
 

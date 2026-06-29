@@ -3,7 +3,7 @@
 
 > **"La observación sin formalismo es ruido estocástico; la intervención sin trazabilidad es entropía pura."**
 
-El sistema AUTODIDACT evoluciona desde una taxonomía de indicadores (KPIs/Métricas) hacia una **Ontología Estructural** validada por un tipado fuerte. La inteligencia de CORTEX-Persist no consiste en acumular texto estocástico, sino en compilar secuencias causales desde la *Evidencia Bruta* hasta la *Intervención Directa*.
+El sistema AUTODIDACT evoluciona desde una taxonomía de indicadores (KPIs/Métricas) hacia una **Ontología Estructural** validada por un tipado fuerte. La inteligencia de BABYLON-60-Persist no consiste en acumular texto estocástico, sino en compilar secuencias causales desde la *Evidencia Bruta* hasta la *Intervención Directa*.
 
 Esta arquitectura actúa como un **Compilador Epistemológico**. Todo razonamiento que viole la secuencia de tipado (e.g., derivar una intervención directamente de una narrativa sin pasar por el modelo latente) generará un `TypeError` / `ValidationError` a nivel de máquina, abortando el ciclo cognitivo (Ley del Isomorfismo Causal Φ5).
 
@@ -69,7 +69,7 @@ La barrera de protección del estado físico. Operan en 4 densidades:
 4. **Probabilistic:** Se exige $P > 0.99$ dentro del modelo latente.
 
 ### `Intervention` (La Singularidad Agéntica)
-Las acciones que MOSKV-1 y CORTEX ejecutan en el entorno anfitrión (macOS, Swarm, GitHub). No solo predecimos el estado, **mutamos la realidad**.
+Las acciones que MOSKV-1 y BABYLON-60 ejecutan en el entorno anfitrión (macOS, Swarm, GitHub). No solo predecimos el estado, **mutamos la realidad**.
 Basado en el cálculo $do(X)$ de Pearl:
 ```yaml
 Intervention: do(freeze_release)

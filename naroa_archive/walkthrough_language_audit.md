@@ -1,4 +1,4 @@
-# ⚡ Walkthrough: CORTEX-Persist Language Audit
+# ⚡ Walkthrough: BABYLON-60-Persist Language Audit
 
 **Reality Level:** `C5-REAL` (Static Analysis & Code Quality Verification)
 **Target:** `cortex-persist` Python Codebase Compliance

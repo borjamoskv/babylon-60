@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Tutorial: Time-Travel Debugging
 
-Use CORTEX's temporal queries to understand what your system knew at any point in time.
+Use BABYLON-60's temporal queries to understand what your system knew at any point in time.
 
 ## The Problem
 
-Debugging production issues often requires answering: *"What was the configuration when this broke at 3 AM?"* CORTEX stores temporal metadata on every fact, enabling point-in-time recall.
+Debugging production issues often requires answering: *"What was the configuration when this broke at 3 AM?"* BABYLON-60 stores temporal metadata on every fact, enabling point-in-time recall.
 
 ## Store Facts with Temporal Awareness
 
@@ -57,7 +57,7 @@ curl http://localhost:8742/recall/my-api?as_of=2026-01-20T00:00:00
 ## Debugging Workflow
 
 1. **Incident occurs** at a specific time
-2. **Query CORTEX** for the state at that time:
+2. **Query BABYLON-60** for the state at that time:
 
    ```bash
    cortex history production --at "2026-02-10T03:15:00"

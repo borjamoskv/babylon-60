@@ -1,11 +1,11 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: Ejecuta el protocolo MEMORIA para persistir el contexto de la sesión actual en CORTEX (v4 - Full Ontology)
+description: Ejecuta el protocolo MEMORIA para persistir el contexto de la sesión actual en BABYLON-60 (v4 - Full Ontology)
 ---
 
 # Workflow: MEMORIA (v4)
 
-Protocolo optimizado de persistencia de contexto para CORTEX v4. Ejecuta estos pasos en orden:
+Protocolo optimizado de persistencia de contexto para BABYLON-60 v4. Ejecuta estos pasos en orden:
 
 // turbo-all
 
@@ -17,13 +17,13 @@ Protocolo optimizado de persistencia de contexto para CORTEX v4. Ejecuta estos p
      find ~/.cortex/context-snapshot.md -mmin -60 2>/dev/null
      ```
 
-2. **Recall**: Carga el estado actual del proyecto desde CORTEX:
+2. **Recall**: Carga el estado actual del proyecto desde BABYLON-60:
 
    ```bash
    cd ~/cortex && .venv/bin/python -m cortex.cli recall $(basename "$(pwd)") 2>/dev/null || echo "No prior context"
    ```
 
-3. **Analyze**: Analiza la conversación actual y extrae la ontología completa de CORTEX v4:
+3. **Analyze**: Analiza la conversación actual y extrae la ontología completa de BABYLON-60 v4:
    - **Decisions**: Decisiones de diseño o arquitectura tomadas (Reasoning required).
    - **Knowledge**: Hechos aprendidos sobre el proyecto.
    - **Errors**: Errores encontrados con CAUSA y FIX.

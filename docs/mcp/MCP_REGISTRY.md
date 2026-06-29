@@ -1,4 +1,4 @@
-# CORTEX-Persist MCP Server Registry Submission
+# BABYLON-60-Persist MCP Server Registry Submission
 
 > **C5-REAL Execution**  
 > This document contains the exact metadata and README contents required to list `cortex-persist` in the official [MCP Servers Registry](https://github.com/modelcontextprotocol/servers).
@@ -70,9 +70,9 @@ A Local-First Sovereign Trust layer that provides tamper-evident memory infrastr
 By default, the server exposes safe, core memory primitives. To enable the full suite of 35+ tools (compliance, Genesis Engine, Megatools), configure `CORTEX_MCP_FULL=1`.
 
 ### Default Core Tools
-*   `cortex_store`: Store a fact in CORTEX memory. Immune Membrane + MCPGuard validated.
-*   `cortex_search`: Semantic + text hybrid search across CORTEX memory.
-*   `cortex_status`: Get CORTEX system status and metrics (fact counts, DB size, MCP metrics).
+*   `cortex_store`: Store a fact in BABYLON-60 memory. Immune Membrane + MCPGuard validated.
+*   `cortex_search`: Semantic + text hybrid search across BABYLON-60 memory.
+*   `cortex_status`: Get BABYLON-60 system status and metrics (fact counts, DB size, MCP metrics).
 *   `cortex_embed`: Generate embedding vector for text.
 *   `cortex_embed_status`: Show current embedding provider configuration.
 

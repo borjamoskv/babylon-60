@@ -3,7 +3,7 @@
 
 ## Overview
 - **Incident ID**: INC-001
-- **Component**: CORTEX Ledger / Persistence Path
+- **Component**: BABYLON-60 Ledger / Persistence Path
 - **Type**: `infra_ghost` (Dependency Contamination)
 - **Status**: ENVIRONMENT_REPAIRED / ARCHITECTURAL_DEBT_LOGGED
 
@@ -11,7 +11,7 @@
 During the finalization of the Mac-Maestro-Ω V5 milestone, the `cortex store` command failed due to a missing `torch_shm_manager` binary in the local `.venv`. This error originated from an indirect dependency on `torch` within the ledger/memory write path.
 
 ## Root Cause
-The CORTEX CLI/Engine write path is currently coupled with heavy machine learning dependencies (`torch`, `sentence-transformers`). When the environment is partially corrupted (e.g., incomplete torch installation), even simple metadata writes to the ledger are blocked by failed binary imports.
+The BABYLON-60 CLI/Engine write path is currently coupled with heavy machine learning dependencies (`torch`, `sentence-transformers`). When the environment is partially corrupted (e.g., incomplete torch installation), even simple metadata writes to the ledger are blocked by failed binary imports.
 
 ## Impact
 - **Operational**: Blocked ledger persistence for verified milestones.

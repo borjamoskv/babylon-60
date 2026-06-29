@@ -2,7 +2,7 @@
 # REPOSITORY-CENSUS.md — ORTU-Ω Phase 0
 
 > **Program**: ORTU-Ω Forge · **Codename**: SORTU-Ω  
-> **Objective**: Freeze the factual map of the CORTEX terrain before defining the external Trust Layer API.  
+> **Objective**: Freeze the factual map of the BABYLON-60 terrain before defining the external Trust Layer API.  
 > **Generated**: 2026-03-14
 
 ---

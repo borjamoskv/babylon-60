@@ -74,7 +74,7 @@ fn compute_hash(obj: &EpistemicObject) -> Hash {
 ------------------------------
 ## 5. Criterios de Aceptación para MVP
 
-Para que el Tipo de Sistema de CORTEX se considere validado, el MVP (Bootstrapping MVP propuesto) debe demostrar empíricamente:
+Para que el Tipo de Sistema de BABYLON-60 se considere validado, el MVP (Bootstrapping MVP propuesto) debe demostrar empíricamente:
 1. **Determinismo**: Múltiples ejecuciones del mismo objeto en distintas máquinas y tiempos producen idéntico SHA3-256.
 2. **Rechazo de Entropía**: Intentar instanciar una `Assertion` con un `float` puro o un string sin normalizar debe ser capturado en tiempo de compilación o fallar inmediatamente en el parser.
 3. **Transparencia BFT (Byzantine Fault Tolerance)**: Si un actor malicioso altera un byte en la descripción de un Literal, el ID/Hash resultante muta por avalancha criptográfica, invalidando cualquier `SupportRelation` que apuntase al objeto original.

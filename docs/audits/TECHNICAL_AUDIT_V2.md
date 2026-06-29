@@ -1,16 +1,16 @@
-# 🛡️ CORTEX-Persist Technical Audit Report v2.0 (Forensic Grade)
+# 🛡️ BABYLON-60-Persist Technical Audit Report v2.0 (Forensic Grade)
 
 * **Author / Demiurgo:** Borja Moskv (`borjamoskv`)
-* **System:** CORTEX-Persist
+* **System:** BABYLON-60-Persist
 * **Repository:** `~/10_PROJECTS/cortex-persist`
 * **Audit Level:** C5-REAL (local deterministic execution context)
 * **Timestamp:** 2026-06-26T11:43:00+02:00
 
 ---
 
-# 📖 1. Glossary (CORTEX ↔ Industry Mapping)
+# 📖 1. Glossary (BABYLON-60 ↔ Industry Mapping)
 
-| CORTEX Term         | Industry Equivalent           | Definition                                         |
+| BABYLON-60 Term         | Industry Equivalent           | Definition                                         |
 | ------------------- | ----------------------------- | -------------------------------------------------- |
 | Demiurgo            | Maintainer / Architect        | Human system designer responsible for architecture |
 | KETER-∞ Metal-Level | Kernel / DB Isolation Layer   | Maximum privilege isolation boundary               |
@@ -55,7 +55,7 @@ This audit follows a **deterministic forensic model**:
 | LLM / Agent swarm   | Untrusted                  |
 | External APIs       | Untrusted                  |
 | Virgo Guard         | Trusted validator          |
-| CORTEX Kernel       | Trusted deterministic core |
+| BABYLON-60 Kernel       | Trusted deterministic core |
 | Operator (Demiurgo) | Fully trusted              |
 
 ## 3.3 Trust Boundaries
@@ -337,7 +337,7 @@ cargo audit (if Rust components enabled)
 
 # 🧾 Final Verdict
 
-CORTEX-Persist exhibits a **strong architectural security model**, particularly in:
+BABYLON-60-Persist exhibits a **strong architectural security model**, particularly in:
 
 * deterministic isolation design
 * intent-driven cryptographic sealing

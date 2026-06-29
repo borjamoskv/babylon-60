@@ -1,15 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-title: CORTEX v8.0 Production Roadmap
+title: BABYLON-60 v8.0 Production Roadmap
 description: Plan de transición de MVP a sistema enterprise-grade (El camino a V8)
 ---
 
-# CORTEX v8.0: The Production Roadmap (30 Days)
+# BABYLON-60 v8.0: The Production Roadmap (30 Days)
 
 > **DIAGNÓSTICO SOBERANO**
-> CORTEX está posicionado estratégicamente como el motor de persistencia criptográfica para IA. La separación arquitectónica CORTEX (producto) vs MOSKV-1 (capa personal) es impecable. Sin embargo, para consolidar el paso de "infraestructura operativa" a "producto enterprise-grade robusto", debemos cerrar brechas críticas en evaluación, recuperación semántica y observabilidad real.
+> BABYLON-60 está posicionado estratégicamente como el motor de persistencia criptográfica para IA. La separación arquitectónica BABYLON-60 (producto) vs MOSKV-1 (capa personal) es impecable. Sin embargo, para consolidar el paso de "infraestructura operativa" a "producto enterprise-grade robusto", debemos cerrar brechas críticas en evaluación, recuperación semántica y observabilidad real.
 
-Este roadmap describe el plan de 30 días para transformar CORTEX en un sistema de memoria de grado producción indiscutible, basado en 6 ejes de fallo sistémico detectados.
+Este roadmap describe el plan de 30 días para transformar BABYLON-60 en un sistema de memoria de grado producción indiscutible, basado en 6 ejes de fallo sistémico detectados.
 
 ---
 
@@ -33,10 +33,10 @@ El dashboard actual valida que Python y SQLite estén en la máquina. No mide si
 
 ### 5. Cierre del Loop de Autosuperación con Señales Reales
 Actualmente usamos entropía simulada para detonar las rutinas de mejora continua en el daemon.
-**Objetivo V8:** Conectar el loop de `mejora_loop.py` directamente con las métricas reales de errores, inactividad y fallos de recall de CORTEX, para priorizar su propia evolución.
+**Objetivo V8:** Conectar el loop de `mejora_loop.py` directamente con las métricas reales de errores, inactividad y fallos de recall de BABYLON-60, para priorizar su propia evolución.
 
 ### 6. Enforcement Técnico en la Frontera Producto vs Personal
-La teoría (MOSKV-1 es personal, CORTEX es producto) está clara; la práctica requiere murallas.
+La teoría (MOSKV-1 es personal, BABYLON-60 es producto) está clara; la práctica requiere murallas.
 **Objetivo V8:** Inyectar políticas de aislamiento (Multi-Tenant nativo real), *namespaces* estrictos (para evitar fugas de `borjamoskv` hacia `enterpriseX`), auditorías de acceso e *import/export* con contratos de datos claros.
 
 ---
@@ -70,7 +70,7 @@ El paso de *grep* a Recuperación Basada en Inteligencia.
 
 ### Semana 4: Operativización Total (Closed Loop & Aislamiento)
 
-Hacer de CORTEX una API empresarial indestructible.
+Hacer de BABYLON-60 una API empresarial indestructible.
 
 *   [ ] **Eliminación del Decay Simulado**: Borrar toda referencia a simulación estadística en `mejora_loop.py`. Enganchar la señal de ejecución a los KPIs de la *Semana 1*.
 *   [ ] **Namespacing y Aislamiento por Tenant**: Forzar a `cortex.cli` y REST Server a validar explícitamente el Tenant ID o la API Key asociada a una base de datos particionada.

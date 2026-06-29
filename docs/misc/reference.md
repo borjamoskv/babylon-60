@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Python API Reference
 
-This section is auto-generated from the CORTEX Python source code using `mkdocstrings`.
+This section is auto-generated from the BABYLON-60 Python source code using `mkdocstrings`.
 
 For HTTP routes and request/response shapes, see the [REST API Reference](api.md).
 For the public contract boundaries, see [SDK Surface](SDK-SURFACE.md), [Trust Semantics](TRUST-SEMANTICS.md),
@@ -11,7 +11,7 @@ For the public contract boundaries, see [SDK Surface](SDK-SURFACE.md), [Trust Se
 
 ## Core Engine
 
-The `CortexEngine` is the primary entry point for all CORTEX operations. It aggregates mixins for storage, querying, consensus, search, and graph operations.
+The `CortexEngine` is the primary entry point for all BABYLON-60 operations. It aggregates mixins for storage, querying, consensus, search, and graph operations.
 
 ::: cortex.engine.CortexEngine
     options:
@@ -34,7 +34,7 @@ FastAPI, MCP, and other async contexts use `CortexEngine` with async methods and
 
 ### Fact
 
-The core data unit in CORTEX — a timestamped, hash-chained record of a decision, error, ghost, or knowledge entry.
+The core data unit in BABYLON-60 — a timestamped, hash-chained record of a decision, error, ghost, or knowledge entry.
 
 ::: cortex.engine.models.Fact
 

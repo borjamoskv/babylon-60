@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Public Product Surface
 
-This document defines the recommended integration surface for CORTEX Persist.
+This document defines the recommended integration surface for BABYLON-60 Persist.
 
 The repository contains more than the core product: there are operator workflows, swarm tooling,
 runtime endpoints, dashboards, and historical research artifacts. Those pieces can be useful, but
@@ -10,7 +10,7 @@ surface.
 
 ## Product Promise
 
-For product adoption, treat CORTEX Persist primarily as:
+For product adoption, treat BABYLON-60 Persist primarily as:
 
 - A verifiable memory layer for facts and decisions.
 - A tamper-evident ledger with cryptographic verification.
@@ -99,7 +99,7 @@ For IDE and agent integrations, the recommended minimum toolset is:
 
 The MCP server also exposes additional trust, trace, embedding, health, genesis, and operator
 tools when `CORTEX_ENABLE_EXPERIMENTAL_MCP=1`. They are useful once you need them, but they are
-not required to adopt CORTEX Persist as a verifiable memory layer.
+not required to adopt BABYLON-60 Persist as a verifiable memory layer.
 
 ## Advanced In-Repo Surfaces
 

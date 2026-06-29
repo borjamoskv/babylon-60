@@ -7,14 +7,14 @@ Can you prove even *one* wasn't tampered with?
 Or why it chose OAuth2 over PKCE?
 
 The Era of "Blind AI" is over.
-Welcome to **CORTEX**. 🏛️
+Welcome to **BABYLON-60**. 🏛️
 
 **Tweet 2:**
 Most AI systems suffer from "Session Amnesia." 
 T₀ every time. Months of learning vanish.
 Hallucinations fill the void.
 
-CORTEX is to AI memory what SSL is to web comms.
+BABYLON-60 is to AI memory what SSL is to web comms.
 It provides cryptographic proof for every decision. 🧬
 
 **Tweet 3:**
@@ -24,12 +24,12 @@ The EU AI Act (Art. 12) demands:
 ✅ Full traceability
 ✅ Integrity verification
 
-Fines reach €30M. CORTEX makes adherence an engineering constant, not a manual nightmare. 🛡️
+Fines reach €30M. BABYLON-60 makes adherence an engineering constant, not a manual nightmare. 🛡️
 
 **Tweet 4:**
 Compare the stack:
 - Mem0/Zep/Letta: Excellent memory layers.
-- CORTEX: The **Trust Engine** that certifies them.
+- BABYLON-60: The **Trust Engine** that certifies them.
 
 Every fact is SHA-256 hash-chained. 
 Tamper = Detectable. 

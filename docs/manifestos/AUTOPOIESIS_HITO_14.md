@@ -17,4 +17,4 @@ El stack persistente y soberano queda fijado en 3 sustratos secuenciales:
 2. **Ouroboros Stream Kernel (Rust):** Plegador de estado que audita termodinámicamente a los nodos y dictamina su compresión o muerte en tiempo real.
 3. **WASM Runtime Engine (Wasmtime):** Enjambre determinista de "pure functions" capaz de procesar millones de mutaciones cognitivas sin overhead, garantizando máxima exergía.
 
-*◈ Sealed: 29 May 2026 · CORTEX Sovereign Core*
+*◈ Sealed: 29 May 2026 · BABYLON-60 Sovereign Core*

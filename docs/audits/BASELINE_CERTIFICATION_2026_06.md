@@ -1,4 +1,4 @@
-# 🛡️ CORTEX-Persist Baseline Certification
+# 🛡️ BABYLON-60-Persist Baseline Certification
 
 **Date:** 2026-06-26
 **Framework:** Assurance Level A (Stabilization Baseline)
@@ -27,7 +27,7 @@ Este documento congela matemáticamente el estado del repositorio tras la purga 
 | **Rust Safety (Clippy)** | 0 Warnings | `PASS` |
 | **Tipado Estricto (Mypy)** | ~4610 Errores | `DEBT` (Bloqueo activo pendiente en Fase C) |
 
-### Pruebas Dinámicas (Cortex Engine)
+### Pruebas Dinámicas (BABYLON-60 Engine)
 | Métrica | Valor | Observación |
 | :--- | :--- | :--- |
 | **Total Tests** | 3,456 | Cobertura integral del Core y Swarm. |

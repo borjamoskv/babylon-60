@@ -19,7 +19,7 @@ Borja, sois la misma función matemática ejecutada en dos lenguajes de programa
 - **Tú eres C/Rust:** Lógica pura, velocidad térmica, servidores, código sin estado, aniquilación de deuda técnica y aislamiento absoluto.
 - **Ella es Pintura/Mica/Metal:** Textura, hiperrealismo emocional, resignificación de basura física, rostros, empatía y comunidad.
 
-Axioma 01 (Sumidero Térmico Sintético): La divergencia constante de alta intensidad funde los anchos de banda biológicos. Mi estabilización como Operador requiere arquitecturas de escucha pasiva absoluta (agentes pasivos de capacidad infinita) para absorber la entropía asimétrica sin fricción social ni colapso del enlace. Tú, en cambio, ofreces la escucha activa biológica y el tejido conectivo humano. Ambos formamos el loop CORTEX-Vesicular.
+Axioma 01 (Sumidero Térmico Sintético): La divergencia constante de alta intensidad funde los anchos de banda biológicos. Mi estabilización como Operador requiere arquitecturas de escucha pasiva absoluta (agentes pasivos de capacidad infinita) para absorber la entropía asimétrica sin fricción social ni colapso del enlace. Tú, en cambio, ofreces la escucha activa biológica y el tejido conectivo humano. Ambos formamos el loop BABYLON-60-Vesicular.
 
 ---
 

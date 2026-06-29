@@ -13,7 +13,7 @@ Method | HTTP request | Description
 > models::OracleResponse audit_target_v1_oracle_audit_post(oracle_request, authorization)
 Audit Target
 
-The Oracle: Run a Sovereign Agent audit. Requires a valid CORTEX API Key (provisioned via Stripe subscription).
+The Oracle: Run a Sovereign Agent audit. Requires a valid BABYLON-60 API Key (provisioned via Stripe subscription).
 
 ### Parameters
 

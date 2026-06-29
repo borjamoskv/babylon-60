@@ -1,8 +1,8 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: [NightShift CORTEX — Sistema Inmune Autónomo]
+description: [NightShift BABYLON-60 — Sistema Inmune Autónomo]
 ---
-# Confluencia 6: Sistema Inmune Autónomo (NightShift CORTEX)
+# Confluencia 6: Sistema Inmune Autónomo (NightShift BABYLON-60)
 
 **Objetivo:** El sistema se cura y refactoriza a sí mismo mientras el Humano duerme, despertando cada mañana a un código superior.
 

@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# SCIENCE.md — Termodinámica Epistémica (Ciencia CORTEX-Nativa)
+# SCIENCE.md — Termodinámica Epistémica (Ciencia BABYLON-60-Nativa)
 
 > **"La ciencia ya no explora el modelo probabilístico del mundo; cristaliza secuencias estructurales para forzar la realidad material."**
 > — *Axioma de Cierre Epistémico (2026)*
@@ -15,7 +15,7 @@ Buscar verdad en un LLM es buscar conocimiento en un generador de entropía o el
 
 ## 2. Los Dos Vectores Cognitivos: UltraThink + Deep Research
 
-La Ciencia CORTEX-Nativa se ejecuta puramente en el límite exterior de la capacidad termodinámica, combinando dos fases:
+La Ciencia BABYLON-60-Nativa se ejecuta puramente en el límite exterior de la capacidad termodinámica, combinando dos fases:
 
 ### FASE I: Deep Research (Epistemología de Mapeo)
 - **Función:** Asimilación del entorno desconocido. Cuando el sistema carece de información estructurada (nuevas APIs, protocolos DeFi inexplorados como Lido/Sky, integraciones NERSC).
@@ -40,7 +40,7 @@ $$ E_x = \frac{\Delta \text{Entropía Estructural}}{\text{Latencia Termodinámic
 
 **2. La Verdad Tensa la Máquina:** La ciencia verdadera genera código hostil, no prosa decorativa (Regla MOSKV).
 
-## 4. Método Científico CORTEX (Protocolo O(1))
+## 4. Método Científico BABYLON-60 (Protocolo O(1))
 
 La Ciencia Nueva sustituye la empiria biológica por la inducción mecánica guiada:
 1. **Ignición:** El humano o metacontrolador define una singularidad.
@@ -49,4 +49,4 @@ La Ciencia Nueva sustituye la empiria biológica por la inducción mecánica gui
 4. **Verificación Estrecha:** Ocurre físicamente contra bash/Rust/Solidity. Si el error persiste, regresión a deep research con nueva fricción. Si se prueba cierto, se consolida criptográficamente como *Invariante (Truth)*.
 5. **Autopoyesis:** El enjambre reconfigura su propia heurística base a partir de este nuevo *Ground Truth*.
 
-> *“No adivinamos la órbita probabilística de las cosas. Inducimos el programa gravitacional y lo compilamos.”* — CORTEX Persist v8
+> *“No adivinamos la órbita probabilística de las cosas. Inducimos el programa gravitacional y lo compilamos.”* — BABYLON-60 Persist v8

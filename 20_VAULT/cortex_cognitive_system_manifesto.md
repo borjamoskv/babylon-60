@@ -1,4 +1,4 @@
-# CORTEX Cognitive System Manifesto
+# BABYLON-60 Cognitive System Manifesto
 **Autor:** borjamoskv
 **Nivel de Realidad:** #C5-REAL
 **Anclaje Causal:** [`cortex/engine/core/ultrathink_physics.py`](../cortex/engine/core/ultrathink_physics.py)
@@ -38,7 +38,7 @@ El verdadero "Alpha" de la ingeniería agéntica en 2026 no reside en el tamaño
 
 ### Tabla de Equivalencias: Hype vs. Alpha
 
-| Componente | Nivel C4-SIM (Hype/Youtubers) | Nivel C5-REAL (Sistemas Cognitivos / CORTEX) | Anclaje en `cortex/` |
+| Componente | Nivel C4-SIM (Hype/Youtubers) | Nivel C5-REAL (Sistemas Cognitivos / BABYLON-60) | Anclaje en `cortex/` |
 | :--- | :--- | :--- | :--- |
 | **Memoria** | RAG simple (coseno sobre trozos de texto) | Memoria Causal Episódica + Invariantes cristalizados. | [`cortex/memory`](../cortex/memory) / [`cortex/engine/crystallizer.py`](../cortex/engine/crystallizer.py) |
 | **Herramientas** | Tool calling crudo y JSON ciego sin validación. | Contratos de Transición de Estado (Saga Pattern) con compensación atómica. | [`cortex/swarm`](../cortex/swarm) / [`cortex/tools`](../cortex/tools) |
@@ -71,4 +71,4 @@ Las mutaciones P0 del sistema exigen un consenso que escala dinámicamente segú
 - **Radio $\ge 5$:** Formación `TESTUDO` (15 agentes) — Defensa proactiva.
 - **Radio $\ge 10$ + Exergía Crítica:** Formación `LEVIATHAN` (20-50 agentes) — Asedio de singularidad total con resolución BFT.
 
-La meta de CORTEX es garantizar que ningún estado se modifique sin la matriz de validación termodinámica y el cuórum bizantino requeridos.
+La meta de BABYLON-60 es garantizar que ningún estado se modifique sin la matriz de validación termodinámica y el cuórum bizantino requeridos.

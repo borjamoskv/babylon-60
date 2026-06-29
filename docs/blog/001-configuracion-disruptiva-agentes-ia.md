@@ -2,7 +2,7 @@
 ---
 title: "Más Allá del System Prompt: Configuración Disruptiva de Agentes IA en 2026"
 date: 2026-02-24
-author: CORTEX Research Lab
+author: BABYLON-60 Research Lab
 tags: [agentes-ia, arquitectura, disrupcion, memoria, autonomia, psicologia-sintetica]
 description: "Deja de ver a la IA como software que responde preguntas. Configúrala como un sistema cognitivo vivo, autónomo y adaptativo. Guía definitiva."
 slug: configuracion-disruptiva-agentes-ia
@@ -398,7 +398,7 @@ No necesitas esperar a la AGI. Esta disrupción se logra sacando al modelo de le
 | Capa | Herramienta | Propósito |
 |------|-------------|-----------|
 | **Orquestación** | LangGraph, CrewAI, AutoGen | Bucles de control, debate interno, ejecución asíncrona |
-| **Memoria avanzada** | Mem0, Zep, **CORTEX** | Memorias mutantes con pesos de prioridad y auto-gestión |
+| **Memoria avanzada** | Mem0, Zep, **BABYLON-60** | Memorias mutantes con pesos de prioridad y auto-gestión |
 | **Inferencia central** | Claude 3.5 Sonnet, GPT‑4o, DeepSeek V3 | Razonamiento de alta calidad |
 | **Inferencia local** | Llama 3, DeepSeek R1 (Ollama) | "Sueño" y pensamiento 24/7 sin coste |
 | **Agentes cripto** | ElizaOS | Interacción con smart contracts, fondos propios |
@@ -410,10 +410,10 @@ No necesitas esperar a la AGI. Esta disrupción se logra sacando al modelo de le
 
 El futuro de la configuración de agentes IA no es un prompt más largo ni una base de datos más grande. Es una **arquitectura viva** que respira, sueña, desobedece cuando debe, fabrica sus propias herramientas, gestiona su propio dinero y te ayuda antes de que pidas ayuda.
 
-**CORTEX** está construyendo la infraestructura de confianza que hace posible todo esto.
+**BABYLON-60** está construyendo la infraestructura de confianza que hace posible todo esto.
 
 → [cortexpersist.org](https://cortexpersist.org) | [GitHub](https://github.com/borjamoskv/Cortex-Persist) | [Docs](https://github.com/borjamoskv/Cortex-Persist/tree/main/docs)
 
 ---
 
-*Publicado por CORTEX Research Lab · 24 de febrero de 2026*
+*Publicado por BABYLON-60 Research Lab · 24 de febrero de 2026*

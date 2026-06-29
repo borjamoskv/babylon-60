@@ -18,7 +18,7 @@ You will receive an acknowledgment within 48 hours and a detailed response withi
 
 ## Security Features
 
-CORTEX is built security-first:
+BABYLON-60 is built security-first:
 
 - **SHA-256 sovereign ledger continuity** — tamper-evident fact storage
 - **Merkle tree checkpoints** — batch integrity verification
@@ -69,7 +69,7 @@ CI runs **[pip-audit](https://github.com/pypa/pip-audit)** on every push to dete
 
 ## Threat Model
 
-CORTEX assumes:
+BABYLON-60 assumes:
 
 - The local SQLite database is as secure as the host filesystem
 - Network APIs require authentication (API keys or JWT)
@@ -95,7 +95,7 @@ CORTEX assumes:
 | CORS misconfiguration | Wildcard `*` rejected in cloud/production deployment mode |
 | Unsafe file patching | AST validation gate before writing patches to `.py` files |
 
-> **⚠️ Composition Leakage:** Two individually innocuous data points that, when combined by an adversary, reconstruct a secret (e.g., deploy address + contract salt = proxy key). This is the differential privacy analog of correlation attacks. CORTEX's Privacy Shield evaluates facts holistically — not per-field — scoring each new fact against the combinatorial surface of related stored data.
+> **⚠️ Composition Leakage:** Two individually innocuous data points that, when combined by an adversary, reconstruct a secret (e.g., deploy address + contract salt = proxy key). This is the differential privacy analog of correlation attacks. BABYLON-60's Privacy Shield evaluates facts holistically — not per-field — scoring each new fact against the combinatorial surface of related stored data.
 
 ---
 

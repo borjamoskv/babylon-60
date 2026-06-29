@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX vs The Ecosystem — May 2026
+# BABYLON-60 vs The Ecosystem — May 2026
 
 > **TAM:** Agentic AI Orchestration & Memory Systems — $6.16B (2025) → $11.5B (2026 est.)
 > **Thesis:** Every competitor below solves a *fragment*. None solve the full trust chain: `Ingestion → Validation → Cryptographic Chaining → Tamper-Evident Audit → Sovereign Export`.
@@ -10,7 +10,7 @@
 
 When an AI agent stores a durable fact, every system below performs an `UPSERT` — a mutable write with no mathematical proof of prior state.
 
-| Property | Industry Standard | CORTEX |
+| Property | Industry Standard | BABYLON-60 |
 | :--- | :--- | :--- |
 | Write model | `UPSERT` (overwrite) | `APPEND` (hash-chained, tamper-evident) |
 | Hallucination guard | None (ingest whatever arrives) | `Verification Membrane` — formal guards reject invalid payloads |
@@ -36,8 +36,8 @@ The memory market has consolidated around three archetypes. None provide cryptog
 
 ### The structural failure across all (The ROI Bleed):
 
-1. **Capital Extraction Leak:** Cloud compute costs spiral out of control when autonomous agents hit recursive failure loops. Because these systems lack an autopoietic immune layer (CPTA/Nemesis), agents burn tokens re-attempting failed paths. CORTEX's declarative `tether.md` stops the financial bleed O(1).
-2. **Context Loss Penalty:** A developer loses ~1 hour per session regaining context. Ephemeral memory means regenerating context. CORTEX's Sovereign Memory saves average enterprise teams $12,000 per engineer/year.
+1. **Capital Extraction Leak:** Cloud compute costs spiral out of control when autonomous agents hit recursive failure loops. Because these systems lack an autopoietic immune layer (CPTA/Nemesis), agents burn tokens re-attempting failed paths. BABYLON-60's declarative `tether.md` stops the financial bleed O(1).
+2. **Context Loss Penalty:** A developer loses ~1 hour per session regaining context. Ephemeral memory means regenerating context. BABYLON-60's Sovereign Memory saves average enterprise teams $12,000 per engineer/year.
 3. **No Verification Membrane:** They ingest whatever the LLM emits. If GPT-5 hallucinates a "fact", it becomes ground truth, compounding error downstream.
 4. **No EU AI Act Art. 12 compliance:** They cannot produce a cryptographically sealed audit artifact. 
 5. **No hash-chained state transitions:** Zero mathematical proof of corruption.
@@ -48,7 +48,7 @@ The memory market has consolidated around three archetypes. None provide cryptog
 
 These solve *routing and coordination*. None solve *accountability*.
 
-| Framework | Stars | Enterprise Footprint | Key Limitation vs CORTEX |
+| Framework | Stars | Enterprise Footprint | Key Limitation vs BABYLON-60 |
 | :--- | :--- | :--- | :--- |
 | **LangGraph** | ~33K ⭐ | Klarna, Uber, LinkedIn, JPMorgan, Cisco | Checkpoints are mutable. Time-travel debugging ≠ tamper-evident lineage. |
 | **CrewAI** | ~44K ⭐ | Claims 60% Fortune 500. Billions of workflows executed. | Memory ephemeral by default. Role-based abstraction hides state governance. |
@@ -57,7 +57,7 @@ These solve *routing and coordination*. None solve *accountability*.
 | **OpenAI Agents SDK** | N/A | Production-ready for OpenAI models. MCP support added. | Vendor-locked reasoning. Opaque model internals. |
 | **Claude Agent SDK** | N/A | Deepest computer-use + MCP native support. | Anthropic-native. No self-hosted option. |
 
-**CORTEX position:** Complementary layer. CORTEX sits *beneath* any framework as the persistence and verification substrate. `LangGraph + CORTEX` = stateful workflows + tamper-evident lineage. `CrewAI + CORTEX` = rapid prototyping + sovereign audit trail.
+**BABYLON-60 position:** Complementary layer. BABYLON-60 sits *beneath* any framework as the persistence and verification substrate. `LangGraph + CORTEX` = stateful workflows + tamper-evident lineage. `CrewAI + CORTEX` = rapid prototyping + sovereign audit trail.
 
 ---
 
@@ -74,7 +74,7 @@ The observability market has shifted from trace viewers to causal reconstruction
 | **Laminar** | Complex multi-step agent debugging, SQL over traces | Debugging tool, not an accountability system. |
 | **Datadog LLM** | Unified APM + agent observability | Proprietary cloud. Admin can modify Elasticsearch indices. No tamper evidence. |
 
-**CORTEX position:** Observability tells you *what happened*. CORTEX *proves* what happened. They complement; they don't substitute.
+**BABYLON-60 position:** Observability tells you *what happened*. BABYLON-60 *proves* what happened. They complement; they don't substitute.
 
 ---
 
@@ -85,7 +85,7 @@ The observability market has shifted from trace viewers to causal reconstruction
 | **MCP** (Model Context Protocol) | Agent ↔ Tool ("USB-C for AI") | 100M+ monthly downloads | Linux Foundation (ex-Anthropic) |
 | **A2A** (Agent2Agent) | Agent ↔ Agent discovery/delegation | Growing enterprise adoption | Linux Foundation (ex-Google) |
 
-**CORTEX position:** Protocol-agnostic trust layer. Operates *below* MCP and A2A. When an MCP tool call mutates state → CORTEX records the cryptographic proof. When an A2A delegation completes → CORTEX chains the result into the ledger. The protocols define *how* agents communicate. CORTEX defines *whether to trust* the result.
+**BABYLON-60 position:** Protocol-agnostic trust layer. Operates *below* MCP and A2A. When an MCP tool call mutates state → BABYLON-60 records the cryptographic proof. When an A2A delegation completes → BABYLON-60 chains the result into the ledger. The protocols define *how* agents communicate. BABYLON-60 defines *whether to trust* the result.
 
 ---
 
@@ -98,7 +98,7 @@ The observability market has shifted from trace viewers to causal reconstruction
 | **GitHub Copilot** | IDE extension. Enterprise standard. | Pro $10, Biz $19, Ent $39/mo | Microsoft. Largest install base. |
 | **Google Antigravity** | Agent-first IDE. Multi-agent orchestration. | Free (Public Preview) | Google. Gemini-native. |
 
-**CORTEX position:** These are execution environments. Agent sessions are ephemeral — when Cursor closes, context evaporates. CORTEX makes the knowledge permanent, verified, and sovereign. It persists across *all* IDEs.
+**BABYLON-60 position:** These are execution environments. Agent sessions are ephemeral — when Cursor closes, context evaporates. BABYLON-60 makes the knowledge permanent, verified, and sovereign. It persists across *all* IDEs.
 
 ---
 
@@ -109,7 +109,7 @@ The observability market has shifted from trace viewers to causal reconstruction
 * **Jan:** Offline ChatGPT UX with plugin extensibility.
 * **LocalAI:** Self-hosted OpenAI-compatible API. Developer-grade.
 
-**CORTEX position:** Orthogonal and complementary. Local inference = *compute sovereignty*. CORTEX = *knowledge sovereignty*. Run Qwen/Llama via Ollama for inference. Persist and verify outputs via CORTEX. Together they form a fully sovereign stack with zero cloud dependency.
+**BABYLON-60 position:** Orthogonal and complementary. Local inference = *compute sovereignty*. BABYLON-60 = *knowledge sovereignty*. Run Qwen/Llama via Ollama for inference. Persist and verify outputs via BABYLON-60. Together they form a fully sovereign stack with zero cloud dependency.
 
 ---
 
@@ -131,7 +131,7 @@ The observability market has shifted from trace viewers to causal reconstruction
 
 ## Summary Matrix
 
-| Capability | Vector DBs | Agent Memory | Orchestration | Observability | Protocols | **CORTEX** |
+| Capability | Vector DBs | Agent Memory | Orchestration | Observability | Protocols | **BABYLON-60** |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | Semantic Search | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
 | Agent Memory | ❌ | ✅ | Partial | ❌ | ❌ | ✅ |
@@ -150,10 +150,10 @@ The observability market has shifted from trace viewers to causal reconstruction
 
 | Threat Vector | Probability | Impact | Mitigation |
 | :--- | :--- | :--- | :--- |
-| Mem0/Letta adds hash-chaining | Medium | High — removes CORTEX's primary differentiator | Ship formal verification guards first. Hash-chaining alone ≠ trust system. Guards + chaining + export = moat. |
+| Mem0/Letta adds hash-chaining | Medium | High — removes BABYLON-60's primary differentiator | Ship formal verification guards first. Hash-chaining alone ≠ trust system. Guards + chaining + export = moat. |
 | LangGraph adds native tamper-evident checkpoints | Low-Medium | High | Integrate as LangGraph plugin *before* they build in-house. Be the standard persistence layer. |
-| Datadog/Splunk adds "AI Audit Trail" product | Medium | Medium | Enterprise sales cycle = slow. CORTEX ships sovereign/local-first. They can't. |
-| Cognition (Devin) builds proprietary memory | High | Medium | Devin solves code execution, not general agent trust. CORTEX's scope is broader. |
+| Datadog/Splunk adds "AI Audit Trail" product | Medium | Medium | Enterprise sales cycle = slow. BABYLON-60 ships sovereign/local-first. They can't. |
+| Cognition (Devin) builds proprietary memory | High | Medium | Devin solves code execution, not general agent trust. BABYLON-60's scope is broader. |
 | EU AI Act enforcement delayed further | Medium | Low | Regulation creates demand but isn't the only driver. Sovereign data ownership has independent value. |
 
 ---
@@ -162,7 +162,7 @@ The observability market has shifted from trace viewers to causal reconstruction
 
 1. **Full trust chain** — No competitor implements `Ingestion → Guard Validation → Hash Chain → Ledger → Canonical Export` as a unified pipeline.
 2. **Local-first sovereignty** — Cloud-dependent competitors cannot serve privacy-maximalist users, regulated industries with data residency requirements, or sovereign AI mandates.
-3. **Protocol agnosticism** — CORTEX sits below MCP/A2A/any framework. Not locked to any vendor's reasoning engine.
+3. **Protocol agnosticism** — BABYLON-60 sits below MCP/A2A/any framework. Not locked to any vendor's reasoning engine.
 4. **EU AI Act readiness** — Art. 12 tamper-evident logging compliance is built into the architecture, not bolted on.
 
 ---

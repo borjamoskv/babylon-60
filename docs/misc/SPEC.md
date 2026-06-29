@@ -1,12 +1,12 @@
-# [C5-REAL] CORTEX Ledger & Audit Pack Formal Specification
+# [C5-REAL] BABYLON-60 Ledger & Audit Pack Formal Specification
 
-This specification defines the cryptographic invariants, serialization layouts, and validation schemas of the CORTEX sovereign memory persistence ledger.
+This specification defines the cryptographic invariants, serialization layouts, and validation schemas of the BABYLON-60 sovereign memory persistence ledger.
 
 ---
 
 ## 1. Cryptographic Ledger Hashing Specification
 
-The CORTEX ledger implements a chronologically ordered, hash-chained sequence of state transition records. Each state mutation (fact insertion, deletion, or rule update) is serialized deterministically and hashed.
+The BABYLON-60 ledger implements a chronologically ordered, hash-chained sequence of state transition records. Each state mutation (fact insertion, deletion, or rule update) is serialized deterministically and hashed.
 
 ### 1.1 Serialization Formats
 Before hashing, data structures MUST be serialized into a canonical representation to prevent semantic drift from key reordering or space padding.
@@ -32,7 +32,7 @@ Where:
 
 ## 2. Merkle Checkpointing Algorithm
 
-To enable $O(1)$ local proofs of ledger state without scanning the entire database, CORTEX creates Merkle Checkpoints at fixed intervals.
+To enable $O(1)$ local proofs of ledger state without scanning the entire database, BABYLON-60 creates Merkle Checkpoints at fixed intervals.
 
 ```mermaid
 graph TD

@@ -1,22 +1,22 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: RFC v0.1 Cortex-Persist Native AI Architecture — Frozen Normative Draft
+description: RFC v0.1 BABYLON-60 Native AI Architecture — Frozen Normative Draft
 ---
 
-# RFC-CORTEX-NATIVE-AI
+# RFC-BABYLON-60-NATIVE-AI
 
 ## 0. Status
 
 **Frozen Normative Draft v0.1** — 2026-03-14
 
-> This document defines the operational ground truth for CORTEX-Persist cognitive hypervisor architecture.
+> This document defines the operational ground truth for BABYLON-60-Persist cognitive hypervisor architecture.
 > Mathematical formalizations pending proof are deferred to formal appendices (see §16).
 > Sections are classified per RFC 2119: **MUST** (hard invariant), **SHOULD** (strong guidance),
 > **TARGET** (performance SLO), **EXPERIMENTAL** (pending formal proof or validation).
 
 ## 1. Purpose
 
-Define the normative architecture of Cortex-Persist as a sovereign cognitive hypervisor:
+Define the normative architecture of BABYLON-60 as a sovereign cognitive hypervisor:
 a decentralized, cryptographically verifiable, probabilistically weighted memory subsystem
 for autonomous AI agent swarms.
 
@@ -159,7 +159,7 @@ equation permits $P=0$ only when injected by an authorized supervisor with audit
 > [!WARNING]
 > The formal algebraic constraints on LogOP veto saturation, tombstone semantics,
 > and CRDT convergence proofs are **EXPERIMENTAL** and specified in
-> [RFC-CORTEX-CRDT-MATH-APPENDIX](file:///.agents/specs/RFC-CORTEX-CRDT-MATH-APPENDIX.md).
+> [RFC-BABYLON-60-CRDT-MATH-APPENDIX](file:///.agents/specs/RFC-BABYLON-60-CRDT-MATH-APPENDIX.md).
 
 ### Tombstone Semantics (SHOULD)
 
@@ -183,7 +183,7 @@ If $Risk_{\text{contam}}$ detects cascading structural contradictions unmitigate
 > **Classification: MUST (Normative)**
 
 1. `ingest_episode(event_obj)`: Segregates sensory noise from immediate attention; archives directly to the Episodic L2 Log.
-2. `revise_belief(belief_id, evidence_ref)`: Triggers Assumption-based Truth Maintenance (ATMS) and Bayesian recalibration. See [ATMS Appendix](file:///.agents/specs/RFC-CORTEX-ATMS-SEMANTICS.md).
+2. `revise_belief(belief_id, evidence_ref)`: Triggers Assumption-based Truth Maintenance (ATMS) and Bayesian recalibration. See [ATMS Appendix](file:///.agents/specs/RFC-BABYLON-60-ATMS-SEMANTICS.md).
 3. `resolve_context(query_params)`: Evaluates the Memory Equation tensor to yield the active Context Package.
 4. `attest_lineage(artifact_id)`: Generates ZK-ready cryptographic proofs of inferential origin tracing back to raw telemetry episodes.
 5. `fork_memory(agent_id, context_delta)`: Instantiates isolated semantic sandboxes permitting complex Monte Carlo counterfactual simulations.
@@ -263,8 +263,8 @@ verification.
 
 | Document | Scope | Status |
 |:---------|:------|:-------|
-| [RFC-CORTEX-CRDT-MATH-APPENDIX](file:///.agents/specs/RFC-CORTEX-CRDT-MATH-APPENDIX.md) | CRDT typology, merge semantics, LogOP veto algebra, tombstone GC, partition convergence | EXPERIMENTAL |
-| [RFC-CORTEX-ATMS-SEMANTICS](file:///.agents/specs/RFC-CORTEX-ATMS-SEMANTICS.md) | Dependency indexing, assumption environments, propagation mathematics, backtracking | EXPERIMENTAL |
+| [RFC-BABYLON-60-CRDT-MATH-APPENDIX](file:///.agents/specs/RFC-BABYLON-60-CRDT-MATH-APPENDIX.md) | CRDT typology, merge semantics, LogOP veto algebra, tombstone GC, partition convergence | EXPERIMENTAL |
+| [RFC-BABYLON-60-ATMS-SEMANTICS](file:///.agents/specs/RFC-BABYLON-60-ATMS-SEMANTICS.md) | Dependency indexing, assumption environments, propagation mathematics, backtracking | EXPERIMENTAL |
 | [Epistemic Failure Modes](file:///.agents/tests/epistemic-failure-modes.md) | Adversarial test scenarios, invariant validation, acceptance criteria | Test Spec |
 
 ## 17. Open Questions
@@ -276,4 +276,4 @@ verification.
 
 ---
 
-*CORTEX-Persist · RFC v0.1 Frozen · 2026-03-14*
+*BABYLON-60-Persist · RFC v0.1 Frozen · 2026-03-14*

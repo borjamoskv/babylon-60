@@ -13,4 +13,4 @@ El manifiesto fundacional de los agentes soberanos se ha actualizado formalmente
 * **Compilación Predictiva:** Creación de `convert_manifest.py` para parsear automáticamente los bloques de código, tablas de exergía y metadatos de Markdown a HTML optimizado.
 * **Sello de Producción:** Vite compila, optimiza y empaqueta el manifiesto en el bundle estático de producción con compresión Brotli (`sintetologia-agentica.html.br`, 9.80 kb).
 
-*◈ Sealed: 31 May 2026 · CORTEX Sovereign Core · Commit b15628f*
+*◈ Sealed: 31 May 2026 · BABYLON-60 Sovereign Core · Commit b15628f*

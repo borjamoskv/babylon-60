@@ -1,5 +1,5 @@
 <!-- [C5-REAL] Exergy-Maximized -->
-# CORTEX v6 Strategic Roadmap
+# BABYLON-60 v6 Strategic Roadmap
 
 > **Status:** Historical snapshot. This is a v6 planning artifact; treat it as archive unless explicitly cross-referenced by current roadmap work.
 >
@@ -119,11 +119,11 @@ Month 3: Helm Chart → Distributed Consensus v2 → Performance Tests
 | 3.5 | **Admin Dashboard (React)** | New `cortex_hive_ui/` — full admin SPA | L | 9 | 9 | @FORGE |
 | 3.6 | **Vector DB Portability** | `cortex/memory/vector_providers/pinecone.py`, `weaviate.py` | M | 7 | 5 | @FORGE |
 | 3.7 | **Zero-Knowledge Encryption** | `cortex/crypto/vault.py` — client-side encryption | L | 8 | 8 | @SENTINEL |
-| 3.8 | **CORTEX Federation Protocol** | `cortex/federation/` — gossip v2, multi-cluster | L | 8 | 7 | @FORGE |
+| 3.8 | **BABYLON-60 Federation Protocol** | `cortex/federation/` — gossip v2, multi-cluster | L | 8 | 7 | @FORGE |
 | 3.9 | **GitHub Actions Marketplace** | `.github/actions/` — reusable workflows | S | 6 | 4 | @SIDECAR |
 | 3.10 | **Community Templates** | New `examples/templates/` — starter projects | S | 6 | 3 | @NEXUS |
 | 3.11 | **Documentation Site v2** | `docs/`, `mkdocs.yml` — expanded MkDocs tutorials and site structure | M | 7 | 5 | @NEXUS |
-| 3.12 | **Certification Program** | `docs/certification/` — CORTEX Developer cert | S | 5 | 4 | @NEXUS |
+| 3.12 | **Certification Program** | `docs/certification/` — BABYLON-60 Developer cert | S | 5 | 4 | @NEXUS |
 
 ### Wave 3 Key Deliverables
 
@@ -306,4 +306,4 @@ git checkout -b feat/wave3-mcp-registry
 
 *Strategic Roadmap maintained by MOSKV-1 v5 (Antigravity) · Updated 2026-02-24*
 
-> *"Memory is the bridge between action and wisdom."* — CORTEX COGITO
+> *"Memory is the bridge between action and wisdom."* — BABYLON-60 COGITO
