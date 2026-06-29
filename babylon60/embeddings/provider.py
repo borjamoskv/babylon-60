@@ -15,12 +15,34 @@ logger = logging.getLogger("cortex")
 class EmbeddingProvider(Protocol):
     """Protocol for embedding providers."""
 
+    @property
+    def dimension(self) -> int:
+        """Return the embedding dimension."""
+        ...
+
+    @property
+    def supports_multimodal(self) -> bool:
+        """Return True if current embedder supports multimodal input."""
+        ...
+
     def is_available(self) -> bool:
         """Check if the provider is available in the current environment."""
         ...
 
-    def embed(self, text: str) -> list[float]:
-        """Generate an embedding for the given text."""
+    def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
+        """Generate an embedding for the given text(s)."""
+        ...
+
+    def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
+        """Generate embeddings for multiple texts."""
+        ...
+
+    async def aembed(self, text: str | list[str]) -> list[float] | list[list[float]]:
+        """Async embedding API."""
+        ...
+
+    async def aembed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
+        """Async batch embedding API."""
         ...
 
 

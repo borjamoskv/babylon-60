@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.embeddings.local import LocalEmbedder
+from babylon60.embeddings.registry import get_provider
 
 __all__ = ["EmbeddingManager"]
 
@@ -42,32 +42,24 @@ class EmbeddingManager:
         """Return True if using a cloud/API provider."""
         return self.mode == "api"
 
-    def _get_embedder(self) -> LocalEmbedder | Any:
-        """Lazy-load the appropriate embedder based on config."""
+    def _get_embedder(self) -> Any:
+        """Lazy-load the appropriate embedder based on config via the registry."""
         if self._embedder is not None:
             return self._embedder
 
-        if self.mode == "api":
-            from cortex.core import config
-
-            try:
-                from cortex.embeddings.api_embedder import APIEmbedder
-            except Exception as exc:
-                raise RuntimeError(f"API embeddings unavailable: {exc}") from exc
-
-            self._embedder = APIEmbedder(
-                provider=config.EMBEDDINGS_PROVIDER,
-                target_dimension=config.EMBEDDINGS_DIMENSION,
-                task_type=config.EMBEDDINGS_TASK_TYPE,
-            )
+        from cortex.core import config
+        
+        provider_type = "api" if self.mode == "api" else "local"
+        
+        try:
+            self._embedder = get_provider(provider_type)
             logger.info(
-                "API embedder initialized: %s (dim=%d)",
-                config.EMBEDDINGS_PROVIDER,
-                config.EMBEDDINGS_DIMENSION,
+                "Embedder initialized: %s (mode=%s)",
+                provider_type,
+                self.mode,
             )
-        else:
-            self._embedder = LocalEmbedder()
-            logger.info("Local embedder initialized (dim=384)")
+        except Exception as exc:
+            raise RuntimeError(f"Failed to initialize embedder: {exc}") from exc
 
         return self._embedder
 
