@@ -11,10 +11,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.append(str(ROOT))
 
-from reality_loop import mutate_reward_model
+from reality_loop import push_mutation_to_babylon
 from policies.abort_rules import AbortRules
+from babylon60.events.bus import DistributedEventBus
 
-def test_ast_mutation_safeguards():
+@pytest.mark.asyncio
+async def test_ast_mutation_safeguards():
     """
     Simulates extreme system fatigue and entropy to ensure the AST mutator
     correctly bounds thresholds and commits safely without syntactical collapse.
@@ -25,8 +27,10 @@ def test_ast_mutation_safeguards():
         "fatigue": 0.99
     }
     
-    # 2. Mutate (this will rewrite reward_model.py and commit)
-    success = mutate_reward_model(metric)
+    bus = DistributedEventBus()
+    
+    # 2. Mutate (this will rewrite reward_model.py and commit via BABYLON bus)
+    success = await push_mutation_to_babylon(metric, bus)
     assert success is True, "AST Mutation failed or crashed"
     
     # 3. Import and verify new thresholds
