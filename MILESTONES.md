@@ -1245,6 +1245,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 73: Integración de Topografía EVM y Rastreo de Rendimiento (EVM Topography Mapping & Yield Tracking Substrate)
+- **Target**: `babylon60/evm/topography.py`, `experimental/dashboard_legacy/scripts/yield_tracker_omega.py`
+- **Objective**: Desarrollo y acoplamiento de la capa de topografía EVM (`EVMTopographyMapper`) para enrutamiento optimizado por latencia de nodos RPC de Ethereum, junto al rastreador de rendimiento (`yield_tracker_omega.py`) para registrar de forma continua las variaciones de balance y exergía monetaria del ecosistema.
+- **Yield Target**: Monitoreo dinámico de latencias de red en nodos RPC y recolección de rendimiento in-memory.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Código ejecutable en `babylon60/evm/` y script de tracking en `experimental/dashboard_legacy/scripts/yield_tracker_omega.py`.
+```yaml
+Claim: EVM topography mapper resolves RPC nodes by latency and registers balances asynchronously.
+Proof:
+  Base: "topography.py runs latency checks on active endpoints; yield_tracker_omega.py extracts and writes metrics."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
