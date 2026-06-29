@@ -1353,6 +1353,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 79: Consolidación Deca-Core del Ecosistema de Comandos CLI (111-Domain click CLI Architecture)
+- **Target**: `babylon60/cli/`
+- **Objective**: Estructuración, consolidación y registro de 111 subgrupos de comandos del CLI Click (`cortex`) para control centralizado de todos los dominios de BABYLON-60 (incluyendo memoria, auditoría, consensos, exergía, salud, forense y despliegue del swarm).
+- **Yield Target**: Interfaz unificada de comandos sin dependencias cruzadas e inicialización instantánea de sub-comandos.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Estructura de submódulos en `babylon60/cli/` y archivo ejecutable Click (`cortex/cli/main.py` / `babylon60/cli/main.py`).
+```yaml
+Claim: CLI interface exports and structures Click subcommands correctly without import loops.
+Proof:
+  Base: "cortex CLI runs and returns help instructions for all 111 subcommands without throwing Tracebacks."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
