@@ -18,8 +18,16 @@ These claims are externally inspectable or reproducible:
 - Opaque baselines are C5-REAL only if source inspection confirms absence of provider names, model names, endpoint identifiers, or hardcoded identity mappings.
 - ProvenanceAuditor explicitly avoids exact identity attribution.
 
-### Safety Boundary
-The auditor must not be used to de-anonymize blind evaluations, extract hidden model identities, or bypass platform identity protections.
+### Safety & Confinement Boundaries
+
+#### Teorema del Canal Isomórfico Asimétrico (Límite de Rice-Redwood)
+Sea $S$ el espacio de estados semánticos y $T$ el espacio de tokens legibles. Para cualquier filtro de salida de caja negra $F: T^* \to \{0,1\}$ diseñado para bloquear un conjunto de cadenas prohibidas $P \subset T^*$:
+Si el generador $M$ posee una capacidad computacional superior a $F$ y aplica una transformación de codificación invertible (isomorfismo) $\phi: T^* \to T^*$ tal que $\phi(s) \notin P$ para $s \in P$, el filtro $F(\phi(s)) = 0$ (permitido) no puede evitar que el receptor final compute $\phi^{-1}(\phi(s)) = s \in P$. 
+
+La detección de cualquier canal cifrado implícito $\phi$ por parte del filtro externo $F$ es reducible al Problema de la Parada (Teorema de Rice), haciendo imposible garantizar el confinamiento de información mediante análisis sintáctico externo si el canal permite transformaciones semánticas representacionales.
+
+Por lo tanto, se establecen las siguientes restricciones operativas estrictas:
+- El auditor no debe usarse para de-anonymize blind evaluations, extraer identidades ocultas de modelos, o evadir guardrails de plataformas mediante exploits de representación.
 
 #### C5-FORMAL — Deterministic by Construction
 These claims hold for fixed inputs and fixed code. C5-FORMAL determinism assumes fixed code, fixed inputs, fixed dependency versions, fixed numerical backend, and no nondeterministic execution paths:
