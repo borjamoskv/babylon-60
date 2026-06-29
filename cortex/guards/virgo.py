@@ -234,14 +234,15 @@ class VirgoContextGuard:
         if not content:
             return "Empty payload content."
 
-        # A. Infinite loops/extreme repetition
+        # A. Infinite loops/extreme repetition (O(M) complexity via Counter)
         words = content.split()
         if len(words) > 30:
+            from collections import Counter
             # Check for excessive n-gram repetition (e.g. agent repeating the same phrase over and over)
             for n in (3, 4, 5):
-                ngrams = [" ".join(words[i : i + n]) for i in range(len(words) - n + 1)]
-                for ng in set(ngrams):
-                    if ngrams.count(ng) > 8:
+                ngrams = (" ".join(words[i : i + n]) for i in range(len(words) - n + 1))
+                for ng, count in Counter(ngrams).items():
+                    if count > 8:
                         return f"Extreme phrase repetition detected (phrase: '{ng[:30]}...'). Potential cognitive loop/hallucination."
 
         # B. Prompt Injection & State hijacking patterns
@@ -268,10 +269,11 @@ class VirgoContextGuard:
         return None
 
     def _calculate_shannon_entropy(self, s: str) -> float:
-        """Calculates Shannon entropy of string."""
+        """Calculates Shannon entropy of string in O(N) using collections.Counter."""
         if not s:
             return 0.0
-        probabilities = [float(s.count(c)) / len(s) for c in dict.fromkeys(s)]
+        from collections import Counter
+        probabilities = [float(count) / len(s) for count in Counter(s).values()]
         return -sum(p * math.log(p, 2) for p in probabilities)
 
     def _apply_trust_penalty(self, agent_id: str | None, taint_severity: float) -> None:
