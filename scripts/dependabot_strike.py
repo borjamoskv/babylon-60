@@ -11,8 +11,9 @@ exergy_tier: P2
 import asyncio
 import sys
 
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.extensions.swarm.centauro_engine import CentauroEngine, Formation
+from babylon60.extensions.llm.router import CortexLLMRouter
+from babylon60.extensions.swarm.centauro_engine import CentauroEngine, Formation
+from babylon60.core import config
 
 
 async def main():
@@ -21,7 +22,7 @@ async def main():
     # 53 Vulnerabilities -> 53 Agents
     mission = "Auditar y generar remediación para 53 vulnerabilidades Dependabot detectadas en el repositorio (C4-SIM) y proponer parche unificado."
     
-    from cortex.extensions.llm.provider import LLMProvider
+    from babylon60.extensions.llm.provider import LLMProvider
 
     primary_provider = LLMProvider("gemini")
     fallback_providers = [

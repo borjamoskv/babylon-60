@@ -16,8 +16,8 @@ import math
 import os
 import time
 
-from cortex.engine.causal.taint_engine import TaintValidationError, enforce_taint_check
-from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
+from babylon60.engine.causal.taint_engine import TaintValidationError, enforce_taint_check
+from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
 
 
 class DummyConnection:
