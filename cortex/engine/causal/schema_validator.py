@@ -11,7 +11,7 @@ class L0L6SchemaValidator:
     Enforces structural isomorphism of the L0-L6 Audit Pipeline.
     """
     
-    def __init__(self, schemas_dir: str = "schemas"):
+    def __init__(self, schemas_dir: str = "schema"):
         self.schemas_dir = Path(schemas_dir)
         self._schemas: Dict[str, Dict[str, Any]] = {}
         self._load_schemas()
