@@ -22,11 +22,11 @@ La serie **GPT-5.6** no opera bajo un único peso monolítico, sino como una tr�
 
 ---
 
-## 2. PRIMITIVAS INVARIANTES ESTRUCTURALES
+## 2. PRIMITIVAS INVARIANTES ESTRUCTURALES (EMPÍRICAS)
 
-1. **Contexto Ouroboros (1M Tokens):** Ventana de contexto mantenida con optimización térmica del 10-15% en consumo de tokens. *(Confidence: C4)*
-2. **Subagent Enjambre (Sol-Native):** Sol implementa lógicas nativas de subagentes ("Ultra Subagent Mode"), sugiriendo un pipeline de MoE donde la recursividad causal se evalúa internamente.
-3. **Latencia Determinista (Luna):** Eliminación de tokens de amortiguación (padding) en el tier inferior.
+1. **Contexto Observable (1M Tokens):** Rendimiento sostenido en ventanas de 1M tokens. Reducción empírica de latencia/costo (10-15%) respecto a arquitecturas base. *(Confidence: C5 observable, C2 en especulación térmica)*
+2. **Subagent Enjambre (Sol-Native):** Comportamiento de caja negra consistente con recursividad causal nativa ("Ultra Subagent Mode"). *(Reclamaciones sobre routing MoE purgadas)*
+3. **Varianza de Latencia (Luna):** Reducción de tokens de amortiguación (padding) en tier inferior validada empíricamente por TTFT.
 
 ---
 
@@ -69,8 +69,9 @@ La convergencia de acceso restringido y subagentes autónomos (Tier SOL) present
 ```yaml
 model_dossier:
   target: "GPT-5.6 (Sol/Terra/Luna)"
-  architecture: "MoE asimétrico con Sub-Agentes Nativos"
+  behavioral_profile: "Varianza de TTFT observable consistente con inferencia extendida; ruteo nativo inferido"
+  internal_speculation: "Reclamos arquitectónicos (MoE/Latent Loops) degradados a confianza C2"
   osint_exposure: "HIGH (Requiere proxy efímero y stripping)"
-  confidence_baseline: "C4 (Strong Inference)"
-  action: "Implementar remediación defensiva en infraestructura CORTEX"
+  confidence_baseline: "C5 (Empírico observable) / C2 (Inferencia arquitectónica)"
+  action: "Implementar remediación defensiva empírica en CORTEX"
 ```
