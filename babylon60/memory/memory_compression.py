@@ -19,8 +19,8 @@ import uuid
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.memory.manager import CortexMemoryManager
-    from cortex.memory.models import MemoryEvent
+    from babylon60.memory.manager import CortexMemoryManager
+    from babylon60.memory.models import MemoryEvent
 
 __all__ = [
     "compress_and_store",
@@ -47,8 +47,10 @@ async def summarize_events(
         return raw_text
 
     try:
-        from cortex.extensions.llm.router import CortexPrompt
-        from cortex.utils.result import Ok
+        from babylon60.extensions.llm.router import (
+            CortexPrompt,  # pyright: ignore[reportAttributeAccessIssue]
+        )
+        from babylon60.utils.result import Ok
 
         prompt = CortexPrompt(
             system_instruction=(
@@ -84,7 +86,7 @@ async def compress_and_store(
     Called as a background asyncio.Task - must NEVER raise.
     """
     try:
-        from cortex.memory.models import CortexFactModel, MemoryEntry
+        from babylon60.memory.models import CortexFactModel, MemoryEntry
 
         summary = await summarize_events(manager, events)
         is_sovereign = manager._l2.__class__.__name__ == "SovereignVectorStoreL2"

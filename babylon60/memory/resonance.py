@@ -14,10 +14,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from cortex.memory.engrams import CortexSemanticEngram
+from babylon60.memory.engrams import CortexSemanticEngram
 
 if TYPE_CHECKING:
-    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
+    from babylon60.extensions.sovereign.endocrine import DigitalEndocrine
 
 logger = logging.getLogger("cortex.memory.resonance")
 

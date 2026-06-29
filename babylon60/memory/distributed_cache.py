@@ -20,7 +20,6 @@ Hydra-Log Architecture:
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import contextlib
 import json
@@ -31,8 +30,10 @@ from collections.abc import AsyncIterator, Callable, Coroutine
 from contextlib import asynccontextmanager
 from typing import Any
 
+from babylon60.crypto.hash_registry import cortex_hash
+
 try:
-    from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
+    from babylon60.extensions.immune.chaos import ChaosGate, async_interceptor
 except ImportError:
     ChaosGate = None  # type: ignore[assignment, misc]
 
@@ -41,7 +42,7 @@ except ImportError:
 
 
 try:
-    from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+    from babylon60.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 except ImportError:
 
     class DummyErrorGhostPipeline:

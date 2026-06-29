@@ -61,6 +61,7 @@ class TurbopufferSink:
 
         # Run the synchronous tpuf network call in a threadpool to prevent GIL lock
         def _do_write():
+            assert self._ns is not None
             self._ns.write(upsert_rows=vectors)
 
         try:

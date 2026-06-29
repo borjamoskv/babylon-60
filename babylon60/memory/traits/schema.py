@@ -3,8 +3,8 @@ import logging
 import sqlite3
 from typing import Any
 
-from cortex.guards.exergy_guard import calculate_exergy
-from cortex.utils import void_vec
+from babylon60.guards.exergy_guard import calculate_exergy
+from babylon60.utils import void_vec
 
 try:
     import sqlite_vec
@@ -14,7 +14,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-from cortex.memory.cortex_decay import cortex_decay
+from babylon60.memory.cortex_decay import cortex_decay
 
 
 class SchemaTrait:
@@ -132,7 +132,7 @@ class SchemaTrait:
                 ("exergy_score", "REAL DEFAULT 1.0"),
             ]
 
-            from cortex.utils.sql_identifiers import validate_sql_identifier
+            from babylon60.utils.sql_identifiers import validate_sql_identifier
 
             cursor = conn.execute(
                 "SELECT name FROM sqlite_master "
@@ -162,7 +162,7 @@ class SchemaTrait:
         # Initialize L2HybridSearch (FTS5 mirror) after conn is established
         if self._hybrid is None:
             try:
-                from cortex.memory.l2_hybrid_search import L2HybridSearch
+                from babylon60.memory.l2_hybrid_search import L2HybridSearch
 
                 self._hybrid = L2HybridSearch(self)  # pyright: ignore[reportArgumentType]
                 self._hybrid.ensure_fts_table()
@@ -181,7 +181,7 @@ class SchemaTrait:
         """Return the module-level PIISanitizer singleton."""
         if self._sanitizer is None:
             try:
-                from cortex.memory.pii_sanitizer import get_pii_sanitizer
+                from babylon60.memory.pii_sanitizer import get_pii_sanitizer
 
                 self._sanitizer = get_pii_sanitizer()
             except Exception as exc:
@@ -194,7 +194,7 @@ class SchemaTrait:
         """Axiom Ω8: Vertical Domain Cut.
         If a corpus weighs too much, we split the universe and migrate only distilled axioms.
         """
-        from cortex.utils.sql_identifiers import validate_sql_identifier
+        from babylon60.utils.sql_identifiers import validate_sql_identifier
 
         safe_tenant = "".join(c for c in tenant_id if c.isalnum() or c == "_")
         safe_proj = "".join(c for c in project_id if c.isalnum() or c == "_")

@@ -14,10 +14,11 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
-    from cortex.extensions.llm.sovereign import SovereignLLM
+    from babylon60.extensions.llm.sovereign import SovereignLLM
 except ImportError:
     SovereignLLM = None  # type: ignore[assignment, misc]
 
@@ -239,7 +240,7 @@ class MemoryArchaeologist:
         primary_parent_id: str | None,
         l2_conn: sqlite3.Connection,
     ) -> None:
-        from cortex.engine.core.mutation_engine import MUTATION_ENGINE
+        from babylon60.engine.core.mutation_engine import MUTATION_ENGINE
 
         old_ids = [str(f["id"]) for f in cluster_facts]
         ts = datetime.now(timezone.utc).isoformat()
@@ -302,7 +303,7 @@ class MemoryArchaeologist:
             )
 
         try:
-            from cortex.engine.core.l3_archive import l3_archiver
+            from babylon60.engine.core.l3_archive import l3_archiver
 
             l3_archiver.archive_facts(cluster_facts)  # type: ignore[arg-type]
         except Exception as e:

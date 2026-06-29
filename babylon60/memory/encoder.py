@@ -13,7 +13,8 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from cortex.embeddings import EMBEDDING_DIM, LocalEmbedder
+from babylon60.embeddings import EMBEDDING_DIM
+from babylon60.embeddings.local import LocalEmbedder
 
 __all__ = ["AsyncEncoder"]
 

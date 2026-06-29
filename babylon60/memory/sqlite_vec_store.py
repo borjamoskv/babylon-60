@@ -21,7 +21,7 @@ try:
 except ImportError:
     sqlite_vec = None
 
-from cortex.memory.encoder import AsyncEncoder
+from babylon60.memory.encoder import AsyncEncoder
 
 __all__ = ["SovereignVectorStoreL2"]
 
@@ -32,9 +32,9 @@ _L2_HYBRID_SEARCH_AVAILABLE: bool | None = None  # None = not yet checked
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
 
 
-from cortex.memory.traits.read import ReadTrait
-from cortex.memory.traits.schema import SchemaTrait
-from cortex.memory.traits.write import WriteTrait
+from babylon60.memory.traits.read import ReadTrait
+from babylon60.memory.traits.schema import SchemaTrait
+from babylon60.memory.traits.write import WriteTrait
 
 
 class SovereignVectorStoreL2(SchemaTrait, ReadTrait, WriteTrait):

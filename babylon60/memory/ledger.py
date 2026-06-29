@@ -22,10 +22,11 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-from cortex.memory.models import MemoryEvent
+
+from babylon60.memory.models import MemoryEvent
 
 try:
-    from cortex.extensions.security.tenant import get_tenant_id
+    from babylon60.extensions.security.tenant import get_tenant_id
 except ImportError:
 
     def get_tenant_id() -> str:
@@ -99,7 +100,7 @@ class EventLedgerL3:
 
     async def append_event(self, event: MemoryEvent) -> None:
         """Persist an event immutably. Fire-and-commit with SHA-3-256 integrity."""
-        from cortex.engine.causal.taint_engine import enforce_taint_check
+        from babylon60.engine.causal.taint_engine import enforce_taint_check
 
         await self.ensure_table()
         token = (

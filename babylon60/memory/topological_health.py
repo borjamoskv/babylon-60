@@ -21,10 +21,10 @@ from collections import deque
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 if TYPE_CHECKING:
-    from cortex.memory.encoder import AsyncEncoder
+    from babylon60.memory.encoder import AsyncEncoder
 
 __all__ = [
     "AnchorInvalidError",

@@ -12,8 +12,8 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from cortex.memory._protocols import CortexMemoryManagerProtocol as CortexMemoryManager
-    from cortex.memory.models import CortexFactModel
+    from babylon60.memory._protocols import CortexMemoryManagerProtocol as CortexMemoryManager
+    from babylon60.memory.models import CortexFactModel
 
 __all__ = [
     "KnowledgeGapException",

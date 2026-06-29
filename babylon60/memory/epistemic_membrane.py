@@ -1,5 +1,4 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 import hashlib
 import time
 
@@ -7,6 +6,8 @@ import numpy as np
 import torch  # pyright: ignore[reportMissingImports]
 import torchhd  # pyright: ignore[reportMissingImports]
 from torchhd import functional as F  # pyright: ignore[reportMissingImports]
+
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 
 D = 16384
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -69,7 +70,7 @@ class EpistemicMembrane:
         threshold_consistency: float = 0.68,
         threshold_novelty: float = 0.88,
         noise_tolerance: float = 0.25,
-        device: torch.device = None
+        device: str | None = None
     ):
         self.dim = dim
         self.max_history = max_history

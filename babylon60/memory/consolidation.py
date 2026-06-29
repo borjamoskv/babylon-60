@@ -22,8 +22,9 @@ import enum
 import logging
 import time
 
-from cortex.memory.engrams import CortexSemanticEngram
 from pydantic import Field
+
+from babylon60.memory.engrams import CortexSemanticEngram
 
 logger = logging.getLogger("cortex.memory.consolidation")
 
@@ -269,7 +270,7 @@ class SystemsConsolidator:
                 doomed_facts = [dict(zip(columns, row, strict=False)) for row in cursor.fetchall()]
                 if doomed_facts:
                     try:
-                        from cortex.engine.core.l3_archive import l3_archiver
+                        from babylon60.engine.core.l3_archive import l3_archiver
 
                         l3_archiver.archive_facts(doomed_facts)  # type: ignore[arg-type]
                     except Exception as e:

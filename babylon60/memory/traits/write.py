@@ -4,10 +4,10 @@ import json
 import logging
 import sqlite3
 
-from cortex.compat.optional import np
-from cortex.guards.exergy_guard import calculate_exergy
-from cortex.memory.models import CortexFactModel
-from cortex.utils import void_vec
+from babylon60.compat.optional import np
+from babylon60.guards.exergy_guard import calculate_exergy
+from babylon60.memory.models import CortexFactModel
+from babylon60.utils import void_vec
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class WriteTrait:
         encrypted PII fragments are persisted in the metadata field.
         """
         conn = self._get_conn()  # pyright: ignore[reportAttributeAccessIssue]
-        from cortex.engine.causal.taint_engine import enforce_taint_check
+        from babylon60.engine.causal.taint_engine import enforce_taint_check
 
         token = (
             (
@@ -112,7 +112,7 @@ class WriteTrait:
                             (rowid, binary_bytes),
                         )
                         # MIH Indexing
-                        from cortex.utils.void_mih import slice_void_bit
+                        from babylon60.utils.void_mih import slice_void_bit
 
                         shards = slice_void_bit(binary_bytes)
                         insert_mih_sql = (

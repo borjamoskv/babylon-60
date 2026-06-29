@@ -17,7 +17,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Any, Final, TypedDict
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 
 class SemanticFactPayload(TypedDict):
@@ -30,7 +30,7 @@ class SemanticFactPayload(TypedDict):
     timestamp: str
 
 
-from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 __all__ = ["DynamicSemanticSpace", "SemanticMutator"]
 
@@ -38,9 +38,9 @@ logger = logging.getLogger("cortex.memory.semantic_ram")
 
 # Import topological health types (lazy to avoid circular imports)
 if TYPE_CHECKING:
-    from cortex.memory._protocols import CortexMemoryManagerProtocol as CortexMemoryManager
-    from cortex.memory.models import CortexFactModel
-    from cortex.memory.topological_health import (
+    from babylon60.memory._protocols import CortexMemoryManagerProtocol as CortexMemoryManager
+    from babylon60.memory.models import CortexFactModel
+    from babylon60.memory.topological_health import (
         TopologicalAnchor,
         TopologicalHealthMonitor,
     )

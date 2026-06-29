@@ -25,7 +25,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final
 
-from cortex.utils.void_vec import cosine_similarity
+from babylon60.utils.void_vec import cosine_similarity
 
 logger = logging.getLogger("cortex.memory.void_detector")
 

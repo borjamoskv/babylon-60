@@ -20,16 +20,16 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.memory.metamemory import (
+from babylon60.memory.metamemory import (
     FOKDirective,
     MetaJudgment,
     MetamemoryMonitor,
     RetrievalOutcome,
 )
-from cortex.memory.schemas import SchemaEngine
-from cortex.memory.stdp import STDPEngine
-from cortex.memory.valence import ValenceRecord, classify_valence
-from cortex.memory.void_detector import (
+from babylon60.memory.schemas import SchemaEngine
+from babylon60.memory.stdp import STDPEngine
+from babylon60.memory.valence import ValenceRecord, classify_valence
+from babylon60.memory.void_detector import (
     EpistemicAnalysis,
     EpistemicVoidDetector,
 )

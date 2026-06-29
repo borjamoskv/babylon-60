@@ -43,9 +43,9 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final
 
 if TYPE_CHECKING:
-    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+    from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 __all__ = ["L2HybridSearch", "L2SearchResult"]
 
@@ -228,7 +228,7 @@ class L2HybridSearch:
 
         Returns list of (facts_meta.id, 0-based rank).
         """
-        from cortex.utils.turboquant import encode_query_qjl
+        from babylon60.utils.turboquant import encode_query_qjl
 
         rotated_query = encode_query_qjl(query_embedding)
         embedding_bytes = np.array(rotated_query, dtype=np.float32).tobytes()

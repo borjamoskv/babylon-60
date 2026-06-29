@@ -116,7 +116,8 @@ class ApoptosisAgent:
         }
 
         import sqlite3
-        from cortex.database.core import connect_async_ctx, causal_write
+
+        from babylon60.database.core import causal_write, connect_async_ctx
 
         try:
             async with connect_async_ctx(self.db_path) as conn:
@@ -126,7 +127,7 @@ class ApoptosisAgent:
                     "SELECT id, content, exergy_score FROM facts WHERE tenant_id = ? AND is_tombstoned = 0",
                     (tenant_id,)
                 ) as cursor:
-                    rows = await cursor.fetchall()
+                    rows = list(await cursor.fetchall())
                     stats["scanned"] = len(rows)
 
                     tombstone_ids = []

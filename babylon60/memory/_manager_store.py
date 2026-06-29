@@ -7,7 +7,7 @@ import uuid
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.memory.engrams import CortexSemanticEngram
+from babylon60.memory.engrams import CortexSemanticEngram
 
 logger = logging.getLogger("cortex.memory._manager_store")
 
@@ -110,7 +110,7 @@ async def store_fact(
     if not should_process:
         logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
         try:
-            from cortex.routes.notch_ws import notify_notch_pruning
+            from babylon60.routes.notch_ws import notify_notch_pruning
 
             await notify_notch_pruning()
         except ImportError:

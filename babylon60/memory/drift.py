@@ -16,7 +16,6 @@ Stratified anchoring: different stability thresholds per fact_type.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import json
 import logging
 import time
@@ -24,7 +23,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Final
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 __all__ = ["DriftMonitor", "DriftSignature"]
 

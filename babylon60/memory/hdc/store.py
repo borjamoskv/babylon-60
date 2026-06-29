@@ -16,18 +16,18 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
     import sqlite_vec
 except ImportError:
     sqlite_vec = None
 
-from cortex.memory.cortex_decay import cortex_decay
-from cortex.memory.hdc.algebra import unbind
-from cortex.memory.hdc.codec import HDCEncoder
-from cortex.memory.hdc.item_memory import ItemMemory
-from cortex.memory.models import CortexFactModel
+from babylon60.memory.cortex_decay import cortex_decay
+from babylon60.memory.hdc.algebra import unbind
+from babylon60.memory.hdc.codec import HDCEncoder
+from babylon60.memory.hdc.item_memory import ItemMemory
+from babylon60.memory.models import CortexFactModel
 
 __all__ = ["HDCVectorStoreL2"]
 
@@ -162,7 +162,7 @@ class HDCVectorStoreL2:
     async def memorize(self, fact: CortexFactModel, fact_type: str | None = None) -> None:
         """Encode and store a multi-tenant CortexFactModel as a Hypervector."""
         conn = self._get_conn()
-        from cortex.engine.causal.taint_engine import enforce_taint_check
+        from babylon60.engine.causal.taint_engine import enforce_taint_check
 
         token = (
             (

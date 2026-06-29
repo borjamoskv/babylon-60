@@ -5,10 +5,10 @@ import sqlite3
 import time
 from typing import Any
 
-from cortex.compat.optional import np
-from cortex.memory.models import CortexFactModel
-from cortex.utils import void_vec
-from cortex.utils.turboquant import encode_query_qjl
+from babylon60.compat.optional import np
+from babylon60.memory.models import CortexFactModel
+from babylon60.utils import void_vec
+from babylon60.utils.turboquant import encode_query_qjl
 
 
 class ReadTrait:
@@ -80,7 +80,7 @@ class ReadTrait:
                     use_void = False
 
             if use_void:
-                from cortex.utils.void_mih import slice_void_bit
+                from babylon60.utils.void_mih import slice_void_bit
 
                 q_shards = slice_void_bit(void_query)
 
