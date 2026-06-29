@@ -2,7 +2,7 @@
 """
 cat_id: stress-test-legion
 cat_type: script
-version: 1.0.0
+version: 1.1.0
 reality_level: C5-REAL
 owner: borjamoskv
 exergy_tier: P2
@@ -13,10 +13,11 @@ import asyncio
 import sys
 import time
 
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.extensions.swarm.centauro_engine import CentauroEngine
+from babylon60.extensions.llm.router import CortexLLMRouter
+from babylon60.extensions.swarm.centauro_engine import CentauroEngine
+from babylon60.core import config
 from rich.console import Console
-from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn, BarColumn, TextColumn
 from rich.table import Table
 
 console = Console()
@@ -38,7 +39,7 @@ async def run_mission(
             status = result.get("status", "unknown")
             progress.update(task_id, advance=1)
             return status, elapsed
-        except Exception:
+        except Exception as e:
             elapsed = time.time() - start_time
             progress.update(task_id, advance=1)
             return "error", elapsed
@@ -50,19 +51,27 @@ async def main():
     parser.add_argument("--concurrency", type=int, default=5, help="Maximum concurrent missions (Thermal Limiter)")
     parser.add_argument("--formation", default="HYDRA", help="Tactical formation to deploy")
     parser.add_argument("--sim", action="store_true", help="Force C4-SIM mode (No LLM calls)")
+    parser.add_argument("--provider", help="Primary LLM provider (default: read from config)")
+    parser.add_argument("--model", help="Primary LLM model (default: read from config)")
 
     args = parser.parse_args()
+
+    # Dynamic LLM Provider configuration from config singleton or CLI overrides
+    primary_provider_name = args.provider or config.LLM_PROVIDER or "gemini"
+    primary_model_name = args.model or config.LLM_MODEL or "gemini-2.5-flash"
 
     console.print("[bold blue]🔱 LEGIØN-1 STRESS TEST ACTIVATED[/bold blue]")
     console.print(f"[cyan]MISSIONS:[/cyan] {args.missions}")
     console.print(f"[cyan]CONCURRENCY THRESHOLD:[/cyan] {args.concurrency}")
     console.print(f"[cyan]FORMATION:[/cyan] {args.formation}")
+    console.print(f"[cyan]PRIMARY PROVIDER:[/cyan] {primary_provider_name}")
+    console.print(f"[cyan]PRIMARY MODEL:[/cyan] {primary_model_name}")
     console.print(f"[cyan]MODE:[/cyan] {'[bold yellow]C4-SIM[/bold yellow]' if args.sim else '[bold red]C5-REAL[/bold red]'}")
     console.print()
 
     if not args.sim:
-        from cortex.extensions.llm.provider import LLMProvider
-        primary_provider = LLMProvider("gemini")
+        from babylon60.extensions.llm.provider import LLMProvider
+        primary_provider = LLMProvider(provider=primary_provider_name, model=primary_model_name)
         fallback_providers = [
             LLMProvider("openrouter"),
             LLMProvider("deepseek"),
