@@ -283,12 +283,26 @@ def entropy_bound_v3(metric: Dict[str, Any], state: Dict[str, Any]) -> str:
 
     This does not replace reinforcement_cycle.
     It determines the decision state that reinforcement_cycle reacts against.
+
+    C5-REAL Patch: Null-signal guard prevents self-mutilation loop.
+    When swarm delivers no real signal (all defaults), route to "observe"
+    instead of "default" to block the trigger_rupture cascade.
     """
 
     entropy = float(metric.get("entropy", 0.5))
     coherence = float(metric.get("coherence", 0.5))
     fatigue = float(metric.get("fatigue", 0.0))
     originality = float(metric.get("originality_ratio", 0.5))
+
+    # Null-signal guard: no real signal from swarm → wait, do not rupture.
+    is_null_signal = (
+        entropy == 0.5
+        and coherence == 0.5
+        and originality == 0.5
+        and fatigue == 0.0
+    )
+    if is_null_signal:
+        return "observe"
 
     # Too coherent, too safe, not original enough.
     if coherence > 0.82 and originality < 0.55:
@@ -306,7 +320,8 @@ def entropy_bound_v3(metric: Dict[str, Any], state: Dict[str, Any]) -> str:
     if 0.55 <= entropy <= 0.82 and coherence >= 0.45:
         return "continue"
 
-    return "default"
+    # Fallback: observe, not default — prevents spurious ruptures.
+    return "observe"
 
 
 # =============================================================================
@@ -475,7 +490,14 @@ def mutate_state(
 
     elif action == "trigger_rupture":
         state["rupture_count"] = int(state.get("rupture_count", 0)) + 1
-        state["current_pressure"] = min(1.0, float(state.get("current_pressure", 0.0)) + 0.3)
+        current_p = float(state.get("current_pressure", 0.0))
+        # Pressure relief valve: cap injection when already critical.
+        if current_p < 0.8:
+            state["current_pressure"] = min(1.0, current_p + 0.3)
+        else:
+            state["current_pressure"] = 1.0  # max out — no further hammering
+            state["swarm_forced"] = False  # force cooldown next cycle
+            return state
         state["swarm_forced"] = True
 
     elif action == "stable":
@@ -484,6 +506,11 @@ def mutate_state(
             0.0,
             float(state.get("attention_pressure", 0.0)) - 0.05
         )
+
+    elif action == "observe":
+        # Passive cooldown: system is waiting for real signal. Bleed pressure.
+        state["current_pressure"] = max(0.0, float(state.get("current_pressure", 0.0)) - 0.1)
+        state["swarm_forced"] = False
 
     history = state.get("mode_history", [])
     history.append({

@@ -10,9 +10,14 @@ DISTRIBUTION_THRESHOLD = 0.161
 def reinforcement_cycle(metric: Dict[str, Any], decision: str) -> str:
     """
     Evaluates metric yields to determine the next evolution/adaptation step.
+
+    C5-REAL Patch: "observe" decision maps to "stable" — no rupture on null signal.
+    Pressure relief valve: prevents runaway convulsions when swarm has no real data.
     """
     originality_ratio = metric.get('originality_ratio', 1.0)
     distribution_yield = metric.get('distribution_yield', 1.0)
+    if decision == 'observe':
+        return 'stable'
     if originality_ratio < ORIGINALITY_THRESHOLD:
         return 'force_swarm_mode'
     if distribution_yield < DISTRIBUTION_THRESHOLD:
