@@ -113,7 +113,9 @@ def _apply_and_verify(
     project: str | None = None,
 ) -> bool:
     """Apply the already generated refactor, test it, and commit/rollback."""
-    abs_path = Path(path).resolve() / top_file_rel
+    path_obj = Path(path).resolve()
+    base_dir = path_obj.parent if path_obj.is_file() else path_obj
+    abs_path = base_dir / top_file_rel
     console.print(f"  [cyan]🔬 Verificando {top_file_rel} (Integridad Bizantina)...[/]")
     try:
         original_code = abs_path.read_text(errors="replace")
@@ -196,10 +198,12 @@ def _run_delta_testing(
     project: str | None,
     level: int = 1,
 ) -> bool:
+    path_obj = Path(path).resolve()
+    base_dir = path_obj.parent if path_obj.is_file() else path_obj
     pytest_cmd = [sys.executable, "-m", "pytest"]
     rel_parts = Path(top_file_rel).parts
     if len(rel_parts) > 1 and rel_parts[0] == "cortex":
-        inferred_test = Path(path) / "tests" / f"test_{Path(top_file_rel).stem}.py"
+        inferred_test = base_dir / "tests" / f"test_{Path(top_file_rel).stem}.py"
         if inferred_test.exists():
             console.print(f"  [cyan]🎯 Delta-Testing: {inferred_test.name}[/]")
             pytest_cmd.append(str(inferred_test))
@@ -207,7 +211,7 @@ def _run_delta_testing(
             console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
     try:
         res = subprocess.run(
-            pytest_cmd, cwd=path, capture_output=True, text=True, timeout=PYTEST_TIMEOUT_SECONDS
+            pytest_cmd, cwd=base_dir, capture_output=True, text=True, timeout=PYTEST_TIMEOUT_SECONDS
         )
         if res.returncode != 0:
             console.print(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
@@ -246,9 +250,11 @@ def _commit_healed_file(
     project: str | None = None,
 ) -> bool:
     try:
+        path_obj = Path(path).resolve()
+        base_dir = path_obj.parent if path_obj.is_file() else path_obj
         commit_msg = f"[MEJORAlo Auto-Heal L{level}] Refactorizado {top_file_rel} (iter {iteration}, score {current_score})"
         console.print(f"  [bold green]✅ {top_file_rel} OK. Comiteando...[/]")
-        subprocess.run(["git", "add", str(abs_path)], cwd=path, capture_output=True)
+        subprocess.run(["git", "add", str(abs_path)], cwd=base_dir, capture_output=True)
         subprocess.run(
             [
                 "git",
@@ -258,7 +264,7 @@ def _commit_healed_file(
                 "--author",
                 "CORTEX MEJORAlo Auto-Heal <cortex@moskv.1>",
             ],
-            cwd=path,
+            cwd=base_dir,
             capture_output=True,
         )
         if engine and project:
@@ -356,9 +362,11 @@ def _run_healing_iteration(
 
     async def _run_generations():
         results = []
+        path_obj = Path(path).resolve()
+        base_dir = path_obj.parent if path_obj.is_file() else path_obj
         for f, iss in targets:
             result = await _heal_file_async(
-                Path(path).resolve() / f,
+                base_dir / f,
                 iss,
                 level=level,
                 iteration=iteration,
