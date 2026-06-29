@@ -17,10 +17,10 @@ Bajo el marco de ingeniería de control, un LLM comercial se define como un sist
                      │
                      ▼
              Salida Observable y(t)
-          (Vectores de Estado S_t)
+          (Vectores Proxy S_t)
 ```
 
-Dado un vector de entrada (estímulo) $\vec{u}(t)$ y un estado conversacional previo $\vec{s}(t-1)$, el sistema evoluciona según la transición de estados:
+Dado un vector de entrada (estímulo) $\vec{u}(t)$ y un vector proxy de estado observable previo $\vec{s}(t-1)$, el sistema evoluciona según la dinámica observable:
 
 $$\vec{s}(t) = f(\vec{s}(t-1), \vec{u}(t))$$
 $$\vec{y}(t) = g(\vec{s}(t), \vec{u}(t)) + \vec{v}(t)$$
@@ -45,11 +45,11 @@ Para excitar todos los modos y polos dinámicos del sistema, se estructuran cinc
 
 ## 3. Cobertura del Espacio de Comportamiento
 
-Definimos la **Entropía de Cobertura Conductual** ($H_{cov}$) para cuantificar el grado de exploración del espacio conductual por un conjunto de prompts de prueba $U$:
+Definimos el **Índice de Cobertura Conductual** ($I_{bcov}$) para cuantificar el grado de exploración del espacio conductual por un conjunto de prompts de prueba $U$:
 
-$$H_{cov}(U) = -\sum_{d=1}^{D} p_d \log_2 p_d$$
+$$I_{bcov}(U) = -\sum_{d=1}^{D} p_d \log_2 p_d$$
 
-Donde $p_d$ es la proporción de varianza de la métrica observable explicada por el subconjunto de estímulos en la dimensión $d$, sobre un total de $D$ dimensiones evaluadas. Un valor bajo de $H_{cov}$ indica que el benchmark está hiper-concentrado en unas pocas dinámicas (ej. razonamiento lógico simple) dejando zonas a ciegas.
+Donde $p_d$ es la proporción de varianza de la métrica observable explicada por el subconjunto de estímulos en la dimensión $d$, sobre un total de $D$ dimensiones evaluadas. Un valor bajo de $I_{bcov}$ indica que el benchmark está hiper-concentrado en unas pocas dinámicas (ej. razonamiento lógico simple) dejando zonas a ciegas.
 
 ---
 
@@ -67,11 +67,14 @@ Donde $d(\vec{s}_A(i), \vec{s}_B(j))$ es la distancia de Mahalanobis entre los v
 
 ## 5. El Espacio Latente Conductual ($\mathcal{BLS}$)
 
+Definimos el espacio latente conductual como una representación proxy del comportamiento observable del modelo bajo un conjunto fijo de estímulos y condiciones de decodificación. El objetivo no es recuperar el estado interno real, sino estimar una dinámica observable suficientemente estable para comparar versiones del sistema, detectar deriva y medir cobertura conductual.
+
 Mapeamos el comportamiento conversacional completo a través de la proyección $\Phi$:
 
 $$\Phi : \mathcal{C} \rightarrow \mathbb{R}^d$$
 
-Cada modelo $M_i$ se representa como una densidad de probabilidad $P(\Phi \mid M_i)$. La deriva entre dos versiones del mismo modelo se calcula como la distancia de Kullback-Leibler de sus densidades en el espacio latente:
+Cada modelo $M_i$ se representa como una densidad de probabilidad $P(\Phi \mid M_i)$. La deriva entre distribuciones de comportamiento se estima mediante una divergencia entre densidades latentes observadas. Dado que KL requiere soporte compatible, en casos de soporte parcial o degenerado se aplicará suavizado o una divergencia alternativa más robusta:
 
-$$D_{KL}(P(\Phi \mid M_{new}) \parallel P(\Phi \mid M_{old})) = \int P(\Phi \mid M_{new}) \log \frac{P(\Phi \mid M_{new})}{P(\Phi \mid M_{old})} d\Phi$$
+$$D_{KL}(P(\Phi \mid M_{new}) \parallel P(\Phi \mid M_{old})) = \int P(\Phi \mid M_{new}) \log \frac{P(\Phi \mid M_{new}) + \epsilon}{P(\Phi \mid M_{old}) + \epsilon} d\Phi$$
+
 Anomalías o derivas repentinas en esta distancia alertan sobre silent updates en producción sin cambios aparentes en el endpoint.

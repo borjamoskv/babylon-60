@@ -1,275 +1,216 @@
-"""Behavioral Latent Space (BLS) Drift Detector.
-
-Detects silent model updates via KL divergence on behavioral state distributions.
-Assumes multivariate Gaussian fit over state vectors.
-
-Author: Borja Moskv (borjamoskv)
-License: Apache-2.0
-"""
-
-from __future__ import annotations
-
 import hashlib
-from dataclasses import dataclass
+import json
+import math
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-
+from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
-
-@dataclass(frozen=True)
+@dataclass
 class BehavioralSnapshot:
-    """Frozen snapshot of a model's behavioral state distribution."""
-
     model_id: str
     timestamp_iso: str
-    state_vectors: np.ndarray  # shape (n, d)
-    metadata: dict[str, object]
-    sha256_hash: str
+    state_vectors: np.ndarray  # Shape: (n_samples, d_dimensions)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    sha256_hash: str = ""
 
-    def __post_init__(self) -> None:
-        if self.state_vectors.ndim != 2:
-            raise ValueError(
-                f"state_vectors must be 2D (n, d), got shape {self.state_vectors.shape}"
-            )
+    def __post_init__(self):
+        if not self.sha256_hash and self.state_vectors is not None:
+            # Deterministic hash generation from state vectors bytes
+            h = hashlib.sha256(self.state_vectors.tobytes())
+            self.sha256_hash = h.hexdigest()
 
-
-@dataclass(frozen=True)
+@dataclass
 class DriftResult:
-    """KL divergence measurement between two behavioral snapshots."""
-
-    kl_forward: float       # D_KL(P || Q)
-    kl_reverse: float       # D_KL(Q || P)
-    symmetric_kl: float     # 0.5 * (kl_forward + kl_reverse)
-    per_dimension_contribution: np.ndarray  # shape (d,)
+    kl_forward: float
+    kl_reverse: float
+    symmetric_kl: float
+    per_dimension_contribution: np.ndarray
     is_significant: bool
-    confidence_level: str   # "low" | "medium" | "high" | "critical"
+    confidence_level: str
 
-
-@dataclass(frozen=True)
+@dataclass
 class SilentUpdateAlert:
-    """Alert emitted when behavioral drift exceeds threshold."""
-
     detected: bool
-    severity: str           # "none" | "low" | "medium" | "high" | "critical"
+    severity: str
     kl_value: float
-    drift_dimensions: list[int]
+    drift_dimensions: List[int]
     recommended_action: str
 
-
 class DriftDetector:
-    """Gaussian KL divergence detector for behavioral latent spaces.
-
-    All covariance matrices are regularized with eps*I to handle
-    singular/near-singular cases from low-sample regimes.
-    """
-
-    SEVERITY_THRESHOLDS: dict[str, float] = {
-        "low": 0.5,
-        "medium": 2.0,
-        "high": 5.0,
-        "critical": 10.0,
-    }
-
-    def __init__(self, eps: float = 1e-6) -> None:
-        if eps <= 0:
-            raise ValueError(f"eps must be positive, got {eps}")
-        self._eps = eps
+    def __init__(self, regularization_eps: float = 1e-5):
+        self.regularization_eps = regularization_eps
 
     def capture_snapshot(
         self,
         model_id: str,
-        states: np.ndarray,
-        metadata: dict[str, object] | None = None,
+        states: List[np.ndarray],
+        metadata: Optional[Dict[str, Any]] = None
     ) -> BehavioralSnapshot:
-        """Capture a behavioral snapshot from raw state vectors.
+        if not states:
+            raise ValueError("State vector list is empty")
+        
+        matrix = np.array(states)
+        if matrix.ndim == 1:
+            matrix = matrix.reshape(1, -1)
 
-        Args:
-            model_id: Identifier for the model/endpoint.
-            states: Array of shape (n, d) with n observations of d-dim vectors.
-            metadata: Arbitrary metadata dict.
-
-        Returns:
-            Frozen BehavioralSnapshot with SHA-256 hash of state bytes.
-        """
-        states = np.asarray(states, dtype=np.float64)
-        if states.ndim == 1:
-            states = states.reshape(1, -1)
-        if states.ndim != 2:
-            raise ValueError(f"states must be 1D or 2D, got ndim={states.ndim}")
-
-        sha = hashlib.sha256(states.tobytes()).hexdigest()
-        ts = datetime.now(timezone.utc).isoformat()
-
+        timestamp = datetime.now(timezone.utc).isoformat()
         return BehavioralSnapshot(
             model_id=model_id,
-            timestamp_iso=ts,
-            state_vectors=states,
-            metadata=metadata or {},
-            sha256_hash=sha,
+            timestamp_iso=timestamp,
+            state_vectors=matrix,
+            metadata=metadata or {}
         )
 
-    def _fit_gaussian(
-        self, vectors: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
-        """Fit mean and regularized covariance from state vectors.
-
-        Returns:
-            (mu, Sigma) where Sigma = cov + eps*I.
+    def _estimate_gaussian_params(self, matrix: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """
-        mu = np.mean(vectors, axis=0)  # (d,)
-        if vectors.shape[0] < 2:
-            d = vectors.shape[1]
-            return mu, np.eye(d) * self._eps
-        centered = vectors - mu
-        cov = (centered.T @ centered) / (vectors.shape[0] - 1)  # (d, d)
-        cov += np.eye(cov.shape[0]) * self._eps  # regularization
-        return mu, cov
-
-    def _kl_gaussian(
-        self,
-        mu1: np.ndarray,
-        S1: np.ndarray,
-        mu0: np.ndarray,
-        S0: np.ndarray,
-    ) -> tuple[float, np.ndarray]:
-        """D_KL(N(mu1, S1) || N(mu0, S0)) for d-dim Gaussians.
-
-        Formula:
-            0.5 * [tr(S0^{-1} S1) + (mu0-mu1)^T S0^{-1} (mu0-mu1) - d + ln(det(S0)/det(S1))]
-
-        Returns:
-            (kl_value, per_dimension_contribution)
+        Estimates Mean and Covariance with regularization to avoid singular matrices.
         """
-        d = mu0.shape[0]
-        S0_inv = np.linalg.inv(S0)
+        n, d = matrix.shape
+        mean = np.mean(matrix, axis=0)
+        
+        if n < 2:
+            # Fallback for insufficient sample size
+            cov = np.eye(d) * self.regularization_eps
+            return mean, cov
 
-        # Per-dimension contributions (diagonal terms dominate)
-        S0_inv_S1 = S0_inv @ S1
-        trace_term = np.diag(S0_inv_S1)  # per-dim trace contribution
-
-        delta = mu0 - mu1
-        quad_vec = S0_inv @ delta
-        quad_per_dim = delta * quad_vec  # element-wise: delta_i * (S0_inv @ delta)_i
-
-        _, logdet_S0 = np.linalg.slogdet(S0)
-        _, logdet_S1 = np.linalg.slogdet(S1)
-        logdet_ratio_per_dim = (logdet_S0 - logdet_S1) / d  # spread evenly
-
-        per_dim = 0.5 * (trace_term + quad_per_dim - 1.0 + logdet_ratio_per_dim)
-
-        kl = 0.5 * (
-            np.trace(S0_inv_S1)
-            + delta @ S0_inv @ delta
-            - d
-            + (logdet_S0 - logdet_S1)
-        )
-
-        return float(kl), per_dim
+        cov = np.cov(matrix, rowvar=False)
+        if cov.ndim == 0:
+            cov = np.array([[float(cov)]])
+        
+        # Regularization: Σ_reg = Σ + εI
+        cov = cov + np.eye(d) * self.regularization_eps
+        return mean, cov
 
     def compute_kl_divergence(
-        self, a: BehavioralSnapshot, b: BehavioralSnapshot
+        self,
+        snapshot_a: BehavioralSnapshot,
+        snapshot_b: BehavioralSnapshot
     ) -> DriftResult:
-        """Compute KL divergence between two behavioral snapshots.
-
-        Args:
-            a: Baseline snapshot (reference distribution).
-            b: Current snapshot (test distribution).
-
-        Returns:
-            DriftResult with forward, reverse, symmetric KL and per-dim breakdown.
         """
-        if a.state_vectors.shape[1] != b.state_vectors.shape[1]:
+        Computes forward KL(B || A) and reverse KL(A || B) using Gaussian approximation.
+        Assumes snapshot_a is baseline (N0) and snapshot_b is target/current (N1).
+        Formula:
+        KL(N1 || N0) = 0.5 * [tr(S0^-1 S1) + (mu0 - mu1)^T S0^-1 (mu0 - mu1) - d + ln(det(S0)/det(S1))]
+        """
+        v_a = snapshot_a.state_vectors
+        v_b = snapshot_b.state_vectors
+
+        if v_a.shape[1] != v_b.shape[1]:
             raise ValueError(
-                f"Dimension mismatch: a.d={a.state_vectors.shape[1]}, "
-                f"b.d={b.state_vectors.shape[1]}"
+                f"Dimension mismatch between state vectors: baseline={v_a.shape[1]}, current={v_b.shape[1]}"
             )
 
-        mu_a, S_a = self._fit_gaussian(a.state_vectors)
-        mu_b, S_b = self._fit_gaussian(b.state_vectors)
+        d = v_a.shape[1]
+        
+        mu_a, cov_a = self._estimate_gaussian_params(v_a)
+        mu_b, cov_b = self._estimate_gaussian_params(v_b)
 
-        kl_fwd, per_dim_fwd = self._kl_gaussian(mu_b, S_b, mu_a, S_a)  # D_KL(b || a)
-        kl_rev, per_dim_rev = self._kl_gaussian(mu_a, S_a, mu_b, S_b)  # D_KL(a || b)
+        # Precompute inverses and determinants
+        try:
+            inv_cov_a = np.linalg.pinv(cov_a)
+            inv_cov_b = np.linalg.pinv(cov_b)
+            
+            sign_a, logdet_a = np.linalg.slogdet(cov_a)
+            sign_b, logdet_b = np.linalg.slogdet(cov_b)
+            
+            det_term = logdet_a - logdet_b
+        except Exception:
+            # Safe recovery back to Euclidean boundaries
+            inv_cov_a = np.eye(d)
+            inv_cov_b = np.eye(d)
+            det_term = 0.0
 
-        sym_kl = 0.5 * (kl_fwd + kl_rev)
-        per_dim_sym = 0.5 * (per_dim_fwd + per_dim_rev)
+        # Forward: KL(B || A) -> current relative to baseline
+        diff = mu_a - mu_b
+        tr_term_f = np.trace(inv_cov_a @ cov_b)
+        quad_term_f = np.dot(np.dot(diff, inv_cov_a), diff)
+        kl_forward = float(0.5 * (tr_term_f + quad_term_f - d + det_term))
+        kl_forward = max(kl_forward, 0.0)
 
-        confidence = self._classify_severity(sym_kl)
-        is_sig = sym_kl > self.SEVERITY_THRESHOLDS["low"]
+        # Reverse: KL(A || B) -> baseline relative to current
+        tr_term_r = np.trace(inv_cov_b @ cov_a)
+        quad_term_r = np.dot(np.dot(diff, inv_cov_b), diff)
+        kl_reverse = float(0.5 * (tr_term_r + quad_term_r - d - det_term))
+        kl_reverse = max(kl_reverse, 0.0)
+
+        symmetric_kl = 0.5 * (kl_forward + kl_reverse)
+
+        # Per-dimension contribution estimation using diagonal variance ratio + mean delta
+        var_a = np.diag(cov_a)
+        var_b = np.diag(cov_b)
+        per_dim = []
+        for i in range(d):
+            # 1D KL divergence formulation per axis
+            term_1d = 0.5 * (var_b[i]/var_a[i] + (mu_a[i] - mu_b[i])**2/var_a[i] - 1.0 + math.log(var_a[i]/var_b[i]))
+            per_dim.append(max(float(term_1d), 0.0))
+        
+        per_dim_arr = np.array(per_dim)
+
+        # Significance classification
+        is_sig = symmetric_kl > 1.5
+        
+        # Confidence score based on sample sizes
+        n_a = v_a.shape[0]
+        n_b = v_b.shape[0]
+        min_n = min(n_a, n_b)
+        if min_n > 50:
+            confidence = "C5"
+        elif min_n > 20:
+            confidence = "C4"
+        elif min_n > 10:
+            confidence = "C3"
+        elif min_n > 5:
+            confidence = "C2"
+        else:
+            confidence = "C1"
 
         return DriftResult(
-            kl_forward=kl_fwd,
-            kl_reverse=kl_rev,
-            symmetric_kl=sym_kl,
-            per_dimension_contribution=per_dim_sym,
+            kl_forward=kl_forward,
+            kl_reverse=kl_reverse,
+            symmetric_kl=symmetric_kl,
+            per_dimension_contribution=per_dim_arr,
             is_significant=is_sig,
-            confidence_level=confidence,
+            confidence_level=confidence
         )
 
-    def compute_symmetric_kl(
-        self, a: BehavioralSnapshot, b: BehavioralSnapshot
-    ) -> float:
-        """Shortcut: returns only the symmetric KL divergence scalar."""
-        return self.compute_kl_divergence(a, b).symmetric_kl
+    def compute_symmetric_kl(self, snapshot_a: BehavioralSnapshot, snapshot_b: BehavioralSnapshot) -> float:
+        res = self.compute_kl_divergence(snapshot_a, snapshot_b)
+        return res.symmetric_kl
 
     def detect_silent_update(
         self,
         baseline: BehavioralSnapshot,
         current: BehavioralSnapshot,
-        threshold: float = 2.0,
+        threshold: float = 2.0
     ) -> SilentUpdateAlert:
-        """Detect whether a model endpoint has been silently updated.
+        res = self.compute_kl_divergence(baseline, current)
+        
+        # Top 3 drifting dimensions
+        drift_dims = []
+        if len(res.per_dimension_contribution) > 0:
+            sorted_indices = np.argsort(res.per_dimension_contribution)[::-1]
+            drift_dims = [int(idx) for idx in sorted_indices[:3] if res.per_dimension_contribution[idx] > 0.1]
 
-        Args:
-            baseline: Reference behavioral snapshot.
-            current: Fresh behavioral snapshot.
-            threshold: Symmetric KL threshold for detection.
-
-        Returns:
-            SilentUpdateAlert with severity, drifting dimensions, and action.
-        """
-        if threshold <= 0:
-            raise ValueError(f"threshold must be positive, got {threshold}")
-
-        result = self.compute_kl_divergence(baseline, current)
-        detected = result.symmetric_kl > threshold
-
-        # Dimensions contributing most to drift (above per-dim mean)
-        per_dim = result.per_dimension_contribution
-        dim_mean = np.mean(np.abs(per_dim))
-        drift_dims = [
-            int(i) for i in np.where(np.abs(per_dim) > dim_mean * 2.0)[0]
-        ]
-
-        severity = self._classify_severity(result.symmetric_kl)
-        action = self._recommend_action(severity, detected)
+        detected = res.symmetric_kl >= threshold
+        
+        if not detected:
+            severity = "none"
+            recommended = "No action required. Endpoints match operational signature."
+        elif res.symmetric_kl < threshold * 2:
+            severity = "medium"
+            recommended = "Warn client services. Behavioral variance detected but within tolerance."
+        elif res.symmetric_kl < threshold * 5:
+            severity = "high"
+            recommended = "Flag silent update. Prompt structures may require adaptation."
+        else:
+            severity = "critical"
+            recommended = "Immediate rollback advised. Observable behavior has diverged significantly."
 
         return SilentUpdateAlert(
             detected=detected,
             severity=severity,
-            kl_value=result.symmetric_kl,
+            kl_value=res.symmetric_kl,
             drift_dimensions=drift_dims,
-            recommended_action=action,
+            recommended_action=recommended
         )
-
-    def _classify_severity(self, kl: float) -> str:
-        if kl >= self.SEVERITY_THRESHOLDS["critical"]:
-            return "critical"
-        if kl >= self.SEVERITY_THRESHOLDS["high"]:
-            return "high"
-        if kl >= self.SEVERITY_THRESHOLDS["medium"]:
-            return "medium"
-        if kl >= self.SEVERITY_THRESHOLDS["low"]:
-            return "low"
-        return "none"
-
-    @staticmethod
-    def _recommend_action(severity: str, detected: bool) -> str:
-        if not detected:
-            return "no_action"
-        actions = {
-            "low": "log_and_monitor",
-            "medium": "flag_for_review",
-            "high": "immediate_investigation",
-            "critical": "halt_pipeline_and_escalate",
-        }
-        return actions.get(severity, "no_action")
