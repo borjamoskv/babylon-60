@@ -30,7 +30,6 @@ from babylon60.swarm.agent_mixin import AgentMixin
 
 if TYPE_CHECKING:
     from babylon60.consensus.manager import ConsensusManager
-    from babylon60.embeddings import LocalEmbedder
     from babylon60.embeddings.manager import EmbeddingManager
     from babylon60.engine.flow.lock import SovereignLock
     from babylon60.facts.manager import FactManager

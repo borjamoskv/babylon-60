@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 import math
-from typing import List
+
 from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.engine.flow.causality_models import (
     Claim,
@@ -43,7 +43,7 @@ class SemanticParticle:
         self.velocity = [0.0] * len(self.position)
         self.active = True
 
-    def apply_impulse(self, impulse: List[float]):
+    def apply_impulse(self, impulse: list[float]):
         for i in range(len(self.position)):
             self.velocity[i] += impulse[i] / self.mass
 
@@ -67,7 +67,7 @@ class EpistemicPhysicsArbiter:
         self.decay_rate = decay_rate
         self.collision_threshold = collision_threshold
 
-    def resolve_collisions(self, claims: List[Claim]) -> List[DecisionTrace]:
+    def resolve_collisions(self, claims: list[Claim]) -> list[DecisionTrace]:
         particles = [SemanticParticle(c) for c in claims]
         
         # Simular 3 pasos de integración de colisiones
@@ -98,12 +98,12 @@ class EpistemicPhysicsArbiter:
 
                     if is_contradictory:
                         # Distancia euclidiana en el espacio semántico
-                        squared_sum = sum((x1 - x2) ** 2 for x1, x2 in zip(p1.position, p2.position))
+                        squared_sum = sum((x1 - x2) ** 2 for x1, x2 in zip(p1.position, p2.position, strict=True))
                         dist = math.sqrt(squared_sum)
                         
                         if dist < self.collision_threshold:
                             # Dirección de la colisión
-                            direction = [x2 - x1 for x1, x2 in zip(p1.position, p2.position)]
+                            direction = [x2 - x1 for x1, x2 in zip(p1.position, p2.position, strict=True)]
                             norm = math.sqrt(sum(x ** 2 for x in direction))
                             if norm == 0:
                                 norm = 0.001
