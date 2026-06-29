@@ -186,7 +186,7 @@ En la transición hacia **v10.5+**, CORTEX consolida su arquitectura descentrali
 ### 1. Tripartite Memory (L1 / L2 / L3)
 El ecosistema separa el ciclo de vida de los datos según su termodinámica de acceso:
 - **L1 (Working Memory):** Capa estocástica e in-memory (Redis / Dicts) para retención de corto plazo y ventanas de contexto de enjambre.
-- **L2 (Vector Sink):** Almacenamiento semántico. Utiliza **sqlite-vec** para embeddings calientes (WARM). Un monitor autónomo (`L2DrainMonitor`) drena periódicamente los vectores fríos (COLD) hacia **Turbopuffer**, un backend serverless de alta capacidad, liberando la presión del nodo local.
+- **L2 (Vector Sink):** Almacenamiento semántico. Utiliza **sqlite-vec** para embeddings calientes (WARM). Opera estrictamente bajo un wrapper inmutable `CortexConnection` sellando la superficie FFI dinámica (VFS lockdown). Un monitor autónomo (`L2DrainMonitor`) drena periódicamente los vectores fríos (COLD) hacia **Turbopuffer**, un backend serverless de alta capacidad, liberando la presión del nodo local.
 - **L3 (Episodic Ledger):** La fuente criptográfica de la verdad. Almacenamiento estrictamente relacional y append-only en SQLite WAL. Ningún hecho existe si no se cristaliza aquí.
 
 ### 2. Formación TESTUDO (Swarm)
@@ -284,7 +284,7 @@ Paths below are relative to the `cortex/` package root unless noted otherwise.
 
 ## Data Flow
 
-### Store a Fact
+### Store a Fact (MTK v2 Enforced)
 
 ```mermaid
 sequenceDiagram
@@ -293,8 +293,9 @@ sequenceDiagram
     participant Auth
     participant Privacy
     participant Engine
-    participant Embedder
+    participant CortexConn
     participant SQLite
+    participant Embedder
     participant Ledger
 
     Client->>API: POST /v1/facts
@@ -303,9 +304,11 @@ sequenceDiagram
     API->>Privacy: Scan content for secrets
     Privacy-->>API: OK (or flag)
     API->>Engine: store(project, content, tenant_id, ...)
-    Engine->>SQLite: INSERT INTO facts
+    Engine->>CortexConn: request physical connection
+    CortexConn-->>Engine: validated handle (Causal Token)
+    Engine->>SQLite: INSERT INTO facts (via CortexConn)
     Engine->>Embedder: embed(content)
-    Embedder->>SQLite: INSERT INTO fact_embeddings
+    Embedder->>SQLite: INSERT INTO fact_embeddings (via CortexConn)
     Engine->>Ledger: _log_transaction()
     Ledger->>SQLite: INSERT INTO transactions (hash-chained)
     Ledger->>SQLite: Merkle checkpoint (if batch full)
@@ -463,7 +466,7 @@ erDiagram
 | **Data Integrity** | SHA-256 hash chain + Merkle trees |
 | **Privacy** | Multi-pattern secret detection at ingress |
 | **Secrets** | AES-256-GCM encrypted vault |
-| **Code Safety** | AST Sandbox for LLM-generated code |
+| **Physical Boundary** | Kernel-Owned Connection Allocator (MTK v2) & Causal Tokens |
 | **Rate Limiting** | Sliding window per IP |
 | **Headers** | CSP, HSTS, X-Frame-Options, X-XSS-Protection |
 
