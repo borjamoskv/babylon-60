@@ -22,6 +22,30 @@ Today, the default FastAPI core bootstrap still fails closed unless `CORTEX_STOR
 Postgres/Turso storage paths exist in the repository, but they remain storage/tooling surfaces rather
 than the default public API bootstrap contract.
 
+## Target Audience & Operational Taxonomy
+
+To ground the architectural design in real-world application, the CORTEX engine serves a multi-dimensional matrix of target audiences. Each audience maps to a core subsystem:
+
+### Audience to Module Mapping
+
+| ID | Target Audience Vector | Operational Pain Point | CORTEX Engine Interface |
+| :--- | :--- | :--- | :--- |
+| **V1** | Platform Engineers | Episodic corruption / state drift | `cortex/engine/` (`crystallizer.py`) |
+| **V2** | AI Agent Developers | Stochastic behavior in pipelines | `cortex/agents/` y `cortex/guards/` (`virgo.py`) |
+| **V3** | Auditors / Forensic AI | Lack of verifiable audit trail | `cortex/audit/` (`ledger.py`) |
+| **V4** | Local-First Operators | High latency / external API SPOF | `cortex/embeddings/` |
+| **V5** | Smart Contract Sentinels | Invalid transient states in DeFi | `cortex/engine/causal/` (`taint_engine.py`) |
+| **V6** | Edge AI & Robotics | Kinetic threat from hallucinated execution | `cortex/consensus/` |
+| **V7** | Adversarial Red Teamers | Corporate safety/woke filters, local sandbox escape | `cortex/extensions/mac_maestro/` |
+| **V8** | Epistemic Miners | Low-signal context rot in massive pipelines | `cortex/shannon/` |
+| **V9** | Autarchy Maximalists | External tracking and telemetry | `cortex/extensions/llm/` |
+| **V10**| Machine-to-Machine (Swarms) | Agent memory lifecycle decay in networks | `cortex/swarm/` |
+| **V11**| Protocol Designers | Unreliable mapping to compiler ASTs | `cortex/utils/` |
+| **V12**| Quants / Latency-Critical | Exergy drain from heavy LLM cognitive thinking | `cortex/engine/core/` (`ultrathink_physics.py`) |
+| **V13**| Knowledge Graph Architects | Redundant facts and context duplication | `cortex/compaction/` y `cortex/graph/` |
+| **V14**| Shadow Operators | Detection of agent footprint / signature | `cortex/extensions/darknet/` |
+
+
 ```mermaid
 graph TB
     subgraph Interfaces
