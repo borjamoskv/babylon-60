@@ -19,6 +19,12 @@ class MockGhost(GhostProtocol):
     project: str
 
 
+@pytest.fixture(autouse=True)
+def temp_db(tmp_path, monkeypatch):
+    """Isolate database to temp directory for each test."""
+    monkeypatch.setenv("CORTEX_DB_PATH", str(tmp_path))
+
+
 def test_classify_ghosts():
     """Test O(1) pattern classification for different errors."""
 

@@ -25,6 +25,12 @@ def temp_repo(tmp_path):
     return repo
 
 
+@pytest.fixture(autouse=True)
+def temp_db(tmp_path, monkeypatch):
+    """Isolate database to temp directory for each test."""
+    monkeypatch.setenv("CORTEX_DB_PATH", str(tmp_path))
+
+
 # ── 1. Tool Sealing Tests (Ω₃) ─────────────────────────────────────────
 
 

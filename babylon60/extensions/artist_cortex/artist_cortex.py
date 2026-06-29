@@ -108,5 +108,39 @@ class ArtistCortexEngine:
         self.conn.commit()
         return artifact_id
 
+    def suntsitu_prune(self, attention_threshold: float = 0.2, originality_threshold: float = 0.1) -> int:
+        """
+        M5 Thermodynamic Expulsion (Suntsitu)
+        Purges low-exergy or rejected artifacts from the system to maintain thermodynamic vacuum.
+        Enforces structural isomorphism (VEC-0) by manually cleaning the vec0 virtual table
+        as it does not support Foreign Key ON DELETE CASCADE.
+        """
+        cursor = self.conn.cursor()
+        
+        # Identify low-exergy artifacts
+        cursor.execute("""
+            SELECT id FROM cortex_artifacts
+            WHERE attention_yield < ? OR originality_raw < ?
+        """, (attention_threshold, originality_threshold))
+        
+        rows = cursor.fetchall()
+        if not rows:
+            return 0
+            
+        artifact_ids = [row["id"] for row in rows]
+        placeholders = ",".join("?" for _ in artifact_ids)
+        
+        # 1. Purge from vec0 (VEC-0 integrity invariant)
+        cursor.execute(f"DELETE FROM cortex_embeddings WHERE rowid IN ({placeholders})", artifact_ids)
+        
+        # 2. Purge from embedding map
+        cursor.execute(f"DELETE FROM cortex_embedding_map WHERE artifact_id IN ({placeholders})", artifact_ids)
+        
+        # 3. Purge from artifacts
+        cursor.execute(f"DELETE FROM cortex_artifacts WHERE id IN ({placeholders})", artifact_ids)
+        
+        self.conn.commit()
+        return len(artifact_ids)
+
     def close(self):
         self.conn.close()
