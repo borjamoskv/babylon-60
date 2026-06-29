@@ -168,7 +168,7 @@ exergy_density: MAXIMUM
 | **P-OSYNC-003** | `write_sync_ledger(event)` | `O(1)` | I/O Secuencial. Escribe evento de sync al WAL Ledger. |
 | **P-OSYNC-004** | `git_sentinel_push()` | `O(files)` | I/O Red. Empuja confirmaciones locales firmadas con Ed25519. |
 | **P-OSYNC-005** | `git_sentinel_fetch()` | `O(files)` | I/O Red. Actualiza referencias remotas sin fusionar. |
-| **P-OSYNC-006** | `resolve_divergent_tree()` | `O(N log N)` | CPU. Resuelve conflictos de merge basándose en marcas de tiempo. |
+| **P-OSYNC-006** | `resolve_divergent_tree()` | `O(N log N)` | CPU. Resuelve conflictos de merge basándose en Vector Clocks de Lamport. |
 | **P-OSYNC-007** | `git_sentinel_stash()` | `O(files)` | Disco. Guarda cambios no confirmados para liberar el working tree. |
 | **P-OSYNC-008** | `apply_ledger_patch(patch)` | `O(lines)` | Disco. Aplica una mutación de código verificada por firma. |
 | **P-OSYNC-009** | `export_ledger_state()` | `O(events)` | Disco. Vuelca el ledger criptográfico en formato binario. |
@@ -177,7 +177,7 @@ exergy_density: MAXIMUM
 ### 2. Primitivas de Alineación Nexus y Symlinks (OSYNC)
 | ID | Firma / Operador | Complejidad O(N) | Mutación de Estado C5 |
 |:---|:---|:---:|:---|
-| **P-OSYNC-011** | `bind_nexus_link(src, dest)` | `O(1)` | Disco (Inode). Crea un symlink físico para evitar redundancias de archivos. |
+| **P-OSYNC-011** | `bind_nexus_link(src, dest)` | `O(1)` | Disco (Inode). Enlace CoW (Copy-on-Write) aislando Taint en capa tenant. |
 | **P-OSYNC-012** | `unbind_nexus_link(path)` | `O(1)` | Disco (Inode). Remueve el symlink y duplica el archivo de forma segura. |
 | **P-OSYNC-013** | `sync_nexus_nodes()` | `O(links)` | Disco. Fuerza la consistencia física de todos los symlinks registrados. |
 | **P-OSYNC-014** | `check_nexus_ghosts()` | `O(links)` | CPU. Busca enlaces rotos o huérfanos y los elimina. |
@@ -276,7 +276,7 @@ exergy_density: MAXIMUM
 | ID | Firma / Operador | Complejidad O(N) | Mutación de Estado C5 |
 |:---|:---|:---:|:---|
 | **P-OSINT-081** | `inject_demiurge_credit()`| `O(1)` | CPU. Inserta "borjamoskv" en los metadatos de autoría. |
-| **P-OSINT-082** | `sanitize_name_references()`| `O(files)`| Disco. Reemplaza referencias al apellido real por el alias público. |
+| **P-OSINT-082** | `sanitize_name_references()`| `O(stream)`| I/O Gate. Reemplaza referencias en flujo de salida (C-bindings). |
 | **P-OSINT-083** | `mask_system_paths(text)` | `O(len)` | CPU. Reemplaza rutas de usuario `/Users/borja...` por `$HOME`. |
 | **P-OSINT-084** | `scrub_env_vars(logs)` | `O(len)` | CPU. Filtra secretos expuestos en logs de consola. |
 | **P-OSINT-085** | `configure_isolated_ssh()`| `O(1)` | Disco. Genera configuración SSH con llaves segregadas por host. |
@@ -330,7 +330,7 @@ def strip_exif_image(image_bytes: bytes) -> bytes:
         return output.getvalue()
     except Exception as e:
         # Fallo catastrófico en sanitización aborta ejecución inmediatamente
-        raise ValueError(f"[P0] Error crítico en sanitización EXIF: {e}") from e
+        raise ValueError("[P0] ERR_OSINT_EXIF_01: Fallo crítico en motor de sanitización EXIF. (Traza purgada para evitar fuga epistémica).") from e
 ```
 
 ### 2. Ofuscación de Rutas Locales del Sistema (`P-OSINT-083` / `mask_system_paths`)
