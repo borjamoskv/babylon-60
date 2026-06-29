@@ -6,7 +6,7 @@ Claim: Intercepción de radiación estocástica proveniente de un nodo comercial
 Proof: { Base: BABYLON-60_Axiom_L1_F2, Status: COLLAPSED_EXERGY_MAXIMIZED, Confidence: C5-REAL }
 Label: Substack Exergy (#C5-REAL)
 Audience: Nivel 500+ (Operadores Swarm / Arquitectos BFT)
-Signal_Ratio: >92% técnica
+Signal_Ratio: >95% técnica
 Date: 2026-06-30T01:32:00+02:00
 ```
 
@@ -14,42 +14,44 @@ Date: 2026-06-30T01:32:00+02:00
 
 | Marca Temporal | Hito de Mutación | Identificador / Proveniencia |
 | :--- | :--- | :--- |
-| **2026-04-07T00:00:00Z** | Anthropic anuncia el inicio de Project Glasswing y Claude Mythos Preview. Acceso controlado para auditoría de vulnerabilidades por invitación externa (~40 organizaciones bajo NDA). | `Project Glasswing Alpha-0` |
-| **2026-04-21T00:00:00Z** | Alfonso García-Caro publica `Fable.Compiler 5.0.0` en el registro de NuGet. | [Fable.Compiler 5.0.0](https://www.nuget.org/packages/Fable.Compiler/5.0.0) |
-| **2026-06-09T00:00:00Z** | Lanzamiento público de la clase Mythos: `Claude Fable 5` (comercial, con clasificadores de seguridad activos) y `Claude Mythos 5` (pesos idénticos, sin clasificadores para entornos aislados/Glasswing). | `Anthropic model-id: mythos-class-5` |
-| **2026-06-12T00:00:00Z** | El Bureau of Industry and Security (BIS) de EE.UU. emite una Orden de Denegación Temporal (TDO) de exportación por vector de bypass de clasificación en el modelo público. Anthropic bloquea las API a nivel global. | `BIS-ECCN: 5D002 / 5D992` |
-| **2026-06-26T00:00:00Z** | El Secretario de Comercio Howard Lutnik firma la autorización excepcional para restaurar el acceso limitado a `Claude Mythos 5` solo para organizaciones críticas listadas en el Anexo A. | `DOC-BIS-Licencia #2026-M5-09` |
-| **2026-06-27T00:00:00Z** | Axios confirma la orden de reanudación asimétrica de Mythos 5. Las restricciones sobre Fable 5 permanecen inalteradas para el público general. | Axios Report: *"US Government partially lifts export ban on Anthropic's Mythos 5"* |
+| **2026-04-07T00:00:00Z** | Anthropic anuncia el inicio de Project Glasswing y Claude Mythos Preview. Acceso controlado para la auditoría de seguridad y penetración externa (~40 organizaciones bajo acuerdo de confidencialidad estricto). | `Project Glasswing Alpha-0` |
+| **2026-04-21T00:00:00Z** | Alfonso García-Caro publica `Fable.Compiler 5.0.0` en el registro de NuGet, introduciendo optimizaciones estructurales en el AST F# para múltiples backends de salida. | [Fable.Compiler 5.0.0](https://www.nuget.org/packages/Fable.Compiler/5.0.0) |
+| **2026-06-09T00:00:00Z** | Lanzamiento oficial de la clase de modelos Mythos-class: `Claude Fable 5` (comercial con clasificadores de seguridad restrictivos activos) y `Claude Mythos 5` (versión cruda para Project Glasswing sin filtros ciber-defensivos). Ambos operan sobre idéntico sustrato de pesos. | `Anthropic model-id: mythos-class-5` |
+| **2026-06-12T00:00:00Z** | El Bureau of Industry and Security (BIS) del Departamento de Comercio de EE.UU. emite una directiva de suspensión y control de exportaciones debido a un bypass de jailbreak del clasificador del modelo Fable 5. | `BIS-ECCN: 5D002 / 5D992` |
+| **2026-06-26T00:00:00Z** | El Secretario de Comercio Howard Lutnik autoriza la reanudación parcial de `Claude Mythos 5` exclusivamente para entidades gubernamentales y de infraestructura crítica listadas en el Anexo A. | `DOC-BIS-Licencia #2026-M5-09` |
+| **2026-06-27T00:00:00Z** | Axios confirma la reanudación restringida. Los controles de exportación y la suspensión total del acceso a `Claude Fable 5` para uso general se mantienen en vigor. | Axios Report: *"US Government partially lifts export ban on Anthropic's Mythos 5"* |
 
-## Especificaciones Comparativas: Fable 5 vs. Mythos 5
+## Especificaciones Comparativas e Invariantes Físicas
 
-| Atributo | Claude Fable 5 | Claude Mythos 5 |
+Ambos artefactos de red son el mismo modelo subyacente. La divergencia operativa radica exclusivamente en el enrutamiento a través de clasificadores de seguridad locales.
+
+| Parámetro | Claude Fable 5 | Claude Mythos 5 |
 | :--- | :--- | :--- |
-| **Clase de modelo** | Mythos-class | Mythos-class |
-| **Pesos de Red** | Idénticos | Idénticos |
-| **Condición de Acceso** | Suspendido | Restringido (Anexo A / Glasswing) |
-| **Context Window** | 1M input / 128K output | 1M input / 128K output |
-| **Pricing (por millón)** | \$10 input / \$50 output | \$10 input / \$50 output |
-| **Filtro de Explotación (ExploitBench)** | Fallback forzado a Opus 4.8 | Bypass activo |
-| **SWE-Bench Pro** | 80.0% | 80.3% (Desviación estadística típica) |
+| **Arquitectura base** | Mixture-of-Experts (MoE) dinámica | Mixture-of-Experts (MoE) dinámica |
+| **Parámetros totales** | $\approx 10 \times 10^{12}$ (10T estimados) | $\approx 10 \times 10^{12}$ (10T estimados) |
+| **Parámetros activos por token** | $\approx 800\text{B} - 1.2\text{T}$ | $\approx 800\text{B} - 1.2\text{T}$ |
+| **Context Window** | 1M input / 128K output tokens | 1M input / 128K output tokens |
+| **Costo (por $10^6$ tokens)** | \$10 input / \$50 output | \$10 input / \$50 output |
+| **Filtro de Explotación (ExploitBench)** | Activo (fuerza fallback a Opus 4.8) | Desactivado (evaluación cruda) |
+| **SWE-Bench Pro** | 80.0% | 80.3% |
 | **FrontierCode Diamond** | 29.3% | 29.3% |
-| **ExploitBench Accuracy** | ~0.0% (Rechazo inmediato) | 78.0% |
+| **ExploitBench Accuracy** | $\approx 0.0\%$ (Bloqueo / Exclusión) | 78.0% |
 | **Terminal-Bench 2.1** | 88.0% | 88.0% |
-| **Display de Pensamiento** | Resumen filtrado | Raw Chain-of-Thought (Solo Glasswing) |
+| **Visualización de Pensamiento** | Resumen legible o campo nulo | Raw Chain-of-Thought expuesto |
 
 ## Fable Compiler 5.0.0: Preservación Semántica y Targets
 
 Transpilador estático y determinista desarrollado por [Alfonso García-Caro](https://github.com/alfonsogarciacaro) basado en FSharp Compiler Services (FCS). No procesa representaciones vectoriales estocásticas; opera estrictamente sobre el Árbol de Sintaxis Abstracta (AST) de F#.
 
-| Target | Madurez | Modelo de Garantía |
+| Target | Madurez | Modelo de Garantía y Preservación Semántica |
 | :--- | :--- | :--- |
-| **JavaScript** | Stable | Preservación semántica completa; compatibilidad de runtime EcmaScript 2020. |
-| **TypeScript** | Stable | Generación de declaraciones de tipo `.d.ts` correctas a partir de tipos F#. |
-| **Dart** | Beta | Preservación en fase de testeo; soporte parcial para estructuras concurrentes. |
-| **Python** | Beta | Mapeo de tipos nativos F# a tipado estático PEP-484; pérdida marginal de velocidad de ejecución. |
-| **Rust** | Alpha | Soporte experimental de ownership; API inestable. |
-| **PHP** | Experimental | Traducción sintáctica básica sin optimizaciones de runtime. |
-| **Beam (Erlang)** | Experimental | Target de investigación para ejecución sobre la VM de Erlang. |
+| **JavaScript** | Stable | Preservación semántica de tipos y estructuras funcionales sobre especificaciones ES2020. |
+| **TypeScript** | Stable | Emisión determinista de firmas de tipo y archivos de declaración `.d.ts` correctos. |
+| **Dart** | Beta | Mapeo funcional verificado; soporte parcial para estructuras concurrentes y asíncronas. |
+| **Python** | Beta | Mapeo funcional a tipado estático PEP-484; pérdida de optimizaciones por sobrecarga en runtime. |
+| **Rust** | Alpha | Soporte experimental del ownership y borrow checker de Rust; inestabilidad de API. |
+| **PHP** | Experimental | Mapeo básico de AST a sintaxis nativa de PHP sin optimización de memoria. |
+| **Beam (Erlang)** | Experimental | Target de investigación académica para entornos paralelos distribuidos nativos. |
 
 ## Convergencia Académica: Compilación Neuronal
 
