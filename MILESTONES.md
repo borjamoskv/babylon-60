@@ -1299,6 +1299,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 76: Subsistema de Diagnóstico y Autocuración (Sovereign Health Check & Diagnostics CLI)
+- **Target**: `babylon60/extensions/health/`, `babylon60/cli/health_cmds.py`, `tests/health/test_health.py`
+- **Objective**: Desarrollo y acoplamiento del subsistema de diagnóstico de salud (`cortex health`). Permite realizar verificaciones de integridad rápidas y reportes detallados (`health_report`) con generación de recomendaciones y cálculo de índice de salud (grade 0-100) sobre los adaptadores de almacenamiento y caches in-memory.
+- **Yield Target**: Reporte consolidado de anomalías e índice ponderado de estabilidad del sistema local.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Comandos CLI expuestos bajo `babylon60/cli/health_cmds.py` y cobertura de tests en `tests/health/test_health.py`.
+```yaml
+Claim: Health monitoring system performs multi-adapter health audits and scores components correctly.
+Proof:
+  Base: "pytest tests/health/test_health.py passes, verifying metric calculation and report formatting."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
