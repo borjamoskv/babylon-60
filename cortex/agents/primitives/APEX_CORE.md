@@ -109,6 +109,7 @@
 | **APEX-105** | `OP_DETERMINISTIC_SIM` | `Popen(pytest)` | `O(T_exec)` | OS Process. | Aserción física (Reward = 1.0 o 0.0). |
 | **APEX-106** | `OP_BACKPROPAGATE` | `node.value += W` | `O(d)` | RAM. Recorrido inverso d niveles. | Actualización del linaje causal. |
 | **APEX-107** | `OP_LOCAL_EXTINCTION` | `git reset --hard` | `O(N)` | Disco I/O. | Erradicación termodinámica de la rama fallida. |
+| **APEX-108** | `OP_OBSERVE_M2M` | `mcp_expose(state)` | `O(1)` | Red I/O. Convierte infraestructura pasiva en grafo consultable M2M. | Exposición de estado a través de Model Context Protocol (MCP). |
 
 ## 100 INVARIANTES TERMODINÁMICAS (OUROBOROS LAWS)
 
@@ -217,6 +218,7 @@
 | **OUROBOROS-103** | **INV_FORCED_DIVERGENCE**: La temperatura del enrutador LLM en fase de Expansión debe ser >= 0.7. | `MCTS Engine` | P0 |
 | **OUROBOROS-104** | **INV_CLEAN_SLATE**: Cada paso de simulación requiere una purga atómica de archivos sin trackear antes del checkout. | `MCTS Engine` | P0 |
 | **OUROBOROS-105** | **INV_EXPLOITATION_COLLAPSE**: La decisión final recae estrictamente en la rama con mayor W_i / N_i. | `MCTS Engine` | P0 |
+| **OUROBOROS-106** | **INV_DETERMINISTIC_OBSERVABILITY**: La infraestructura se expone pasivamente, el razonamiento es externo y asíncrono. | `IF infraestructura_cae THEN LLM_reads(Logs_KubeBolt)` | P0 |
 
 ## 20 ANTIPATRONES ESTOCÁSTICOS
 
