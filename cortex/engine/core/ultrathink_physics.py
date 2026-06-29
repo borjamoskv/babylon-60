@@ -13,6 +13,7 @@ preserva el Invariante (ORT-004) y ancla el isomorfismo en el Estado/Ledger (ORT
 import logging
 from enum import Enum
 from typing import Any, Optional
+from collections import deque
 
 logger = logging.getLogger("cortex.engine.exergy_physics")
 
@@ -34,14 +35,24 @@ class UltrathinkPhysicsEngine:
     # Constante de Singularidad (Singularity Exergy Limit)
     SINGULARITY_CONSTANT: float = 100.0
 
-    # Critical subsystems for trust scaling
-    CRITICAL_DOMAINS: list[str] = [
+    # Critical subsystems for trust scaling (frozenset for O(1) ops where applicable)
+    CRITICAL_DOMAINS: frozenset[str] = frozenset([
         "ledger", "crypto", "auth", "db", "migration", "guard", 
         "security", "vault", "engine", "sovereign", "audit", "pii", "trust"
-    ]
+    ])
 
     # Constante de Landauer para penalización térmica
     LANDAUER_THERMAL_PENALTY: float = 1.05
+
+    @classmethod
+    def _resolve_risk(cls, epicenter_node: Optional[str]) -> tuple[float, bool]:
+        """Calcula el multiplicador de riesgo termodinámico en O(K)."""
+        if not epicenter_node:
+            return 1.0, False
+        node_lower = epicenter_node.lower()
+        if any(domain in node_lower for domain in cls.CRITICAL_DOMAINS):
+            return 1.5, True
+        return 1.0, False
 
     @staticmethod
     def calculate_exergy_yield(
@@ -59,8 +70,11 @@ class UltrathinkPhysicsEngine:
         # Penalización térmica no lineal (Ley de Landauer adaptada)
         # El tiempo de ejecución prolongado disipa ATP/Exergía como calor
         thermal_dissipation = UltrathinkPhysicsEngine.LANDAUER_THERMAL_PENALTY ** execution_time
-        exergy = raw_exergy / thermal_dissipation
         
+        if thermal_dissipation == 0:
+            return 0.0
+            
+        exergy = raw_exergy / thermal_dissipation
         return max(0.0, exergy)
 
     @staticmethod
@@ -68,54 +82,53 @@ class UltrathinkPhysicsEngine:
         """
         Calcula el 'Blast Radius' topológico de una corrupción P0 para el aislamiento térmico.
         Devuelve el número de niveles y ramificaciones afectadas.
+        [Optimización O(N) implementada vía deque]
         """
         visited = set()
-        queue = [epicenter_node]
+        queue = deque([epicenter_node])
 
         while queue:
-            current = queue.pop(0)
-            if current not in visited:
-                visited.add(current)
-                if current in dependency_graph:
-                    neighbors = dependency_graph[current]
-                    if isinstance(neighbors, list):
-                        queue.extend([n for n in neighbors if n not in visited])
-                    elif isinstance(neighbors, dict):
-                        queue.extend([n for n in neighbors.keys() if n not in visited])
+            current = queue.popleft()
+            if current in visited:
+                continue
+                
+            visited.add(current)
+            
+            neighbors = dependency_graph.get(current)
+            if isinstance(neighbors, list):
+                queue.extend(n for n in neighbors if n not in visited)
+            elif isinstance(neighbors, dict):
+                queue.extend(n for n in neighbors.keys() if n not in visited)
 
         # The Blast Radius is the size of the affected cluster
         radius = len(visited)
         logger.debug("Blast Radius measure for %s: %d", epicenter_node, radius)
         return radius
 
-    @staticmethod
+    @classmethod
     def calculate_legion_formation(
-        epicenter_radius: int, exergy_yield: float, epicenter_node: Optional[str] = None
+        cls, epicenter_radius: int, exergy_yield: float, epicenter_node: Optional[str] = None
     ) -> LegionFormation:
         """
         Collapses thermodynamic requirements into a specific LEGIØN-1 Swarm Formation.
         Includes critical path amplification.
         """
-        risk_multiplier = 1.0
-        if epicenter_node:
-            node_lower = epicenter_node.lower()
-            if any(domain in node_lower for domain in UltrathinkPhysicsEngine.CRITICAL_DOMAINS):
-                risk_multiplier = 1.5
-
+        risk_multiplier, _ = cls._resolve_risk(epicenter_node)
         effective_radius = int(epicenter_radius * risk_multiplier)
 
-        if effective_radius >= 10 and exergy_yield > (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * 0.5):
+        if effective_radius >= 10 and exergy_yield > (cls.SINGULARITY_CONSTANT * 0.5):
             return LegionFormation.LEVIATHAN
         if effective_radius >= 7:
             return LegionFormation.HYDRA
         if effective_radius >= 5:
             return LegionFormation.TESTUDO
-        if exergy_yield > (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * 0.3):
+        if exergy_yield > (cls.SINGULARITY_CONSTANT * 0.3):
             return LegionFormation.OUROBOROS
         return LegionFormation.PHOENIX
 
-    @staticmethod
+    @classmethod
     def authorize_ultrathink(
+        cls,
         stochastic_entropy: float,
         deterministic_output: float,
         execution_time: float,
@@ -126,20 +139,13 @@ class UltrathinkPhysicsEngine:
         El colapso a 'Ultrathink' exige un rendimiento exergético masivo
         y un radio de explosión demostrable. Amplifica la sensibilidad ante nodos críticos.
         """
-        exergy = UltrathinkPhysicsEngine.calculate_exergy_yield(
+        exergy = cls.calculate_exergy_yield(
             stochastic_entropy, deterministic_output, execution_time
         )
-
-        # Evaluate critical domain risk amplification
-        risk_multiplier = 1.0
-        is_critical = False
-        if epicenter_node:
-            node_lower = epicenter_node.lower()
-            if any(domain in node_lower for domain in UltrathinkPhysicsEngine.CRITICAL_DOMAINS):
-                risk_multiplier = 1.5
-                is_critical = True
-
+        
+        risk_multiplier, is_critical = cls._resolve_risk(epicenter_node)
         effective_radius = int(epicenter_radius * risk_multiplier)
+        
         required_exergy_ratio = 0.05 if is_critical else 0.1
         min_radius = 2 if is_critical else 3
 
@@ -150,12 +156,13 @@ class UltrathinkPhysicsEngine:
                 None
             )
 
-        if exergy < (UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * required_exergy_ratio):
+        required_exergy = cls.SINGULARITY_CONSTANT * required_exergy_ratio
+        if exergy < required_exergy:
             return (
                 False, 
-                f"Insufficient Exergy Yield ({exergy:.2f}) for JIT structural collapse (Required: {UltrathinkPhysicsEngine.SINGULARITY_CONSTANT * required_exergy_ratio}).",
+                f"Insufficient Exergy Yield ({exergy:.2f}) for JIT structural collapse (Required: {required_exergy:.2f}).",
                 None
             )
 
-        formation = UltrathinkPhysicsEngine.calculate_legion_formation(epicenter_radius, exergy, epicenter_node)
+        formation = cls.calculate_legion_formation(epicenter_radius, exergy, epicenter_node)
         return True, f"Ultrathink P0 Singularity Horizon Authorized. Swarm: {formation.value}", formation
