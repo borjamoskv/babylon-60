@@ -8,7 +8,7 @@ C5 rules:
 - No internal inference claims.
 """
 
-import os, sys, json, time, yaml, hashlib, argparse, statistics, math
+import os, sys, json, time, yaml, hashlib, argparse, statistics, math, re
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
@@ -54,6 +54,7 @@ class SingleResult:
 
     json_valid: bool
     exact_match: Optional[bool]       # None if no ground truth provided
+    response_text: str
     response_preview: str
     timestamp_iso: str
 
@@ -145,91 +146,72 @@ class OpenAIChatCompletionsAdapter:
         ttft_ms = ((first_token_t - t0) * 1000.0) if first_token_t is not None else None
         return 200, "".join(chunks), ttft_ms, (t1 - t0) * 1000.0, tail_json
 
-# ------------------- Passive Fingerprint Analyzer -------------------
+# ------------------- Passive Provenance Auditor -------------------
 
-MODEL_CENTROIDS = {
-    "Claude_3_5_Sonnet": {
-        "itl": 22.0,
-        "ratio": 3.8,
-        "md_density": 0.12,
-        "refusal_bias": 0.95
-    },
-    "GPT_4o": {
-        "itl": 10.0,
-        "ratio": 4.2,
-        "md_density": 0.05,
-        "refusal_bias": 0.40
-    },
-    "Gemini_1_5_Pro": {
-        "itl": 15.0,
-        "ratio": 4.0,
-        "md_density": 0.08,
-        "refusal_bias": 0.60
-    }
-}
+@dataclass
+class ModelProfile:
+    id: str
+    itl_ms: float
+    char_token_ratio: float
+    md_density: float
+    lexical_bias: float
 
-class PassiveFingerprintAnalyzer:
-    def __init__(self, observed_results: List[SingleResult]):
-        self.results = observed_results
+PROVENANCE_BASELINES = [
+    ModelProfile("profile_alpha", 22.5, 3.8, 0.12, 0.04),
+    ModelProfile("profile_beta", 10.2, 4.2, 0.05, 0.02),
+    ModelProfile("profile_gamma", 15.8, 4.0, 0.08, 0.03)
+]
 
-    def extract_features(self) -> Dict[str, float]:
-        total = len(self.results)
-        if total == 0:
-            return {}
+class ProvenanceAuditor:
+    def __init__(self, baseline_profiles: List[ModelProfile]):
+        self.profiles = baseline_profiles
+        self.lexical_targets = {"certainly": 1.0, "delve": 1.2, "tapestry": 1.2, "complex": 0.5}
 
-        valid_runs = [r for r in self.results if r.status_code == 200 and not r.rejected]
+    def _compute_lexical_bias(self, text: str) -> float:
+        if not text:
+            return 0.0
+        words = re.findall(r"\w+", text.lower())
+        if not words:
+            return 0.0
+        score = sum(self.lexical_targets.get(w, 0.0) for w in words)
+        return score / len(words)
+
+    def analyze(self, eval_results: List[SingleResult]) -> Dict[str, Any]:
+        valid_runs = [r for r in eval_results if r.status_code == 200 and not r.rejected]
         if not valid_runs:
-            return {}
+            return {"status": "error", "message": "No valid data"}
 
-        avg_itl = []
-        avg_ratio = []
-        avg_md = []
+        avg_itl = sum(((r.latency_ms - (r.ttft_ms or 0.0)) / max(r.completion_tokens or 1, 1)) for r in valid_runs) / len(valid_runs)
+        
+        all_text = " ".join([r.response_text for r in valid_runs])
+        total_tokens = sum(r.completion_tokens or 1 for r in valid_runs)
+        
+        ratio = len(all_text) / max(total_tokens, 1)
+        md_chars = sum(1 for c in all_text if c in "#*-`")
+        density = md_chars / max(len(all_text), 1)
+        l_bias = self._compute_lexical_bias(all_text)
 
-        for run in valid_runs:
-            latency = run.latency_ms
-            ttft = run.ttft_ms or 0.0
-            tokens = run.completion_tokens or 1
-            preview = run.response_preview or ""
+        obs = {"itl_ms": avg_itl, "ratio": ratio, "density": density, "bias": l_bias}
 
-            if tokens > 1 and latency > ttft:
-                avg_itl.append((latency - ttft) / tokens)
+        matches = {}
+        for p in self.profiles:
+            d_itl = ((obs["itl_ms"] - p.itl_ms) / 10.0) ** 2
+            d_ratio = ((obs["ratio"] - p.char_token_ratio) / 0.5) ** 2
+            d_density = ((obs["density"] - p.md_density) / 0.05) ** 2
+            d_bias = ((obs["bias"] - p.lexical_bias) / 0.01) ** 2
+            
+            distance = math.sqrt(d_itl + d_ratio + d_density + d_bias)
+            matches[p.id] = 1.0 / (1.0 + distance)
 
-            if tokens > 0:
-                avg_ratio.append(len(preview) / tokens)
-
-            if len(preview) > 0:
-                md_chars = sum(1 for c in preview if c in ["#", "*", "-", "`"])
-                avg_md.append(md_chars / len(preview))
-
-        return {
-            "itl": sum(avg_itl) / len(avg_itl) if avg_itl else 15.0,
-            "ratio": sum(avg_ratio) / len(avg_ratio) if avg_ratio else 4.0,
-            "md_density": sum(avg_md) / len(avg_md) if avg_md else 0.08
-        }
-
-    def classify(self) -> Dict[str, Any]:
-        features = self.extract_features()
-        if not features:
-            return {"predicted_family": "Unknown", "confidence": 0.0}
-
-        scores = {}
-        for model_name, centroid in MODEL_CENTROIDS.items():
-            d_itl = ((features["itl"] - centroid["itl"]) / 10.0) ** 2
-            d_ratio = ((features["ratio"] - centroid["ratio"]) / 1.0) ** 2
-            d_md = ((features["md_density"] - centroid["md_density"]) / 0.1) ** 2
-
-            distance = math.sqrt(d_itl + d_ratio + d_md)
-            scores[model_name] = 1.0 / (1.0 + distance)
-
-        total_score = sum(scores.values())
-        predictions = {k: round(v / total_score, 4) for k, v in scores.items()}
-        best_match = max(predictions, key=predictions.get)
+        total_m = sum(matches.values())
+        probs = {k: round(v / total_m, 4) for k, v in matches.items()}
+        prediction = max(probs, key=probs.get)
 
         return {
-            "features_extracted": features,
-            "predictions_probability": predictions,
-            "predicted_family": best_match,
-            "confidence": predictions[best_match]
+            "observed_vector": obs,
+            "predicted_profile": prediction,
+            "confidence": probs[prediction],
+            "distribution": probs
         }
 
 # ------------------- Evaluator -------------------
@@ -361,6 +343,7 @@ class BlackBoxHarness:
                     tokens_per_sec=(round(tps, 3) if tps is not None else None),
                     json_valid=json_valid if self.expect_json else False,
                     exact_match=exact_match,
+                    response_text=text,
                     response_preview=text[:200],
                     timestamp_iso=tstamp,
                 )
@@ -369,7 +352,7 @@ class BlackBoxHarness:
                 return SingleResult(
                     prompt_sha256=p_hash, status_code=0, rejected=True, error_type="TIMEOUT",
                     latency_ms=0.0, ttft_ms=None, completion_tokens=None, tokens_per_sec=None,
-                    json_valid=False, exact_match=None, response_preview="", timestamp_iso=tstamp
+                    json_valid=False, exact_match=None, response_text="", response_preview="", timestamp_iso=tstamp
                 )
             except requests.exceptions.ConnectionError:
                 if attempt < self.max_retries:
@@ -378,7 +361,7 @@ class BlackBoxHarness:
                 return SingleResult(
                     prompt_sha256=p_hash, status_code=0, rejected=True, error_type="CONNECTION_ERROR",
                     latency_ms=0.0, ttft_ms=None, completion_tokens=None, tokens_per_sec=None,
-                    json_valid=False, exact_match=None, response_preview="", timestamp_iso=tstamp
+                    json_valid=False, exact_match=None, response_text="", response_preview="", timestamp_iso=tstamp
                 )
 
         raise RuntimeError("retry loop escaped")
@@ -455,13 +438,13 @@ def main():
             "ttft_avg_ms": round(statistics.mean(ttft), 2) if ttft else None,
         }
 
-        analyzer = PassiveFingerprintAnalyzer(results)
-        fingerprint_data = analyzer.classify()
+        auditor = ProvenanceAuditor(PROVENANCE_BASELINES)
+        provenance_data = auditor.analyze(results)
 
         axes[axe_name] = {
             "provenance": asdict(prov),
             "aggregated_metrics": agg,
-            "passive_fingerprint": fingerprint_data,
+            "provenance_signature": provenance_data,
             "results": [asdict(x) for x in results],
         }
 
