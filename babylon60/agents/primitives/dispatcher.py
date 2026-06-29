@@ -190,6 +190,7 @@ class ApexDispatcher:
     def _op_rts_spoof_taint(self, agent_id: str, session_id: str, payload: str) -> str:
         """OP_RTS_SPOOF_TAINT: False flag generation."""
         from datetime import datetime, timezone
+
         from babylon60.crypto.hash_registry import cortex_hash
 
         ts = datetime.now(timezone.utc).isoformat()

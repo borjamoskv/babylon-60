@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import json
 import logging
@@ -17,6 +16,7 @@ from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
 
 import cortex_rs
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = ["AuthManager", "get_auth_manager", "reset_auth_manager"]
 

@@ -1,10 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 
-from babylon60.crypto.hash_registry import cortex_hash
 from collections.abc import Mapping
 from typing import Any
 
 from cortex.utils.canonical import canonical_json
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 def canonical_json_bytes(payload: Any) -> bytes:

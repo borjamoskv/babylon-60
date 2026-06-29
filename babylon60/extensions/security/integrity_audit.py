@@ -9,7 +9,6 @@ and detects orphaned/tampered facts.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import time
 from dataclasses import dataclass, field
@@ -19,6 +18,8 @@ from typing import Any
 import aiosqlite
 from cortex.core import config
 from cortex.database.core import connect_async_ctx
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex_extensions.security.integrity_audit")
 

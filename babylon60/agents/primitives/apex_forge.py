@@ -18,11 +18,12 @@ from __future__ import annotations
 
 import argparse
 import json
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import re
 import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 # ── Data Models ──────────────────────────────────────────────────────
 

@@ -9,13 +9,14 @@ Derivation: Ω₃ (Byzantine Default) - every model is self-verifiable.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import enum
 import json
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = [
     "ExecutionReceipt",

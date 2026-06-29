@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 import logging
 import math
 import os
 import sys
 import threading
 from typing import cast
+
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 
 EMBEDDING_DIM = 384
 DEFAULT_EMBEDDING_MODEL = "all-MiniLM-L6-v2"

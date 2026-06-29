@@ -8,7 +8,6 @@ Silence is NOT compliance.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import dataclasses
 import logging
 import sqlite3
@@ -16,6 +15,8 @@ import time
 from typing import Any
 
 from cortex.database.core import connect as db_connect
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.services.trust")
 

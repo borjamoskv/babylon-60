@@ -6,12 +6,13 @@ Matches the Ed25519-based RustChainWallet SDK interface.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_raw
 import time
 from typing import Any
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
+
+from babylon60.crypto.hash_registry import cortex_hash_raw
 
 
 class RustChainWallet:

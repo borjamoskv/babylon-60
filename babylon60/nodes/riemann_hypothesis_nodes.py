@@ -1,7 +1,7 @@
 # C5-REAL
-from babylon60.crypto.hash_registry import cortex_hash_truncated
-
 from pydantic import BaseModel, Field
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 
 class RiemannZeroNode(BaseModel):

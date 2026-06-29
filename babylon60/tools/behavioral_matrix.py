@@ -14,13 +14,14 @@ Enforces evaluation of model behavior along dimensions 9 to 16:
 - Metacognitive Coherence
 """
 
-from babylon60.crypto.hash_registry import cortex_hash_raw
 import math
 import re
 import statistics
 from dataclasses import dataclass
 
 import numpy as np
+
+from babylon60.crypto.hash_registry import cortex_hash_raw
 
 
 @dataclass

@@ -10,13 +10,14 @@ Reality Level: C5-REAL
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import os
 import threading
 import time
 from collections.abc import Callable
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 try:
     import redis

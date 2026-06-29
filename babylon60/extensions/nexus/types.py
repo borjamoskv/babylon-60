@@ -3,12 +3,13 @@
 CORTEX Nexus Domain Types (Zero-Trust).
 """
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import json
 import time
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 
 class DomainOrigin(Enum):

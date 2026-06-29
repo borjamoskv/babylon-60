@@ -6,7 +6,6 @@ Implements Darwinian Code Mutation (Axiom Ω₂) with fully atomic rollback.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import ast
 import copy
 import logging
@@ -21,6 +20,8 @@ from cortex.extensions.evolution.ast_mutators import (
     _DocstringInjector,
     _EntropyAnnihilator,
 )
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex_extensions.evolution.ouroboros")
 

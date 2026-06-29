@@ -6,7 +6,6 @@ Embeds hyperdimensional ghost traces into the file system.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import json
 import logging
 import os
@@ -15,6 +14,8 @@ from pathlib import Path
 
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("cortex_extensions.songlines.emitter")
 

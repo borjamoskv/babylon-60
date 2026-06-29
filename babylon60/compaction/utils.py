@@ -5,8 +5,9 @@ Shared utilities for compaction strategies.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 from difflib import SequenceMatcher
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = [
     "content_hash",

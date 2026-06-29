@@ -1,7 +1,8 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 class RuntimeState:

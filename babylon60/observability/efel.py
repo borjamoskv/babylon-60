@@ -1,11 +1,12 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash_raw
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 from sklearn.cluster import KMeans
+
+from babylon60.crypto.hash_registry import cortex_hash_raw
 
 
 @dataclass

@@ -3,7 +3,7 @@
 """
 cat_id: ship-gate
 cat_type: script
-version: 1.0.0
+version: 1.1.0
 reality_level: C5-REAL
 owner: borjamoskv
 exergy_tier: P2
@@ -144,87 +144,162 @@ def check_neural_connectivity() -> CheckResult:
     )
 
 
+# ── Vercel Shield — Exclusion Vectors ───────────────────────────────
+_VERCEL_SKIP: Final[frozenset] = frozenset(
+    ("node_modules", ".venv", "venv", ".git", ".wrangler", "dist", "build", ".astro")
+)
+_VERCEL_FORBIDDEN_PKGS: Final[tuple] = (
+    "@vercel/kv", "@vercel/postgres", "@vercel/blob", "@vercel/analytics",
+    "@vercel/edge", "@vercel/edge-config", "@vercel/og", "@vercel/toolbar",
+    "@vercel/speed-insights", "@vercel/flags", "@vercel/sdk", "@ai-sdk/vercel",
+    "vercel",
+)
+_VERCEL_IMPORT_RE: Final[re.Pattern] = re.compile(
+    r"from\s+['\"]@vercel/"
+    r"|import\s+.*?\s+from\s+['\"]@vercel/"
+    r"|import\(['\"]@vercel/"
+    r"|import\s+['\"]@vercel/"
+    r"|require\(['\"]@vercel/"
+    r"|require\(['\"]vercel"
+)
+_VERCEL_SCRIPT_RE: Final[re.Pattern] = re.compile(
+    r"(?:^|\s)vercel\s+(?:deploy|dev|build|pull|env|link)"
+    r"|vercel\.com"
+    r"|VERCEL_TOKEN"
+    r"|VERCEL_ORG_ID"
+    r"|VERCEL_PROJECT_ID",
+    re.MULTILINE,
+)
+_VERCEL_ENV_RE: Final[re.Pattern] = re.compile(
+    r"^VERCEL_|^VERCEL$|^NEXT_PUBLIC_VERCEL_", re.MULTILINE
+)
+
+
 def check_vercel_ban() -> CheckResult:
-    """Verify absolute ban of Vercel dependencies/references in source code."""
+    """
+    OUROBOROS-V001..V100 enforcement.
+    10-vector scan: deps | configs | dirs | imports | scripts |
+                    env-vars | lockfile | worktrees | pyproject | wrangler-presence.
+    Returns aggregated violation list; fails on first non-empty vector.
+    """
     t0 = time.monotonic()
-    
-    # 1. Check package.json for '@vercel/' under dependencies or devDependencies
-    pkg_json_path = REPO_ROOT / "package.json"
-    if pkg_json_path.exists():
+    violations: list[str] = []
+
+    # ── V1: package.json — dependencies + devDependencies + scripts ──
+    pkg_path = REPO_ROOT / "package.json"
+    if pkg_path.exists():
         try:
-            with open(pkg_json_path, "r", encoding="utf-8") as f:
-                pkg_data = json.load(f)
-            deps = pkg_data.get("dependencies", {})
-            dev_deps = pkg_data.get("devDependencies", {})
-            for d in list(deps.keys()) + list(dev_deps.keys()):
-                if "@vercel" in d or d == "vercel":
-                    ms = (time.monotonic() - t0) * 1000
-                    return CheckResult(
-                        name="vercel_shield",
-                        passed=False,
-                        duration_ms=round(ms, 1),
-                        detail=f"Forbidden Vercel dependency found in package.json: {d}",
-                    )
-        except Exception as e:
-            ms = (time.monotonic() - t0) * 1000
-            return CheckResult(
-                name="vercel_shield",
-                passed=False,
-                duration_ms=round(ms, 1),
-                detail=f"Failed to read package.json: {e}",
-            )
-            
-    # 2. Check for vercel.json in the repository
-    for path in REPO_ROOT.rglob("vercel.json"):
-        if any(p in path.parts for p in ("node_modules", ".venv", ".git")):
-            continue
-        ms = (time.monotonic() - t0) * 1000
-        return CheckResult(
-            name="vercel_shield",
-            passed=False,
-            duration_ms=round(ms, 1),
-            detail=f"Forbidden vercel.json file found: {path.relative_to(REPO_ROOT)}",
-        )
+            pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+            all_deps = {
+                **pkg.get("dependencies", {}),
+                **pkg.get("devDependencies", {}),
+                **pkg.get("peerDependencies", {}),
+                **pkg.get("optionalDependencies", {}),
+            }
+            for dep in all_deps:
+                if dep in _VERCEL_FORBIDDEN_PKGS or dep.startswith("@vercel/"):
+                    violations.append(f"V1:pkg_dep:{dep}")
+            for script_body in pkg.get("scripts", {}).values():
+                if _VERCEL_SCRIPT_RE.search(str(script_body)):
+                    violations.append(f"V1:pkg_script:{script_body[:80]}")
+        except Exception as exc:
+            violations.append(f"V1:pkg_parse_error:{exc}")
 
-    # 3. Check for .vercel/ folders in the repository
-    for path in REPO_ROOT.rglob(".vercel"):
-        if any(p in path.parts for p in ("node_modules", ".venv", ".git")):
+    # ── V2: vercel.json existence (any path, any depth) ──────────────
+    for p in REPO_ROOT.rglob("vercel.json"):
+        if any(skip in p.parts for skip in _VERCEL_SKIP):
             continue
-        ms = (time.monotonic() - t0) * 1000
-        return CheckResult(
-            name="vercel_shield",
-            passed=False,
-            duration_ms=round(ms, 1),
-            detail="Forbidden .vercel directory found",
-        )
+        violations.append(f"V2:vercel_json:{p.relative_to(REPO_ROOT)}")
 
-    # 4. Check imports in JS/TS/Astro/Python code files (excluding node_modules, etc.)
-    forbidden_import_pattern = re.compile(
-        r"from\s+['\"]@vercel/|import\s+.*?\s+from\s+['\"]@vercel/|import\(['\"]@vercel/|import\s+['\"]@vercel/"
-    )
-    for ext in ("*.js", "*.ts", "*.jsx", "*.tsx", "*.astro", "*.py"):
-        for path in REPO_ROOT.rglob(ext):
-            if any(p in path.parts for p in ("node_modules", ".venv", ".git", ".astro", ".wrangler", "dist", "build")):
+    # ── V3: .vercel/ directory ────────────────────────────────────────
+    for p in REPO_ROOT.rglob(".vercel"):
+        if any(skip in p.parts for skip in _VERCEL_SKIP):
+            continue
+        if p.is_dir():
+            violations.append(f"V3:vercel_dir:{p.relative_to(REPO_ROOT)}")
+
+    # ── V4: @vercel/* imports in source files ─────────────────────────
+    for ext in ("*.js", "*.ts", "*.jsx", "*.tsx", "*.astro", "*.py", "*.mjs", "*.cjs"):
+        for p in REPO_ROOT.rglob(ext):
+            if any(skip in p.parts for skip in _VERCEL_SKIP):
                 continue
             try:
-                content = path.read_text(encoding="utf-8")
-                if forbidden_import_pattern.search(content):
-                    ms = (time.monotonic() - t0) * 1000
-                    return CheckResult(
-                        name="vercel_shield",
-                        passed=False,
-                        duration_ms=round(ms, 1),
-                        detail=f"Forbidden Vercel import in: {path.relative_to(REPO_ROOT)}",
-                    )
-            except Exception:
+                if _VERCEL_IMPORT_RE.search(p.read_text(encoding="utf-8", errors="ignore")):
+                    violations.append(f"V4:import:{p.relative_to(REPO_ROOT)}")
+            except OSError:
                 continue
 
-    ms = (time.monotonic() - t0) * 1000
+    # ── V5: Makefile / shell scripts / CI yaml ────────────────────────
+    for pattern in ("Makefile", "*.sh", "*.yaml", "*.yml"):
+        for p in REPO_ROOT.rglob(pattern):
+            if any(skip in p.parts for skip in _VERCEL_SKIP):
+                continue
+            try:
+                content = p.read_text(encoding="utf-8", errors="ignore")
+                if _VERCEL_SCRIPT_RE.search(content):
+                    violations.append(f"V5:script:{p.relative_to(REPO_ROOT)}")
+            except OSError:
+                continue
+
+    # ── V6: VERCEL_* env vars in live process environment ────────────
+    for key in os.environ:
+        if re.match(r"^VERCEL_|^VERCEL$|^NEXT_PUBLIC_VERCEL_", key):
+            violations.append(f"V6:env:{key}={os.environ[key][:20]}")
+
+    # ── V7: VERCEL_* in .env* files ───────────────────────────────────
+    for env_file in REPO_ROOT.glob(".env*"):
+        try:
+            content = env_file.read_text(encoding="utf-8", errors="ignore")
+            if _VERCEL_ENV_RE.search(content):
+                violations.append(f"V7:env_file:{env_file.name}")
+        except OSError:
+            continue
+
+    # ── V8: package-lock.json / yarn.lock / pnpm-lock.yaml ───────────
+    for lock in ("package-lock.json", "yarn.lock", "pnpm-lock.yaml"):
+        lock_path = REPO_ROOT / lock
+        if not lock_path.exists():
+            continue
+        try:
+            # Fast string scan — no full parse needed
+            if b"@vercel/" in lock_path.read_bytes():
+                violations.append(f"V8:lockfile:{lock}")
+        except OSError:
+            continue
+
+    # ── V9: worktrees — scan for vercel.json in active worktrees ──────
+    worktrees_root = REPO_ROOT / "worktrees"
+    if worktrees_root.is_dir():
+        for p in worktrees_root.rglob("vercel.json"):
+            if any(skip in p.parts for skip in _VERCEL_SKIP):
+                continue
+            violations.append(f"V9:worktree_json:{p.relative_to(REPO_ROOT)}")
+
+    # ── V10: wrangler.toml presence (positive invariant OUROBOROS-V011)
+    wrangler_present = (
+        (REPO_ROOT / "wrangler.toml").exists()
+        or (REPO_ROOT / "wrangler.json").exists()
+    )
+    if not wrangler_present:
+        violations.append("V10:missing_wrangler_toml — no wrangler.toml or wrangler.json found")
+
+    ms = round((time.monotonic() - t0) * 1000, 1)
+    if violations:
+        # Collapse to first 3 surface violations for readability + total count
+        head = " | ".join(violations[:3])
+        tail = f" (+{len(violations) - 3} more)" if len(violations) > 3 else ""
+        return CheckResult(
+            name="vercel_shield",
+            passed=False,
+            duration_ms=ms,
+            detail=f"[P0] {len(violations)} violation(s): {head}{tail}",
+        )
+
     return CheckResult(
         name="vercel_shield",
         passed=True,
-        duration_ms=round(ms, 1),
-        detail="No Vercel dependencies, configs, or imports found. Cloudflare-native confirmed.",
+        duration_ms=ms,
+        detail="OUROBOROS-V001..V100 clear. Cloudflare-native C5-REAL confirmed.",
     )
 
 

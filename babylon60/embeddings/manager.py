@@ -47,7 +47,6 @@ class EmbeddingManager:
         if self._embedder is not None:
             return self._embedder
 
-        from cortex.core import config
         
         provider_type = "api" if self.mode == "api" else "local"
         

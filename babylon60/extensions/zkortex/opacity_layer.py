@@ -23,7 +23,6 @@ Caso de uso soberano:
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import time
 from typing import Any
@@ -32,6 +31,8 @@ from cortex.extensions.zkortex.commitment import KnowledgeCommitment
 from cortex.extensions.zkortex.merkle import ZKMembershipProof
 from cortex.extensions.zkortex.prover import ZKOrtexProver
 from cortex.extensions.zkortex.range_proof import ZKRangeProof
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex_extensions.zkortex.opacity")
 

@@ -21,7 +21,6 @@ License: Apache-2.0
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import math
 import re
@@ -30,6 +29,8 @@ from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum, auto
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 __all__ = [
     "ExcitationFamily",

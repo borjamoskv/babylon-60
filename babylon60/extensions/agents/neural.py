@@ -9,7 +9,6 @@ the user's goal before they explicitly articulate it.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import math
@@ -18,6 +17,8 @@ import time
 from dataclasses import dataclass
 
 from cortex.extensions.platform.sys import get_cortex_dir, is_linux, is_macos, is_windows
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = [
     "BaseClipboardSensor",

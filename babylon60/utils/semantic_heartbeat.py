@@ -8,10 +8,11 @@ between system health states.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.heartbeat.semantic")
 

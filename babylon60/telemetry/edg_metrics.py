@@ -7,12 +7,13 @@ Rejects click-tracking in favor of thermodynamic cognitive effort:
 Resolution Time vs. Problem Cyclomatic Complexity.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import time
 from typing import Any
 
 from cortex.telemetry.metrics import metrics
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 class EDGTelemetryAggregator:

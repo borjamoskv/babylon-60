@@ -199,8 +199,8 @@ class ByzantineZeroCopyBus:
         self._lock = asyncio.Lock()
 
     def _sign(self, msg_json: str) -> str:
+
         from babylon60.crypto.hash_registry import cortex_hmac
-        import hmac
 
         return cortex_hmac(self.secret, msg_json.encode("utf-8"))
 

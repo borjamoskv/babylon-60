@@ -15,9 +15,10 @@ Run: python -m pytest cortex/zkortex/test_integration.py -v
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import sys
 from pathlib import Path
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 # Asegurar que la raíz del proyecto esté en el path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
@@ -114,7 +115,6 @@ def test_full_sovereign_opacity_protocol() -> None:
 
 def _fact_fingerprint(fact: str) -> str:
     """Helper para fingerprint - replicando la lógica interna de SovereignOpacityLayer."""
-    import hashlib
 
     return cortex_hash(b"zkortex:fact:" + fact.encode())
 

@@ -4,11 +4,12 @@ Sells the state mutation cryptographically.
 Reality Level: C5-REAL
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import time
 
 from pydantic import BaseModel
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 class LedgerEntry(BaseModel):

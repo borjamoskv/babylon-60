@@ -8,7 +8,6 @@ C5 rules:
 - No internal inference claims.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import argparse
 import json
 import math
@@ -23,6 +22,8 @@ from typing import Any, Optional
 
 import requests
 import yaml
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 # ---- Protocol thresholds (Section 5) ----
 ABORT_RATE_LIMIT_THRESHOLD = 0.05   # 5%

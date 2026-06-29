@@ -7,7 +7,6 @@ based on hash(sender/receiver) mod NUM_SHARDS.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import time
@@ -19,6 +18,8 @@ from cortex.core import config
 from cortex.extensions.signals.bus import _CREATE_INDEXES, _CREATE_TABLE, _build_query
 from cortex.extensions.signals.models import Signal, signal_from_row
 from cortex.guards.url_guard import SafeTransport
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex_extensions.signals.sharded_bus")
 

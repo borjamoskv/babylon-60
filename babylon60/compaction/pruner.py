@@ -5,10 +5,11 @@ Consolidates old facts into cryptographically sealed Snapshots to prevent
 ledger bloat, maintaining C5-REAL audibility via continuous hash chains.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import hashlib
 import logging
 from typing import TypedDict
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.compaction.pruner")
 

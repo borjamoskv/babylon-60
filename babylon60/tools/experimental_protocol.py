@@ -10,12 +10,13 @@ Implements rigorous experimental isolation:
 - Capacity vs. Policy disassociation
 """
 
-from babylon60.crypto.hash_registry import cortex_hash_raw
 import math
 from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+
+from babylon60.crypto.hash_registry import cortex_hash_raw
 
 
 @dataclass

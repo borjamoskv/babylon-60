@@ -9,7 +9,6 @@ Refactored to use the generalized ChaosGate system.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import logging
 import time
@@ -19,6 +18,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 from cortex.extensions.immune.chaos import ChaosScenario, async_interceptor
 from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex_extensions.red_team.hydra_chaos")
 

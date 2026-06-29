@@ -9,7 +9,6 @@ Refactored: scan() orchestrates, helpers do collection + scoring + assembly.
 import ast
 import logging
 import os
-from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from cortex.extensions.mejoralo.constants import (

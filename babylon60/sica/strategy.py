@@ -19,7 +19,6 @@ The evolutionary loop:
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import copy
 import json
 import logging
@@ -27,6 +26,8 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("cortex.sica.strategy")
 

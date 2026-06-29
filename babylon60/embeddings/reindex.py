@@ -8,7 +8,6 @@ Handles migration and re-embedding when the EmbeddingProvider or dimension chang
 
 import asyncio
 import logging
-import sqlite3
 from typing import Any
 
 from babylon60.embeddings.manager import EmbeddingManager
@@ -119,10 +118,10 @@ class ReindexPipeline:
 
             # Record re-index event in the ledger
             try:
-                from babylon60.crypto.hash_registry import cortex_hash
                 import time
-                timestamp = str(int(time.time()))
-                payload = f"reindex:{tenant_id}:{target_dim}:{total}"
+
+                from babylon60.crypto.hash_registry import cortex_hash
+                payload = f"reindex:{tenant_id}:{target_dim}:{total}:{int(time.time())}"
                 await conn.execute(
                     "INSERT INTO transactions (tenant_id, project, action, detail, hash) VALUES (?, ?, ?, ?, ?)",
                     (tenant_id, "system", "REINDEX_EMBEDDINGS", f"Re-indexed {success} facts to dim {target_dim}", cortex_hash(payload.encode()))

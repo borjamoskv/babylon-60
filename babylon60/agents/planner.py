@@ -19,7 +19,6 @@ the plan halts - no meta-cognitive replanning.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import time
 from dataclasses import dataclass, field
@@ -27,6 +26,8 @@ from decimal import Decimal
 from enum import Enum
 from typing import Any
 from uuid import uuid4
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("cortex.agents.planner")
 

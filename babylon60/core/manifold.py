@@ -1,6 +1,7 @@
-from babylon60.crypto.hash_registry import cortex_hash_raw
 from dataclasses import dataclass
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash_raw
 
 # Expected to import EpistemicState, EpistemicEvent from membrane
 # from .membrane import EpistemicEvent, EpistemicState

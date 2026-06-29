@@ -6,7 +6,6 @@ Local-first memory infrastructure with vector search, temporal facts,
 and cryptographic vaults. Zero network dependencies.
 """
 
-import importlib
 import sys
 
 try:

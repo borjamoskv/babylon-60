@@ -9,7 +9,6 @@ the agent/user that created it, proving provenance beyond hash chains.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import base64
 import logging
 import os
@@ -26,6 +25,8 @@ from cryptography.hazmat.primitives.serialization import (
     PrivateFormat,
     PublicFormat,
 )
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = [
     "Ed25519Signer",

@@ -1,5 +1,4 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash
 import functools
 import json
 import logging
@@ -10,6 +9,8 @@ import time
 from cortex.config import DB_PATH
 from cortex.database.core import connect
 from cortex.extensions.signals.bus import SignalBus
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 # Sovereign Memory & Execution Imports
 _CORTEX_CORE = os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core")

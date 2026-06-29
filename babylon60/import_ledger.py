@@ -6,7 +6,6 @@ and cryptographic verification (Merkle Tree Root + Ed25519 signatures).
 Conforms to BABYLON60-NATIVE-AI-MANIFESTO (Axiom Ω3) enforcing Tenant and Agent isolation.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import fcntl
 import json
 import os
@@ -18,6 +17,8 @@ from pathlib import Path
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 class ImportResolutionLedger:

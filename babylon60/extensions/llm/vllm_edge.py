@@ -9,7 +9,6 @@ TurboQuant compression (arXiv:2504.19874) of PagedAttention Context Windows
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_truncated
 import asyncio
 import json
 import logging
@@ -21,6 +20,8 @@ from pathlib import Path
 from cortex.engine.core.context_cache import ContextCacheManager
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from cortex.extensions.llm._result_cache import ResultCache
+
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_truncated
 
 logger = logging.getLogger("cortex_extensions.llm.vllm_edge")
 

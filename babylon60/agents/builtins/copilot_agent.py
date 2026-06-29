@@ -24,12 +24,12 @@ Constraint: Without the human, the copilot does NOTHING.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import time
 from typing import Any
 from uuid import uuid4
 
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 from cortex.agents.base import BaseAgent
 from cortex.agents.copilot_contracts import (
     CodeEdit,

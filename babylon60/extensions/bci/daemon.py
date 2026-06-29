@@ -1,12 +1,13 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import json
 import os
 import time
 from collections.abc import Callable
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 # Standard library fallback since protobuf might need to be generated via protoc
 # In pure O(1) spirit, if we don't compile intent_pb2, we can just use length-prefixed struct packing.

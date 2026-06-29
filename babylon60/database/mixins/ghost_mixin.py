@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import json
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 if TYPE_CHECKING:
     from cortex.extensions.songlines.sensor import GhostTrace

@@ -13,11 +13,12 @@ Hash Scheme Versions:
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import datetime
 import json
 import time
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = [
     "canonical_json",

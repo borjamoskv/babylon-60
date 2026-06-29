@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import hashlib
 import json
 import logging
@@ -12,6 +11,8 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = [
     "AGENT_DIR",

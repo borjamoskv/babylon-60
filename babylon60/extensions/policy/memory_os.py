@@ -1,9 +1,10 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 from collections import deque
 from enum import Enum
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 VSA_DIMENSION = 10000
 EPISODIC_TRACE_LIMIT = 1000  # Maximum number of episodic traces retained in memory

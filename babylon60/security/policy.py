@@ -1,7 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import datetime
 import json
 import time
@@ -17,6 +16,8 @@ from cortex.security.types import (
     SealRecord,
     SealViolation,
 )
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 # ---------- 5. State machine ----------
 

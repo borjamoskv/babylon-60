@@ -7,13 +7,14 @@ Decouples EmbeddingManager from hardcoded embedder implementations.
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Dict, Type
+from collections.abc import Callable
+from typing import Any
 
 from babylon60.embeddings.provider import EmbeddingProvider
 
 logger = logging.getLogger("cortex.embeddings.registry")
 
-_EMBEDDING_PROVIDERS: Dict[str, Callable[..., EmbeddingProvider]] = {}
+_EMBEDDING_PROVIDERS: dict[str, Callable[..., EmbeddingProvider]] = {}
 
 def register_provider(name: str, factory: Callable[..., EmbeddingProvider]) -> None:
     """Register an embedding provider factory under a specific name."""
@@ -34,8 +35,8 @@ def _local_embedder_factory(**kwargs: Any) -> EmbeddingProvider:
     return LocalEmbedder()
 
 def _api_embedder_factory(**kwargs: Any) -> EmbeddingProvider:
-    from cortex.embeddings.api_embedder import APIEmbedder
     from cortex.core import config
+    from cortex.embeddings.api_embedder import APIEmbedder
     
     provider = kwargs.get("provider", config.EMBEDDINGS_PROVIDER)
     target_dimension = kwargs.get("target_dimension", config.EMBEDDINGS_DIMENSION)

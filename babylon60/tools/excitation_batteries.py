@@ -1,8 +1,9 @@
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Optional
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 class DifficultyLevel(Enum):

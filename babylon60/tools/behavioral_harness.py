@@ -1,4 +1,3 @@
-from babylon60.crypto.hash_registry import cortex_hash
 import statistics
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -6,6 +5,7 @@ from typing import Any, Optional
 
 import numpy as np
 
+from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.tools.behavioral_matrix import BehavioralAnalyzer, ConversationTurn
 from babylon60.tools.blackbox_harness import BlackBoxHarness, SingleResult
 from babylon60.tools.coverage_entropy import CoverageAnalyzer

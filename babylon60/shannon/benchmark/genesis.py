@@ -5,13 +5,14 @@ Tool Genesis Benchmark (ASI-1)
 A C5-REAL adversarial protocol measurement harness to test autonomous tool synthesis.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash_raw
 import asyncio
 import logging
 import random
 import secrets
 import struct
 from dataclasses import dataclass
+
+from babylon60.crypto.hash_registry import cortex_hash_raw
 
 logger = logging.getLogger(__name__)
 

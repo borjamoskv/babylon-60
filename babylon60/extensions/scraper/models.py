@@ -6,10 +6,11 @@ Pydantic-validated schemas for requests, results, and batch jobs.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import enum
 import time
 from dataclasses import dataclass, field
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 
 class ExtractionStrategy(enum.Enum):

@@ -15,11 +15,12 @@ Author: Borja Moskv (SYS_ID: borjamoskv)
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated, cortex_hash_raw
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash_raw, cortex_hash_truncated
 
 __all__ = [
     "EmbeddingBackend",

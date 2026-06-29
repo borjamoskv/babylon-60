@@ -5,13 +5,14 @@ A true heartbeat should calculate the hash of the entropy on each poll
 and alert solely when the semantic asymmetry deviates from the given threshold.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import time
 from datetime import datetime, timezone
 from typing import Any
 
 from cortex.extensions.daemon.models import SiteStatus
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.monitors.heartbeat")
 

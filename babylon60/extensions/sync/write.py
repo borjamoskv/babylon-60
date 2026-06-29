@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import sqlite3
@@ -18,6 +17,8 @@ from cortex.extensions.sync.common import (
     save_sync_state,
 )
 from cortex.memory.temporal import now_iso
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = ["export_to_json"]
 

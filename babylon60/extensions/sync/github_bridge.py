@@ -8,13 +8,14 @@ Dedup via SHA256 of `{repo}/{number}` stored in `meta.github_key`.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 import httpx
 from cortex.memory.temporal import now_iso
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine

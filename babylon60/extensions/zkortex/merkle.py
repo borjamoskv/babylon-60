@@ -16,8 +16,9 @@ Uso soberano:
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_raw
 from dataclasses import dataclass
+
+from babylon60.crypto.hash_registry import cortex_hash_raw
 
 
 def _sha256(data: bytes) -> bytes:

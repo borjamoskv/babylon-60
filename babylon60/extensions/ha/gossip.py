@@ -8,13 +8,14 @@ Implements Semantic Digests and Vector Clocks to ensure eventual consistency.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import json
 import logging
 import time
 from dataclasses import dataclass, field
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = ["GossipProtocol", "SemanticDigest", "StateRecord"]
 

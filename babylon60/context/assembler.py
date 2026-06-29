@@ -27,6 +27,7 @@ MAX_CONTEXT_TOKENS = 8000  # Hard limit to prevent context overflow
 
 import asyncio
 
+
 class ContextAssembler:
     """Assembles context from all available knowledge sources.
 

@@ -206,7 +206,7 @@ class AdaptiveResonanceGate:
 
         # 4. Epistemic Physics Collision Resolution
         from babylon60.engine.causal.epistemic_physics import EpistemicPhysicsArbiter
-        from babylon60.engine.flow.causality_models import Claim, Evidence, EpistemicStatus
+        from babylon60.engine.flow.causality_models import Claim, EpistemicStatus, Evidence
 
         conflict_detected = False
         claims_to_resolve = []

@@ -8,7 +8,6 @@ Uses SQLite WAL for zero-latency cross-process synchronization (Ω₂).
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 import logging
 import sqlite3
@@ -20,6 +19,8 @@ from pathlib import Path
 from typing import Any
 
 from cortex.database.core import connect as db_connect
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex_extensions.llm.cache")
 
