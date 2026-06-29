@@ -1029,6 +1029,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 61: Formulación de la Doctrina Soberana & Membrana de Aislamiento Vesicular (Native AI Manifesto & Vesicular Runtime)
+- **Target**: `babylon60/swarm/vesicular.py`, `.agents/workflows/BABYLON60-NATIVE-AI-MANIFESTO.md`, `tests/test_vesicular.py`
+- **Objective**: Formulación de la doctrina filosófica nativa (Manifiesto de IA Nativa de BABYLON-60) y codificación nativa del `VesicularRuntime`. Este runtime aísla físicamente las claves API y variables de entorno del host mediante subprocesos asíncronos y destrucción atómica de la memoria JIT ante desbordamientos o tiempos límite.
+- **Yield Target**: Aislamiento absoluto de claves API de host y destrucción de heap de subprocesos bajo señales SIGKILL.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `ca9655ea7` (workflow alignment), and files `babylon60/swarm/vesicular.py`, `tests/test_vesicular.py`.
+```yaml
+Claim: Vesicular process isolation runtime operational and verified under sandbox limits.
+Proof:
+  Base: "pytest tests/test_vesicular.py passed, confirming environment isolation and timeout enforcement."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
