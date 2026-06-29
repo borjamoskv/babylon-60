@@ -77,8 +77,8 @@ class OSINTGuard:
                     decoded_url = urllib.parse.unquote(raw_text)
                     if decoded_url != raw_text:
                         layers.update(_extract_text_layers(decoded_url, depth + 1))
-                except Exception as e:
-                    logger.debug("OSINT URL decode failure: %s", e)
+                except Exception:
+                    logger.debug("OSINT URL decode failure.")
 
             # Hex / Binary peel
             hex_pattern = re.compile(r'(?:0x)?([0-9a-fA-F]{6,})')
@@ -89,8 +89,8 @@ class OSINTGuard:
                         decoded_hex = bytes.fromhex(hex_str).decode('utf-8', errors='ignore')
                         if decoded_hex and any(c.isalnum() for c in decoded_hex):
                             layers.update(_extract_text_layers(decoded_hex, depth + 1))
-                    except Exception as e:
-                        logger.debug("OSINT HEX decode failure: %s", e)
+                    except Exception:
+                        logger.debug("OSINT HEX decode failure.")
 
             # Base64 peel
             b64_pattern = re.compile(r'\b[a-zA-Z0-9+/]{8,}=*\b')
@@ -103,8 +103,8 @@ class OSINTGuard:
                     decoded_b64 = base64.b64decode(b64_str).decode('utf-8', errors='ignore')
                     if decoded_b64 and any(c.isalnum() for c in decoded_b64):
                         layers.update(_extract_text_layers(decoded_b64, depth + 1))
-                except Exception as e:
-                    logger.debug("OSINT B64 decode failure: %s", e)
+                except Exception:
+                    logger.debug("OSINT B64 decode failure.")
 
             return layers
 
@@ -148,7 +148,7 @@ class OSINTGuard:
             if username == target or "borja" in username.lower():
                 logger.error("[P0] OSINTGuard: Absolute system path leak detected.")
                 raise OSINTViolationError(
-                    f"PII Leak: Absolute system path for user '{username}' exposed. Mask with $HOME."
+                    "PII Leak: Absolute system path containing private user directory exposed. Mask with $HOME."
                 )
 
     @classmethod
