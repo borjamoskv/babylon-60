@@ -98,3 +98,16 @@ def test_ultrathink_arsenal_path_resolution():
     assert found_target is True
 
 
+def test_estimate_shannon_entropy():
+    """Verify that text Shannon Entropy is calculated accurately."""
+    # Empty string should yield 0.0
+    assert UltrathinkPhysicsEngine.estimate_shannon_entropy("") == 0.0
+    
+    # Single repeating character should yield 0.0 (no uncertainty/entropy)
+    assert UltrathinkPhysicsEngine.estimate_shannon_entropy("aaaaa") == 0.0
+    
+    # Equal distribution of two characters (a, b) should yield 1.0 bit
+    assert UltrathinkPhysicsEngine.estimate_shannon_entropy("abab") == pytest.approx(1.0, rel=1e-5)
+
+
+

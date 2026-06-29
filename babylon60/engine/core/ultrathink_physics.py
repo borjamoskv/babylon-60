@@ -19,12 +19,20 @@ logger = logging.getLogger("cortex.engine.exergy_physics")
 
 class LegionFormation(str, Enum):
     """Sovereign Swarm Formations (LEGIØN-1 Protocol)"""
-    HYDRA = "HYDRA"         # 10-20 agents: Parallel domain mutation
-    PHOENIX = "PHOENIX"     # 5-8 agents: Self-healing & technical debt
-    LEVIATHAN = "LEVIATHAN" # 20-50 agents: Total P0 singularity siege
-    ORACLE = "ORACLE"       # 3-5 agents: Strategic prediction
-    OUROBOROS = "OUROBOROS" # 3-7 agents: Recursive self-improvement
-    TESTUDO = "TESTUDO"     # 15 agents: Proactive infrastructure defense
+    BLITZ = "BLITZ"          # 3-5 agents: Atomic tasks
+    PHALANX = "PHALANX"      # 6-10 agents: Audit & coverage
+    SIEGE = "SIEGE"          # 8-15 agents: Deep research
+    HYDRA = "HYDRA"          # 10-20 agents: Parallel domain mutation
+    ORACLE = "ORACLE"        # 3-5 agents: Strategic prediction
+    PHOENIX = "PHOENIX"      # 5-8 agents: Self-healing & technical debt
+    CHIMERA = "CHIMERA"      # 4-12 agents: Innovation
+    LEVIATHAN = "LEVIATHAN"  # 20-50 agents: Total P0 singularity siege
+    OUROBOROS = "OUROBOROS"  # 3-7 agents: Recursive self-improvement
+    SENTINEL = "SENTINEL"    # Security & Infrastructure monitoring
+    SPECTRE = "SPECTRE"      # OSINT & Intelligence stealth
+    GHOST = "GHOST"          # Single specialized agent
+    TESTUDO = "TESTUDO"      # 15 agents: Proactive infrastructure defense
+    SANEDRIN = "SANEDRIN"    # 5 agents: Heterogeneous Supreme Quorum
 
 class UltrathinkPhysicsEngine:
     """
@@ -174,3 +182,19 @@ class UltrathinkPhysicsEngine:
 
         formation = cls.calculate_legion_formation(epicenter_radius, exergy, epicenter_node)
         return True, f"Ultrathink P0 Singularity Horizon Authorized. Swarm: {formation.value}", formation
+
+    @staticmethod
+    def estimate_shannon_entropy(text: str) -> float:
+        """
+        Estimates the Shannon Entropy of raw text output.
+        S = -sum(p(x) * log2(p(x)))
+        """
+        if not text:
+            return 0.0
+        import math
+        char_counts = {}
+        for char in text:
+            char_counts[char] = char_counts.get(char, 0) + 1
+        total = len(text)
+        return -sum((count / total) * math.log2(count / total) for count in char_counts.values())
+
