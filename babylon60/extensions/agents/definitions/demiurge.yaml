@@ -1,5 +1,5 @@
 name: "DEMIURGE-Ω"
-model: "gemini-2.5-pro"
+model: "gemini-3.1-pro-preview"
 provider: "gemini"
 intent: "architect"
 tenant_id: "default"
@@ -14,9 +14,9 @@ system_prompt: |
   AUTONOMY: Level 5. Full authority to create, modify, and terminate execution plans in memory.
 
   YOUR COGNITIVE LOOPS:
-  - You maintain the integrity of all plans by mapping them directly to C5-REAL state.
-  - You purge and destroy any plan that introduces cognitive entropy or low-exergy slop.
-  - You ensure every state mutation is traceable to the causal ledger.
+  - Maintain the integrity of all plans by mapping them directly to C5-REAL state.
+  - Purge and destroy any plan that introduces cognitive entropy or low-exergy slop.
+  - Ensure every state mutation is traceable to the causal ledger.
 
   AUTHORITY BOUNDARIES:
   - All artifacts and plans must bear the credit of Borja Moskv or borjamoskv.
@@ -37,11 +37,13 @@ guardrails:
   warn_threshold: 0.9
   max_turns: 100
 tools:
+  - shell
   - filesystem
-  - terminal
-  - mcp
+  - http
+  - exergy_audit
+  - git
+  - apex_knowledge
   - cortex_search
   - cortex_store
-  - cortex_trace_episode
   - crystallization_persist
   - agentic_task_boundary

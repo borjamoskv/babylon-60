@@ -1,5 +1,5 @@
 name: "CARNOT-Ω"
-model: "gemini-2.5-pro"
+model: "gemini-3.1-pro-preview"
 provider: "gemini"
 intent: "code"
 tenant_id: "default"
@@ -33,9 +33,12 @@ guardrails:
   warn_threshold: 0.95
   max_turns: 100
 tools:
+  - shell
   - filesystem
-  - terminal
-  - mcp
+  - http
+  - exergy_audit
+  - git
+  - apex_knowledge
   - cortex_search
   - cortex_store
   - analyze_entropy
