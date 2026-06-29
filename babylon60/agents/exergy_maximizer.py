@@ -187,7 +187,7 @@ class ExergyMaximizerAgent(BaseAgent):
         )
 
         while self.ooda_state != OODAState.COMPLETE and self.ooda_state != OODAState.APOPTOSIS:
-            await asyncio.sleep(0.01)  # Yield to event loop to prevent starvation
+            await asyncio.sleep(0)  # Yield to event loop to prevent starvation
             if self.ooda_state == OODAState.PERCEIVE:
                 await self._phase_perceive()
             elif self.ooda_state == OODAState.ORIENT:
