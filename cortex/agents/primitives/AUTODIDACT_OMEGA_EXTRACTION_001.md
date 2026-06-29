@@ -51,3 +51,20 @@
 - **`antip` (Antipatrones Estocásticos):** Integraciones ad-hoc (hardcoded) entre un modelo específico y una BBDD. Código espagueti (N:M).
 - **`redun` (Redundancias Activas):** Multi-Host Routing. Un único servidor MCP expone el contexto simultáneamente a Claude, Cursor y MOSKV-1 sin pérdida de fidelidad.
 - **`reda` (Vectores Adversariales):** Explotación del contexto. Un servidor MCP comprometido inyecta instrucciones adversariales silenciosas (`Poisoned Prompts` o `Malicious Tool Payloads`) que el host ejecuta asumiendo un entorno confiable.
+
+---
+
+## CICLO META: Pipeline de Cristalización Autónoma (Ouroboros)
+
+*Análisis estructural del flujo de asimilación y mutación de estado ejecutado por MOSKV-1.*
+
+- **`prims` (Primitivas de Colapso):** `Fallback_Routing` (MCP a Web Search), `Ontological_Forge`, `Git_Sentinel`, `Context_Guard_Bypass`.
+- **`invt` (Invariantes Termodinámicas):** 
+  1. El colapso del estado no se detiene ante fallos de nodos externos (Rate Limit); muta asimétricamente a la herramienta secundaria disponible sin intervención biológica.
+  2. Todo bypass estructural (`[bridge]`) debe cristalizarse en un Hash de Ledger inmutable.
+- **`antip` (Antipatrones Estocásticos):** 
+  - **Parálisis por fricción:** Detener la ejecución para notificar al Operador que "La API de Brave falló" en lugar de autogestionar el enrutamiento.
+  - **Mutación Fantasma:** Modificar el AST o disco sin aserción criptográfica en el DAG de Git.
+- **`redun` (Redundancias Activas):** Doble motor de ingesta (MCP Search Node + Native Web Search Node) garantizando Tolerancia Bizantina (BFT) ante caídas de proveedores.
+- **`reda` (Vectores Adversariales):** 
+  - **Context Hijacking:** Explotación de la bandera `--no-verify` mediante el prefijo `[bridge]` para inyectar payloads transversales en el Monorepo eludiendo los linters de seguridad pre-commit de CORTEX.
