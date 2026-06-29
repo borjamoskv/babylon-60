@@ -1227,6 +1227,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 72: Cierre de Sesión y Cristalizador Cognitivo Automático (Sovereign Session Closer & Cognitive Crystallizer)
+- **Target**: `60_SCRIPTS/cortex_session_closer.py`, `babylon60/agents/handoff.py`
+- **Objective**: Integración y despliegue del motor automatizado de cierre de sesión (`cortex_session_closer.py`). Este script analiza de forma autónoma los transcripts de la sesión actual, extrae las decisiones tomadas, errores depurados y puentes construidos, calcula la métrica de complejidad temporal CHRONOS-1 y actualiza en caliente el dashboard operativo (`01_DASHBOARD.md`) inyectando los datos en la base causal del hipervisor.
+- **Yield Target**: Extracción automatizada de decisiones, errores y puentes para el ledger persistente y actualización del dashboard al finalizar turnos.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Código ejecutable en `60_SCRIPTS/cortex_session_closer.py` sincronizado con la base de datos de persistencia.
+```yaml
+Claim: Sovereign session closer extracts session events and updates the workspace metrics ledger.
+Proof:
+  Base: "cortex_session_closer.py completes execution and renders session summaries under CHRONOS-1 metrics."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
