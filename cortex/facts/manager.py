@@ -157,9 +157,11 @@ class FactManager:
             if row:
                 fact_id = row[0]
                 logger.info("V8 Guardrail: Fact discarded - P0 Exact Duplicate of #%s", fact_id)
-                await conn.execute(
-                    "UPDATE facts SET updated_at = ? WHERE id = ?", (now_iso(), fact_id)
-                )
+                from cortex.database.core import causal_write
+                with causal_write(conn):
+                    await conn.execute(
+                        "UPDATE facts SET updated_at = ? WHERE id = ?", (now_iso(), fact_id)
+                    )
                 await conn.commit()
                 return fact_id
 
@@ -184,10 +186,12 @@ class FactManager:
                                 results[0].score,  # type: ignore[reportAttributeAccessIssue]
                             )
                             # We update updated_at / last_accessed
-                            await conn.execute(  # type: ignore[reportOptionalMemberAccess]
-                                "UPDATE facts SET updated_at = ? WHERE id = ?",
-                                (now_iso(), results[0].fact_id),
-                            )
+                            from cortex.database.core import causal_write
+                            with causal_write(conn):
+                                await conn.execute(  # type: ignore[reportOptionalMemberAccess]
+                                    "UPDATE facts SET updated_at = ? WHERE id = ?",
+                                    (now_iso(), results[0].fact_id),
+                                )
                             await conn.commit()  # type: ignore[reportOptionalMemberAccess]
                             return results[0].fact_id  # type: ignore[reportAttributeAccessIssue]
         except ValidationError as e:
