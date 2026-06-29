@@ -16,7 +16,7 @@ async def verify_webhook(request: Request):
     token = params.get("hub.verify_token")
     challenge = params.get("hub.challenge")
 
-    # TODO: Fetch expected token from Cortex keyring
+    # TO-DO: Fetch expected token from Cortex keyring
     expected_token = "CORTEX_KAPSO_VERIFY_TOKEN" 
 
     if mode and token:

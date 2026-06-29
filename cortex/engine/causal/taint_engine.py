@@ -284,6 +284,7 @@ PII_HEX_CHUNKS: frozenset[str] = frozenset([
 ])
 
 import re
+
 HOMOGLYPH_PREFILTER_RE = re.compile(r"[\u0400-\u04ff\u0370-\u03ff]")
 
 
