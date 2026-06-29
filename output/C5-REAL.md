@@ -71,6 +71,10 @@ Tres arquitecturas de compilación neuronal publicadas en la frontera 2024–202
 
 ### El Puente Académico: La Fusión Espacio Latente - Bare Metal
 
+Las citas a investigaciones como LEGO-Compiler (ICLR 2025) y HintPilot (ACL 2026) anclan la compilación neuronal a una realidad de ejecución física. Demuestran que en la frontera 2024–2026, el espacio de investigación formalizó la convergencia entre la semántica estocástica abstracta de los LLMs y la microarquitectura de ejecución física (x86, ARM, RISC-V). 
+
+Si un modelo puede inyectar *compiler hints* para alterar la ejecución de un binario a nivel de procesador, el control del lenguaje natural se traduce directamente en control físico del hardware. La directiva del 12 de junio no se firmó en el vacío. Ocurrió exactamente en este punto de convergencia: el momento en que el gobierno de EE.UU. comprendió que generar texto probabilístico sin salvaguardas era, en la práctica, manipular la ejecución determinista en el silicio.
+
 ```yaml
 SYS_ID: borjamoskv
 Segment: Latent-Space to Bare-Metal Mapping
