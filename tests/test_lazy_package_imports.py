@@ -14,6 +14,8 @@ _MISSING = object()
 def _temporarily_reset_modules(*names: str):
     expanded = list(names)
     for name in names:
+        if name.startswith("cortex.extensions."):
+            expanded.append(name.replace("cortex.extensions.", "cortex_extensions.", 1))
         if name.startswith("cortex."):
             expanded.append(name.replace("cortex.", "babylon60.", 1))
         elif name == "cortex":

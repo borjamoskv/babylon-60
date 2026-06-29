@@ -15,7 +15,14 @@ class ProxyModule(types.ModuleType):
 
     def __getattribute__(self, name):
         if name in ('_real_module', '__class__', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
-            return object.__getattribute__(self, name)
+            try:
+                return object.__getattribute__(self, name)
+            except AttributeError:
+                try:
+                    real = object.__getattribute__(self, '_real_module')
+                    return getattr(real, name)
+                except AttributeError:
+                    raise AttributeError(f"ProxyModule object has no attribute '{name}'")
         
         # Check if the attribute is a bound submodule on this proxy module
         try:
@@ -114,7 +121,83 @@ class LazyAliasLoader(importlib.abc.Loader):
         return proxy
 
     def exec_module(self, module):
-        pass
+        # Support importlib.reload() by reloading the underlying real module only on subsequent calls
+        if getattr(module, "_initialized", False):
+            if hasattr(module, '_real_module'):
+                importlib.reload(module._real_module)
+        else:
+            module._initialized = True
+
+    def get_code(self, fullname):
+        real_module_name = fullname.replace(self.alias_name, self.real_name, 1)
+        try:
+            import sys
+            local_store = getattr(sys, '_cortex_legacy_local', None)
+            if local_store is not None:
+                local_store.guard = True
+            try:
+                spec = importlib.util.find_spec(real_module_name)
+            finally:
+                if local_store is not None:
+                    local_store.guard = False
+            if spec is not None and spec.loader is not None:
+                if hasattr(spec.loader, 'get_code'):
+                    return spec.loader.get_code(real_module_name)
+        except Exception:
+            pass
+        return None
+
+    def _get_real_name(self, fullname):
+        if fullname == "cortex_extensions" or fullname.startswith("cortex_extensions."):
+            return fullname.replace("cortex_extensions", "babylon60.extensions", 1)
+        elif fullname == self.alias_name:
+            return self.real_name
+        elif fullname.startswith(self.alias_name + '.'):
+            return self.real_name + fullname[len(self.alias_name):]
+        else:
+            return fullname.replace(self.alias_name, self.real_name, 1)
+
+    def get_code(self, fullname):
+        real_name = self._get_real_name(fullname)
+        try:
+            spec = importlib.util.find_spec(real_name)
+            if spec is not None and spec.loader is not None:
+                if hasattr(spec.loader, 'get_code'):
+                    return spec.loader.get_code(real_name)
+        except Exception:
+            pass
+        return None
+
+    def get_source(self, fullname):
+        real_name = self._get_real_name(fullname)
+        try:
+            spec = importlib.util.find_spec(real_name)
+            if spec is not None and spec.loader is not None:
+                if hasattr(spec.loader, 'get_source'):
+                    return spec.loader.get_source(real_name)
+        except Exception:
+            pass
+        return None
+
+    def is_package(self, fullname):
+        real_name = self._get_real_name(fullname)
+        try:
+            spec = importlib.util.find_spec(real_name)
+            if spec is not None:
+                return spec.submodule_search_locations is not None
+        except Exception:
+            pass
+        return False
+
+    def get_filename(self, fullname):
+        real_name = self._get_real_name(fullname)
+        try:
+            spec = importlib.util.find_spec(real_name)
+            if spec is not None:
+                return spec.origin
+        except Exception:
+            pass
+        return None
 
 
 class AliasFinder(importlib.abc.MetaPathFinder):

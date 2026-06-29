@@ -180,9 +180,9 @@ def test_forensics_command_is_experimental_in_root_cli(monkeypatch) -> None:
         del cortex.cli.common.cli.commands["forensics"]
 
     monkeypatch.delenv("CORTEX_ENABLE_EXPERIMENTAL_CLI", raising=False)
-    importlib.reload(cortex.cli.forensics_cmds)
+    importlib.reload(getattr(cortex.cli.forensics_cmds, "_real_module", cortex.cli.forensics_cmds))
     assert "forensics" not in cortex.cli.common.cli.commands
 
     monkeypatch.setenv("CORTEX_ENABLE_EXPERIMENTAL_CLI", "1")
-    importlib.reload(cortex.cli.forensics_cmds)
+    importlib.reload(getattr(cortex.cli.forensics_cmds, "_real_module", cortex.cli.forensics_cmds))
     assert "forensics" in cortex.cli.common.cli.commands

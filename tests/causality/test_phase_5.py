@@ -39,7 +39,7 @@ class TestMCP:
                 os.path.dirname(__file__),
                 "..",
                 "..",
-                "cortex",
+                "babylon60",
                 "mcp_server",
                 "server.py",
             )
@@ -53,7 +53,7 @@ class TestMCP:
                 os.path.dirname(__file__),
                 "..",
                 "..",
-                "cortex",
+                "babylon60",
                 "mcp_server",
                 "core_tools.py",
             )
