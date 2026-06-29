@@ -70,6 +70,30 @@ La precisión de la clasificación estilométrica es altamente dependiente del e
 * **Huella Digital del Sistema:** *Wimbauer, A., et al. (2026).* "Fingerprinting Inference Systems of Large Language Models". arXiv preprint arXiv:2605.29979. (Prueba cómo la infraestructura de inferencia y atención deja señales identificables en el output final).
 * **Estilometría de Código:** *Bisztray, T., et al. (2025).* "I Know Which LLM Wrote Your Code Last Summer: LLM generated Code Stylometry for Authorship Attribution". arXiv preprint arXiv:2506.17323. (Demuestra la persistencia de las firmas de estilo en tareas estructuradas de programación).
 
+## 3. Protocolo Empírico de Diferenciación de Modelos (Black-Box Fingerprinting)
+
+Para verificar empíricamente la relación entre modelos lingüísticos independientes sin acceso a los pesos internos, los logits, o los log-probabilities, es necesario diseñar escenarios de prueba en límites sintácticos y semánticos donde las arquitecturas y los sesgos del pre-entrenamiento emerjan inevitablemente.
+
+### 3.1 Pruebas de Colisión de Tokenización
+Los tokenizadores determinan de manera rígida la división y procesamiento de sub-palabras. Si dos modelos de nombres distintos segmentan y fallan de forma idéntica en caracteres y secuencias raras, es indicativo de un tokenizador compartido.
+* **Prueba:** Instrucciones de manipulación de caracteres, conteo exacto o inversión de texto con glifos raros (e.g., sistemas de escritura de bajos recursos como birmano o glagolítico), y secuencias en formato hexadecimal.
+* **Señal de Identidad:** Fallos sistemáticos en los mismos límites de tokens o imposibilidad de agrupar sub-palabras de forma idéntica.
+
+### 3.2 Topología y Signaturas de Rechazo (Refusal Signatures)
+El alineamiento de comportamiento (RLHF/DPO) se incrusta en capas de proyección semántica profunda. Dos alineamientos entrenados de forma independiente difícilmente convergerán en la misma firma de rechazo exacta.
+* **Prueba:** Ejecución de una batería de 10-20 prompts límite (*borderline*) en dominios éticamente grises o ciberseguridad defensiva que rocen el límite de la política de uso.
+* **Señal de Identidad:** Estructuras sintácticas y frases de denegación idénticas, y coincidencia exacta en el umbral geométrico de activación del rechazo.
+
+### 3.3 Sesgo de Selección Léxica bajo Stress
+Bajo restricciones lingüísticas complejas, los modelos de lenguaje tienden a colapsar hacia sus conectores lógicos de mayor probabilidad base en el pre-entrenamiento.
+* **Prueba:** Tareas de razonamiento lógico con restricciones léxicas negativas extremas (e.g., "Explicar el Teorema de Pitágoras sin usar la letra 'a' o sin utilizar comas").
+* **Señal de Identidad:** Coincidencia en las palabras de sustitución y en las estrategias léxicas de escape empleadas para sortear la restricción lógica.
+
+### 3.4 Distribución de Alucinación y Límites de Datos (Knowledge Cutoff)
+Los límites cronológicos del conjunto de entrenamiento y las alucinaciones sistemáticas sobre hechos oscuros son huellas específicas de la distribución del dataset de origen.
+* **Prueba:** Consultas complejas de hechos específicos cercanos a la fecha declarada de corte de datos, o preguntas sobre individuos con escasa presencia en la web.
+* **Señal de Identidad:** Generación del mismo dato ficticio o el mismo error factual idéntico sobre biografías o eventos históricos poco documentados.
+
 ### References
 
 1. **Yuan, Z., et al.** (2023). "GPT-4 is too smart to be safe: Stealthy chat with LLMs via cipher." *arXiv:2308.03825*.
