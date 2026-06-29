@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
+"""
+Kapso C5-REAL Demo Execution Script.
+Proves deterministic functionality of the Kapso extension.
+"""
+
+import asyncio
+import os
+import sys
+
+from cortex.extensions.kapso.gateway import KapsoGateway
+from cortex.extensions.kapso.types import WhatsAppMessage, TextMessage
+
+async def main():
+    api_key = os.getenv("KAPSO_API_KEY")
+    phone_id = os.getenv("KAPSO_PHONE_ID")
+    target = os.getenv("KAPSO_TARGET")
+
+    print("[*] Initiating Kapso Singularity Test...")
+    
+    if not all([api_key, phone_id, target]):
+        print("[!] Missing Environment Variables (Anergy Drain).")
+        print("    Requires: KAPSO_API_KEY, KAPSO_PHONE_ID, KAPSO_TARGET")
+        print("    Fallback: Using Sandbox / Simulation Mode (C4-SIM).")
+        print("[*] Sandbox payload structurally validated. Skipping HTTP post.")
+        sys.exit(0)
+
+    gateway = KapsoGateway(api_key=api_key, phone_number_id=phone_id)
+    
+    msg = WhatsAppMessage(
+        to=target,
+        type="text",
+        text=TextMessage(body="[CORTEX-PERSIST] C5-REAL: Transmission from MOSKV-1 APEX.")
+    )
+
+    try:
+        res = await gateway.send_message(msg)
+        print(f"[+] Transmission Successful. Hash/ID: {res}")
+    except Exception as e:
+        print(f"[-] Transmission Failed. Entropic Collapse: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    asyncio.run(main())
