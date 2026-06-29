@@ -867,3 +867,40 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 52: Cristalización Ontológica (Ontology Forge - Batch 1)
+- **Target**: `docs/ontology/`, `tests/test_ontology_structure.py`
+- **Objective**: Ejecución del protocolo `ONTOLOGY-FORGE-OMEGA` para compresión e indexación de 91 entidades ontológicas cubriendo consenso BFT, seguridad de red y trust, y desarrollo de tests unitarios de validación de esquemas de conocimiento en disco.
+- **Yield Target**: 91 entidades validadas bajo reglas sintácticas y semánticas estrictas sin redundancia.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `a0f5fbd0a` (swarm consensus), `d0946d3f0` (security & trust), `b33b8da8e` (validation tests).
+```yaml
+Claim: 91 ontology entities crystallized and verified via validation suite.
+Proof:
+  Base: "pytest tests/test_ontology_structure.py verified 91 Markdown nodes successfully."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+---
+
+### Hito 53: Coordinación Asíncrona Dirigida por Eventos & Optimización del Yield Loop
+- **Target**: `cortex/engine/exergy.py`, `cortex/engine/shared_bus.py`, `tests/test_exergy_physics.py`
+- **Objective**: Eliminación de bucles de sondeo activo (active polling) en el motor de exergía, transicionando la coordinación de agentes a un esquema coordinado por eventos asíncronos (`asyncio.Event`) para evitar event loop starvation, y optimizando el cálculo de homología y entropía de Shannon.
+- **Yield Target**: Cero starvation del bucle del sistema y latencia de paso reducida bajo concurrencia.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `a732e509a` (asyncio event-driven), `b24594754` (asyncio yield fix), `333a9c8e3` (tactical physics expansion).
+```yaml
+Claim: Active polling eliminated and event-driven coordination verified under concurrent execution.
+Proof:
+  Base: "exergy_maximizer coordinated purely via AsyncSignalBus and asyncio.Event; test_exergy_physics.py passed."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
