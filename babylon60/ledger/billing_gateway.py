@@ -98,6 +98,7 @@ class BillingIntegrityGateway:
         """Route the specific action to the AuthManager."""
         # We decouple imperative logic from stripe.py
         import cortex.api.state as api_state
+        from cortex.core import config
 
         if action == "checkout.session.completed":
             session = payload["data"]["object"]
@@ -106,19 +107,64 @@ class BillingIntegrityGateway:
             ).get("email", "unknown")
             plan = session.get("metadata", {}).get("plan", "pro")
 
-            if api_state.auth_manager:
-                from cortex.routes.stripe import PLAN_CONFIG
+            amount_usd = 0.0
+            if plan == "pwyw":
+                try:
+                    amount_usd = float(session.get("metadata", {}).get("amount_usd", 0.0))
+                except (ValueError, TypeError):
+                    amount_usd = 0.0
 
+            if plan == "pwyw" and amount_usd > 0:
+                calls_limit = int(amount_usd * 10000)
+                rate_limit = min(30 + int(amount_usd * 5), 1000)
+                projects_limit = max(1, int(amount_usd / 2))
+                storage_bytes = int(amount_usd * 100 * 1024 * 1024)
+                permissions = ["read", "write"]
+            else:
+                from cortex.routes.stripe import PLAN_CONFIG
                 plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])
+                calls_limit = plan_cfg.get("calls_limit", 50000)
+                rate_limit = plan_cfg.get("rate_limit", 300)
+                projects_limit = plan_cfg.get("projects_limit", 10)
+                storage_bytes = 1024 * 1024 * 1024
+                permissions = plan_cfg.get("permissions", ["read", "write"])
+
+            if api_state.auth_manager:
                 await api_state.auth_manager.create_key(
                     name=f"stripe-{customer_email}",
                     tenant_id=customer_email,
-                    permissions=plan_cfg["permissions"],
-                    rate_limit=plan_cfg["rate_limit"],
+                    permissions=permissions,
+                    rate_limit=rate_limit,
                 )
                 logger.info(
                     "Ledger applied: provisioned key for %s (Plan: %s)", customer_email, plan
                 )
+
+            tenant_config = {
+                "plan": plan,
+                "amount_usd": amount_usd,
+                "calls_limit": calls_limit,
+                "rate_limit": rate_limit,
+                "projects_limit": projects_limit,
+                "storage_bytes": storage_bytes,
+                "stripe_subscription_item_id": f"si_{customer_email[-8:]}" if not config.STRIPE_SECRET_KEY else ""
+            }
+
+            from cortex.database.core import causal_write
+            async with connect_async_ctx(self.db_path) as conn:
+                with causal_write(conn):
+                    await conn.execute(
+                        """
+                        INSERT INTO tenants (id, name, config, is_active)
+                        VALUES (?, ?, ?, 1)
+                        ON CONFLICT(id) DO UPDATE SET
+                          name = excluded.name,
+                          config = excluded.config
+                        """,
+                        (customer_email, customer_email, json.dumps(tenant_config)),
+                    )
+                    await conn.commit()
+                logger.info("Tenants table updated for tenant: %s", customer_email)
 
         elif action == "customer.subscription.deleted":
             subscription = payload["data"]["object"]

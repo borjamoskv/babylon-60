@@ -370,6 +370,40 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
         tenant_id = result.tenant_id
         token = tenant_id_var.set(tenant_id)
 
+        request.state.tenant_id = tenant_id
+        request.state.role = result.role
+        request.state.permissions = [str(p) for p in result.permissions]
+
+        plan = "free"
+        plan_quota = None
+        pool = getattr(request.app.state, "pool", None)
+        if pool:
+            try:
+                async with pool.acquire() as conn:
+                    async with conn.execute(
+                        "SELECT config FROM tenants WHERE id = ?", (tenant_id,)
+                    ) as cursor:
+                        row = await cursor.fetchone()
+                        if row:
+                            config_data = json.loads(row[0])
+                            plan = config_data.get("plan", "free")
+                            if plan == "pwyw":
+                                from cortex.extensions.metering.quotas import PlanQuota
+                                plan_quota = PlanQuota(
+                                    name="pwyw",
+                                    calls_limit=config_data.get("calls_limit", 1000),
+                                    projects_limit=config_data.get("projects_limit", 1),
+                                    storage_bytes=config_data.get("storage_bytes", 10 * 1024 * 1024),
+                                    rate_limit=config_data.get("rate_limit", 30),
+                                    search_depth=3,
+                                    batch_size=100,
+                                    ledger_verify=True,
+                                )
+            except Exception as e:
+                logger.error("Failed to load tenant plan config: %s", e)
+        request.state.plan = plan
+        request.state.plan_quota = plan_quota
+
         try:
             # 4. Deep Payload Defense (Poisoning Check)
             if request.method in ("POST", "PUT", "PATCH"):

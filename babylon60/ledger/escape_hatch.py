@@ -34,6 +34,30 @@ async def record_liveness(conn: aiosqlite.Connection) -> None:
     logger.info("Liveness recorded: %s", now_str)
 
 
+def record_liveness_sync(db_path: str | Path) -> None:
+    """Updates the liveness token in cortex_meta (synchronous)."""
+    import sqlite3
+
+    now_str = datetime.now(timezone.utc).isoformat()
+    try:
+        conn = sqlite3.connect(str(db_path))
+        try:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS cortex_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);"
+            )
+            conn.execute(
+                "INSERT OR REPLACE INTO cortex_meta (key, value) VALUES (?, ?);",
+                (LIVENESS_KEY, now_str),
+            )
+            conn.commit()
+            logger.info("Liveness recorded (sync): %s", now_str)
+        finally:
+            conn.close()
+    except Exception as e:
+        logger.warning("Failed to record sync liveness at %s: %s", db_path, e)
+
+
+
 async def is_dead_man_switch_triggered(
     conn: aiosqlite.Connection, threshold_days: int = 30
 ) -> bool:

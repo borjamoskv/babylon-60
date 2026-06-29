@@ -46,6 +46,11 @@ class HealthLoop:
     def tick(self) -> dict | None:
         """Run one health check cycle."""
         try:
+            if self._db_path:
+                from cortex.ledger.escape_hatch import record_liveness_sync
+
+                record_liveness_sync(self._db_path)
+
             collector = HealthCollector(db_path=self._db_path)
             metrics = collector.collect_all()
             hs = HealthScorer.score(metrics)

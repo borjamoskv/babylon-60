@@ -111,6 +111,14 @@ class QuotaEnforcer:
             QuotaCheckResult with allowed flag and remaining calls.
         """
         quota = PLAN_QUOTAS.get(plan, PLAN_QUOTAS["free"])
+        return self.check_with_quota(tenant_id, quota)
+
+    def check_with_quota(
+        self,
+        tenant_id: str,
+        quota: PlanQuota,
+    ) -> QuotaCheckResult:
+        """Check usage against a custom/dynamic quota definition."""
         usage = self._tracker.get_usage(tenant_id)
         calls_used = usage["calls_used"]
 
@@ -121,7 +129,7 @@ class QuotaEnforcer:
                 remaining=-1,
                 limit=-1,
                 used=calls_used,
-                plan=plan,
+                plan=quota.name,
                 reset_at=self._next_reset(),
             )
 
@@ -132,7 +140,7 @@ class QuotaEnforcer:
             remaining=remaining,
             limit=quota.calls_limit,
             used=calls_used,
-            plan=plan,
+            plan=quota.name,
             reset_at=self._next_reset(),
         )
 

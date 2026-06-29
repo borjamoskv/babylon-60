@@ -54,13 +54,17 @@ class MeteringMiddleware(BaseHTTPMiddleware):
         # Extract tenant from auth result (set by auth dependency)
         tenant_id = getattr(getattr(request, "state", None), "tenant_id", None)
         plan = getattr(getattr(request, "state", None), "plan", "free")
+        plan_quota = getattr(getattr(request, "state", None), "plan_quota", None)
 
         # If no tenant identified (unauthenticated), let the auth layer handle it
         if not tenant_id:
             return await call_next(request)
 
         # ── Quota Check ──
-        check = self._enforcer.check(tenant_id, plan)
+        if plan_quota is not None:
+            check = self._enforcer.check_with_quota(tenant_id, plan_quota)
+        else:
+            check = self._enforcer.check(tenant_id, plan)
         if not check.allowed:
             logger.warning(
                 "Quota exceeded: tenant=%s plan=%s used=%d limit=%d",

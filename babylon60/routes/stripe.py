@@ -62,6 +62,8 @@ class CheckoutRequest(BaseModel):
     customer_email: str | None = None
     success_url: str = "https://cortexpersist.com"
     cancel_url: str = "https://cortexpersist.com"
+    amount_usd: float | None = None
+    recurring: bool = False
 
 
 class PortalRequest(BaseModel):
@@ -102,6 +104,65 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
     """Create a Stripe Checkout session for a plan purchase."""
     stripe = _get_stripe()
 
+    # 1. Handle Pay-What-You-Want custom contribution
+    if body.amount_usd is not None:
+        if body.amount_usd < 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Amount must be non-negative",
+            )
+
+        if body.amount_usd == 0:
+            # Free bypass
+            return {
+                "client_secret": None,
+                "session_id": "free_bypass",
+                "url": body.success_url + "?session_id=free_bypass",
+                "publishable_key": config.STRIPE_PUBLISHABLE_KEY,
+            }
+
+        try:
+            amount_in_cents = int(body.amount_usd * 100)
+            line_item = {
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": "CORTEX Proportional Quota Contribution",
+                        "description": "Pay-What-You-Want custom support for CORTEX",
+                    },
+                    "unit_amount": amount_in_cents,
+                },
+                "quantity": 1,
+            }
+            if body.recurring:
+                line_item["price_data"]["recurring"] = {"interval": "month"}
+
+            session_kwargs = {
+                "mode": "subscription" if body.recurring else "payment",
+                "ui_mode": "embedded",
+                "line_items": [line_item],
+                "return_url": body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
+                "metadata": {
+                    "plan": "pwyw",
+                    "amount_usd": str(body.amount_usd),
+                },
+            }
+            if body.customer_email:
+                session_kwargs["customer_email"] = body.customer_email
+
+            session = stripe.checkout.Session.create(**session_kwargs)
+        except stripe.StripeError as exc:
+            logger.error("Stripe checkout error: %s", exc)
+            raise HTTPException(status_code=502, detail="Stripe API error") from exc
+
+        return {
+            "client_secret": session.client_secret,
+            "session_id": session.id,
+            "url": session.url,
+            "publishable_key": config.STRIPE_PUBLISHABLE_KEY,
+        }
+
+    # 2. Existing static plan flow
     if body.plan not in PLAN_CONFIG:
         raise HTTPException(
             status_code=400,
