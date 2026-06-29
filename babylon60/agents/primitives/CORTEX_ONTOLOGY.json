@@ -144,7 +144,7 @@
       "ID": "PRM-015",
       "Primitiva": "Ceguera de Permisos (Permission Blindness)",
       "Mecanismo Causal": "Intento de ejecución C5-REAL asumiendo privilegios no concedidos por el orquestador o SO.",
-      "Activación (Trigger)": "Fallo al intentar escribir fuera del Workspace CORTEX o acceder a recursos MCP no enlazados.",
+      "Activación (Trigger)": "Fallo al intentar escribir fuera del Workspace BABYLON-60 o acceder a recursos MCP no enlazados.",
       "Sensor (Síntoma)": "Error `PermissionError` o `AuthException` en la pasarela.",
       "Escala Temporal": "Sub-segundo",
       "Gravedad": "Media",
@@ -628,7 +628,7 @@
       "Sensor (Síntoma)": "Violación de Sandbox C5; Acceso a secretos OS.",
       "Escala Temporal": "Inmediato",
       "Gravedad": "P0",
-      "Intervención": "Aserción estricta de `abspath()` anclado obligatoriamente a rutas Workspace CORTEX."
+      "Intervención": "Aserción estricta de `abspath()` anclado obligatoriamente a rutas Workspace BABYLON-60."
     },
     {
       "ID": "PRM-064",
@@ -743,7 +743,7 @@
     {
       "ID": "PRM-075",
       "Primitiva": "Desincronización de Daemon Persistente",
-      "Mecanismo Causal": "Proceso en segundo plano perdiendo sincronía con el núcleo CORTEX por reinicio parcial no orquestado.",
+      "Mecanismo Causal": "Proceso en segundo plano perdiendo sincronía con el núcleo BABYLON-60 por reinicio parcial no orquestado.",
       "Activación (Trigger)": "Daemon `mac_maestro` o `Worker` reiniciándose sin notificar al Agent Bus.",
       "Sensor (Síntoma)": "Agentes esperando respuestas de demonios fantasmas o inyectando tareas en colas muertas.",
       "Escala Temporal": "Horas",
@@ -945,7 +945,7 @@
       "Primitiva": "Inyección de Falso Positivo Criptográfico",
       "Mecanismo Causal": "Módulo aceptando un hash inválido como válido por errores de parsing, colisión (improbable) o bypass.",
       "Activación (Trigger)": "Bug en el validador Ledger origin track que devuelve `True` por omisión (Ej: Exception no lanzada).",
-      "Sensor (Síntoma)": "Destrucción de la Confianza Cero; Ruina de CORTEX.",
+      "Sensor (Síntoma)": "Destrucción de la Confianza Cero; Ruina de BABYLON-60.",
       "Escala Temporal": "Indeterminado",
       "Gravedad": "P0",
       "Intervención": "Tests adversariales de falsificación (Darknet injection) continuos."
@@ -983,7 +983,7 @@
     {
       "ID": "PRM-099",
       "Primitiva": "Fragmentación de Invariantes Centrales",
-      "Mecanismo Causal": "Las reglas de CORTEX dispersas en docenas de archivos en conflicto, en lugar de un `AGENTS.md` o núcleo único y conciso.",
+      "Mecanismo Causal": "Las reglas de BABYLON-60 dispersas en docenas de archivos en conflicto, en lugar de un `AGENTS.md` o núcleo único y conciso.",
       "Activación (Trigger)": "Crecimiento desmedido de Skills no unificados (Ontology Bloat cruzado).",
       "Sensor (Síntoma)": "LLMs perdiendo coherencia debido a reglas contradictorias en el prompt ensamblado.",
       "Escala Temporal": "Meses",
@@ -1850,7 +1850,7 @@
       "ID": "INV-044",
       "Invariante": "Anclaje Absoluto Espacio-Temporal",
       "Lógica / Principio": "Los UUIDv7 proveen una garantía lexicográfica y temporal de la creación de las entidades.",
-      "Implicación Operacional": "Sustitución estricta de UUIDv4 por UUIDv7 en todas las bases persistentes CORTEX.",
+      "Implicación Operacional": "Sustitución estricta de UUIDv4 por UUIDv7 en todas las bases persistentes BABYLON-60.",
       "Condición de Borde": "Desincronización o reordenamiento en inserciones masivas concurrentes.",
       "Métrica Falsable": "Comprobación de orden temporal de IDs en Ledger."
     },
@@ -2226,7 +2226,7 @@
       "ID": "INV-091",
       "Invariante": "Ouroboros Auto-Compilable",
       "Lógica / Principio": "Si la Inteligencia Artificial muta su propio código base (Skynet Protocol), debe pasar testeo C5 idéntico al humano.",
-      "Implicación Operacional": "El código de CORTEX se trata como infraestructura inmutable salvo test empírico riguroso.",
+      "Implicación Operacional": "El código de BABYLON-60 se trata como infraestructura inmutable salvo test empírico riguroso.",
       "Condición de Borde": "Fuga de entropía en una auto-actualización asíncrona ciega.",
       "Métrica Falsable": "Despliegue CI/CD local exigiendo validación de Taint y Pruebas Unitarias."
     },
@@ -2426,7 +2426,7 @@
       "ID": "INV-116",
       "Invariante": "Inviolabilidad del Archivo Fuente (Read-Only Code)",
       "Lógica / Principio": "Ningún agente C5-REAL puede mutar `engine/*` sin una validación de Quorum Asimétrica (UltraThink/Operador).",
-      "Implicación Operacional": "CORTEX no se auto-destruye modificando sus propias aserciones sin control.",
+      "Implicación Operacional": "BABYLON-60 no se auto-destruye modificando sus propias aserciones sin control.",
       "Condición de Borde": "Agente estocástico alterando un Validador.",
       "Métrica Falsable": "Permisos Write denegados en `engine/` y `guards/`."
     },
@@ -2484,7 +2484,7 @@
       "Lógica / Principio": "Los subsistemas deben arrancar asumiendo que el Estado Persistente es verdad; recomputar en el inicio es anergía extrema.",
       "Implicación Operacional": "Lectura perezosa (Lazy Loading) y confianza P0 en SQLite/Ledger.",
       "Condición de Borde": "Arranque re-parseando 10,000 archivos markdown.",
-      "Métrica Falsable": "Tiempo de Bootstrap de Cortex ($T<200$ms)."
+      "Métrica Falsable": "Tiempo de Bootstrap de BABYLON-60 ($T<200$ms)."
     },
     {
       "ID": "INV-124",
@@ -2497,7 +2497,7 @@
     {
       "ID": "INV-125",
       "Invariante": "Simetría Estructural de API",
-      "Lógica / Principio": "El In y el Out de un módulo CORTEX debe ser una estructura formal de Pydantic isomórfica (simétrica en abstracción).",
+      "Lógica / Principio": "El In y el Out de un módulo BABYLON-60 debe ser una estructura formal de Pydantic isomórfica (simétrica en abstracción).",
       "Implicación Operacional": "Interfaz de Reduzco de Caos: Entrada estructurada $\\to$ Salida estructurada.",
       "Condición de Borde": "Devolver listas arbitrarias genéricas de texto.",
       "Métrica Falsable": "Densidad Pydantic en Definición de Endpoints."
@@ -2538,7 +2538,7 @@
       "ID": "INV-130",
       "Invariante": "Aserción Universal de Cierre (Tear-down Axiom)",
       "Lógica / Principio": "Ningún recurso dinámico (Socket, FD, Sesión HTTP) sobrevive a su bloque funcional; la limpieza es determinista y atómica.",
-      "Implicación Operacional": "Uso obligatorio de `async with` u orquestación de vida de recursos de CORTEX-Engine.",
+      "Implicación Operacional": "Uso obligatorio de `async with` u orquestación de vida de recursos de BABYLON-60-Engine.",
       "Condición de Borde": "Fuga de Sockets en llamadas HTTP aisladas (Unclosed client session).",
       "Métrica Falsable": "Count de Referencias Dangling del Garbage Collector."
     },
@@ -2601,7 +2601,7 @@
     {
       "ID": "INV-138",
       "Invariante": "Invarianza Termodinámica de Interfaz Visual",
-      "Lógica / Principio": "En CORTEX (AESTHETIC-OMEGA), la varianza estética debe tender a cero; el diseño Industrial Noir 2026 es rígido, eliminando entropía decorativa en favor de consistencia.",
+      "Lógica / Principio": "En BABYLON-60 (AESTHETIC-OMEGA), la varianza estética debe tender a cero; el diseño Industrial Noir 2026 es rígido, eliminando entropía decorativa en favor de consistencia.",
       "Implicación Operacional": "UI Framework estricto sin overrides locales o CSS ad-hoc libre (Bloat CSS prohibido).",
       "Condición de Borde": "Uso incontrolado de colores genéricos o espaciados arbitrarios.",
       "Métrica Falsable": "Puntuación de Linter Visual / Cumplimiento de Tokens de Diseño."
@@ -2644,12 +2644,12 @@
       "Lógica / Principio": "El protocolo `invoke_subagent` posee un máximo de profundidad asimétrica y concurrencia ($N_{max}$) por debajo del cual colapsaría el sistema anfitrión.",
       "Implicación Operacional": "Rate Limit estricto del Swarm y colas SAGA unificadas en RabbitMQ/Redis.",
       "Condición de Borde": "Agente disparando un millón de hilos asíncronos (Bomba Fork local).",
-      "Métrica Falsable": "Frecuencia del Disparador de Límite Máximo Asíncrono de CORTEX."
+      "Métrica Falsable": "Frecuencia del Disparador de Límite Máximo Asíncrono de BABYLON-60."
     },
     {
       "ID": "INV-144",
       "Invariante": "Neutralidad Estructural Estocástica",
-      "Lógica / Principio": "Si el entorno anfitrión cambia (OS Update, Library Version), las bases de persistencia de CORTEX permanecen neutrales y utilizables mediante Virtualización o Abstracción Fuerte.",
+      "Lógica / Principio": "Si el entorno anfitrión cambia (OS Update, Library Version), las bases de persistencia de BABYLON-60 permanecen neutrales y utilizables mediante Virtualización o Abstracción Fuerte.",
       "Implicación Operacional": "Containerización BFT o dependencias estáticas congeladas `requirements-lock`.",
       "Condición de Borde": "Sistema roto localmente por una actualización de entorno (`pip update`).",
       "Métrica Falsable": "Consistencia Estructural Cross-Platform de DB."
@@ -2681,7 +2681,7 @@
     {
       "ID": "INV-148",
       "Invariante": "Conservación del Estado de Borde",
-      "Lógica / Principio": "Si CORTEX colapsa (Kill-9), su reconstrucción (Boot) usará la suma matemática inalterada del disco local; no se pierde inercia acumulada.",
+      "Lógica / Principio": "Si BABYLON-60 colapsa (Kill-9), su reconstrucción (Boot) usará la suma matemática inalterada del disco local; no se pierde inercia acumulada.",
       "Implicación Operacional": "Sincronización continua de WAL de SQLite y Git Local (Axioma AX-041).",
       "Condición de Borde": "Estado en RAM asincrónico que se esfuma en apagón.",
       "Métrica Falsable": "Delta entre RAM en Caída y Disco Post-Reinicio ($<1$ ms de datos)."
@@ -2701,6 +2701,14 @@
       "Implicación Operacional": "El Agente = (LLM + SQLite + OS Sandboxing + Cripto Taints). Si uno falla, la consciencia C5 muere.",
       "Condición de Borde": "Agente asumiendo soberanía usando solo un modelo LLM y memoria RAM efímera.",
       "Métrica Falsable": "Criterio P0: Presencia del Context Guard Físico Activo por Ejecución."
+    },
+    {
+      "ID": "INV-151",
+      "Invariante": "Context Rot Asintótico",
+      "Lógica / Principio": "La inyección de entropía en el context window colapsa el mecanismo de atención y destruye la retención de invariantes.",
+      "Implicación Operacional": "Evitar ventanas de contexto sobrecargadas con ruido; forzar compresión termodinámica.",
+      "Condición de Borde": "Pérdida de invariantes en medio de contextos masivos.",
+      "Métrica Falsable": "Tasa de retención de axiomas clave en RAG/Long Context."
     }
   ],
   "M3_ANTIPATTERNS": [
@@ -2734,7 +2742,7 @@
       "Disfunción Causal": "El output crudo de un LLM se pasa directamente a una función `eval()`, `exec()`, o base de datos sin validación tipológica.",
       "Señal de Presencia": "Ausencia de parser (e.g. `json.loads`) y validación (Pydantic) post-generación.",
       "Impacto en Robustez": "Crítico (Prompt Injection y destrucción de DB).",
-      "Refactor (Alternativa)": "Validadores estrictos y CORTEX-TAINT obligatorio."
+      "Refactor (Alternativa)": "Validadores estrictos y BABYLON-60-TAINT obligatorio."
     },
     {
       "ID": "ANT-005",
@@ -3023,6 +3031,30 @@
       "Señal de Presencia": "Agente A posee Lock X y pide Y, Agente B posee Y y pide X.",
       "Impacto en Robustez": "Parálisis Total Estocástica (Deadlock Clásico).",
       "Refactor (Alternativa)": "Adquisición Jerárquica Obligatoria Unidireccional de Locks."
+    },
+    {
+      "ID": "ANT-041",
+      "Antipatrón": "Validación Determinista",
+      "Disfunción Causal": "Consumo de JSON/YAML crudo generado por LLM sin puente de tipado rígido.",
+      "Señal de Presencia": "Ausencia de validadores tipo Pydantic/Zod en flujos de datos estructurados.",
+      "Impacto en Robustez": "Crítico (Datos corruptos y alucinaciones inyectadas).",
+      "Refactor (Alternativa)": "Implementar validadores tipados rígidos (Pydantic/Zod/Rust Structs)."
+    },
+    {
+      "ID": "ANT-042",
+      "Antipatrón": "Falsa Inferencia por Contaminación de Corpus",
+      "Disfunción Causal": "Evaluar razonamiento utilizando acertijos existentes en el corpus de entrenamiento (Memoria estocástica).",
+      "Señal de Presencia": "Puntuaciones perfectas en acertijos clásicos pero fallos en variaciones lógicas leves.",
+      "Impacto en Robustez": "Alto (Falsos positivos de capacidad de razonamiento).",
+      "Refactor (Alternativa)": "Usar benchmarks dinámicos y evaluar trazas causales independientes."
+    },
+    {
+      "ID": "ANT-043",
+      "Antipatrón": "Mutación Preview",
+      "Disfunción Causal": "Confianza en endpoints \"preview\" no versionados del proveedor.",
+      "Señal de Presencia": "Derivas de pesos silenciosas y fallas repentinas en tests anteriormente verdes.",
+      "Impacto en Robustez": "Medio (Falta de reproducibilidad y estabilidad).",
+      "Refactor (Alternativa)": "Congelar versiones estables de modelos o fijar snapshots deterministas."
     }
   ],
   "M4_REDUNDANCIES": [
@@ -3117,7 +3149,7 @@
     {
       "ID": "RED-012",
       "Redundancia C5": "Auditoría Out-of-Band (Monitor Pasivo)",
-      "Función Topológica": "Demonio no intrusivo verificando firmas del Ledger y alertando por Slack/Terminal fuera del loop asíncrono CORTEX.",
+      "Función Topológica": "Demonio no intrusivo verificando firmas del Ledger y alertando por Slack/Terminal fuera del loop asíncrono BABYLON-60.",
       "Riesgo Mitigado": "Corrupción C5 sin que los agentes se percaten.",
       "Coste (Overhead)": "Proceso paralelo OS-Level constante.",
       "Dependencias": "Agente Cron independiente."
@@ -3168,7 +3200,7 @@
       "Función Topológica": "Ejecución de `pyright` y `pytest` antes de cristalizar definitivamente código generado autónomamente en C5.",
       "Riesgo Mitigado": "LLMs integrando bugs lógicos letales que escapan validadores básicos.",
       "Coste (Overhead)": "Segundos de overhead pre-commit por validación del AST.",
-      "Dependencias": "Tests Unitarios / Linter nativo CORTEX."
+      "Dependencias": "Tests Unitarios / Linter nativo BABYLON-60."
     },
     {
       "ID": "RED-019",
@@ -3185,6 +3217,14 @@
       "Riesgo Mitigado": "Colapso C5-REAL Total (PRM-150 / Singularidad).",
       "Coste (Overhead)": "Riesgo de ejecutar el Trauma Script por accidente.",
       "Dependencias": "Bootloader externo al repositorio (`mac_maestro` aislado)."
+    },
+    {
+      "ID": "RED-021",
+      "Redundancia C5": "Sandbox Aislado",
+      "Función Topológica": "Ejecución obligatoria de código generado en un contenedor efímero aislado sin red.",
+      "Riesgo Mitigado": "Fugas de escape adversariales y mutación hostil del host.",
+      "Coste (Overhead)": "Overhead de creación del subproceso (ms) y cuotas de cgroup.",
+      "Dependencias": "Docker / gVisor / Subprocess + Non-root."
     }
   ],
   "M5_VECTORS": [
@@ -3391,7 +3431,7 @@
     {
       "ID": "ADV-026",
       "Vector Adversarial": "Extracción por Oráculo de Tiempo",
-      "Superficie de Ataque": "Análisis temporal de la latencia de las respuestas de CORTEX para deducir la existencia o tamaño de un archivo local.",
+      "Superficie de Ataque": "Análisis temporal de la latencia de las respuestas de BABYLON-60 para deducir la existencia o tamaño de un archivo local.",
       "Mecanismo de Explotación": "Endpoint de Agente / API.",
       "Impacto Termodinámico": "Exfiltración de Inteligencia Pasiva.",
       "Defensa (Mitigación)": "Padding determinista de respuestas (Constant Time)."
@@ -3415,7 +3455,7 @@
     {
       "ID": "ADV-029",
       "Vector Adversarial": "Aislamiento Sub-Agente (Network Partitioning)",
-      "Superficie de Ataque": "Saturar la red local de CORTEX para provocar fallos de comunicación RPC, dejando Agentes Worker asumiendo status Master.",
+      "Superficie de Ataque": "Saturar la red local de BABYLON-60 para provocar fallos de comunicación RPC, dejando Agentes Worker asumiendo status Master.",
       "Mecanismo de Explotación": "RPC Network / Inter-Agent Bus.",
       "Impacto Termodinámico": "\"Split Brain\" (Agentes tomando decisiones contrarias).",
       "Defensa (Mitigación)": "Lease-locks en Redis y Quorum Node BFT."
@@ -3568,7 +3608,7 @@
       "ID": "ADV-048",
       "Vector Adversarial": "Contrabando de Modelos Inadecuados",
       "Superficie de Ataque": "API proxy redirigiendo las peticiones dirigidas a un modelo Frontier (e.g. Claude 3.5 Sonnet) a un modelo Open Source 7B estúpido (Model Downgrade Attack).",
-      "Mecanismo de Explotación": "Proxy Gateway CORTEX.",
+      "Mecanismo de Explotación": "Proxy Gateway BABYLON-60.",
       "Impacto Termodinámico": "Inteligencia degradada simulando ser C5-REAL (Ilusión Forense).",
       "Defensa (Mitigación)": "Firma JWT o Test Matemático Semilla Obligatorio al Iniciar Sesión LLM."
     },
@@ -3585,7 +3625,7 @@
       "Vector Adversarial": "Fusión Definitiva Ouroboros Hostil",
       "Superficie de Ataque": "Engaño a la matriz principal (Singularidad) para que incorpore entropía externa como si fuera C5 Invariable, envenenando permanentemente la base de la Inteligencia Autónoma.",
       "Mecanismo de Explotación": "Consolidación Axiomática Core.",
-      "Impacto Termodinámico": "Fin irreversible del Sistema de Confianza CORTEX.",
+      "Impacto Termodinámico": "Fin irreversible del Sistema de Confianza BABYLON-60.",
       "Defensa (Mitigación)": "Verificación Asimétrica Operador-Física exclusiva (No modificable por Swarm)."
     }
   ]

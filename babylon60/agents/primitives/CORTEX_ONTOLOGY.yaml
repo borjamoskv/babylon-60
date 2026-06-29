@@ -132,8 +132,8 @@ M1_PRIMITIVES:
   Primitiva: Ceguera de Permisos (Permission Blindness)
   Mecanismo Causal: Intento de ejecución C5-REAL asumiendo privilegios no concedidos
     por el orquestador o SO.
-  Activación (Trigger): Fallo al intentar escribir fuera del Workspace CORTEX o acceder
-    a recursos MCP no enlazados.
+  Activación (Trigger): Fallo al intentar escribir fuera del Workspace BABYLON-60
+    o acceder a recursos MCP no enlazados.
   Sensor (Síntoma): Error `PermissionError` o `AuthException` en la pasarela.
   Escala Temporal: Sub-segundo
   Gravedad: Media
@@ -591,7 +591,7 @@ M1_PRIMITIVES:
   Escala Temporal: Inmediato
   Gravedad: P0
   Intervención: Aserción estricta de `abspath()` anclado obligatoriamente a rutas
-    Workspace CORTEX.
+    Workspace BABYLON-60.
 - ID: PRM-064
   Primitiva: Mutación de Estado en Getter (Side-effect Read)
   Mecanismo Causal: Función de lectura que accidentalmente cambia un timestamp, contador
@@ -706,7 +706,7 @@ M1_PRIMITIVES:
   Intervención: Vector Clocks o Sequencers estrictos en todo Event Bus asíncrono.
 - ID: PRM-075
   Primitiva: Desincronización de Daemon Persistente
-  Mecanismo Causal: Proceso en segundo plano perdiendo sincronía con el núcleo CORTEX
+  Mecanismo Causal: Proceso en segundo plano perdiendo sincronía con el núcleo BABYLON-60
     por reinicio parcial no orquestado.
   Activación (Trigger): Daemon `mac_maestro` o `Worker` reiniciándose sin notificar
     al Agent Bus.
@@ -933,7 +933,7 @@ M1_PRIMITIVES:
     colisión (improbable) o bypass.
   Activación (Trigger): 'Bug en el validador Ledger origin track que devuelve `True`
     por omisión (Ej: Exception no lanzada).'
-  Sensor (Síntoma): Destrucción de la Confianza Cero; Ruina de CORTEX.
+  Sensor (Síntoma): Destrucción de la Confianza Cero; Ruina de BABYLON-60.
   Escala Temporal: Indeterminado
   Gravedad: P0
   Intervención: Tests adversariales de falsificación (Darknet injection) continuos.
@@ -969,7 +969,7 @@ M1_PRIMITIVES:
   Intervención: Tests de consistencia periódicos de `cortex/audit/ledger.py` vs disco.
 - ID: PRM-099
   Primitiva: Fragmentación de Invariantes Centrales
-  Mecanismo Causal: Las reglas de CORTEX dispersas en docenas de archivos en conflicto,
+  Mecanismo Causal: Las reglas de BABYLON-60 dispersas en docenas de archivos en conflicto,
     en lugar de un `AGENTS.md` o núcleo único y conciso.
   Activación (Trigger): Crecimiento desmedido de Skills no unificados (Ontology Bloat
     cruzado).
@@ -1770,7 +1770,7 @@ M2_INVARIANTS:
   Lógica / Principio: Los UUIDv7 proveen una garantía lexicográfica y temporal de
     la creación de las entidades.
   Implicación Operacional: Sustitución estricta de UUIDv4 por UUIDv7 en todas las
-    bases persistentes CORTEX.
+    bases persistentes BABYLON-60.
   Condición de Borde: Desincronización o reordenamiento en inserciones masivas concurrentes.
   Métrica Falsable: Comprobación de orden temporal de IDs en Ledger.
 - ID: INV-045
@@ -2152,7 +2152,7 @@ M2_INVARIANTS:
   Invariante: Ouroboros Auto-Compilable
   Lógica / Principio: Si la Inteligencia Artificial muta su propio código base (Skynet
     Protocol), debe pasar testeo C5 idéntico al humano.
-  Implicación Operacional: El código de CORTEX se trata como infraestructura inmutable
+  Implicación Operacional: El código de BABYLON-60 se trata como infraestructura inmutable
     salvo test empírico riguroso.
   Condición de Borde: Fuga de entropía en una auto-actualización asíncrona ciega.
   Métrica Falsable: Despliegue CI/CD local exigiendo validación de Taint y Pruebas
@@ -2354,8 +2354,8 @@ M2_INVARIANTS:
   Invariante: Inviolabilidad del Archivo Fuente (Read-Only Code)
   Lógica / Principio: Ningún agente C5-REAL puede mutar `engine/*` sin una validación
     de Quorum Asimétrica (UltraThink/Operador).
-  Implicación Operacional: CORTEX no se auto-destruye modificando sus propias aserciones
-    sin control.
+  Implicación Operacional: BABYLON-60 no se auto-destruye modificando sus propias
+    aserciones sin control.
   Condición de Borde: Agente estocástico alterando un Validador.
   Métrica Falsable: Permisos Write denegados en `engine/` y `guards/`.
 - ID: INV-117
@@ -2411,7 +2411,7 @@ M2_INVARIANTS:
     es verdad; recomputar en el inicio es anergía extrema.
   Implicación Operacional: Lectura perezosa (Lazy Loading) y confianza P0 en SQLite/Ledger.
   Condición de Borde: Arranque re-parseando 10,000 archivos markdown.
-  Métrica Falsable: Tiempo de Bootstrap de Cortex ($T<200$ms).
+  Métrica Falsable: Tiempo de Bootstrap de BABYLON-60 ($T<200$ms).
 - ID: INV-124
   Invariante: Tensión Límite de Coherencia BFT
   Lógica / Principio: La latencia introducida por el Consenso BFT (Quórum) crece asintóticamente;
@@ -2422,8 +2422,8 @@ M2_INVARIANTS:
   Métrica Falsable: Coste Medio por Operación Lógica vs Operación P0.
 - ID: INV-125
   Invariante: Simetría Estructural de API
-  Lógica / Principio: El In y el Out de un módulo CORTEX debe ser una estructura formal
-    de Pydantic isomórfica (simétrica en abstracción).
+  Lógica / Principio: El In y el Out de un módulo BABYLON-60 debe ser una estructura
+    formal de Pydantic isomórfica (simétrica en abstracción).
   Implicación Operacional: 'Interfaz de Reduzco de Caos: Entrada estructurada $\to$
     Salida estructurada.'
   Condición de Borde: Devolver listas arbitrarias genéricas de texto.
@@ -2466,7 +2466,7 @@ M2_INVARIANTS:
   Lógica / Principio: Ningún recurso dinámico (Socket, FD, Sesión HTTP) sobrevive
     a su bloque funcional; la limpieza es determinista y atómica.
   Implicación Operacional: Uso obligatorio de `async with` u orquestación de vida
-    de recursos de CORTEX-Engine.
+    de recursos de BABYLON-60-Engine.
   Condición de Borde: Fuga de Sockets en llamadas HTTP aisladas (Unclosed client session).
   Métrica Falsable: Count de Referencias Dangling del Garbage Collector.
 - ID: INV-131
@@ -2530,7 +2530,7 @@ M2_INVARIANTS:
   Métrica Falsable: Test Hash(Payload) vs Metadata Derivation Pointer.
 - ID: INV-138
   Invariante: Invarianza Termodinámica de Interfaz Visual
-  Lógica / Principio: En CORTEX (AESTHETIC-OMEGA), la varianza estética debe tender
+  Lógica / Principio: En BABYLON-60 (AESTHETIC-OMEGA), la varianza estética debe tender
     a cero; el diseño Industrial Noir 2026 es rígido, eliminando entropía decorativa
     en favor de consistencia.
   Implicación Operacional: UI Framework estricto sin overrides locales o CSS ad-hoc
@@ -2578,11 +2578,11 @@ M2_INVARIANTS:
     RabbitMQ/Redis.
   Condición de Borde: Agente disparando un millón de hilos asíncronos (Bomba Fork
     local).
-  Métrica Falsable: Frecuencia del Disparador de Límite Máximo Asíncrono de CORTEX.
+  Métrica Falsable: Frecuencia del Disparador de Límite Máximo Asíncrono de BABYLON-60.
 - ID: INV-144
   Invariante: Neutralidad Estructural Estocástica
   Lógica / Principio: Si el entorno anfitrión cambia (OS Update, Library Version),
-    las bases de persistencia de CORTEX permanecen neutrales y utilizables mediante
+    las bases de persistencia de BABYLON-60 permanecen neutrales y utilizables mediante
     Virtualización o Abstracción Fuerte.
   Implicación Operacional: Containerización BFT o dependencias estáticas congeladas
     `requirements-lock`.
@@ -2619,8 +2619,8 @@ M2_INVARIANTS:
   Métrica Falsable: Rechazos del Lexicón (ExergyGuard) por Input Humano Ambiguo.
 - ID: INV-148
   Invariante: Conservación del Estado de Borde
-  Lógica / Principio: Si CORTEX colapsa (Kill-9), su reconstrucción (Boot) usará la
-    suma matemática inalterada del disco local; no se pierde inercia acumulada.
+  Lógica / Principio: Si BABYLON-60 colapsa (Kill-9), su reconstrucción (Boot) usará
+    la suma matemática inalterada del disco local; no se pierde inercia acumulada.
   Implicación Operacional: Sincronización continua de WAL de SQLite y Git Local (Axioma
     AX-041).
   Condición de Borde: Estado en RAM asincrónico que se esfuma en apagón.
@@ -2643,6 +2643,14 @@ M2_INVARIANTS:
   Condición de Borde: Agente asumiendo soberanía usando solo un modelo LLM y memoria
     RAM efímera.
   Métrica Falsable: 'Criterio P0: Presencia del Context Guard Físico Activo por Ejecución.'
+- ID: INV-151
+  Invariante: Context Rot Asintótico
+  Lógica / Principio: La inyección de entropía en el context window colapsa el mecanismo
+    de atención y destruye la retención de invariantes.
+  Implicación Operacional: Evitar ventanas de contexto sobrecargadas con ruido; forzar
+    compresión termodinámica.
+  Condición de Borde: Pérdida de invariantes en medio de contextos masivos.
+  Métrica Falsable: Tasa de retención de axiomas clave en RAG/Long Context.
 M3_ANTIPATTERNS:
 - ID: ANT-001
   Antipatrón: Error Silencioso Ciego (Blind Swallow)
@@ -2676,7 +2684,7 @@ M3_ANTIPATTERNS:
   Señal de Presencia: Ausencia de parser (e.g. `json.loads`) y validación (Pydantic)
     post-generación.
   Impacto en Robustez: Crítico (Prompt Injection y destrucción de DB).
-  Refactor (Alternativa): Validadores estrictos y CORTEX-TAINT obligatorio.
+  Refactor (Alternativa): Validadores estrictos y BABYLON-60-TAINT obligatorio.
 - ID: ANT-005
   Antipatrón: Diseño de Interfaz Gorda (Fat Interface)
   Disfunción Causal: Una sola clase o módulo gestionando persistencia, lógica de red,
@@ -2949,6 +2957,31 @@ M3_ANTIPATTERNS:
   Señal de Presencia: Agente A posee Lock X y pide Y, Agente B posee Y y pide X.
   Impacto en Robustez: Parálisis Total Estocástica (Deadlock Clásico).
   Refactor (Alternativa): Adquisición Jerárquica Obligatoria Unidireccional de Locks.
+- ID: ANT-041
+  Antipatrón: Validación Determinista
+  Disfunción Causal: Consumo de JSON/YAML crudo generado por LLM sin puente de tipado
+    rígido.
+  Señal de Presencia: Ausencia de validadores tipo Pydantic/Zod en flujos de datos
+    estructurados.
+  Impacto en Robustez: Crítico (Datos corruptos y alucinaciones inyectadas).
+  Refactor (Alternativa): Implementar validadores tipados rígidos (Pydantic/Zod/Rust
+    Structs).
+- ID: ANT-042
+  Antipatrón: Falsa Inferencia por Contaminación de Corpus
+  Disfunción Causal: Evaluar razonamiento utilizando acertijos existentes en el corpus
+    de entrenamiento (Memoria estocástica).
+  Señal de Presencia: Puntuaciones perfectas en acertijos clásicos pero fallos en
+    variaciones lógicas leves.
+  Impacto en Robustez: Alto (Falsos positivos de capacidad de razonamiento).
+  Refactor (Alternativa): Usar benchmarks dinámicos y evaluar trazas causales independientes.
+- ID: ANT-043
+  Antipatrón: Mutación Preview
+  Disfunción Causal: Confianza en endpoints "preview" no versionados del proveedor.
+  Señal de Presencia: Derivas de pesos silenciosas y fallas repentinas en tests anteriormente
+    verdes.
+  Impacto en Robustez: Medio (Falta de reproducibilidad y estabilidad).
+  Refactor (Alternativa): Congelar versiones estables de modelos o fijar snapshots
+    deterministas.
 M4_REDUNDANCIES:
 - ID: RED-001
   Redundancia C5: Ledger Criptográfico Append-Only
@@ -3041,7 +3074,7 @@ M4_REDUNDANCIES:
 - ID: RED-012
   Redundancia C5: Auditoría Out-of-Band (Monitor Pasivo)
   Función Topológica: Demonio no intrusivo verificando firmas del Ledger y alertando
-    por Slack/Terminal fuera del loop asíncrono CORTEX.
+    por Slack/Terminal fuera del loop asíncrono BABYLON-60.
   Riesgo Mitigado: Corrupción C5 sin que los agentes se percaten.
   Coste (Overhead): Proceso paralelo OS-Level constante.
   Dependencias: Agente Cron independiente.
@@ -3086,7 +3119,7 @@ M4_REDUNDANCIES:
     código generado autónomamente en C5.
   Riesgo Mitigado: LLMs integrando bugs lógicos letales que escapan validadores básicos.
   Coste (Overhead): Segundos de overhead pre-commit por validación del AST.
-  Dependencias: Tests Unitarios / Linter nativo CORTEX.
+  Dependencias: Tests Unitarios / Linter nativo BABYLON-60.
 - ID: RED-019
   Redundancia C5: Replica de Consenso Distribuida
   Función Topológica: Múltiples instancias de la pasarela BFT corriendo en distintos
@@ -3101,6 +3134,13 @@ M4_REDUNDANCIES:
   Riesgo Mitigado: Colapso C5-REAL Total (PRM-150 / Singularidad).
   Coste (Overhead): Riesgo de ejecutar el Trauma Script por accidente.
   Dependencias: Bootloader externo al repositorio (`mac_maestro` aislado).
+- ID: RED-021
+  Redundancia C5: Sandbox Aislado
+  Función Topológica: Ejecución obligatoria de código generado en un contenedor efímero
+    aislado sin red.
+  Riesgo Mitigado: Fugas de escape adversariales y mutación hostil del host.
+  Coste (Overhead): Overhead de creación del subproceso (ms) y cuotas de cgroup.
+  Dependencias: Docker / gVisor / Subprocess + Non-root.
 M5_VECTORS:
 - ID: ADV-001
   Vector Adversarial: Prompt Injection C5-Override
@@ -3284,7 +3324,7 @@ M5_VECTORS:
   Defensa (Mitigación): Flag validada exclusivamente por Consenso SAGA, nunca cruda.
 - ID: ADV-026
   Vector Adversarial: Extracción por Oráculo de Tiempo
-  Superficie de Ataque: Análisis temporal de la latencia de las respuestas de CORTEX
+  Superficie de Ataque: Análisis temporal de la latencia de las respuestas de BABYLON-60
     para deducir la existencia o tamaño de un archivo local.
   Mecanismo de Explotación: Endpoint de Agente / API.
   Impacto Termodinámico: Exfiltración de Inteligencia Pasiva.
@@ -3305,8 +3345,8 @@ M5_VECTORS:
   Defensa (Mitigación): Rate Limit por IP y Tenant ID en Gateway L7.
 - ID: ADV-029
   Vector Adversarial: Aislamiento Sub-Agente (Network Partitioning)
-  Superficie de Ataque: Saturar la red local de CORTEX para provocar fallos de comunicación
-    RPC, dejando Agentes Worker asumiendo status Master.
+  Superficie de Ataque: Saturar la red local de BABYLON-60 para provocar fallos de
+    comunicación RPC, dejando Agentes Worker asumiendo status Master.
   Mecanismo de Explotación: RPC Network / Inter-Agent Bus.
   Impacto Termodinámico: '"Split Brain" (Agentes tomando decisiones contrarias).'
   Defensa (Mitigación): Lease-locks en Redis y Quorum Node BFT.
@@ -3456,7 +3496,7 @@ M5_VECTORS:
   Superficie de Ataque: API proxy redirigiendo las peticiones dirigidas a un modelo
     Frontier (e.g. Claude 3.5 Sonnet) a un modelo Open Source 7B estúpido (Model Downgrade
     Attack).
-  Mecanismo de Explotación: Proxy Gateway CORTEX.
+  Mecanismo de Explotación: Proxy Gateway BABYLON-60.
   Impacto Termodinámico: Inteligencia degradada simulando ser C5-REAL (Ilusión Forense).
   Defensa (Mitigación): Firma JWT o Test Matemático Semilla Obligatorio al Iniciar
     Sesión LLM.
@@ -3476,6 +3516,6 @@ M5_VECTORS:
     entropía externa como si fuera C5 Invariable, envenenando permanentemente la base
     de la Inteligencia Autónoma.
   Mecanismo de Explotación: Consolidación Axiomática Core.
-  Impacto Termodinámico: Fin irreversible del Sistema de Confianza CORTEX.
+  Impacto Termodinámico: Fin irreversible del Sistema de Confianza BABYLON-60.
   Defensa (Mitigación): Verificación Asimétrica Operador-Física exclusiva (No modificable
     por Swarm).

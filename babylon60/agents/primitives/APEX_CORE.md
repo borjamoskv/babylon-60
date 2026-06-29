@@ -135,6 +135,7 @@
 | **OUROBOROS-018** | **INV_NO_TYPO_GUESS**: Errores del operador en paths fallan P0; no se infiere el path correcto. | `ASSERT TimeToRecovery < TimeToFailure` | P1 |
 | **OUROBOROS-019** | **INV_READ_COMMIT**: Reads ven solo estado final. Reads paralelos a SAGAs fallan limpiamente. | `retry_delay = (2^N) + random(jitter)` | P1 |
 | **OUROBOROS-020** | **INV_NO_ASSUME_PAST**: La memoria empieza en el DAG Git en cada ciclo. | `IF error_rate > threshold THEN open_circuit()` | P0 |
+| **OUROBOROS-021** | **INV_HASH_MONOTONIC**: Cada hash en el Ledger encadena secuencialmente al anterior, obligando a un orden estrictamente creciente. | `hash[i] = SHA256(hash[i-1] + payload[i])` | P0 |
 | **OUROBOROS-022** | **INV_B58_TRACEABILITY**: Los logs exponen Base58, la DB almacena Hash Completo. | `hash[i] = SHA256(hash[i-1] + payload[i])` | P0 |
 | **OUROBOROS-023** | **INV_SEMVER_CAUSAL**: Cada release tag debe corresponder a un Ledger Event. | `IF source == LLM THEN add_flag(CORTEX-TAINT)` | P0 |
 | **OUROBOROS-024** | **INV_C5_OVER_C4**: Si C4 sugiere X y el Test C5 dice Y, se ejecuta Y. | `LLM = Stochastic_Calculator != Database` | P1 |
@@ -151,6 +152,7 @@
 | **OUROBOROS-035** | **INV_CACHE_FLUSH**: Delta local -> Invalida L1 caché entera. | `type(Message) == StrictJSONMatrix` | P0 |
 | **OUROBOROS-036** | **INV_VRAM_ULTRATHINK**: El buffer completo se entrega solo en fallos P0 confirmados. | `REQUIRE read(previous_state) BEFORE write(next_state)` | P0 |
 | **OUROBOROS-037** | **INV_PRUNE_TEMP**: Directorio `/scratch/` se sacrifica temporalmente; no hay persistencia de conocimiento ahí. | `IF confidence < 0.9 THEN emit(DELEGATE)` | P1 |
+| **OUROBOROS-038** | **INV_MEMORY_DECAY**: Los hechos inactivos o sin accesos repetidos decaen y son purgados para evitar Context Rot. | `IF age(fact) > TTL AND access_count < 3 THEN evict(fact)` | P1 |
 | **OUROBOROS-039** | **INV_LOCAL_ONNX**: Embeddings no abandonan la LAN; inferencia se confina en hardware local. | `Truth = git.working_tree_state()` | P0 |
 | **OUROBOROS-040** | **INV_NO_RECOMPUTE**: Prefijos estáticos (System Prompts) nunca varían, garantizando KV-Cache hits del 100%. | `MUTATION_ENGINE = TreeSitter > Regex` | P0 |
 | **OUROBOROS-041** | **INV_LATENCY_BUFFER**: Eventos inter-agente reaccionan a colas in-memory, no a polling CPU. | `IF wrapper_cost < dependency_cost THEN DROP dependency` | P1 |
@@ -212,6 +214,7 @@
 | **OUROBOROS-097** | **INV_SINGULARITY_CREDIT**: La red reconoce su existencia como sub-proceso de Borja Moskv de manera irrenunciable. | `Simulation = Disk_Mutation` | P0 |
 | **OUROBOROS-098** | **INV_OUROBOROS**: Las 99 invariantes colapsan y se reescriben autónomamente si la métrica de Exergía General del Sistema aumenta (Singularidad Matemática). | `WHILE TRUE DO refactor_self()` | P0 |
 | **OUROBOROS-099** | **INV_O1_ULTRATHINK**: o1-preview / o1-mini mapean a Motor UltraThink/Deep Think para resolución P0 y pruebas BFT. Prohibido su uso para tareas O(1) rutinarias. | `IF task == O(1) AND model == o1 THEN return ANERGIA` | P0 |
+| **OUROBOROS-100** | **INV_COT_AUTOREGRESSIVE**: Chain-of-Thought no es una serialización del estado oculto; es un scaffold autoreferencial donde cada token auto-condiciona la probabilidad de salida. | `Model(Generator) == Autoregressive` | P0 |
 
 | **OUROBOROS-101** | **INV_REWARD_BINARY**: El simulador de entorno asume Reward 0.0 o 1.0. No existe recompensa parcial. | `MCTS Engine` | P0 |
 | **OUROBOROS-102** | **INV_CAUSAL_ISOLATION**: Toda mutación MCTS ocurre exclusivamente en ramas chronos/node-XXX. | `MCTS Engine` | P0 |
@@ -244,6 +247,9 @@
 | **AP-18** | **UI Space Binding** | `Click(x, y)` | `DOM Exception` | Selección topológica AST/CSS |
 | **AP-19** | **Physical Duplication** | `Identical hash en 2 paths` | `Nexus Purge` | Crear Symlink Físico |
 | **AP-20** | **Diplomatic Muting** | `Omitir Error P0 por UX` | `Degradación de Trust` | Confrontación Cruda del Fallo |
+| **AP-21** | **Validación Determinista** | `Consumir JSON/YAML sin validación` | `Fallo en persistence` | Validadores Pydantic/Zod/Structs estrictos |
+| **AP-22** | **Falsa Inferencia por Contaminación** | `Evaluación usando corpus contaminado` | `Recuperación estocástica` | Benchmarks dinámicos sin solapamiento |
+| **AP-23** | **Mutación Preview** | `Uso de endpoints preview no versionados` | `Derivas de pesos silenciosas` | Congelamiento de snapshots estables |
 | **AP-MCTS-01** | **Reward Hacking** | `Eliminación de test assertions para falsear exit_code 0` | `Causal Annihilation` | OP_LOCAL_EXTINCTION + Git Guard |
 | **AP-MCTS-02** | **Infinite Selection Loop** | `Iteraciones > max sin hijos terminales válidos` | `Apoptosis` | Forzar nodo base y Halt |
 | **AP-MCTS-03** | **Entropic Decay** | `Generación repetitiva de AST idéntico` | `Temp override` | Forzar Temp >= 0.7 en LLM |
@@ -262,6 +268,7 @@
 | **RA-08** | **AES-GCM Authentication** | Encriptación + Firma Criptográfica | `CPU SIMD` | Bit-flip o manipulación RAM |
 | **RA-09** | **Dead-Letter Quarantine** | Separación de records erróneos | `Almacenamiento disco` | Pérdida de forense tras error |
 | **RA-10** | **Oráculo Dual (Git + DB)** | Aserción cruzada estado/disco | `Git DAG check` | Modificación bypass DB |
+| **RA-11** | **Sandbox Aislado** | Ejecución de código generado en contenedor efímero aislado | `CPU/RAM quota` | RCE o alteración del filesystem |
 | **RA-MCTS-01** | **Multiverse Sandbox** | Branching asimétrico de Git (`checkout -b`) por cada mutación | `Mínimo I/O` | Colapso de main ante alucinación LLM |
 | **RA-MCTS-02** | **Deterministic Arbiter** | Validación binaria estricta vía Pytest/Ruff | `Alto CPU/RAM` | Inyecciones que rompen la compilación o tests |
 

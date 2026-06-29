@@ -472,7 +472,7 @@ def emit_markdown(canonical: ForgeReport, out_dir: Path) -> Path:
     lines.append("")
 
     # Antipatterns
-    lines.append("## 20 ANTIPATRONES ESTOCÁSTICOS")
+    lines.append("## 23 ANTIPATRONES ESTOCÁSTICOS")
     lines.append("")
     lines.append("| ID | Antipatrón | Trigger | Penalty | Resolution |")
     lines.append("|:---|:---|:---|:---|:---|")
@@ -484,7 +484,7 @@ def emit_markdown(canonical: ForgeReport, out_dir: Path) -> Path:
     lines.append("")
 
     # Redundancies
-    lines.append("## 10 REDUNDANCIAS ACTIVAS (MITIGACIÓN C5)")
+    lines.append("## 11 REDUNDANCIAS ACTIVAS (MITIGACIÓN C5)")
     lines.append("")
     lines.append("| ID | Redundancia | Mecanismo | Overhead | Resiliencia |")
     lines.append("|:---|:---|:---|:---|:---|")
@@ -539,8 +539,8 @@ def main() -> None:
     gaps = {
         "primitives": find_gaps(report.primitives, "APEX-", 100),
         "invariants": find_gaps(report.invariants, "OUROBOROS-", 100),
-        "antipatterns": find_gaps_ap(report.antipatterns, 20),
-        "redundancies": find_gaps_ra(report.redundancies, 10),
+        "antipatterns": find_gaps_ap(report.antipatterns, 23),
+        "redundancies": find_gaps_ra(report.redundancies, 11),
     }
     report.gaps = gaps
     for cat, g in gaps.items():
@@ -553,7 +553,7 @@ def main() -> None:
     print(f"  Invariants (post-synth):   {len(report.invariants)}")
 
     # Phase 4: Select canonical set
-    print("\n[PHASE-4] Selecting canonical 100+100+20+10...")
+    print("\n[PHASE-4] Selecting canonical 100+100+23+11...")
     canonical = select_canonical(report)
     print(f"  Primitives:   {len(canonical.primitives)}")
     print(f"  Invariants:   {len(canonical.invariants)}")
@@ -567,11 +567,11 @@ def main() -> None:
     assert len(canonical.invariants) == 100, (
         f"Expected 100 invariants, got {len(canonical.invariants)}"
     )
-    assert len(canonical.antipatterns) == 20, (
-        f"Expected 20 antipatterns, got {len(canonical.antipatterns)}"
+    assert len(canonical.antipatterns) == 23, (
+        f"Expected 23 antipatterns, got {len(canonical.antipatterns)}"
     )
-    assert len(canonical.redundancies) == 10, (
-        f"Expected 10 redundancies, got {len(canonical.redundancies)}"
+    assert len(canonical.redundancies) == 11, (
+        f"Expected 11 redundancies, got {len(canonical.redundancies)}"
     )
 
     # Phase 5: Emit

@@ -6,8 +6,8 @@
     "counts": {
       "primitives": 100,
       "invariants": 100,
-      "antipatterns": 20,
-      "redundancies": 10
+      "antipatterns": 23,
+      "redundancies": 11
     }
   },
   "primitives": [
@@ -1055,10 +1055,10 @@
     },
     {
       "id": "OUROBOROS-021",
-      "name": "INV_HASH_MONOTONIC",
-      "logic": "hash[i] = SHA256(hash[i-1] + payload[i]); ORDER(i) es estrictamente creciente",
+      "name": "**INV_HASH_MONOTONIC**: Cada hash en el Ledger encadena secuencialmente al anterior, obligando a un orden estrictamente creciente.",
+      "logic": "hash[i] = SHA256(hash[i-1] + payload[i])",
       "risk": "P0",
-      "source": "synthesized"
+      "source": "parsed"
     },
     {
       "id": "OUROBOROS-022",
@@ -1174,10 +1174,10 @@
     },
     {
       "id": "OUROBOROS-038",
-      "name": "INV_MEMORY_DECAY",
+      "name": "**INV_MEMORY_DECAY**: Los hechos inactivos o sin accesos repetidos decaen y son purgados para evitar Context Rot.",
       "logic": "IF age(fact) > TTL AND access_count < 3 THEN evict(fact)",
       "risk": "P1",
-      "source": "synthesized"
+      "source": "parsed"
     },
     {
       "id": "OUROBOROS-039",
@@ -1412,7 +1412,7 @@
     },
     {
       "id": "OUROBOROS-072",
-      "name": "**INV_ARTIFACT_META**: Artifacts CORTEX requieren forzosamente booleans de UserFacing y RequestFeedback.",
+      "name": "**INV_ARTIFACT_META**: Artifacts BABYLON-60 requieren forzosamente booleans de UserFacing y RequestFeedback.",
       "logic": "agent_A.trust(agent_B) == FALSE",
       "risk": "P0",
       "source": "parsed"
@@ -1545,7 +1545,7 @@
     },
     {
       "id": "OUROBOROS-091",
-      "name": "**INV_NO_PHANTOM_RELEASE**: Release exige correlación 1:1 con un Hash firmado CORTEX.",
+      "name": "**INV_NO_PHANTOM_RELEASE**: Release exige correlación 1:1 con un Hash firmado BABYLON-60.",
       "logic": "IF human_cmd == FATAL THEN HALT AND CONFRONT",
       "risk": "P0",
       "source": "parsed"
@@ -1608,10 +1608,10 @@
     },
     {
       "id": "OUROBOROS-100",
-      "name": "INV_SYNTH_100",
-      "logic": "ASSERT structural_invariant_100 == TRUE",
-      "risk": "P1",
-      "source": "synthesized"
+      "name": "**INV_COT_AUTOREGRESSIVE**: Chain-of-Thought no es una serialización del estado oculto; es un scaffold autoreferencial donde cada token auto-condiciona la probabilidad de salida.",
+      "logic": "Model(Generator) == Autoregressive",
+      "risk": "P0",
+      "source": "parsed"
     }
   ],
   "antipatterns": [
@@ -1660,7 +1660,7 @@
       "name": "Orphaned Taint",
       "trigger": "Generative_Fact SIN Taint",
       "penalty": "Purga LFU",
-      "resolution": "Emitir CORTEX-TAINT",
+      "resolution": "Emitir BABYLON-60-TAINT",
       "source": "parsed"
     },
     {
@@ -1774,6 +1774,30 @@
       "penalty": "Degradación de Trust",
       "resolution": "Confrontación Cruda del Fallo",
       "source": "parsed"
+    },
+    {
+      "id": "AP-21",
+      "name": "Validación Determinista",
+      "trigger": "Consumir JSON/YAML sin validación",
+      "penalty": "Fallo en persistence",
+      "resolution": "Validadores Pydantic/Zod/Structs estrictos",
+      "source": "parsed"
+    },
+    {
+      "id": "AP-22",
+      "name": "Falsa Inferencia por Contaminación",
+      "trigger": "Evaluación usando corpus contaminado",
+      "penalty": "Recuperación estocástica",
+      "resolution": "Benchmarks dinámicos sin solapamiento",
+      "source": "parsed"
+    },
+    {
+      "id": "AP-23",
+      "name": "Mutación Preview",
+      "trigger": "Uso de endpoints preview no versionados",
+      "penalty": "Derivas de pesos silenciosas",
+      "resolution": "Congelamiento de snapshots estables",
+      "source": "parsed"
     }
   ],
   "redundancies": [
@@ -1803,7 +1827,7 @@
     },
     {
       "id": "RA-04",
-      "name": "CORTEX-TAINT Provenance",
+      "name": "BABYLON-60-TAINT Provenance",
       "mechanism": "Flagging origen probabilístico",
       "overhead": "Metadatos extra",
       "resilience": "Alucinación en cascada",
@@ -1855,6 +1879,14 @@
       "mechanism": "Aserción cruzada estado/disco",
       "overhead": "Git DAG check",
       "resilience": "Modificación bypass DB",
+      "source": "parsed"
+    },
+    {
+      "id": "RA-11",
+      "name": "Sandbox Aislado",
+      "mechanism": "Ejecución de código generado en contenedor efímero aislado",
+      "overhead": "CPU/RAM quota",
+      "resilience": "RCE o alteración del filesystem",
       "source": "parsed"
     }
   ]

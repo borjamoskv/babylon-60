@@ -76,7 +76,7 @@ def compile_ontology(primitives_dir, output_json, output_yaml):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(message)s')
-    PRIMITIVES_DIR = "cortex/agents/primitives"
+    PRIMITIVES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "agents", "primitives"))
     OUTPUT_JSON = os.path.join(PRIMITIVES_DIR, "CORTEX_ONTOLOGY.json")
     OUTPUT_YAML = os.path.join(PRIMITIVES_DIR, "CORTEX_ONTOLOGY.yaml")
     compile_ontology(PRIMITIVES_DIR, OUTPUT_JSON, OUTPUT_YAML)
