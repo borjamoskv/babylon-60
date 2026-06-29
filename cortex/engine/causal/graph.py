@@ -85,6 +85,10 @@ def propagate_refutation(graph: KnowledgeGraph, refuted_event_id: str, decay: fl
                 queue.append((child_id, depth + 1))
 
 
+# Alias for backwards compatibility
+CausalGraph = KnowledgeGraph
+
+
 class AsyncCausalGraph:
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self.conn = conn
