@@ -59,14 +59,12 @@ class ExergyGradient:
 
     @property
     def net_derivative(self) -> float:
-        """Calculate ∂E/∂t of the latest steps."""
+        """Calculate ∂E/∂t of the latest steps with temporal regularization."""
         if len(self.history) < 2:
             return 0.0
         latest = self.history[-1]
         prev = self.history[-2]
-        dt = latest["timestamp"] - prev["timestamp"]
-        if dt <= 0:
-            return 0.0
+        dt = max(latest["timestamp"] - prev["timestamp"], 1.0)
         return (latest["net"] - prev["net"]) / dt
 
     def is_degrading(self) -> bool:
@@ -79,9 +77,9 @@ class ExergyGradient:
         for i in range(-1, -self.patience_steps, -1):
             curr = self.history[i]
             prev = self.history[i-1]
-            dt = curr["timestamp"] - prev["timestamp"]
+            dt = max(curr["timestamp"] - prev["timestamp"], 1.0)
             diff = curr["net"] - prev["net"]
-            deriv = (diff / dt) if dt > 0 else 0.0
+            deriv = diff / dt
             if deriv < self.degradation_threshold:
                 degrading_count += 1
 
@@ -107,6 +105,7 @@ class ExergyMaximizerAgent(BaseAgent):
         self.gradient = ExergyGradient()
         self.current_plan: ExecutionPlan | None = None
         self.active_subagents: dict[str, str] = {}  # task_id -> agent_id
+        self.replan_count = 0
         self._execution_log: list[dict[str, Any]] = []
 
     async def handle_message(self, message: AgentMessage) -> None:
@@ -184,6 +183,7 @@ class ExergyMaximizerAgent(BaseAgent):
         )
 
         while self.ooda_state != OODAState.COMPLETE and self.ooda_state != OODAState.APOPTOSIS:
+            await asyncio.sleep(0.01)  # Yield to event loop to prevent starvation
             if self.ooda_state == OODAState.PERCEIVE:
                 await self._phase_perceive()
             elif self.ooda_state == OODAState.ORIENT:
@@ -271,6 +271,7 @@ class ExergyMaximizerAgent(BaseAgent):
             
             step.mark_completed(result)
             self.current_plan.record_step_result(step)
+            self.replan_count = 0  # Reset replan count on successful action execution
         except Exception as exc:
             step.mark_failed(str(exc))
             self.current_plan.record_step_result(step)
@@ -298,6 +299,12 @@ class ExergyMaximizerAgent(BaseAgent):
         """Replan around the failure point by synthesizing alternative routes."""
         logger.info("[%s] OODA: Replan around failure point", self.agent_id)
         if not self.current_plan:
+            self.ooda_state = OODAState.APOPTOSIS
+            return
+
+        self.replan_count += 1
+        if self.replan_count > 3:
+            logger.error("[%s] Replan threshold exceeded (>3). Aborting to prevent infinite loop.", self.agent_id)
             self.ooda_state = OODAState.APOPTOSIS
             return
 

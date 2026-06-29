@@ -25,11 +25,11 @@ def _unique_db() -> str:
     return f"file:mem_{uuid.uuid4().hex[:8]}?mode=memory&cache=shared"
 
 
-def _make_manifest(agent_id: str = "test-l5") -> AgentManifest:
+def _make_manifest(agent_id: str = "test-l5", can_delegate: bool = False) -> AgentManifest:
     return AgentManifest(
         agent_id=agent_id,
         purpose="Level 5 Agent testing",
-        can_delegate=True,
+        can_delegate=can_delegate,
         daemon=True,
     )
 
@@ -48,9 +48,12 @@ class DummyTool:
 
 
 class ErrorTool:
+    def __init__(self, name: str = "error_tool"):
+        self._name = name
+
     @property
     def name(self) -> str:
-        return "error_tool"
+        return self._name
 
     async def execute(self, **kwargs) -> str:
         raise RuntimeError("Local execution error")
@@ -81,7 +84,7 @@ class TestExergyMaximizerAgent:
 
     @pytest.mark.asyncio
     async def test_oom_loop_success(self, bus):
-        manifest = _make_manifest("demiurge-test")
+        manifest = _make_manifest("demiurge-test", can_delegate=False)
         registry = ToolRegistry()
         registry.register(DummyTool("exergy_audit", "optimal"))
         
@@ -93,21 +96,50 @@ class TestExergyMaximizerAgent:
 
     @pytest.mark.asyncio
     async def test_replan_on_failure(self, bus):
-        manifest = _make_manifest("demiurge-replan")
+        manifest = _make_manifest("demiurge-replan", can_delegate=False)
         registry = ToolRegistry()
-        # Initial step uses exergy_audit. Let's make it fail by raising or returning errors.
-        # But wait, exergy_audit is built-in. We can register an error tool or override it.
-        registry.register(ErrorTool())  # will raise error
+        registry.register(ErrorTool("exergy_audit"))  # failing step 1
+        registry.register(DummyTool("noop", "recovered"))  # successful step 2 (fallback)
 
         agent = ExergyMaximizerAgent(manifest, bus, registry)
         
-        # Override initial plan to use the error tool
         result = await agent.execute_objective("Objective that will fail")
-        # Since it fails, OODA State transitions from OBSERVE -> REPLAN -> PERCEIVE -> ACT (noop fallback).
-        # noop fallback succeeds and transitions to CRITIQUE -> COMPLETE.
         assert result["status"] == "SUCCESS"
         assert result["ooda_final_state"] == "complete"
         assert "[REPLAN]" in result["plan_summary"]["objective"]
+
+    @pytest.mark.asyncio
+    async def test_delegation_flow(self, bus):
+        manifest = _make_manifest("demiurge-delegate", can_delegate=True)
+        registry = ToolRegistry()
+        registry.register(DummyTool("exergy_audit", "optimal"))
+
+        agent = ExergyMaximizerAgent(manifest, bus, registry, step_timeout_s=5.0)
+
+        # Background task that simulates the worker responding to delegation message
+        async def simulate_l4_worker():
+            await asyncio.sleep(0.5)
+            # Find the message sent by the agent to l4-worker-agent
+            pending = await bus.receive("l4-worker-agent", timeout=1.0)
+            if pending:
+                # Reply with task completion message
+                reply = new_message(
+                    sender="l4-worker-agent",
+                    recipient=agent.agent_id,
+                    kind=MessageKind.TASK_RESULT,
+                    payload={"result": {"objective": pending.payload["objective"], "status": "SUCCESS"}},
+                    correlation_id=pending.correlation_id
+                )
+                await bus.send(reply)
+                # Dispatch it to the agent manually so handle_message receives it
+                await agent.handle_message(reply)
+
+        worker_task = asyncio.create_task(simulate_l4_worker())
+        
+        result = await agent.execute_objective("Delegate task")
+        assert result["status"] == "SUCCESS"
+        assert result["ooda_final_state"] == "complete"
+        await worker_task
 
     @pytest.mark.asyncio
     async def test_factory_creation(self, bus):
