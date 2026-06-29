@@ -345,9 +345,6 @@ class EnterpriseAuditLedger:
 
         return {"status": "verified", "blocks": len(batches)}
 
-
-        return {"status": "verified", "blocks": len(batches)}
-
     async def _anchor_worker(self) -> None:
         """Background worker that pulls unanchored local entries and anchors them to Rekor/TSA asynchronously."""
         import asyncio
