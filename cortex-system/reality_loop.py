@@ -191,11 +191,50 @@ class ThresholdMutator(ast.NodeTransformer):
                 node.value = ast.Constant(value=round(self.new_dist, 3))
         return node
 
-def mutate_reward_model(metric: Dict[str, Any]) -> bool:
+    # Obsolete. Replaced by push_mutation_to_babylon.
+
+async def push_mutation_to_babylon(metric: Dict[str, Any], bus: DistributedEventBus) -> bool:
     """
-    Actively mutates the reward_model.py parameters using deterministic AST transformation.
-    Eliminates Regex fragility. Executes a Git Sentinel commit (C5-REAL).
+    Wave 4: Reality Loop Bridge to BABYLON-60.
+    Mutates runtime vector first via event_bus, then promotes to disk and commits.
     """
+    entropy = float(metric.get("entropy", 0.5))
+    fatigue = float(metric.get("fatigue", 0.0))
+    
+    new_orig = max(0.20, min(0.60, 0.34 + (0.5 - entropy) * 0.1))
+    new_dist = max(0.15, min(0.40, 0.26 - (fatigue * 0.1)))
+    
+    # Abort rules bounds check
+    if new_orig < 0.20 or new_dist < 0.15:
+        return False
+
+    try:
+        ledger_parent = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode().strip()
+    except Exception:
+        ledger_parent = "unknown"
+
+    # Build MutationProposal
+    payload = {
+        "event_type": "optimization.vector.mutation_requested",
+        "source": "reality_loop",
+        "target": "babylon60.engine.causal.artist_cortex.OptimizationVector",
+        "parameter": "originality_threshold",
+        "old_value": 0.34,
+        "new_value": round(new_orig, 3),
+        "reason": "trigger_rupture",
+        "ledger_parent": ledger_parent,
+        "dry_run": False,
+    }
+
+    # Publish to Event Bus -> Adapter mutates OptimizationVector
+    await emit_event(
+        source="reality_loop",
+        event_type="optimization.vector.mutation_requested",
+        payload=payload,
+        bus=bus
+    )
+    
+    # Promote mutation to disk
     model_path = ROOT / "policies" / "reward_model.py"
     if not model_path.exists():
         return False
@@ -203,13 +242,6 @@ def mutate_reward_model(metric: Dict[str, Any]) -> bool:
     with model_path.open("r", encoding="utf-8") as f:
         content = f.read()
         
-    entropy = float(metric.get("entropy", 0.5))
-    fatigue = float(metric.get("fatigue", 0.0))
-    
-    new_orig = max(0.20, min(0.60, 0.34 + (0.5 - entropy) * 0.1))
-    new_dist = max(0.15, min(0.40, 0.26 - (fatigue * 0.1)))
-    
-    # Structural Isomorphism: parse, mutate, unparse
     try:
         tree = ast.parse(content)
         mutator = ThresholdMutator(new_orig, new_dist)
@@ -221,6 +253,12 @@ def mutate_reward_model(metric: Dict[str, Any]) -> bool:
         
     with model_path.open("w", encoding="utf-8") as f:
         f.write(new_content)
+        
+    # Compile Gate
+    try:
+        subprocess.run([sys.executable, "-m", "py_compile", str(model_path)], check=True)
+    except subprocess.CalledProcessError:
+        return False
         
     # Git Sentinel Auto-Commit
     try:
@@ -480,8 +518,8 @@ async def run_reality_cycle(metric: Dict[str, Any], bus: DistributedEventBus) ->
 
     decision = evaluate_policy(metric, registry, state)
     
-    # C5-REAL: Self-modify policy thresholds before evaluating reinforcement action
-    mutate_reward_model(metric)
+    # C5-REAL: Bridge Reality Loop into BABYLON-60 Event Bus
+    await push_mutation_to_babylon(metric, bus)
     
     action = reinforcement_cycle(metric, decision)
 
@@ -583,6 +621,13 @@ def main() -> None:
 
     metric = parse_metric_from_args(args)
     bus = DistributedEventBus()
+    
+    # Wave 4: Lazily register ArtistCortex adapter to the bus
+    try:
+        from runtime.event_bus import register_artist_cortex_listener
+        register_artist_cortex_listener(bus)
+    except ImportError as e:
+        print(f"[Warning] Could not load babylon_bridge adapter: {e}")
     
     result = asyncio.run(run_reality_cycle(metric, bus))
 

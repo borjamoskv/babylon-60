@@ -47,3 +47,13 @@ class EventBus:
             tasks.append(cb(event))
             
         await asyncio.gather(*tasks, return_exceptions=True)
+
+def register_artist_cortex_listener(event_bus):
+    from runtime.babylon_bridge import ArtistCortexEventAdapter
+
+    adapter = ArtistCortexEventAdapter()
+    event_bus.subscribe("optimization.vector.mutation_requested", adapter.on_mutation_requested)
+    event_bus.subscribe("telemetry.artist.fact_observed", adapter.on_telemetry_observed)
+    event_bus.subscribe("apoptosis.lock_requested", adapter.on_apoptosis_lock_requested)
+
+    return adapter
