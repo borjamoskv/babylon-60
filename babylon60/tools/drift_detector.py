@@ -42,13 +42,13 @@ class SilentUpdateAlert:
 
 
 class DriftDetector:
-    def __init__(self, regularization_eps: float = 1e-5):
-        self.regularization_eps = regularization_eps
+    def __init__(self, regularization_eps: float = 1e-5, eps: Optional[float] = None):
+        self.regularization_eps = eps if eps is not None else regularization_eps
 
     def capture_snapshot(
         self, model_id: str, states: list[np.ndarray], metadata: Optional[dict[str, Any]] = None
     ) -> BehavioralSnapshot:
-        if not states:
+        if len(states) == 0:
             raise ValueError("State vector list is empty")
 
         matrix = np.array(states)
