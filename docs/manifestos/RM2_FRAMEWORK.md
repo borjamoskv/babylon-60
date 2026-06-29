@@ -32,11 +32,16 @@ Donde la ganancia de información se mide como la divergencia Kullback-Leibler e
 ## 3. Justificación Matemática del Criterio de Evicción
 El problema de determinar qué subconjunto de hipótesis retener en \(M_t\) que maximice el valor esperado \(\sum (p_i u_i)\) sin superar el coste \(\sum c_i \le B\) es isomorfo al **Problema de la Mochila 0-1 (0-1 Knapsack Problem)**.
 
-Al aplicar la relajación fraccional (Fractional Knapsack) para aproximar la política de evicción (\(a_{mem}\)) en tiempo real, la estrategia avara (greedy) matemática y demostrablemente óptima dicta ordenar los elementos por su **ratio valor/peso**.
-
-Por lo tanto, el criterio de prioridad para el Semantic GC **no es una heurística de diseño**, es la solución formal de optimización:
+Al aplicar la relajación fraccional (Fractional Knapsack) para aproximar la política de evicción (\(a_{mem}\)) en tiempo real, la estrategia avara (greedy) dicta ordenar los elementos por su **ratio valor/peso**:
 \[ S_i = \frac{\text{Expected Value}}{\text{Cost}} = \frac{p_i u_i}{c_i} \]
-El sistema purga sistemáticamente el final de la cola ordenada por \(S_i\) hasta satisfacer la restricción \(B\).
+
+**Condiciones de Optimalidad Exacta**: Este criterio \(S_i\) es extremadamente eficiente, pero pasa de ser una heurística a un **teorema óptimo demostrable** si y sólo si se asumen las siguientes restricciones:
+1. Independencia probabilística absoluta entre hipótesis en \(\mathcal{M}\).
+2. Utilidad estrictamente aditiva (ausencia de submodularidad o efectos de interacción).
+3. Costes \(c_i\) marginales constantes e independientes del estado de la memoria.
+4. El descarte de \(H_i\) no modifica drásticamente las dinámicas de transición futuras del POMDP.
+
+Bajo la relajación natural de estos supuestos en entornos reales, \(S_i\) actúa como una heurística de aproximación guiada por el valor marginal.
 
 ---
 
@@ -48,11 +53,19 @@ Esto desacopla la necesidad de explorar de la estimación recursiva del Expected
 ---
 
 ## 5. Garantías Teóricas a Demostrar
-La formalización del framework RM² permite ahora exigir la demostración de los siguientes teoremas matemáticos:
+La formalización del framework RM² permite ahora exigir la demostración de los siguientes teoremas matemáticos sobre agentes adaptativos en entornos estacionarios y ergódicos:
 
-1. **Regret Sublineal**: Bajo \(\epsilon\)-exploración y evicción \(\mathcal{O}(S_i)\), la política de memoria \(\pi\) incurre en un *regret* asintótico de memoria \(\mathcal{O}(\sqrt{T})\) en comparación con un oráculo con memoria ilimitada \(B = \infty\).
-2. **Convergencia del Subespacio Activo**: Tras suficientes evidencias \(O_t\), la distancia de Wasserstein entre \(M_t\) y la distribución posterior real de hipótesis está acotada.
-3. **Estabilidad de la Capacidad (\(B\))**: El coste total \(C(M_t)\) nunca viola la condición de restricción bajo variaciones arbitrarias del entorno, evitando caídas (OOM/Latencia máxima).
+1. **Cota de Pérdida por Memoria Finita (Teorema Central)**: 
+   Demostrar que la pérdida de rendimiento causada por la restricción de capacidad (\(B\)) está estrictamente acotada en comparación con una política óptima dotada de memoria ilimitada:
+   \[ V_B^\pi \ge V_\infty^\pi - \Delta(B) \]
+   Donde la función de penalización decae asintóticamente: \(\Delta(B) \rightarrow 0\) cuando \(B \rightarrow \infty\). Esto conecta directamente con la teoría formal de compresión de memoria en aprendizaje secuencial.
+
+2. **Regret Sublineal \(\mathcal{O}(\sqrt{T})\)**: 
+   Demostrar que, asumiendo \(\epsilon\)-exploración, recompensas acotadas, un espacio de hipótesis finito y condiciones de mezclado (*mixing conditions*) suficientes sobre el POMDP, la política de evicción \(\pi\) incurre en un *regret* asintótico sublineal.
+
+3. **Convergencia del Subespacio Activo**: Tras suficientes evidencias \(O_t\), la distancia de Wasserstein entre \(M_t\) y la distribución posterior real de hipótesis está matemáticamente acotada.
+
+4. **Estabilidad del Presupuesto (\(B\))**: El coste total \(C(M_t)\) converge casi seguramente bajo el umbral \(\le B\), impidiendo los desbordamientos térmicos o de contexto.
 
 ---
 > **Conclusión**: El olvido agresivo ya no es una analogía; es la aplicación forzosa de la solución óptima del *Knapsack Problem* a un *POMDP* con memoria finita. Las intuiciones quedan descartadas; solo las matemáticas C5-REAL rigen la retención de estado en CORTEX-Persist.
