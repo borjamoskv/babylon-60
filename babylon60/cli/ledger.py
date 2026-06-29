@@ -304,8 +304,13 @@ def export_ledger_cmd(
 def escape_hatch_cmd(db: str, check: bool, touch: bool, export_dir: Path | None, threshold_days: int, force: bool):
     """Autonomic Data Escape Hatch (Dead Man Switch) operations."""
     import asyncio
+
     import aiosqlite
-    from cortex.ledger.escape_hatch import record_liveness, is_dead_man_switch_triggered, trigger_escape_hatch_export
+    from cortex.ledger.escape_hatch import (
+        is_dead_man_switch_triggered,
+        record_liveness,
+        trigger_escape_hatch_export,
+    )
 
     async def _run():
         async with aiosqlite.connect(db) as conn:

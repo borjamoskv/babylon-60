@@ -109,7 +109,7 @@ async def trigger_escape_hatch_export(
         table_file = export_path / f"{table}.jsonl"
         with open(table_file, "w", encoding="utf-8") as f:
             for row in rows:
-                row_dict = dict(zip(columns, row))
+                row_dict = dict(zip(columns, row, strict=True))
                 f.write(json.dumps(row_dict, sort_keys=True) + "\n")
 
         exported_files[table] = str(table_file)
