@@ -205,6 +205,22 @@ cortex mcp serve --port 8765
 
 ---
 
+## ▀▄ EPISTEMIC EVALUATION & STANDARDIZATION
+
+> **CORTEX no debería evaluarse por la calidad de las respuestas que produce, sino por las propiedades que garantiza sobre el proceso que las produce.**
+
+The success criteria for this architecture is not *"Is CORTEX smarter than an LLM?"* but rather: **"Can a CORTEX implementation formally prove it preserves its invariants for any valid execution?"**
+
+To decouple the ecosystem's evolution from underlying LLM volatility, CORTEX governs its growth through a rigorous standard discipline:
+
+- **Core Specification**: Invariants, semantics, and execution model.
+- **CEP (CORTEX Enhancement Proposals)**: Evolution proposals demanding formal impact arguments.
+- **Reference Kernel**: Minimal implementation serving as an executable specification.
+- **Conformance Levels**: Objective compliance tiers (e.g., Core, Verified Provenance, Full Trust Algebra).
+- **Proof Obligations Registry**: Properties every component must formally demonstrate.
+
+---
+
 ## ▀▄ DOCUMENTATION & REAL-WORLD C5-REAL TRACES
 
 | Resource | Description |
