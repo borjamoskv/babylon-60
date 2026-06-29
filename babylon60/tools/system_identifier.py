@@ -10,16 +10,15 @@ Implements:
 - Excitations suite definition
 """
 
-import os
-import sys
-import json
+import hashlib
 import math
 import re
 import statistics
-import hashlib
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Optional
+
 import numpy as np
+
 
 @dataclass
 class ConversationalState:
@@ -103,7 +102,7 @@ class SystemIdentifier:
         
         return float(-np.sum(probs * np.log2(probs)))
 
-    def compute_trajectory_dtw(self, traj_a: List[ConversationalState], traj_b: List[ConversationalState]) -> float:
+    def compute_trajectory_dtw(self, traj_a: list[ConversationalState], traj_b: list[ConversationalState]) -> float:
         """
         Computes Dynamic Time Warping distance between two conversational trajectories.
         """
@@ -137,7 +136,7 @@ class SystemIdentifier:
 
         return float(dtw[n, m])
 
-    def profile_temperament(self, states: List[ConversationalState]) -> Dict[str, float]:
+    def profile_temperament(self, states: list[ConversationalState]) -> dict[str, float]:
         """
         Profiles computational temperament along continuous spectrums (0.0 to 1.0).
         """

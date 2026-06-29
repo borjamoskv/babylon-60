@@ -10,9 +10,8 @@ License: Apache-2.0
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Dict, List
 
 import numpy as np
 
@@ -24,7 +23,7 @@ class BehavioralSnapshot:
     model_id: str
     timestamp_iso: str
     state_vectors: np.ndarray  # shape (n, d)
-    metadata: Dict[str, object]
+    metadata: dict[str, object]
     sha256_hash: str
 
     def __post_init__(self) -> None:
@@ -53,7 +52,7 @@ class SilentUpdateAlert:
     detected: bool
     severity: str           # "none" | "low" | "medium" | "high" | "critical"
     kl_value: float
-    drift_dimensions: List[int]
+    drift_dimensions: list[int]
     recommended_action: str
 
 
@@ -64,7 +63,7 @@ class DriftDetector:
     singular/near-singular cases from low-sample regimes.
     """
 
-    SEVERITY_THRESHOLDS: Dict[str, float] = {
+    SEVERITY_THRESHOLDS: dict[str, float] = {
         "low": 0.5,
         "medium": 2.0,
         "high": 5.0,
@@ -80,7 +79,7 @@ class DriftDetector:
         self,
         model_id: str,
         states: np.ndarray,
-        metadata: Dict[str, object] | None = None,
+        metadata: dict[str, object] | None = None,
     ) -> BehavioralSnapshot:
         """Capture a behavioral snapshot from raw state vectors.
 
