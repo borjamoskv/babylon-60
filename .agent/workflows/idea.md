@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: Genera 3 caminos divergentes para resolver un problema usando el contexto de BABYLON-60.
+cat_id: idea
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description: Genera 3 caminos divergentes para resolver un problema usando el contexto
+  de BABYLON-60.
 ---
+
 
 # Workflow: IDEA
 

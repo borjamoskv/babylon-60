@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: [El Arquitecto Físico MMX — Despliegue Earthship Autónomo]
+cat_id: confluence-mmx
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description:
+- "El Arquitecto F\xEDsico MMX \u2014 Despliegue Earthship Aut\xF3nomo"
 ---
+
 # Confluencia 2: El Arquitecto Físico MMX
 
 **Objetivo:** Desde la concepción legal del terreno hasta la simulación termodinámica y logística pesada de materiales terrestres.

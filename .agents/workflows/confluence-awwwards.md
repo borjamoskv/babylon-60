@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: [La Tríada Estética Awwwards — Dominio Perceptivo Múltiple]
+cat_id: confluence-awwwards
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description:
+- "La Tr\xEDada Est\xE9tica Awwwards \u2014 Dominio Perceptivo M\xFAltiple"
 ---
+
 # Confluencia 4: La Tríada Estética Awwwards
 
 **Objetivo:** Generar experiencias frontend hiper-premium 2026, ganando tracción instantánea en internet.

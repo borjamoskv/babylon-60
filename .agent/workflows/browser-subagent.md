@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: Workflow maestro para browser_subagent — QA visual, investigación web, testing de flujos y scraping inteligente
+cat_id: browser-subagent
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description: "Workflow maestro para browser_subagent \u2014 QA visual, investigaci\xF3\
+  n web, testing de flujos y scraping inteligente"
 ---
+
 
 # 🌐 Browser Subagent — Workflow Maestro
 

@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: [El Sindicato Cibernético — Ingestión y Verdad Absoluta]
+cat_id: confluence-sindicate
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description:
+- "El Sindicato Cibern\xE9tico \u2014 Ingesti\xF3n y Verdad Absoluta"
 ---
+
 # Confluencia 3: El Sindicato Cibernético
 
 **Objetivo:** Devorar campos enteros de conocimiento humano, destilar la verdad matemática y descubrir nuevos paradigmas.

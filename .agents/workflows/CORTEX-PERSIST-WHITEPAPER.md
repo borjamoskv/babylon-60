@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: BABYLON-60 Whitepaper v0.2.2 — Infraestructura de gobernanza cognitiva para enjambres de agentes
+cat_id: CORTEX-PERSIST-WHITEPAPER
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description: "BABYLON-60 Whitepaper v0.2.2 \u2014 Infraestructura de gobernanza cognitiva\
+  \ para enjambres de agentes"
 ---
+
 
 # BABYLON-60
 

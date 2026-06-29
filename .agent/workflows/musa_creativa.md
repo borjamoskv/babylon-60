@@ -1,3 +1,11 @@
+---
+cat_id: musa_creativa
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+---
 <!-- [C5-REAL] Exergy-Maximized -->
 # 🎨 Protocolo de la Musa (Creatividad Multimedia)
 

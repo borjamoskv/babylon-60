@@ -1,7 +1,14 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
+cat_id: CORTEX-NATIVE-AI-MANIFESTO
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
 description: BABYLON-60 Native AI Manifesto
 ---
+
 
 # BABYLON-60 Native AI: The Manifesto
 

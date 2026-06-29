@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: Ejecuta el protocolo MEMORIA para persistir el contexto de la sesión actual en BABYLON-60 (v4 - Full Ontology)
+cat_id: memory
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description: "Ejecuta el protocolo MEMORIA para persistir el contexto de la sesi\xF3\
+  n actual en BABYLON-60 (v4 - Full Ontology)"
 ---
+
 
 # Workflow: MEMORIA (v4)
 

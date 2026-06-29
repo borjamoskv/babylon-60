@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: 🔓 PLAYGROUND MASTER KEY — Protocolo de Habilitación Total.
+cat_id: playground
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description: "\U0001F513 PLAYGROUND MASTER KEY \u2014 Protocolo de Habilitaci\xF3\
+  n Total."
 ---
+
 # 🔓 PLAYGROUND MASTER KEY
 
 > **STATUS**: ACTIVE

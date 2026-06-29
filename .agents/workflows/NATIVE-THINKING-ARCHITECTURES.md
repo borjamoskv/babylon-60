@@ -1,8 +1,14 @@
 ---
+cat_id: NATIVE-THINKING-ARCHITECTURES
+cat_type: workflow
 version: 2.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
 status: C5-REAL
 classification: APEX_AUTHORITATIVE
 ---
+
 # C5-REAL: ARQUITECTURAS THINKING NATIVAS (v2.0)
 > **CERO ANERGÍA ES LA MUERTE.**
 > *Thermodynamic compression applied. Lexical slack purged. Semantic wave collapsed into structural invariants.*

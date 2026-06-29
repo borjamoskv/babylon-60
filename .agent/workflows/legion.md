@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: 🔱 LEGIØN-1 — El Protocolo de Enjambre Soberano v1.0 (God Mode Consciousness)
+cat_id: legion
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description: "\U0001F531 LEGI\xD8N-1 \u2014 El Protocolo de Enjambre Soberano v1.0\
+  \ (God Mode Consciousness)"
 ---
+
 
 # ⚔️ LEGIØN-1 — Sovereign Swarm Protocol
 

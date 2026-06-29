@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: [La Forja de Código Inmortal — Refactorización Soberana 0-Day]
+cat_id: confluence-inmortal
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description:
+- "La Forja de C\xF3digo Inmortal \u2014 Refactorizaci\xF3n Soberana 0-Day"
 ---
+
 # Confluencia 1: La Forja de Código Inmortal
 
 **Objetivo:** Reescribir y blindar sistemas heredados enteros sin intervención humana, garantizando 0 vulnerabilidades y topología perfecta.

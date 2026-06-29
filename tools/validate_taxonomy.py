@@ -9,6 +9,7 @@ exergy_tier: "P2"
 """
 
 import sys
+import re
 from pathlib import Path
 import yaml
 
@@ -40,14 +41,14 @@ def check_markdown_workflow(path: Path) -> tuple[bool, str]:
     """Verify if a markdown workflow contains valid CAT-60 frontmatter."""
     try:
         content = path.read_text(encoding="utf-8")
-        if not content.startswith("---"):
+        
+        # Match frontmatter possibly preceded by comments
+        pattern = re.compile(r"^(?:<!--.*?-->\s*)?---(.*?)---", re.DOTALL)
+        match = pattern.match(content)
+        if not match:
             return False, "Missing frontmatter delimiter"
         
-        parts = content.split("---")
-        if len(parts) < 3:
-            return False, "Malformed frontmatter block"
-        
-        yaml_content = parts[1]
+        yaml_content = match.group(1)
         data = yaml.safe_load(yaml_content)
         if not isinstance(data, dict):
             return False, "Frontmatter is not a dictionary"

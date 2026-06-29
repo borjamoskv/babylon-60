@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: [Membrana de Cisne Negro — Defensa Cognitiva y Financiera]
+cat_id: confluence-black-swan
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description:
+- "Membrana de Cisne Negro \u2014 Defensa Cognitiva y Financiera"
 ---
+
 # Confluencia 5: Membrana de Cisne Negro
 
 **Objetivo:** Proteger el capital y la cordura del Operador frente a colapsos sistémicos o manipulación masiva episódica.

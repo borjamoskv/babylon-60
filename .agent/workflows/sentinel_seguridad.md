@@ -1,3 +1,11 @@
+---
+cat_id: sentinel_seguridad
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+---
 <!-- [C5-REAL] Exergy-Maximized -->
 # 🛡️ Protocolo del Centinela (Seguridad y Privacidad)
 

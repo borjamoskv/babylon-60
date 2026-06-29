@@ -1,7 +1,14 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: RFC v0.1 BABYLON-60 Native AI Architecture — Frozen Normative Draft
+cat_id: RFC-CORTEX-NATIVE-AI
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description: "RFC v0.1 BABYLON-60 Native AI Architecture \u2014 Frozen Normative Draft"
 ---
+
 
 # RFC-BABYLON-60-NATIVE-AI
 

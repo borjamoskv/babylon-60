@@ -1,7 +1,16 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: "OUROBOROS-∞ — El skill supremo. Inteligencia autónoma auto-evolutiva con razonamiento causal, War Council multi-modelo, arqueología temporal, adversarial testing, y meta-cognición recursiva."
+cat_id: ouroboros
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description: "OUROBOROS-\u221E \u2014 El skill supremo. Inteligencia aut\xF3noma auto-evolutiva\
+  \ con razonamiento causal, War Council multi-modelo, arqueolog\xEDa temporal, adversarial\
+  \ testing, y meta-cognici\xF3n recursiva."
 ---
+
 
 # ∞ OUROBOROS-∞ — The Infinite Self
 

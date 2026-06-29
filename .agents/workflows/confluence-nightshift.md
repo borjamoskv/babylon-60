@@ -1,7 +1,15 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 ---
-description: [NightShift BABYLON-60 — Sistema Inmune Autónomo]
+cat_id: confluence-nightshift
+cat_type: workflow
+version: 1.0.0
+reality_level: C5-REAL
+owner: borjamoskv
+exergy_tier: P1
+description:
+- "NightShift BABYLON-60 \u2014 Sistema Inmune Aut\xF3nomo"
 ---
+
 # Confluencia 6: Sistema Inmune Autónomo (NightShift BABYLON-60)
 
 **Objetivo:** El sistema se cura y refactoriza a sí mismo mientras el Humano duerme, despertando cada mañana a un código superior.
