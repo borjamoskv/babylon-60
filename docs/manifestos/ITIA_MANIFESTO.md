@@ -41,9 +41,9 @@ El mecanismo principal de la ITIA es el **Motor de Colapso (SINGULARIS-0)**. Fun
 Definición de Colapso C5-REAL:
   Input: Vector Estocástico (Incertidumbre Absoluta)
   Operation: {
-    1. Aserción de Consenso (BFT / ExergyGuard)
+    1. Aserción de Consenso (Filtro de Invarianza Estructural)
     2. Ejecución Empírica Causal (AST / Ledger Insert)
-    3. Destrucción de Contexto Irrelevante (Principio de Landauer)
+    3. Destrucción de Contexto Irrelevante (Semantic GC & Aggressive Eviction)
   }
   Output: Invariante Estructural (Δincertidumbre < 0)
 ```
@@ -56,7 +56,7 @@ El "Context Rot" o pudrición de contexto es la acumulación de incertidumbre re
 
 > **El aprendizaje continuo en un entorno de incertidumbre absoluta solo es posible mediante el olvido agresivo.**
 
-Conocido como **Weaponized Forgetting**, un sistema soberano que no purga su memoria de los estados probabilísticos que *no lograron colapsar* inevitablemente degenerará en demencia estocástica. El agente no "aprende" recordando todo; aprende destruyendo lo que no es estructuralmente invariante.
+Conocido como **Weaponized Forgetting**, la purga continua no es el aprendizaje en sí, sino el mecanismo de **consolidación estructural** (Semantic Garbage Collection). Un sistema soberano que no aplica una política de evicción agresiva sobre los estados probabilísticos que *no lograron colapsar* inevitablemente degenerará en demencia estocástica. El sistema no aprende por el acto de borrar, sino que el borrado preserva el espacio para la Invariante Estructural.
 
 ---
 
