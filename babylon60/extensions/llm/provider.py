@@ -143,7 +143,7 @@ class LLMProvider(BaseProvider):
         self._gemini_gateway = None
 
         if self._provider == "ollama" and "CORTEX_LLM_TIMEOUT" not in os.environ:
-            timeout_val = 15.0
+            timeout_val = 60.0
         else:
             timeout_val = float(os.environ.get("CORTEX_LLM_TIMEOUT", "120.0"))
         self._client = httpx.AsyncClient(timeout=timeout_val)
