@@ -37,6 +37,9 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import asyncio
+
+from babylon60.events.bus import DistributedEventBus
 
 
 # =============================================================================
@@ -154,7 +157,7 @@ def append_jsonl(path: Path, item: Dict[str, Any]) -> None:
         f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
 
-def emit_event(source: str, event_type: str, payload: Dict[str, Any]) -> CortexEvent:
+async def emit_event(source: str, event_type: str, payload: Dict[str, Any], bus: DistributedEventBus) -> CortexEvent:
     event = CortexEvent(
         event_id=str(uuid.uuid4()),
         timestamp=utc_now(),
@@ -164,6 +167,10 @@ def emit_event(source: str, event_type: str, payload: Dict[str, Any]) -> CortexE
     )
 
     append_jsonl(EVENT_LOG_PATH, asdict(event))
+    
+    # Bridge to BABYLON-60 Event Bus
+    await bus.publish(topic=event_type, payload=asdict(event))
+    
     return event
 
 
@@ -355,7 +362,7 @@ def build_swarm_job(
     )
 
 
-def dispatch_swarm_job(job: SwarmJob) -> Path:
+async def dispatch_swarm_job(job: SwarmJob, bus: DistributedEventBus) -> Path:
     """
     Dispatches job into moskv-swarm inbox if available.
     Otherwise writes to local runtime/swarm_outbox.
@@ -370,7 +377,7 @@ def dispatch_swarm_job(job: SwarmJob) -> Path:
 
     save_json(out_path, asdict(job))
 
-    emit_event(
+    await emit_event(
         source="reality_loop",
         event_type="swarm_job_dispatched",
         payload={
@@ -378,7 +385,8 @@ def dispatch_swarm_job(job: SwarmJob) -> Path:
             "path": str(out_path),
             "action": job.action,
             "agent_chain": job.agent_chain,
-        }
+        },
+        bus=bus
     )
 
     return out_path
@@ -454,7 +462,7 @@ def evaluate_policy(
     return "default"
 
 
-def run_reality_cycle(metric: Dict[str, Any]) -> Dict[str, Any]:
+async def run_reality_cycle(metric: Dict[str, Any], bus: DistributedEventBus) -> Dict[str, Any]:
     ensure_dirs()
 
     registry = load_json(REGISTRY_PATH, DEFAULT_REGISTRY)
@@ -475,7 +483,7 @@ def run_reality_cycle(metric: Dict[str, Any]) -> Dict[str, Any]:
         state=state,
     )
 
-    job_path = dispatch_swarm_job(job)
+    job_path = await dispatch_swarm_job(job, bus)
 
     state = mutate_state(
         state=state,
@@ -486,7 +494,7 @@ def run_reality_cycle(metric: Dict[str, Any]) -> Dict[str, Any]:
 
     save_json(STATE_PATH, state)
 
-    event = emit_event(
+    event = await emit_event(
         source="reality_loop",
         event_type="reality_cycle_completed",
         payload={
@@ -494,7 +502,8 @@ def run_reality_cycle(metric: Dict[str, Any]) -> Dict[str, Any]:
             "action": action,
             "job_path": str(job_path),
             "state_path": str(STATE_PATH),
-        }
+        },
+        bus=bus
     )
 
     return {
@@ -551,7 +560,9 @@ def main() -> None:
     args = parser.parse_args()
 
     metric = parse_metric_from_args(args)
-    result = run_reality_cycle(metric)
+    bus = DistributedEventBus()
+    
+    result = asyncio.run(run_reality_cycle(metric, bus))
 
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
