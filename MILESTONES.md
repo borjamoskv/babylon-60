@@ -1281,6 +1281,25 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 29 Junio 2026
 
+---
+
+### Hito 75: Motor de Compilación y Renderizado Programático de Video (Cortex Remotion Video Engine)
+- **Target**: `cortex_video_engine/`, `cortex_video_engine/render_parallel.py`
+- **Objective**: Desarrollo y despliegue del motor de video programático `CortexRemotionVideoEngine` basado en Remotion. Implementa un despachador en paralelo (`render_parallel.py`) que fragmenta los rangos de frames de las composiciones de React en múltiples procesos asíncronos y concatena los fragmentos resultantes usando `ffmpeg` sin pérdida de sincronía.
+- **Yield Target**: Renderizado paralelo acelerado para flujos multimedia automatizados e integración de assets dinámicos.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Código en `cortex_video_engine/` y renderizador en paralelo en `cortex_video_engine/render_parallel.py`.
+```yaml
+Claim: Remotion video engine successfully splits frames and renders video chunks in parallel.
+Proof:
+  Base: "render_parallel.py executes chunks, tracks polls, and ffmpeg merges chunks successfully."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-29
+```
+- **Status**: ✅ COMPLETE — 29 Junio 2026
+
+
 
 
 
