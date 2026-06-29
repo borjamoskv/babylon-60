@@ -58,7 +58,7 @@ class MaxwellRouterAgent(BaseAgent):
         if message.kind != MessageKind.TASK_REQUEST:
             return
 
-        prompt = message.content.get("prompt", "")
+        prompt = message.payload.get("prompt", "")
         entropy = self._calculate_shannon_entropy(prompt)
         
         logger.info(f"[{self.manifest.agent_id}] Assessed task entropy: {entropy:.2f}")
@@ -75,25 +75,25 @@ class MaxwellRouterAgent(BaseAgent):
 
         # Emit delegated task
         delegation = new_message(
-            sender_id=self.agent_id,
-            recipient_id=target_agent,
+            sender=self.agent_id,
+            recipient=target_agent,
             kind=MessageKind.TASK_REQUEST,
-            content=message.content,
+            payload=message.payload,
         )
         await self.bus.send(delegation)
 
         # Reply to original sender that routing is complete
         reply = new_message(
-            sender_id=self.agent_id,
-            recipient_id=message.sender_id,
+            sender=self.agent_id,
+            recipient=message.sender,
             kind=MessageKind.TASK_RESULT,
-            content={
+            payload={
                 "status": "routed",
                 "target": target_agent,
                 "entropy": entropy,
                 "reason": reason
             },
-            correlation_id=message.id
+            correlation_id=message.correlation_id
         )
         await self.bus.send(reply)
 
