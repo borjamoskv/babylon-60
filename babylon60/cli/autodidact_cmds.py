@@ -7,11 +7,11 @@ JIT AST Compilation and Thermodynamic Sovereign Forging.
 from __future__ import annotations
 
 import click
+from cortex.extensions.swarm.autodidact_actuator import autodidact_ingest
 from rich.panel import Panel
 from rich.syntax import Syntax
 
 from cortex.cli.common import _run_async, cli, console
-from cortex.extensions.swarm.autodidact_actuator import autodidact_ingest
 
 
 @cli.group(name="autodidact")
@@ -71,8 +71,9 @@ def jit_eval(code_snippet: str) -> None:
 @autodidact_group.command(name="audit")
 def audit():
     """Mide el impacto termodinámico de las inferencias previas usando crystal_thermometer.py."""
-    from cortex.cli.common import get_engine
     from cortex.extensions.swarm.crystal_thermometer import scan_all_crystals
+
+    from cortex.cli.common import get_engine
 
     console.print("[bold cyan]🔍 CORTEX: Autodidact-Ω Audit[/bold cyan]")
     engine = get_engine()

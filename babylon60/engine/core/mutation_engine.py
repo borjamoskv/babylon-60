@@ -15,7 +15,6 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-
 from cortex.engine.evo._mutation_projectors import project
 from cortex.extensions.axioms.topological_id import flake_gen
 

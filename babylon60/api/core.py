@@ -13,12 +13,7 @@ import logging
 import sqlite3
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-
 import cortex.api.state as api_state
-from cortex import __version__, config
 from cortex.api.middleware import (
     ContentSizeLimitMiddleware,
     CortexBillingMiddleware,
@@ -34,10 +29,15 @@ from cortex.extensions.llm.quota import QuotaRejectedError
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.swarm.manager import get_swarm_manager
 from cortex.extensions.timing import TimingTracker
-from cortex.mcp_server.knowledge_watcher import start_knowledge_daemon
 from cortex.routes import api_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from cortex import __version__, config
+from cortex.mcp_server.knowledge_watcher import start_knowledge_daemon
 
 __all__ = [
     "ContentSizeLimitMiddleware",

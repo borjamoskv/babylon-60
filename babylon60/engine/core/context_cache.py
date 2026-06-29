@@ -209,7 +209,6 @@ class ContextCacheManager:
             import time
 
             import numpy as np
-
             from cortex.memory.encoder import AsyncEncoder
             from cortex.memory.models import CortexFactModel
             from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2

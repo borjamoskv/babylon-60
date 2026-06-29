@@ -7,7 +7,6 @@ import sqlite3
 from typing import Any
 
 import aiosqlite
-
 from cortex.memory.temporal import build_temporal_filter_params
 from cortex.search.models import SearchResult
 from cortex.search.utils import (

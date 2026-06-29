@@ -11,13 +11,12 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
-from fastapi import APIRouter
-
 from cortex.extensions.sovereign.observability import (
     Dimension,
     compute_power,
     run_security_scans,
 )
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/api/v1/sovereign", tags=["sovereign"])
 

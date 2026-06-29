@@ -53,9 +53,10 @@ def scrape(
     persist: bool,
 ):
     """Extract content from a single URL."""
-    from cortex.cli.common import _run_async
     from cortex.extensions.scraper.engine import ScraperEngine
     from cortex.extensions.scraper.models import ExtractionStrategy, ScrapeRequest
+
+    from cortex.cli.common import _run_async
 
     console.print(
         Panel(
@@ -138,9 +139,10 @@ def batch(
     output: str | None,
 ):
     """Batch extract URLs from a newline-delimited file."""
-    from cortex.cli.common import _run_async
     from cortex.extensions.scraper.engine import ScraperEngine
     from cortex.extensions.scraper.models import ExtractionStrategy
+
+    from cortex.cli.common import _run_async
 
     with open(file) as f:
         urls = [line.strip() for line in f if line.strip() and not line.startswith("#")]
@@ -201,8 +203,9 @@ def batch(
 @click.option("--output", "-o", type=click.Path(), default=None, help="Output file for URLs.")
 def map_site(url: str, depth: int, output: str | None):
     """Discover URLs from a website (sitemap)."""
-    from cortex.cli.common import _run_async
     from cortex.extensions.scraper.engine import ScraperEngine
+
+    from cortex.cli.common import _run_async
 
     console.print(
         Panel(

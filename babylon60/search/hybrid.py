@@ -16,7 +16,6 @@ from datetime import datetime, timezone
 from typing import Final
 
 import aiosqlite
-
 from cortex.search.causal_gap import (
     CausalGap,
     SearchCandidate,

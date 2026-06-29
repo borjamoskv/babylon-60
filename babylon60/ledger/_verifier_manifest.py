@@ -3,8 +3,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from cryptography.exceptions import InvalidSignature
-
 from cortex.ledger.public_verifier_utils import (
     PublicVerifierError,
     _manifest_signature_scope,
@@ -13,6 +11,7 @@ from cortex.ledger.public_verifier_utils import (
     _string_list,
     _verify_ed25519,
 )
+from cryptography.exceptions import InvalidSignature
 
 if TYPE_CHECKING:
     from cortex.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier

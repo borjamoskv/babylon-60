@@ -11,7 +11,6 @@ import logging
 from typing import Any
 
 import aiosqlite
-
 from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.core.mutation_engine import MUTATION_ENGINE
 

@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
-
 from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.audit.smt import SparseMerkleTree
 

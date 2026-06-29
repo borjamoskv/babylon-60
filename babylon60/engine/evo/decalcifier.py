@@ -13,7 +13,6 @@ import time
 from typing import Any
 
 import aiosqlite
-
 from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 
 logger = logging.getLogger("cortex.engine.evo.decalcifier")

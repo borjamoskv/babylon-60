@@ -6,18 +6,19 @@ and cryptographic verification (Merkle Tree Root + Ed25519 signatures).
 Conforms to BABYLON60-NATIVE-AI-MANIFESTO (Axiom Ω3) enforcing Tenant and Agent isolation.
 """
 
-import os
-import sys
-import json
-import time
-import uuid
 import fcntl
 import hashlib
-from pathlib import Path
+import json
+import os
+import sys
+import uuid
 from datetime import datetime, timezone
-from cryptography.hazmat.primitives.asymmetric import ed25519
-from cryptography.hazmat.primitives import serialization
+from pathlib import Path
+
 from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ed25519
+
 
 class ImportResolutionLedger:
     """
@@ -136,7 +137,7 @@ class ImportResolutionLedger:
                     os.fsync(f.fileno())
                 finally:
                     fcntl.flock(f, fcntl.LOCK_UN)
-        except IOError as e:
+        except OSError as e:
             sys.stderr.write(f"\n[LEDGER ERROR] Failed to write import ledger: {e}\n")
             sys.stderr.flush()
 
@@ -200,7 +201,7 @@ class ImportResolutionLedger:
         line_num = 0
 
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 for line in f:
                     line_num += 1
                     if not line.strip():

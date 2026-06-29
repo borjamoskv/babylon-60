@@ -27,9 +27,9 @@ import math
 import re
 import time
 from collections import Counter
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Sequence
 
 __all__ = [
     "ExcitationFamily",

@@ -6,10 +6,10 @@ import asyncio
 from pathlib import Path
 
 import click
+from cortex.swarm.swarm_10k import SwarmCommander
 from rich.panel import Panel
 
 from cortex.cli.common import cli, console
-from cortex.swarm.swarm_10k import SwarmCommander
 
 
 @cli.group()

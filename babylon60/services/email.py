@@ -10,7 +10,6 @@ import logging
 import os
 
 import httpx
-
 from cortex.audit.ledger import EnterpriseAuditLedger
 from cortex.guards.egress_guard import EgressGuard
 

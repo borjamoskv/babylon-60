@@ -11,8 +11,6 @@ import logging
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
-
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.llm.router import IntentProfile
 from cortex.extensions.music_engine.adapters import (
@@ -22,6 +20,7 @@ from cortex.extensions.music_engine.adapters import (
     UdioV4Adapter,
 )
 from cortex.extensions.music_engine.dsp_apotheosis import DSPApotheosis
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 

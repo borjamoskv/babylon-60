@@ -14,7 +14,6 @@ import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.cli.common import console  # pyright: ignore
 from cortex.extensions.mejoralo.constants import (
     DEVILS_ADVOCATE_THRESHOLD,
     SWARM_BASE_TEMPERATURE,
@@ -23,6 +22,8 @@ from cortex.extensions.mejoralo.constants import (
     SWARM_TEMPERATURE_STEP,
     SWARM_TIMEOUT_SECONDS,
 )
+
+from cortex.cli.common import console  # pyright: ignore
 
 if TYPE_CHECKING:
     from cortex.extensions.mejoralo.engine import MejoraloEngine

@@ -14,7 +14,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 import httpx
-
 from cortex.memory.temporal import now_iso
 
 if TYPE_CHECKING:

@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
-
 from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from cortex.extensions.signals.bus import SignalBus
 

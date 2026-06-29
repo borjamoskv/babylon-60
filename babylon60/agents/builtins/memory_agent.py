@@ -14,11 +14,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from cortex.memory.manager import CortexMemoryManager
+
 from cortex.agents.base import ReactiveTaskAgent
 from cortex.agents.bus import MessageBus
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.tools import ToolRegistry
-from cortex.memory.manager import CortexMemoryManager
 
 logger = logging.getLogger(__name__)
 

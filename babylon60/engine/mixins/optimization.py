@@ -16,7 +16,6 @@ from enum import Enum
 from typing import Any, ClassVar, final
 
 import aiosqlite
-
 from cortex.utils.canonical import canonical_json, compute_tx_hash, now_iso
 from cortex.utils.result import Err, Ok, Result
 

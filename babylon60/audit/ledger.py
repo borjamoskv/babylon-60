@@ -15,12 +15,11 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
+from cortex.audit.smt import smt_engine
+from cortex.database.core import causal_write
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
-
-from cortex.audit.smt import smt_engine
-from cortex.database.core import causal_write
 
 logger = logging.getLogger("cortex.audit.ledger")
 
@@ -361,9 +360,8 @@ class EnterpriseAuditLedger:
             logger.warning(
                 "rfc3161ng is not installed. TSA signatures will be disabled. Run pip install cortex-persist[secure]"
             )
-        from cryptography.hazmat.primitives import serialization
-
         from cortex.audit.rekor_client import RekorClient
+        from cryptography.hazmat.primitives import serialization
 
         # C5-REAL Exergy Optimization: Instantiate external clients once outside the loop.
         rekor_client = RekorClient()

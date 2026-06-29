@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 import click
-from rich.panel import Panel
-from rich.table import Table
-
-from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 from cortex.compaction.compactor import (
     CompactionStrategy,
     compact,
     compact_session,
     get_compaction_stats,
 )
+from rich.panel import Panel
+from rich.table import Table
+
+from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
 
 __all__ = ["compact_cmd", "compact_session_cmd", "compact_status", "gc_cmd"]
 
@@ -227,8 +227,9 @@ def gc_cmd(batch_size, force, db) -> None:
     Physically deletes facts and embeddings marked as tombstoned. Defers
     execution to off-peak hours by default to protect database IOPS.
     """
-    from cortex.cli.common import _run_async
     from cortex.compaction.gc import GarbageCollector
+
+    from cortex.cli.common import _run_async
 
     engine = get_engine(db)
     gc = GarbageCollector(engine)  # type: ignore[reportArgumentType]

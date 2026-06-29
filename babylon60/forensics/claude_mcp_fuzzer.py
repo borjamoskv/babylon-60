@@ -12,11 +12,10 @@ import time
 from dataclasses import dataclass, field
 from typing import Optional
 
+from cortex.integration.rustchain.judge import ASTLintJudge, PolicyJudge
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from mcp.server.fastmcp import FastMCP
-
-from cortex.integration.rustchain.judge import ASTLintJudge, PolicyJudge
 
 logger = logging.getLogger("cortex.forensics.claude_mcp_fuzzer")
 

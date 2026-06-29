@@ -78,10 +78,9 @@ class LedgerVerifier:
         import base64
         import os
 
-        from cryptography.hazmat.primitives.asymmetric import mldsa
-
         from cortex.crypto.aes import get_default_encrypter
         from cortex.crypto.keyring import keyring
+        from cryptography.hazmat.primitives.asymmetric import mldsa
 
         db_dir = os.path.dirname(self.store.db_path) if self.store.db_path else "."
         if not db_dir:

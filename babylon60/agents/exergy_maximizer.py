@@ -22,8 +22,7 @@ from typing import Any
 from cortex.agents.base import BaseAgent
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.agents.planner import ExecutionPlan, ExergyPlanner, PlanStep, StepStatus
-from cortex.agents.state import AgentStatus
+from cortex.agents.planner import ExecutionPlan, ExergyPlanner, PlanStep
 from cortex.agents.tools import ToolRegistry
 
 logger = logging.getLogger("cortex.agents.exergy_maximizer")

@@ -126,10 +126,10 @@ class SlowOpTipEmitter:
     def _emit_tip(self) -> None:
         """Emit a single tip to Rich console. Fully isolated - never crashes."""
         try:
+            from cortex.engine.core.tips import TipsEngine
             from rich.panel import Panel
 
             from cortex.cli.common import console
-            from cortex.engine.core.tips import TipsEngine
 
             tips_engine = TipsEngine(
                 None,

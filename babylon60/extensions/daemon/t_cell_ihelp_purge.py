@@ -156,7 +156,6 @@ class IHelpPurgeDaemon:
         import os
 
         import httpx
-
         from cortex.audit.ledger import EnterpriseAuditLedger
         from cortex.database.core import connect_async
         from cortex.routes.telemetry import BASE_MAFIA_NODES

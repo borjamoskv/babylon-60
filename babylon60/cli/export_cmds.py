@@ -83,12 +83,11 @@ def export_bundle(tenant_id: str, output: str) -> None:
         # (Assuming the public key can be pulled from the local environment)
         pk_path = bundle_dir / "audit_sovereign_pub.pem"
         try:
-            from cryptography.hazmat.primitives import serialization
-
             from cortex.audit.ledger import EnterpriseAuditLedger
 
             # Get public key from a temporary instance
             from cortex.database.core import connect_async
+            from cryptography.hazmat.primitives import serialization
 
             async with await connect_async(db_path) as c:
                 ledger = EnterpriseAuditLedger(c)

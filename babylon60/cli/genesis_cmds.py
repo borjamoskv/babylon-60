@@ -116,7 +116,6 @@ def create(
 def from_yaml(path: str) -> None:
     """Create a system from a YAML specification file."""
     import yaml
-
     from cortex.extensions.genesis import GenesisEngine
 
     try:

@@ -16,12 +16,12 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import NoReturn
 
+from cortex.utils.i18n import get_trans
 from rich.panel import Panel
 
 # Re-use the shared CLI console so errors appear in the same stream
 # as regular output (important for Click test runner capture).
 from cortex.cli.common import console
-from cortex.utils.i18n import get_trans
 
 __all__ = [
     "CortexErrorStruct",

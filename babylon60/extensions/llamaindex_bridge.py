@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 from typing import Any
 
+from cortex.engine import CortexEngine
 from llama_index.core.callbacks.base_handler import (
     BaseCallbackHandler,  # pyright: ignore[reportMissingImports]
 )
@@ -10,8 +11,6 @@ from llama_index.core.postprocessor.types import (
 )
 from llama_index.core.schema import NodeWithScore  # pyright: ignore[reportMissingImports]
 from pydantic import Field
-
-from cortex.engine import CortexEngine
 
 
 class ExergyFilter(BaseNodePostprocessor):

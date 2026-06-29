@@ -10,16 +10,13 @@ Implements rigorous experimental isolation:
 - Capacity vs. Policy disassociation
 """
 
-import os
-import sys
-import json
-import time
-import math
-import statistics
 import hashlib
-from dataclasses import dataclass, asdict
-from typing import Any, Dict, List, Optional, Tuple
+import math
+from dataclasses import dataclass
+from typing import Any
+
 import numpy as np
+
 
 @dataclass
 class RunStatistics:
@@ -64,9 +61,9 @@ class ExperimentalProfiler:
     def run_statistical_trial(
         self, 
         prompt: str, 
-        confusion_params: Dict[str, Any], 
+        confusion_params: dict[str, Any], 
         n_runs: int = 5
-    ) -> Dict[str, RunStatistics]:
+    ) -> dict[str, RunStatistics]:
         """
         Executes N runs under identical, strictly controlled confounding variables.
         Estimates variance, mean, and percentiles to analyze stochastical stability.
@@ -89,7 +86,7 @@ class ExperimentalProfiler:
             else:
                 itls.append(0.0)
 
-        def get_stats(name: str, values: List[float]) -> RunStatistics:
+        def get_stats(name: str, values: list[float]) -> RunStatistics:
             if not values:
                 return RunStatistics(name, 0.0, 0.0, 0.0, 0.0, 0)
             arr = np.array(values)
@@ -113,9 +110,9 @@ class ExperimentalProfiler:
         self,
         base_prompt: str,
         distractor_template: str,
-        steps: List[int], # List of word counts for distractor injection (e.g. [1000, 4000, 16000])
-        confusion_params: Dict[str, Any]
-    ) -> List[DegradationDataPoint]:
+        steps: list[int], # List of word counts for distractor injection (e.g. [1000, 4000, 16000])
+        confusion_params: dict[str, Any]
+    ) -> list[DegradationDataPoint]:
         """
         Injects progressive noise/context length to evaluate the capacity decay curve.
         """
@@ -146,9 +143,9 @@ class ExperimentalProfiler:
     def generate_constraint_saturation_curve(
         self,
         base_prompt: str,
-        constraints: List[str], # Cumulative constraints
-        confusion_params: Dict[str, Any]
-    ) -> List[DegradationDataPoint]:
+        constraints: list[str], # Cumulative constraints
+        confusion_params: dict[str, Any]
+    ) -> list[DegradationDataPoint]:
         """
         Measures performance as constraints scale from 1 to M.
         """

@@ -6,14 +6,13 @@ Agents Router (Reputation Management).
 import logging
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException
-from starlette.requests import Request
-
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.types.models import AgentRegisterRequest, AgentResponse
 from cortex.utils.i18n import get_trans
+from fastapi import APIRouter, Depends, HTTPException
+from starlette.requests import Request
 
 __all__ = ["get_agent", "list_agents", "register_agent"]
 

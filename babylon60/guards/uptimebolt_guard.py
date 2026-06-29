@@ -13,7 +13,6 @@ import logging
 import os
 import urllib.error
 import urllib.request
-from typing import Any
 
 logger = logging.getLogger("cortex.guards.uptimebolt_guard")
 

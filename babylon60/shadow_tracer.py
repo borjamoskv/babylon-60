@@ -5,14 +5,14 @@ Provides runtime virtualization, dependency tracing, cycle detection under colla
 and JSON compatibility delta graph export.
 """
 
-import sys
-import os
-import inspect
-import json
 import importlib.abc
 import importlib.util
-from pathlib import Path
+import json
+import os
+import sys
 from collections import defaultdict
+from pathlib import Path
+
 
 class _TracerAliasLoader(importlib.abc.Loader):
     def __init__(self, target_module):

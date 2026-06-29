@@ -3,7 +3,6 @@ import random
 from typing import Any
 
 import numpy as np
-
 from cortex.observability.fdf import FailureField, Particle
 
 

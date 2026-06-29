@@ -10,7 +10,6 @@ import logging
 from pathlib import Path
 
 import aiosqlite
-
 from cortex.engine.cognitive.models import row_to_fact
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 

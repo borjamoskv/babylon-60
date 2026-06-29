@@ -2,10 +2,11 @@
 [C5-REAL] Black-Box Benchmark Harness
 Erradica la identificación especulativa de modelos. Implementa detección de deriva y consistencia de endpoints.
 """
-import time
 import asyncio
-from typing import Dict, Any, Optional
+import time
 from dataclasses import dataclass
+from typing import Any
+
 
 @dataclass
 class BaselineProfile:
@@ -16,7 +17,7 @@ class BaselineProfile:
 
 class BlackBoxBenchmarkHarness:
     def __init__(self):
-        self._baselines: Dict[str, BaselineProfile] = {}
+        self._baselines: dict[str, BaselineProfile] = {}
         
     async def measure_network_baseline(self, endpoint_url: str, probes: int = 5) -> float:
         """
@@ -39,7 +40,7 @@ class BlackBoxBenchmarkHarness:
         )
         return baseline
 
-    def evaluate_drift(self, endpoint_url: str, observed_latency_ms: float, ttft_ms: float) -> Dict[str, Any]:
+    def evaluate_drift(self, endpoint_url: str, observed_latency_ms: float, ttft_ms: float) -> dict[str, Any]:
         """
         Evalúa si la inferencia reportada viola las leyes termodinámicas del baseline,
         lo que indicaría un cambio encubierto de modelo (ej. downgrade a Flash).

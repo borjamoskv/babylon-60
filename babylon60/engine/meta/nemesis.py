@@ -6,7 +6,6 @@ import logging
 import re
 
 import aiosqlite
-
 from cortex.database.core import connect as db_connect
 from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 

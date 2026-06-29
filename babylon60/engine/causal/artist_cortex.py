@@ -5,9 +5,9 @@ Transforms the operator's psychological entropy into executable topology.
 Implements the 8 vectors of epistemic friction as strict physical invariants.
 """
 
-import os
 import hashlib
 import logging
+import os
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -68,7 +68,7 @@ class ApoptosisEngine:
             # Force OS-level denial of read access to force memory wipe
             logger.warning(f"APOPTOSIS INITIATED. Locking {anchor_path} for 30 cycles.")
             os.chmod(anchor_path, 0o000) # C5-REAL File Mutability Lock
-            return f"[C5-REAL] Apoptosis executed. Access to references destroyed. Survive the vacuum."
+            return "[C5-REAL] Apoptosis executed. Access to references destroyed. Survive the vacuum."
         except Exception as e:
             logger.error(f"Apoptosis constraint failure: {e}")
             raise

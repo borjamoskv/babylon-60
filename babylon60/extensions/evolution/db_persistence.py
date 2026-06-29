@@ -37,7 +37,6 @@ from pathlib import Path
 from typing import Any
 
 import aiosqlite
-
 from cortex.database.core import connect_async_ctx
 from cortex.extensions.evolution.agents import EnneagramSovereign
 from cortex.extensions.evolution.persistence import (

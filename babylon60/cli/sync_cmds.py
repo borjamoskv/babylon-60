@@ -7,11 +7,11 @@ from pathlib import Path
 from typing import Any
 
 import click
+from cortex.extensions.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
 from rich.panel import Panel
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.slow_tip import tip_on_slow
-from cortex.extensions.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
 
 __all__ = [
     "export",

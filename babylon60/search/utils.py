@@ -8,7 +8,6 @@ import sqlite3
 from typing import Any
 
 import aiosqlite
-
 from cortex.crypto.aes import CortexEncrypter
 from cortex.search.models import SearchResult
 

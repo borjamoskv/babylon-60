@@ -3,9 +3,8 @@
 
 import os
 
-from neo4j import AsyncGraphDatabase
-
 from cortex.graph.backends.base import GraphBackend
+from neo4j import AsyncGraphDatabase
 
 
 class Neo4jBackend(GraphBackend):

@@ -7,7 +7,6 @@ import sqlite3
 from typing import Any, cast
 
 import aiosqlite
-
 from cortex.engine.mixins.base import EngineMixinBase
 from cortex.memory.temporal import now_iso
 

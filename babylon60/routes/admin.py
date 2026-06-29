@@ -14,14 +14,7 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-from starlette.concurrency import run_in_threadpool
-from starlette.requests import Request
-
 import cortex.api.state as api_state
-from cortex import __version__
 from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, get_auth_manager, require_permission
 from cortex.database.schema import SCHEMA_VERSION
@@ -38,6 +31,13 @@ from cortex.types.models import (
 )
 from cortex.utils.export import export_facts
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+from starlette.concurrency import run_in_threadpool
+from starlette.requests import Request
+
+from cortex import __version__
 
 if TYPE_CHECKING:
     from cortex.auth import AuthManager

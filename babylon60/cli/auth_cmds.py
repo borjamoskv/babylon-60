@@ -1,11 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 
 import click
+from cortex.engine import CortexEngine
+from cortex.swarm.auth_gateway import QuorumGateway
 from rich.console import Console
 
 from cortex.cli.common import _run_async, cli
-from cortex.engine import CortexEngine
-from cortex.swarm.auth_gateway import QuorumGateway
 
 console = Console()
 

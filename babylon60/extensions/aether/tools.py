@@ -14,7 +14,6 @@ from collections.abc import Callable
 from pathlib import Path
 
 import httpx
-
 from cortex.guards.capabilities import RiskTier
 from cortex.guards.capability_guard import CapabilityGuard
 

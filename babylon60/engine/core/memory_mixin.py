@@ -6,7 +6,6 @@ import logging
 from pathlib import Path
 
 import aiosqlite
-
 from cortex.engine.mixins.base import EngineMixinBase
 
 __all__ = ["MemoryMixin"]

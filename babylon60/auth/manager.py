@@ -13,9 +13,10 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any
 
-import cortex_rs
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
+
+import cortex_rs
 
 __all__ = ["AuthManager", "get_auth_manager", "reset_auth_manager"]
 

@@ -19,10 +19,9 @@ import logging
 import os
 import time
 
+from cortex.core import config
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
-
-from cortex.core import config
 
 __all__ = [
     "CheckoutRequest",

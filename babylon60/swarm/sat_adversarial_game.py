@@ -1,8 +1,9 @@
 import logging
 from typing import Any
 
-from cortex.agents.sat_orchestrator import SatOrchestrator
 from cortex.swarm.sat_genetic_swarm import SatGeneticSwarm
+
+from cortex.agents.sat_orchestrator import SatOrchestrator
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)

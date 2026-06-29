@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
-from mcp.server.fastmcp import FastMCP
-
 from cortex.extensions.ui_control.maestro import MaestroUI
 from cortex.extensions.ui_control.models import AppTarget
+from mcp.server.fastmcp import FastMCP
+
 from cortex.mcp_server.utils import get_engine  # type: ignore[reportAttributeAccessIssue]
 
 logger = logging.getLogger("cortex.mcp_server.maestro")

@@ -22,7 +22,6 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-
 from cortex.memory.models import MemoryEvent
 
 try:

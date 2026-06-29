@@ -13,14 +13,13 @@ import time
 from collections import defaultdict
 from typing import Any
 
+from cortex.extensions.signals.bus import SignalBus
 from rich import box
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
-
-from cortex.extensions.signals.bus import SignalBus
 
 console = Console()
 

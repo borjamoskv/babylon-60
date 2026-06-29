@@ -17,12 +17,13 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.agents.mixins import EngineAwareMixin
 from cortex.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_TARGET_SCORE,
     STAGNATION_LIMIT,
 )
 from cortex.extensions.mejoralo.models import ScanResult
+
+from cortex.agents.mixins import EngineAwareMixin
 
 logger = logging.getLogger("cortex_extensions.agents.mejoralo_omega")
 

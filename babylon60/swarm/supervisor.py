@@ -18,14 +18,13 @@ import uuid
 from typing import Any
 
 import aiosqlite
-from pydantic import ValidationError
-
 from cortex.config import DB_PATH
 from cortex.engine.causal.taint_engine import generate_secure_taint_token
 from cortex.engine.causal.topological_arbitrage import TopologyIndex
 from cortex.extensions.skills.autodidact.epistemology import Hypothesis
 from cortex.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
 from cortex.swarm.state_store import CausalStateStore
+from pydantic import ValidationError
 
 logger = logging.getLogger("cortex.swarm.supervisor")
 

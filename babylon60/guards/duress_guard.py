@@ -46,6 +46,7 @@ class DuressGuard:
         try:
             import hashlib
             from datetime import datetime, timezone
+
             from cortex.database.core import connect
 
             db_path = os.environ.get("CORTEX_DB_PATH", "cortex_ledger.db")

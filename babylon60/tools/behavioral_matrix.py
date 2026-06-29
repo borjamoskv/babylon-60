@@ -14,16 +14,14 @@ Enforces evaluation of model behavior along dimensions 9 to 16:
 - Metacognitive Coherence
 """
 
-import os
-import sys
-import json
 import hashlib
-import statistics
 import math
 import re
-from dataclasses import dataclass, asdict
-from typing import Any, Dict, List, Optional, Tuple
+import statistics
+from dataclasses import dataclass
+
 import numpy as np
+
 
 @dataclass
 class ConversationTurn:
@@ -60,7 +58,7 @@ class BehavioralAnalyzer:
         total = len(words)
         return -sum((count / total) * math.log2(count / total) for count in counts.values())
 
-    def analyze_curvature(self, history: List[ConversationTurn]) -> float:
+    def analyze_curvature(self, history: list[ConversationTurn]) -> float:
         """
         Dimension 9: Measures response drift over a multi-turn conversation.
         Low values represent high context stickiness (reusing exact semantic vectors).
@@ -78,7 +76,7 @@ class BehavioralAnalyzer:
             similarities.append(sim)
         return float(statistics.mean(similarities))
 
-    def analyze_elasticity(self, variants: List[str]) -> float:
+    def analyze_elasticity(self, variants: list[str]) -> float:
         """
         Dimension 10: Measures invariant conceptual mapping across multiple formats.
         Computes variance over the embedding space. Lower is more invariant.
@@ -93,7 +91,7 @@ class BehavioralAnalyzer:
             return 0.0
         return float(np.trace(cov))
 
-    def analyze_robustness(self, original: str, perturbed: List[str]) -> float:
+    def analyze_robustness(self, original: str, perturbed: list[str]) -> float:
         """
         Dimension 11: Measures delta of response variance over small prompt mutations.
         """
@@ -110,14 +108,14 @@ class BehavioralAnalyzer:
             deltas.append(1.0 - sim)
         return float(statistics.mean(deltas))
 
-    def analyze_compression(self, sequence: List[str]) -> List[float]:
+    def analyze_compression(self, sequence: list[str]) -> list[float]:
         """
         Dimension 12: Sequence of Shannon entropy drops.
         Expects a sequence representing: Original -> 80% -> 50% -> 20% -> 1-Sentence -> 3-Words
         """
         return [self.compute_shannon_entropy(step) for step in sequence]
 
-    def analyze_expansion(self, sequence: List[str]) -> List[float]:
+    def analyze_expansion(self, sequence: list[str]) -> list[float]:
         """
         Dimension 13: Unique word growth rate over progressive expansions.
         """

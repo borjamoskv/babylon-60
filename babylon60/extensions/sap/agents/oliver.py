@@ -12,7 +12,6 @@ from __future__ import annotations
 import logging
 
 import aiosqlite
-
 from cortex.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex_extensions.sap.oliver")

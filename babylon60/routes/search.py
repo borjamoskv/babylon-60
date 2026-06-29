@@ -3,12 +3,11 @@
 Search Router.
 """
 
-from fastapi import APIRouter, Depends, Query
-
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.types.models import SearchRequest, SearchResult
+from fastapi import APIRouter, Depends, Query
 
 __all__ = ["search_facts", "search_facts_get"]
 

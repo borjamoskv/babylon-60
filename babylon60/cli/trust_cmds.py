@@ -44,8 +44,9 @@ def _run_async(coro):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def verify_fact(fact_id: int, db: str) -> None:
     """Verify cryptographic integrity of a specific fact."""
-    from cortex.cli.errors import err_fact_not_found, handle_cli_error
     from cortex.database.core import connect as db_connect
+
+    from cortex.cli.errors import err_fact_not_found, handle_cli_error
 
     conn = None
     try:
@@ -92,8 +93,9 @@ def compliance_report(db: str) -> None:
     """Generate EU AI Act Article 12 compliance snapshot."""
     from datetime import datetime, timezone
 
-    from cortex.cli.errors import handle_cli_error
     from cortex.database.core import connect as db_connect
+
+    from cortex.cli.errors import handle_cli_error
 
     conn = None
     try:
@@ -245,8 +247,9 @@ def audit_cognitive(tenant: str, db: str) -> None:
 
 def _audit_trail(project: str, limit: int, db: str) -> None:
     """Display the audit trail from the database."""
-    from cortex.cli.errors import handle_cli_error
     from cortex.database.core import connect as db_connect
+
+    from cortex.cli.errors import handle_cli_error
 
     conn = None
     try:
@@ -287,11 +290,12 @@ def audit(ctx, calcification: bool, frontend: bool, project: str, limit: int, db
 @click.option("--db", default=DEFAULT_DB, help="Database path to attack")
 def siege(db: str) -> None:
     """Run an autonomous Red Team swarm to test Ledger and Vault BFT compliance."""
-    from cortex.cli.errors import handle_cli_error
     from cortex.crypto.vault import Vault
     from cortex.database.pool import CortexConnectionPool
     from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.swarm.legion_vectors import COMPLIANCE_SIEGE_SWARM
+
+    from cortex.cli.errors import handle_cli_error
 
     async def _run_siege():
         pool = CortexConnectionPool(db, min_connections=2, max_connections=10, read_only=False)

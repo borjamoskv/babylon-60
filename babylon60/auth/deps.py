@@ -5,11 +5,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from fastapi import Depends, Header, HTTPException, Request
-
 from cortex.auth.manager import get_auth_manager
 from cortex.auth.models import AuthResult
 from cortex.auth.rbac import RBAC, Permission
+from fastapi import Depends, Header, HTTPException, Request
 
 __all__ = [
     "require_auth",

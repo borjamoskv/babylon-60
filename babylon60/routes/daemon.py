@@ -3,10 +3,9 @@
 Daemon Router.
 """
 
-from fastapi import APIRouter, Depends, Request
-
 from cortex.auth import AuthResult, require_permission
 from cortex.utils.i18n import get_trans
+from fastapi import APIRouter, Depends, Request
 
 __all__ = ["daemon_status"]
 

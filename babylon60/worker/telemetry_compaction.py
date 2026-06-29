@@ -12,7 +12,6 @@ import logging
 from datetime import datetime, timezone
 
 import aiosqlite
-
 from cortex.database.core import causal_write, connect_async_ctx
 
 logger = logging.getLogger("cortex.worker.telemetry_compaction")

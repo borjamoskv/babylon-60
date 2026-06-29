@@ -12,9 +12,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Query
-
 from cortex.auth import AuthResult, require_permission
+from fastapi import APIRouter, Depends, Query
 
 router = APIRouter(tags=["notebooklm"])
 
@@ -90,10 +89,9 @@ async def notebooklm_digest(
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
     """Generate Master Digest with Shadow Key anchors."""
-    from fastapi import HTTPException
-
     from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
     from cortex.services.notebooklm import NotebookLMService
+    from fastapi import HTTPException
 
     base_dir = Path.cwd().resolve()
     target_file = (base_dir / output).resolve()
@@ -119,10 +117,9 @@ async def notebooklm_fragment(
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
     """Fragment CORTEX facts into semantic domain files."""
-    from fastapi import HTTPException
-
     from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
     from cortex.services.notebooklm import NotebookLMService
+    from fastapi import HTTPException
 
     base_dir = Path.cwd().resolve()
     target_dir = (base_dir / output_dir).resolve()

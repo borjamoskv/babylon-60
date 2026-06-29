@@ -22,7 +22,6 @@ import sqlite3
 from pathlib import Path
 
 import aiosqlite
-
 from cortex.core.paths import COLD_STORAGE_DB, PERSONAL_DB
 from cortex.search.models import SearchResult, SearchScope
 from cortex.search.text import text_search, text_search_sync

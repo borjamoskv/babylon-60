@@ -149,9 +149,8 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
     if live:
         # Live sampling mode
 
-        from rich.progress import track
-
         from cortex.extensions.health import HealthCollector, HealthScorer
+        from rich.progress import track
 
         collector = HealthCollector(db_path=path)
         detector = TrendDetector(window_size=samples)
@@ -192,9 +191,8 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
 @click.option("--limit", default=20, help="Number of records to show.")
 def history(db_path: str | None, limit: int) -> None:
     """Show persisted health score history."""
-    from rich.table import Table
-
     from cortex.extensions.health.trend import TrendDetector
+    from rich.table import Table
 
     path = _resolve_db(db_path)
     records = TrendDetector.query_history(path, limit=limit)

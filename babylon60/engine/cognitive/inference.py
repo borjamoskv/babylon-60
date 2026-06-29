@@ -16,7 +16,6 @@ from dataclasses import dataclass
 from typing import Any
 
 import aiosqlite
-
 from cortex.engine.flow.causality import (
     EDGE_DERIVED_FROM,
     AsyncCausalGraph,

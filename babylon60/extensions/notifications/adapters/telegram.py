@@ -16,7 +16,6 @@ import logging
 import os
 
 import httpx
-
 from cortex.extensions.notifications.adapters.base import BaseAdapter
 from cortex.extensions.notifications.events import CortexEvent
 

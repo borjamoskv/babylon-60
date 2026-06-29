@@ -5,15 +5,15 @@ import os
 import time
 
 import httpx
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
 
 # CORTEX L2 Membrane
 from cortex.engine import CortexEngine
 from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, StreamingResponse
 
 app = FastAPI(title="Claude Code Router (CCR)")
 

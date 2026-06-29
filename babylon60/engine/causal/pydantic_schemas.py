@@ -4,7 +4,7 @@ Provides strict typing and structural validation for higher-order causal entitie
 """
 
 from enum import Enum
-from typing import Literal, Optional
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool

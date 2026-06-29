@@ -76,7 +76,6 @@ async def embed_fact_async(
     ):
         try:
             import numpy as np
-
             from cortex.memory.hdc.algebra import bind
             from cortex.memory.models import CortexFactModel
 

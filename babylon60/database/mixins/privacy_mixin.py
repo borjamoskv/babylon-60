@@ -8,7 +8,6 @@ import logging
 from typing import Any
 
 import aiosqlite
-
 from cortex.crypto import get_default_encrypter
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
 from cortex.storage.classifier import (

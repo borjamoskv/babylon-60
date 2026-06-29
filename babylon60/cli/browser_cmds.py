@@ -2,9 +2,8 @@
 import asyncio
 
 import click
-from rich.console import Console
-
 from cortex.extensions.browser.agent import SovereignBrowserAgent
+from rich.console import Console
 
 console = Console()
 

@@ -11,7 +11,7 @@ import hashlib
 import sys
 import time
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, TypedDict
+from typing import Any, Literal, Optional, TypedDict
 
 import cortex.utils.canonical as canonical
 
@@ -26,8 +26,8 @@ class CausalEvent(TypedDict):
         "module_bind", "mutation", "invalidate", "reload"
     ]
     subject: str              
-    inputs: Dict[str, Any]    
-    outputs: Dict[str, Any]   
+    inputs: dict[str, Any]    
+    outputs: dict[str, Any]   
     parent_event_id: Optional[str] 
     tenant_id: str            
 
@@ -37,8 +37,8 @@ class RuntimeSnapshot(TypedDict):
     sys_modules_hash: str     
     sys_meta_path_hash: str   
     sys_path_hash: str        
-    import_cache_hashes: Dict[str, str] 
-    loader_state_hashes: Dict[str, str] 
+    import_cache_hashes: dict[str, str] 
+    loader_state_hashes: dict[str, str] 
 
 class EdgeRelation(str, Enum):
     TRIGGERS = "triggers"       
@@ -71,12 +71,12 @@ def _hash_list(lst: list) -> str:
 class RuntimeCausalLedger:
     def __init__(self, tenant_id: str):
         self.tenant_id = tenant_id
-        self.events: List[CausalEvent] = []
-        self._module_identity_map: Dict[str, str] = {}
+        self.events: list[CausalEvent] = []
+        self._module_identity_map: dict[str, str] = {}
         self.pre_snapshot: Optional[RuntimeSnapshot] = None
         self.post_snapshot: Optional[RuntimeSnapshot] = None
 
-    def record_event(self, kind: str, subject: str, inputs: Dict[str, Any], outputs: Dict[str, Any]) -> str:
+    def record_event(self, kind: str, subject: str, inputs: dict[str, Any], outputs: dict[str, Any]) -> str:
         """Forja un evento atómico y lo anexa al grafo en memoria."""
         ts = time.perf_counter()
         
@@ -84,7 +84,7 @@ class RuntimeCausalLedger:
         parent_id = current_import_parent.get()
         
         # Payload canónico para SHA3-256
-        payload = f"{ts}|{kind}|{subject}|{parent_id}".encode('utf-8')
+        payload = f"{ts}|{kind}|{subject}|{parent_id}".encode()
         event_id = _compute_sha3_256(payload)
         
         event = CausalEvent(
@@ -124,7 +124,7 @@ class RuntimeCausalLedger:
         # Loader state is tricky, just stubbing for pure loaders
         loader_state_hashes = {}
         
-        payload = f"{ts}|{sys_modules_hash}|{sys_meta_path_hash}".encode('utf-8')
+        payload = f"{ts}|{sys_modules_hash}|{sys_meta_path_hash}".encode()
         snapshot_id = _compute_sha3_256(payload)
         
         snapshot = RuntimeSnapshot(
@@ -183,7 +183,7 @@ class RuntimeCausalLedger:
         return None
 
 # Singleton / Global Hook Manager support
-_active_ledgers: Dict[str, RuntimeCausalLedger] = {}
+_active_ledgers: dict[str, RuntimeCausalLedger] = {}
 
 def get_ledger(tenant_id: str) -> RuntimeCausalLedger:
     if tenant_id not in _active_ledgers:

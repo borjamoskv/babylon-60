@@ -11,12 +11,11 @@ from __future__ import annotations
 import logging
 import time
 
+from cortex.extensions.llm.sovereign import SovereignLLM
+from cortex.gateway.spoof import SpoofManager
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-
-from cortex.extensions.llm.sovereign import SovereignLLM
-from cortex.gateway.spoof import SpoofManager
 
 logger = logging.getLogger("cortex.gateway.openai")
 

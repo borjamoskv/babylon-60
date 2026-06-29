@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import aiosqlite
-
 from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex.database.mixins.query_mixin import QueryMixin
 from cortex.database.mixins.search_mixin import SearchMixin

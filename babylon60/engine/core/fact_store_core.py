@@ -12,7 +12,6 @@ import sqlite3
 from typing import Any
 
 import aiosqlite
-
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import compute_fact_hash
 

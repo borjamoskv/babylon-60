@@ -319,7 +319,6 @@ class OmegaDaemon:
                             import os
 
                             import keyring
-
                             from cortex.engine.causal.taint_engine import (
                                 generate_secure_taint_token,
                             )

@@ -10,10 +10,10 @@ CLI interface for the Exergy Daemon background loop.
 import asyncio
 
 import click
+from cortex.observability.exergy_engine import ExergyEngine
 from rich.panel import Panel
 
 from cortex.cli.common import cli, console
-from cortex.observability.exergy_engine import ExergyEngine
 
 __all__ = [
     "exergy_cmds",

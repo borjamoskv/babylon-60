@@ -5,8 +5,6 @@ SovereignGate API Router.
 REST endpoints for remote operator approval of L3 actions.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
-
 from cortex.auth import require_permission
 from cortex.extensions.gate import (
     GateError,
@@ -19,6 +17,7 @@ from cortex.types.models import (
     GateApprovalRequest,
     GateStatusResponse,
 )
+from fastapi import APIRouter, Depends, HTTPException
 
 __all__ = [
     "approve_action",

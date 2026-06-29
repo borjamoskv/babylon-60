@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 import aiosqlite
-
 from cortex.crypto import get_default_encrypter
 from cortex.engine.flow.causality import AsyncCausalGraph
 

@@ -16,10 +16,9 @@ import logging
 import sys
 from pathlib import Path
 
-from rich.console import Console
-
 from cortex.guards import analysis
 from cortex.guards.models import DependencyViolation
+from rich.console import Console
 
 __all__ = ["DependencyViolation", "scan_directory", "scan_file"]
 

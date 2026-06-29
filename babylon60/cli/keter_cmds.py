@@ -7,12 +7,12 @@ Sovereign Orchestration and Reality Weaver.
 from __future__ import annotations
 
 import click
+from cortex.engine.speculative.keter import KeterEngine
+from cortex.utils.errors import CortexError
 from rich.console import Console
 from rich.panel import Panel
 
 from cortex.cli.common import _run_async, cli
-from cortex.engine.speculative.keter import KeterEngine
-from cortex.utils.errors import CortexError
 
 console = Console()
 

@@ -14,8 +14,9 @@ import os
 import time
 from typing import Any, Protocol
 
-from cortex.agents.message_schema import AgentMessage
 from cortex.database.core import causal_write, connect_async
+
+from cortex.agents.message_schema import AgentMessage
 
 logger = logging.getLogger("cortex.agents.bus")
 

@@ -16,11 +16,11 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import click
+from cortex.crypto.aes import get_default_encrypter
 from rich.panel import Panel
 from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.crypto.aes import get_default_encrypter
 
 logger = logging.getLogger("cortex.roi")
 

@@ -8,8 +8,6 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 import click
-
-from cortex.cli.common import DEFAULT_DB, cli
 from cortex.forensics.evidence_bundle import (
     build_evidence_manifest,
     commit_evidence_manifest,
@@ -18,6 +16,8 @@ from cortex.forensics.evidence_bundle import (
     verify_evidence_commit,
     verify_evidence_manifest,
 )
+
+from cortex.cli.common import DEFAULT_DB, cli
 
 
 @click.group("forensics")

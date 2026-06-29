@@ -6,7 +6,6 @@ from collections.abc import Callable
 from typing import Any
 
 import aiosqlite
-
 from cortex.engine.mixins.base import EngineMixinBase
 
 logger = logging.getLogger("cortex_extensions.agent")

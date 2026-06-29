@@ -6,13 +6,12 @@ Timing Router.
 import logging
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from starlette.concurrency import run_in_threadpool
-
 import cortex.api.state as api_state
 from cortex.auth import AuthResult, require_permission
 from cortex.types.models import HeartbeatRequest, TimeSummaryResponse
 from cortex.utils.i18n import get_trans
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from starlette.concurrency import run_in_threadpool
 
 __all__ = [
     "get_time_history",

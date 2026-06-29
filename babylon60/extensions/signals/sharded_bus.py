@@ -15,7 +15,6 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import aiosqlite
-
 from cortex.core import config
 from cortex.extensions.signals.bus import _CREATE_INDEXES, _CREATE_TABLE, _build_query
 from cortex.extensions.signals.models import Signal, signal_from_row

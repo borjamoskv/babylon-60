@@ -2,9 +2,8 @@
 import re
 import time
 
-from google.antigravity import hooks
-
 from cortex.observability.telemetry import telemetry
+from google.antigravity import hooks
 
 _timers = {}
 

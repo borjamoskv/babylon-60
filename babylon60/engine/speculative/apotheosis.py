@@ -9,11 +9,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from cortex.engine import CortexEngine
     from watchdog.events import FileSystemEvent as FileSystemEvent
     from watchdog.events import FileSystemEventHandler as FileSystemEventHandler
     from watchdog.observers import Observer as Observer
-
-    from cortex.engine import CortexEngine
 
     _HAS_WATCHDOG = True
 else:

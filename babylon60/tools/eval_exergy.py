@@ -8,7 +8,6 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Dict, Tuple
 
 try:
     from pydantic import BaseModel, Field
@@ -25,9 +24,9 @@ class ExergyMetric(BaseModel):
     token_count: int = Field(..., gt=0)
     info_density: float = Field(..., ge=0.0, le=1000.0)
     dola_trigger: float = Field(..., ge=0.0, le=1.0)
-    heuristics: Dict[str, float] = Field(default_factory=dict)
+    heuristics: dict[str, float] = Field(default_factory=dict)
 
-def calculate_eff(text: str) -> Tuple[float, float]:
+def calculate_eff(text: str) -> tuple[float, float]:
     """Proxy E_eff: Retorna (info_density, ttr) para evitar recálculo o NameError."""
     tokens = TokenProxy().count(text)
     if tokens == 0:
@@ -82,7 +81,7 @@ def main():
     )
     
     if ledger_path.exists():
-        with open(ledger_path, "r", encoding="utf-8") as f:
+        with open(ledger_path, encoding="utf-8") as f:
             history = json.load(f)
     else:
         history = []

@@ -11,10 +11,10 @@ from __future__ import annotations
 import asyncio
 
 import click
-
-from cortex.cli.common import cli, console, get_engine
 from cortex.extensions.ui_control.maestro import MaestroUI
 from cortex.extensions.ui_control.models import AppTarget
+
+from cortex.cli.common import cli, console, get_engine
 
 
 @click.group(name="maestro")

@@ -9,12 +9,11 @@ from __future__ import annotations
 
 import logging
 
+from cortex.extensions.metering.quotas import QuotaEnforcer
+from cortex.extensions.metering.tracker import UsageTracker
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-
-from cortex.extensions.metering.quotas import QuotaEnforcer
-from cortex.extensions.metering.tracker import UsageTracker
 
 __all__ = ["MeteringMiddleware"]
 

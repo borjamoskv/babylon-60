@@ -9,7 +9,6 @@ import logging
 import sqlite3
 
 import aiosqlite
-
 from cortex.database.schema import get_all_schema
 from cortex.migrations.registry import MIGRATIONS
 

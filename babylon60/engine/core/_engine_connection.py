@@ -16,7 +16,6 @@ from contextlib import asynccontextmanager
 
 import aiosqlite
 import sqlite_vec
-
 from cortex.database.core import connect, load_sqlite_vec_async
 from cortex.database.schema import get_init_meta
 from cortex.migrations.core import run_migrations_async

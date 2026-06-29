@@ -15,6 +15,8 @@ from cortex.extensions.immune.filters.base import Verdict
 from cortex.extensions.immune.membrane import ImmuneMembrane
 from cortex.integration.rustchain.mcp_tool import register_rustchain_tools
 from cortex.ledger import ImmutableLedger
+from cortex.swarm import start_swarm_daemon
+
 from cortex.mcp_server.apollo_tools import register_apollo_tools
 from cortex.mcp_server.core_tools import (
     _register_embed_status_tool,
@@ -35,7 +37,6 @@ from cortex.mcp_server.utils import (
     MCPServerConfig,
     SimpleAsyncCache,
 )
-from cortex.swarm import start_swarm_daemon
 
 __all__ = ["create_mcp_server", "run_server"]
 

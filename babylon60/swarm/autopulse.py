@@ -203,7 +203,6 @@ async def _append_state_ledger(agent: str, payload: dict) -> None:
 
     try:
         import aiosqlite
-
         from cortex.database.core import connect_async
 
         async with await connect_async(DB_PATH) as conn:

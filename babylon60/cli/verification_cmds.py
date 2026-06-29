@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import click
+from cortex.verification.verifier import SovereignVerifier
 from rich.console import Console
 from rich.table import Table
 
 from cortex.cli.common import cli
-from cortex.verification.verifier import SovereignVerifier
 
 console = Console()
 

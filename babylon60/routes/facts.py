@@ -4,10 +4,6 @@ import sqlite3
 from collections.abc import Mapping
 from typing import Any, Protocol, cast
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
-from starlette.requests import Request
-
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
@@ -21,6 +17,9 @@ from cortex.types.models import (
     VoteV2Request,
 )
 from cortex.utils.i18n import get_trans
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
+from starlette.requests import Request
 
 """
 Facts Router.

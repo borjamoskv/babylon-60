@@ -18,8 +18,9 @@ if TYPE_CHECKING:
     from cortex.engine import CortexEngine
     from cortex.extensions.timing import TimingTracker
 
-from cortex import __version__
 from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+
+from cortex import __version__
 
 # Theme and Console
 cortex_theme = Theme(

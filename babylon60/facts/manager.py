@@ -5,11 +5,10 @@ import dataclasses
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
-from pydantic import ValidationError
-
 from cortex.engine.cognitive.models import Fact, row_to_fact
 from cortex.engine.core.store_validators import validate_content
 from cortex.utils.canonical import now_iso
+from pydantic import ValidationError
 
 if TYPE_CHECKING:
     from cortex.extensions.interfaces.engine import EngineProtocol

@@ -4,16 +4,16 @@ import asyncio
 from datetime import datetime
 
 import click
-from rich.console import Console
-from rich.panel import Panel
-
-from cortex.cli.common import cli
 from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex.darknet.agents import AVATARS, DarknetAgent
 from cortex.darknet.ingestor import DarknetIngestor
 from cortex.darknet.social_ledger import DarknetLedger
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import CortexLLMRouter
+from rich.console import Console
+from rich.panel import Panel
+
+from cortex.cli.common import cli
 
 console = Console()
 

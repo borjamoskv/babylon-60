@@ -14,10 +14,10 @@ from __future__ import annotations
 import json
 
 import click
+from cortex.database.core import connect as db_connect
 from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, console
-from cortex.database.core import connect as db_connect
 
 __all__: list[str] = []
 

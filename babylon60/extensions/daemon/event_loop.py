@@ -90,9 +90,8 @@ class EventLoopMixin:
             sys.path.append(scripts_path)
 
         async def run_ouroboros_prune():
-            from ouroboros_prune import execute_thermal_purge
-
             from cortex.core.paths import CORTEX_DB
+            from ouroboros_prune import execute_thermal_purge
 
             await asyncio.to_thread(execute_thermal_purge, db_path=str(CORTEX_DB))
 

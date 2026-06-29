@@ -7,9 +7,9 @@ Control the R&D and Metabolism pulse of CORTEX.
 import asyncio
 
 import click
+from cortex.extensions.daemon.frontier import FrontierDaemon
 
 from cortex.cli.common import console, get_engine
-from cortex.extensions.daemon.frontier import FrontierDaemon
 
 
 @click.group("frontier")

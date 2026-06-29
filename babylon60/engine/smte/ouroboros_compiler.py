@@ -12,9 +12,10 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.agents.mixins import EngineAwareMixin
 from cortex.engine.smte.llm_mutator import call_qwen_mutator
 from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
+
+from cortex.agents.mixins import EngineAwareMixin
 
 logger = logging.getLogger("cortex.engine.smte.ouroboros_compiler")
 

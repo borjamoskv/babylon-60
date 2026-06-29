@@ -19,7 +19,6 @@ import os
 from typing import Any
 
 import httpx
-
 from cortex.api.client import CortexError, Fact
 from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
 

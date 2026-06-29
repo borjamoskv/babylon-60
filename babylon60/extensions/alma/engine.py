@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from cortex.extensions.alma.taste import TasteVerdict
 
 import aiosqlite
-
 from cortex.config import DB_PATH
 from cortex.database.core import connect_async_ctx
 from cortex.telemetry.metrics import metrics

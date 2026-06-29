@@ -8,7 +8,6 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 import numpy as np
-
 from cortex.observability.caf import lagrangian, select_next
 from cortex.observability.efel import SystemState, encode_state, encode_task
 from cortex.observability.fdf import FailureField, Particle, simulate_field

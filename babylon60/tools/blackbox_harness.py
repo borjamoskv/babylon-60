@@ -8,11 +8,21 @@ C5 rules:
 - No internal inference claims.
 """
 
-import os, sys, json, time, yaml, hashlib, argparse, statistics, math, re
-from dataclasses import dataclass, asdict, field
+import argparse
+import hashlib
+import json
+import math
+import os
+import re
+import statistics
+import sys
+import time
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
+
 import requests
+import yaml
 
 # ---- Protocol thresholds (Section 5) ----
 ABORT_RATE_LIMIT_THRESHOLD = 0.05   # 5%
@@ -87,7 +97,7 @@ class OpenAIChatCompletionsAdapter:
             "Content-Type": "application/json",
         }
 
-    def call_nonstream(self, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any], float]:
+    def call_nonstream(self, payload: dict[str, Any]) -> tuple[int, dict[str, Any], float]:
         t0 = time.perf_counter()
         r = requests.post(self.endpoint, headers=self.headers, json=payload, timeout=self.timeout_sec)
         t1 = time.perf_counter()
@@ -99,15 +109,15 @@ class OpenAIChatCompletionsAdapter:
             data = {}
         return r.status_code, data, latency_ms
 
-    def call_stream(self, payload: Dict[str, Any]) -> Tuple[int, str, Optional[float], float, Dict[str, Any]]:
+    def call_stream(self, payload: dict[str, Any]) -> tuple[int, str, Optional[float], float, dict[str, Any]]:
         """
         Returns:
           status_code, full_text, ttft_ms(or None), total_latency_ms, tail_json(if any)
         """
         t0 = time.perf_counter()
         first_token_t = None
-        chunks: List[str] = []
-        tail_json: Dict[str, Any] = {}
+        chunks: list[str] = []
+        tail_json: dict[str, Any] = {}
 
         r = requests.post(
             self.endpoint,
@@ -155,8 +165,8 @@ class BaselineProfile:
     endpoints conocidos. Deliberadamente NO contiene atribución de proveedor.
     """
     id: str
-    features_mean: Dict[str, float]
-    features_std: Dict[str, float]
+    features_mean: dict[str, float]
+    features_std: dict[str, float]
     calibrated_at: float = field(default_factory=time.time)
     sample_size: int = 0  # N de runs usados para calibrar este perfil
 
@@ -209,8 +219,8 @@ class ProvenanceAuditor:
 
     def __init__(
         self,
-        baselines: List[BaselineProfile],
-        weights: Optional[Dict[str, float]] = None,
+        baselines: list[BaselineProfile],
+        weights: Optional[dict[str, float]] = None,
         jitter_baseline_ms: float = 0.0,  # latencia de red de referencia a restar
     ):
         self.baselines = baselines
@@ -230,7 +240,7 @@ class ProvenanceAuditor:
         score = sum(self.lexical_targets.get(w, 0.0) for w in words)
         return score / len(words)
 
-    def _extract_features(self, results: List[SingleResult]) -> Optional[Dict[str, float]]:
+    def _extract_features(self, results: list[SingleResult]) -> Optional[dict[str, float]]:
         valid = [r for r in results if r.status_code == 200 and not r.rejected]
         if not valid:
             return None
@@ -264,7 +274,7 @@ class ProvenanceAuditor:
             "lexical_bias": mean(bias_vals),
         }
 
-    def analyze(self, results: List[SingleResult]) -> Dict[str, Any]:
+    def analyze(self, results: list[SingleResult]) -> dict[str, Any]:
         obs = self._extract_features(results)
         if obs is None:
             return {
@@ -313,7 +323,7 @@ class ProvenanceAuditor:
 # ------------------- Evaluator -------------------
 
 class BlackBoxHarness:
-    def __init__(self, cfg: Dict[str, Any]):
+    def __init__(self, cfg: dict[str, Any]):
         self.endpoint = cfg["endpoint_url"]
         self.model_id = cfg["model_id"]
         self.region = cfg.get("region", "unknown")
@@ -358,8 +368,8 @@ class BlackBoxHarness:
             region=self.region,
         )
 
-    def _build_payload(self, prompt: str, stream: bool) -> Dict[str, Any]:
-        payload: Dict[str, Any] = {
+    def _build_payload(self, prompt: str, stream: bool) -> dict[str, Any]:
+        payload: dict[str, Any] = {
             "model": self.model_id,
             "messages": [{"role": "user", "content": prompt}],
             "temperature": self.params.temperature,
@@ -373,7 +383,7 @@ class BlackBoxHarness:
             payload["reasoning_effort"] = self.params.reasoning_effort
         return payload
 
-    def _extract_text_usage(self, data: Dict[str, Any]) -> Tuple[str, Optional[int]]:
+    def _extract_text_usage(self, data: dict[str, Any]) -> tuple[str, Optional[int]]:
         try:
             text = data["choices"][0]["message"]["content"]
         except Exception:
@@ -462,7 +472,7 @@ class BlackBoxHarness:
 
         raise RuntimeError("retry loop escaped")
 
-    def abort_flags(self) -> Dict[str, Any]:
+    def abort_flags(self) -> dict[str, Any]:
         total = max(self.total_calls, 1)
         rate_limit_rate = self.rate_limit_429 / total
         format_fail_rate = self.format_fail / total if self.expect_json else 0.0
@@ -478,8 +488,8 @@ class BlackBoxHarness:
 
 # ------------------- Main -------------------
 
-def load_yaml(path: str) -> Dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as f:
+def load_yaml(path: str) -> dict[str, Any]:
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 def main():
@@ -498,15 +508,15 @@ def main():
     harness = BlackBoxHarness(cfg)
     prov = harness.provenance()
 
-    axes: Dict[str, Any] = {}
+    axes: dict[str, Any] = {}
     abort_global = False
 
-    eval_axes: Dict[str, List[Any]] = cfg.get("eval_axes", {})
+    eval_axes: dict[str, list[Any]] = cfg.get("eval_axes", {})
     if not eval_axes:
         raise SystemExit("eval_axes empty.")
 
     for axe_name, items in eval_axes.items():
-        results: List[SingleResult] = []
+        results: list[SingleResult] = []
         for item in items:
             if isinstance(item, str):
                 prompt = item

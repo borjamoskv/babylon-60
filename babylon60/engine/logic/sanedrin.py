@@ -9,8 +9,9 @@ import hashlib
 import logging
 from typing import Any
 
-from cortex.agents.primitives.dispatcher import apex_dispatcher
 from cortex.swarm.trust_registry import global_trust_registry
+
+from cortex.agents.primitives.dispatcher import apex_dispatcher
 
 logger = logging.getLogger("cortex.engine.logic.sanedrin")
 

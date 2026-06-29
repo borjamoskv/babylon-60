@@ -10,6 +10,7 @@ import time
 from datetime import datetime, timezone
 
 import click
+from cortex.swarm.omega_daemon import OmegaKernel
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
@@ -18,7 +19,6 @@ from rich.table import Table
 from rich.text import Text
 
 from cortex.cli.common import cli
-from cortex.swarm.omega_daemon import OmegaKernel
 
 console = Console()
 logger = logging.getLogger(__name__)

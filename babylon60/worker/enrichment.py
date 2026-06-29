@@ -12,7 +12,6 @@ import time
 from datetime import datetime, timedelta, timezone
 
 import aiosqlite
-
 from cortex.database.core import connect_async_ctx
 from cortex.embeddings.provider import EmbeddingProvider
 

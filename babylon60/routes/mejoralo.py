@@ -5,8 +5,6 @@ MEJORAlo Router.
 API endpoints for the MEJORAlo v7.3 protocol.
 """
 
-from fastapi import APIRouter, Depends, Query
-
 from cortex.api.deps import get_engine
 from cortex.auth import require_permission
 from cortex.engine import CortexEngine
@@ -21,6 +19,7 @@ from cortex.types.models import (
     MejoraloShipResponse,
     ShipSealModel,
 )
+from fastapi import APIRouter, Depends, Query
 
 __all__ = [
     "get_history",

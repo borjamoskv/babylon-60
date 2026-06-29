@@ -6,10 +6,10 @@ CORTEX CLI - Niche Arbitrage Commands
 import asyncio
 
 import click
-
-from cortex.cli.common import console
 from cortex.extensions.skills.niche_arbitrage.models import NicheTarget
 from cortex.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngine
+
+from cortex.cli.common import console
 
 
 @click.group(name="niche", help="Niche Arbitrage - Market Intelligence Pipeline")

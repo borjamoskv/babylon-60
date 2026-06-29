@@ -3,9 +3,9 @@ import asyncio
 import logging
 
 import click
+from cortex.extensions.swarm.josu_daemon import JosuProactiveDaemon
 
 from cortex.cli.common import DEFAULT_DB, console, get_engine
-from cortex.extensions.swarm.josu_daemon import JosuProactiveDaemon
 
 logger = logging.getLogger("cortex.cli.josu")
 

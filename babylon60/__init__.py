@@ -9,8 +9,8 @@ and cryptographic vaults. Zero network dependencies.
 import importlib
 import importlib.abc
 import importlib.util
-import sys
 import os
+import sys
 
 try:
     # Use pysqlite3 if available (allows newer SQLite versions + extensions)

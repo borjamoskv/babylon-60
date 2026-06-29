@@ -15,7 +15,6 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.cli import get_engine  # pyright: ignore
 from cortex.extensions.daemon.monitors.canary import CanaryMonitor
 from cortex.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_SCAN_INTERVAL,
@@ -25,6 +24,8 @@ from cortex.extensions.mejoralo.constants import (
 from cortex.extensions.mejoralo.engine import MejoraloEngine
 from cortex.extensions.thinking.fusion import ContextFusion
 from cortex.telemetry.metrics import MetricsRegistry
+
+from cortex.cli import get_engine  # pyright: ignore
 
 logger = logging.getLogger("cortex_extensions.mejoralo.daemon")
 

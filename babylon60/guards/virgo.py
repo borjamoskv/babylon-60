@@ -13,7 +13,6 @@ import math
 from typing import Any
 
 import aiosqlite
-
 from cortex.crypto.keys import ZKSwarmIdentity
 from cortex.utils.errors import CortexError
 

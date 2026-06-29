@@ -282,9 +282,10 @@ def ingest_cmd(drive_path: str | None) -> None:
     """Silent daemon-like ingest: Parse NotebookLM notes back into CORTEX."""
     import json
 
-    from cortex.cli.common import get_engine
     from cortex.extensions.llm.router import IntentProfile
     from cortex.extensions.llm.sovereign import SovereignLLM
+
+    from cortex.cli.common import get_engine
 
     if drive_path:
         target = Path(drive_path)

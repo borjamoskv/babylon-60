@@ -6,7 +6,6 @@ import logging
 import time
 
 import httpx
-
 from cortex.extensions.daemon.models import (
     DEFAULT_RETRIES,
     DEFAULT_TIMEOUT,

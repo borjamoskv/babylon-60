@@ -20,6 +20,7 @@ except ImportError:
 
 from cortex.config import DB_PATH
 from cortex.engine import CortexEngine
+
 from cortex.mcp_server.utils import AsyncConnectionPool, MCPMetrics, SimpleAsyncCache
 
 logger = logging.getLogger("cortex.mcp_server.aether")

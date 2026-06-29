@@ -13,7 +13,6 @@ import logging
 from typing import Any
 
 import aiosqlite
-
 from cortex.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex_extensions.sap.tom")

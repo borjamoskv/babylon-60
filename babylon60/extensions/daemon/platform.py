@@ -11,10 +11,9 @@ import shutil
 import sys
 from pathlib import Path
 
-from rich.console import Console
-
 from cortex.extensions.daemon import BUNDLE_ID
 from cortex.extensions.platform.sys import get_service_dir
+from rich.console import Console
 
 __all__ = [
     "install_linux",

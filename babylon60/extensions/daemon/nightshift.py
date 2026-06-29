@@ -4,8 +4,9 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from cortex.agents.primitives.dispatcher import apex_dispatcher
 from cortex.engine.crystallizer import auto_crystallizer
+
+from cortex.agents.primitives.dispatcher import apex_dispatcher
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - [%(levelname)s] - %(message)s")
 logger = logging.getLogger("NightShift")

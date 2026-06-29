@@ -3,7 +3,6 @@
 import logging
 
 import aiosqlite
-
 from cortex.graph.backends.base import GraphBackend
 from cortex.graph.backends.sqlite.algorithms import SQLiteAlgorithmsMixin
 from cortex.graph.backends.sqlite.query import SQLiteQueryMixin

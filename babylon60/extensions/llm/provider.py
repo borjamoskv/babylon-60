@@ -13,8 +13,6 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 import httpx
-from rich.console import Console
-
 from cortex.extensions.llm._audit import spectral_audit
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from cortex.extensions.llm._presets import get_prefix_cache_config, load_presets
@@ -30,6 +28,7 @@ from cortex.extensions.llm._stealth import (
 )
 from cortex.extensions.llm.gemini_cache import get_gemini_gateway
 from cortex.extensions.llm.quota import SovereignQuotaManager
+from rich.console import Console
 
 __all__ = ["LLMProvider"]
 

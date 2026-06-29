@@ -1,13 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
-from starlette.requests import Request
-
 from cortex.api.deps import get_async_engine
 from cortex.auth import require_permission
 from cortex.extensions.swarm.psychohistory import PsychohistoryOrchestrator
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from starlette.requests import Request
 
 
 async def get_manager(request: Request):

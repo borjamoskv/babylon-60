@@ -18,7 +18,6 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-
 from cortex.config import DB_PATH
 from cortex.database.core import connect_async_ctx
 

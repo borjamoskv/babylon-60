@@ -10,12 +10,11 @@ import logging
 import os
 import time
 
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
-
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 logger = logging.getLogger("cortex.mcp_server.knowledge_watcher")
 

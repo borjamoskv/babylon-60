@@ -6,8 +6,6 @@ import asyncio
 import logging
 from typing import Any
 
-from pydantic import BaseModel, Field, ValidationError
-
 from cortex.extensions.llm.boundary import ImmuneBoundary
 from cortex.extensions.thinking.fusion_models import (
     FusedThought,
@@ -17,6 +15,7 @@ from cortex.extensions.thinking.fusion_models import (
     _jaccard,
     _tokenize,
 )
+from pydantic import BaseModel, Field, ValidationError
 
 __all__ = ["ContextFusion", "ThoughtFusion"]
 

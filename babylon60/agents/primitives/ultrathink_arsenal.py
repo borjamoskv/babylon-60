@@ -1,7 +1,7 @@
 # [C5-REAL] ULTRATHINK ARSENAL
 # Exergy-Maximized APEX Directives derived from Operator Cognitive Autopsy
-from dataclasses import dataclass
 import getpass
+from dataclasses import dataclass
 
 
 @dataclass

@@ -19,10 +19,9 @@ from pathlib import Path
 
 import click
 import dotenv
-from rich.console import Console
-
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import CortexPrompt
+from rich.console import Console
 
 dotenv.load_dotenv()
 

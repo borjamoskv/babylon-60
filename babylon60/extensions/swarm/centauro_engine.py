@@ -12,11 +12,10 @@ import hashlib
 import logging
 from typing import Any, TypedDict, cast
 
-from pydantic import BaseModel, Field
-
 from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from cortex.extensions.swarm.byzantine import ByzantineConsensus
 from cortex.swarm.aleph_omega import AxiomaticLeapEngine
+from pydantic import BaseModel, Field
 
 __all__ = [
     "CentauroEngine",

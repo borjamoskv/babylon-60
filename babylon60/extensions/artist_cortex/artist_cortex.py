@@ -4,8 +4,6 @@ Orchestrates aesthetic embeddings and thermodynamic artifact metrics using sqlit
 """
 
 import sqlite3
-import time
-from typing import Dict, Any, List, Optional
 import struct
 
 # Taint Engine and Ledger dependencies might be injected here per BABYLON-60 architecture
@@ -29,15 +27,15 @@ class ArtistCortexEngine:
             pass
         self.conn.row_factory = sqlite3.Row
 
-    def apply_migrations(self, sql_paths: List[str]):
+    def apply_migrations(self, sql_paths: list[str]):
         """Executes the foundational C5-REAL migrations."""
         cursor = self.conn.cursor()
         for path in sql_paths:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 cursor.executescript(f.read())
         self.conn.commit()
 
-    def calculate_thermodynamics(self, t0_ms: int, t1_ms: int, input_entropy: float, model_confidence: float) -> Dict[str, float]:
+    def calculate_thermodynamics(self, t0_ms: int, t1_ms: int, input_entropy: float, model_confidence: float) -> dict[str, float]:
         """
         Calculates Exergy metrics based on execution friction and output confidence.
         """
@@ -52,7 +50,7 @@ class ArtistCortexEngine:
             "attention_yield": attention_yield
         }
 
-    def serialize_embedding(self, vector: List[float]) -> bytes:
+    def serialize_embedding(self, vector: list[float]) -> bytes:
         """Serializes a float array to sqlite-vec binary format."""
         return struct.pack(f"{len(vector)}f", *vector)
 
@@ -67,7 +65,7 @@ class ArtistCortexEngine:
         t1_ms: int,
         input_entropy: float,
         model_confidence: float,
-        vector_1536: List[float]
+        vector_1536: list[float]
     ) -> int:
         """
         Inserts an artifact, triggers metric computation, and writes to the vec0 store.

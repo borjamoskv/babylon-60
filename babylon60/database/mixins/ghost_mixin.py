@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from cortex.extensions.songlines.sensor import GhostTrace
 
 import aiosqlite
-
 from cortex.engine.mixins.base import EngineMixinBase
 
 __all__ = ["GhostMixin"]

@@ -17,7 +17,6 @@ from decimal import Decimal
 from typing import Any, Final, cast
 
 import redis
-
 from cortex.memory.guardrails import SessionGuardrail
 from cortex.memory.models import MemoryEvent
 

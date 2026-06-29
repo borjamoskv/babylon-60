@@ -9,9 +9,8 @@ from __future__ import annotations
 
 import time
 
-from pydantic import Field
-
 from cortex.memory.models import CortexFactModel
+from pydantic import Field
 
 
 class CortexSemanticEngram(CortexFactModel):

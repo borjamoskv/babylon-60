@@ -9,11 +9,11 @@ from collections.abc import Coroutine
 from typing import Any, TypeVar, cast
 
 import click
+from cortex.extensions.sync import export_to_json
 from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_fact_not_found
-from cortex.extensions.sync import export_to_json
 
 __all__ = ["delete", "edit", "list_facts"]
 

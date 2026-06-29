@@ -8,7 +8,6 @@ from collections import deque
 from typing import Any
 
 import aiosqlite
-
 from cortex.engine.flow.causality_models import (
     EpistemicStatus,
     LedgerEvent,

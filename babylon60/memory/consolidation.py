@@ -22,9 +22,8 @@ import enum
 import logging
 import time
 
-from pydantic import Field
-
 from cortex.memory.engrams import CortexSemanticEngram
+from pydantic import Field
 
 logger = logging.getLogger("cortex.memory.consolidation")
 

@@ -4,9 +4,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from pydantic import BaseModel
-
 from cortex.engine import CortexEngine
+from pydantic import BaseModel
 
 logger = logging.getLogger("cortex.taas")
 

@@ -7,7 +7,6 @@ import sqlite3
 from typing import Any
 
 import aiosqlite
-
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
 from cortex.engine.forensic.slashing import SlashingEngine
 from cortex.engine.mixins.base import EngineMixinBase

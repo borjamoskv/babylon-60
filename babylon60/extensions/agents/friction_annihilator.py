@@ -12,8 +12,9 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.agents.mixins import EngineAwareMixin
 from cortex.engine.smte.llm_mutator import LLMMutator  # pyright: ignore[reportAttributeAccessIssue]
+
+from cortex.agents.mixins import EngineAwareMixin
 
 logger = logging.getLogger("cortex_extensions.agents.friction_annihilator")
 

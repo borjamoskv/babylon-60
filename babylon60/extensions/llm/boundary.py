@@ -17,9 +17,8 @@ import logging
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
-from pydantic import BaseModel, ValidationError
-
 from cortex.utils.errors import CortexError
+from pydantic import BaseModel, ValidationError
 
 logger = logging.getLogger("cortex_extensions.llm.boundary")
 

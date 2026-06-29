@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-
 from cortex.crypto import get_default_encrypter
 from cortex.engine.flow.causality_models import (
     EDGE_TAINTED_BY,

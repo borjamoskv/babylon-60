@@ -1,10 +1,11 @@
 import logging
 from typing import Any
 
-from cortex.agents.primitives.dispatcher import apex_dispatcher
 from cortex.engine.logic.atms import AtmsAdapter
 from cortex.engine.logic.sanedrin import sanedrin_council
 from cortex.engine.logic.z3_solver import z3_engine
+
+from cortex.agents.primitives.dispatcher import apex_dispatcher
 
 logger = logging.getLogger(__name__)
 

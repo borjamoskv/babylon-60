@@ -6,10 +6,10 @@ import dataclasses
 import json
 
 import click
+from cortex.extensions.llm.quota import SovereignQuotaManager
 from rich.table import Table
 
 from cortex.cli.common import console
-from cortex.extensions.llm.quota import SovereignQuotaManager
 
 
 @click.group()

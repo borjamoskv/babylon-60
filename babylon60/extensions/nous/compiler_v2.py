@@ -5,9 +5,8 @@ Reality Level: C5-REAL
 """
 
 import instructor
-from openai import AsyncOpenAI
-
 from cortex.extensions.nous.models import NousAST
+from openai import AsyncOpenAI
 
 
 class NousCompilerV2:
