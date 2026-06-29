@@ -22,30 +22,37 @@ deps_to_find = [
 
 mapping = defaultdict(list)
 
-for root, _, files in os.walk("cortex"):
-    for file in files:
-        if file.endswith(".py"):
-            path = os.path.join(root, file)
-            with open(path, encoding="utf-8") as f:
-                content = f.read()
-            try:
-                tree = ast.parse(content, filename=path)
-            except Exception:
-                continue
-            
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        base = alias.name.split('.')[0]
-                        if base in deps_to_find:
-                            mapping[base].append(path)
-                elif isinstance(node, ast.ImportFrom):
-                    if node.module:
-                        base = node.module.split('.')[0]
-                        if base in deps_to_find:
-                            mapping[base].append(path)
+search_dirs = ["cortex", "babylon60", "cortex-system", "moskv-swarm"]
 
-out_path = "~/.gemini/antigravity/brain/485a969b-d38a-4d5b-afde-2d29ea95d0eb/dependency_map.md"
+for s_dir in search_dirs:
+    if not os.path.exists(s_dir):
+        continue
+    for root, _, files in os.walk(s_dir):
+        for file in files:
+            if file.endswith(".py"):
+                path = os.path.join(root, file)
+                with open(path, encoding="utf-8") as f:
+                    content = f.read()
+                try:
+                    tree = ast.parse(content, filename=path)
+                except Exception:
+                    continue
+                
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Import):
+                        for alias in node.names:
+                            base = alias.name.split('.')[0]
+                            if base in deps_to_find:
+                                mapping[base].append(path)
+                    elif isinstance(node, ast.ImportFrom):
+                        if node.module:
+                            base = node.module.split('.')[0]
+                            if base in deps_to_find:
+                                mapping[base].append(path)
+
+out_path = "/Users/borjafernandezangulo/.gemini/antigravity/brain/fb2c8891-3e03-488c-a064-f6387507b5d8/dependency_map.md"
+os.makedirs(os.path.dirname(out_path), exist_ok=True)
+
 with open(out_path, "w") as out:
     out.write("# Mapa de Dependencias a Eliminar (UltraThink Blast Radius)\n\n")
     for dep in sorted(deps_to_find):
