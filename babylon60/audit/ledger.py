@@ -226,8 +226,8 @@ class EnterpriseAuditLedger:
             return {"status": "verified", "blocks": 0}
 
         # Group by batch (same prev_hash and signature)
-        batches: list[tuple[str, str, list[dict]]] = []
-        current_batch: list[dict] = []
+        batches: list[tuple[str, str, list[Any]]] = []
+        current_batch: list[Any] = []
         current_prev_hash = rows[0]["prev_hash"]
         current_sig = rows[0]["signature"]
 

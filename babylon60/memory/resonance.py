@@ -204,6 +204,101 @@ class AdaptiveResonanceGate:
             )
             return ("resonance", reinforced)
 
+        # 4. Epistemic Physics Collision Resolution
+        from babylon60.engine.causal.epistemic_physics import EpistemicPhysicsArbiter
+        from babylon60.engine.flow.causality_models import Claim, Evidence, EpistemicStatus
+
+        conflict_detected = False
+        claims_to_resolve = []
+
+        # Convert candidate to Claim
+        candidate_confidence = candidate.metadata.get("confidence_score", 0.8) if candidate.metadata else 0.8
+        candidate_claim = Claim(
+            id=candidate.id,
+            statement=candidate.content,
+            evidence_list=[Evidence(
+                source="candidate",
+                confidence=candidate_confidence,
+                metadata={
+                    "embedding": candidate.embedding,
+                    "contradicts": candidate.metadata.get("contradicts") if candidate.metadata else None
+                }
+            )]
+        )
+        claims_to_resolve.append(candidate_claim)
+
+        # Map neighbors to detect explicit contradictions
+        neighbor_map = {}
+        for neighbor in neighbors:
+            if not isinstance(neighbor, CortexSemanticEngram):
+                continue
+
+            is_contradictory = False
+            cand_contr = candidate.metadata.get("contradicts") if candidate.metadata else None
+            neigh_contr = neighbor.metadata.get("contradicts") if neighbor.metadata else None
+
+            if cand_contr == neighbor.id or neigh_contr == candidate.id:
+                is_contradictory = True
+
+            if is_contradictory:
+                conflict_detected = True
+                neighbor_confidence = neighbor.metadata.get("confidence_score", 0.8) if neighbor.metadata else 0.8
+                neigh_claim = Claim(
+                    id=neighbor.id,
+                    statement=neighbor.content,
+                    evidence_list=[Evidence(
+                        source="neighbor",
+                        confidence=neighbor_confidence,
+                        metadata={
+                            "embedding": neighbor.embedding,
+                            "contradicts": neigh_contr
+                        }
+                    )]
+                )
+                claims_to_resolve.append(neigh_claim)
+                neighbor_map[neighbor.id] = neighbor
+
+        if conflict_detected:
+            logger.info("ART GATE: Epistemic conflict detected. Resolving via physics engine.")
+            physics_arbiter = EpistemicPhysicsArbiter(decay_rate=0.01, collision_threshold=rho)
+            traces = physics_arbiter.resolve_collisions(claims_to_resolve)
+
+            # Analyze trace of the candidate claim
+            candidate_trace = next(t for t in traces if t.trace_steps[0].endswith(candidate.id))
+
+            # If candidate collapses, block ingestion
+            if candidate_trace.verdict == EpistemicStatus.CONTRADICTED:
+                logger.warning("ART GATE: Ingestion blocked. Candidate claim collapsed by physics collision.")
+                return ("blocked", candidate)
+
+            # Update neighbors affected by the collision
+            for trace in traces:
+                trace_id = trace.trace_steps[0].split()[-3]
+                if trace_id in neighbor_map:
+                    n_engram = neighbor_map[trace_id]
+                    if trace.verdict == EpistemicStatus.CONTRADICTED:
+                        logger.info("ART GATE: Neighbor %s collapsed in physics collision.", trace_id)
+                        n_engram = n_engram.model_copy(
+                            update={
+                                "energy_level": 0.0,
+                                "metadata": {**(n_engram.metadata or {}), "status": "contradicted"}
+                            }
+                        )
+                    else:
+                        new_energy = max(0.1, trace.truth_score.value)
+                        logger.info("ART GATE: Neighbor %s energy updated to %.4f.", trace_id, new_energy)
+                        n_engram = n_engram.model_copy(
+                            update={
+                                "energy_level": new_energy,
+                                "metadata": {
+                                    **(n_engram.metadata or {}),
+                                    "confidence_score": trace.truth_score.value
+                                }
+                            }
+                        )
+                    if hasattr(self._vs, "upsert"):
+                        await self._vs.upsert(n_engram)
+
         # RESET → Insert new engram category
         if hasattr(self._vs, "upsert"):
             await self._vs.upsert(candidate)
@@ -215,3 +310,4 @@ class AdaptiveResonanceGate:
             rho,
         )
         return ("reset", candidate)
+
