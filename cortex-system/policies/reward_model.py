@@ -7,8 +7,8 @@ from typing import Dict, Any
 
 # Evolutionary parameters - modified dynamically during runtime execution mutations
 MUTATION_RATE = 0.05
-ORIGINALITY_THRESHOLD = 0.324
-DISTRIBUTION_THRESHOLD = 0.250
+ORIGINALITY_THRESHOLD = 0.380
+DISTRIBUTION_THRESHOLD = 0.180
 
 def reinforcement_cycle(metric: Dict[str, Any], decision: str) -> str:
     """
