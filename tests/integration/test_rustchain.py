@@ -208,7 +208,7 @@ def test_add():
     assert add(2, 3) == 5
 """
     passed, reasons = await judge.judge(code, {"test_code": test_code})
-    assert passed is True
+    assert passed is True, f"Reasons: {reasons}"
     assert len(reasons) == 0
 
     # Fail case

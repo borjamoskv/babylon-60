@@ -201,14 +201,23 @@ def _run_delta_testing(
     path_obj = Path(path).resolve()
     base_dir = path_obj.parent if path_obj.is_file() else path_obj
     pytest_cmd = [sys.executable, "-m", "pytest"]
-    rel_parts = Path(top_file_rel).parts
-    if len(rel_parts) > 1 and rel_parts[0] == "cortex":
-        inferred_test = base_dir / "tests" / f"test_{Path(top_file_rel).stem}.py"
-        if inferred_test.exists():
-            console.print(f"  [cyan]🎯 Delta-Testing: {inferred_test.name}[/]")
-            pytest_cmd.append(str(inferred_test))
-        else:
-            console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
+    
+    # Deduce specific tests by searching tests/ for the file stem
+    stem = Path(top_file_rel).stem
+    tests_dir = base_dir / "tests"
+    matched_tests = []
+    if tests_dir.exists():
+        import os
+        for root_dir, _, files in os.walk(tests_dir):
+            for f in files:
+                if f.endswith(".py") and f.startswith("test_") and stem in f:
+                    matched_tests.append(os.path.join(root_dir, f))
+                    
+    if matched_tests:
+        console.print(f"  [cyan]🎯 Delta-Testing: acotado a {len(matched_tests)} tests ({', '.join(Path(t).name for t in matched_tests)})[/]")
+        pytest_cmd.extend(matched_tests)
+    else:
+        console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
     try:
         res = subprocess.run(
             pytest_cmd, cwd=base_dir, capture_output=True, text=True, timeout=PYTEST_TIMEOUT_SECONDS

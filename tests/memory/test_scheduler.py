@@ -122,19 +122,21 @@ def test_confidence_resolution() -> None:
 
 def test_recency_exponential_decay() -> None:
     """Test exponential decay on timestamps."""
+    from unittest.mock import patch
     # Decay rate: 0.1 per second
     config = SchedulerConfig(recency_decay_rate=0.1)
     scheduler = MemoryScheduler(config)
 
-    now = time.time()
-    b_fresh = MockBelief(content="Test", timestamp_last_verified=now)
-    b_old = MockBelief(content="Test", timestamp_last_verified=now - 10.0)
+    now = 1700000000.0
+    with patch("time.time", return_value=now):
+        b_fresh = MockBelief(content="Test", timestamp_last_verified=now)
+        b_old = MockBelief(content="Test", timestamp_last_verified=now - 10.0)
 
-    rec_fresh = scheduler._calculate_recency(b_fresh)
-    rec_old = scheduler._calculate_recency(b_old)
+        rec_fresh = scheduler._calculate_recency(b_fresh)
+        rec_old = scheduler._calculate_recency(b_old)
 
-    assert rec_fresh == pytest.approx(1.0, abs=1e-3)
-    assert rec_old == pytest.approx(math.exp(-1.0), abs=1e-3)
+        assert rec_fresh == pytest.approx(1.0, abs=1e-3)
+        assert rec_old == pytest.approx(math.exp(-1.0), abs=1e-3)
 
 
 def test_timestamp_parsing() -> None:
