@@ -4,9 +4,13 @@ use pyo3::prelude::*;
 #[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub struct AtmsGraph {
+    #[pyo3(get)]
     pub nodes: HashSet<String>,
+    #[pyo3(get)]
     pub dependencies: HashMap<String, Vec<String>>, // Child -> Parents (DependsOn)
+    #[pyo3(get)]
     pub entails: HashMap<String, Vec<String>>,      // Parent -> Children (Entails)
+    #[pyo3(get)]
     pub conflicts: HashMap<String, Vec<String>>,    // Node -> Conflicting nodes
 }
 

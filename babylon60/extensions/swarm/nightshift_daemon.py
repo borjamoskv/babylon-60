@@ -42,7 +42,7 @@ def shannon_density(crystal_text: str) -> float:
     total = len(crystal_text)
     counts = collections.Counter(crystal_text)
     freq = {char: count / total for char, count in counts.items()}
-    return -sum(p * math.log2(p) for p in freq.values())
+    return max(0.0, -sum(p * math.log2(p) for p in freq.values()))
 
 
 class NightShiftCrystalDaemon:
