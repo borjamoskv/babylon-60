@@ -14,6 +14,14 @@ import importlib.util
 from pathlib import Path
 from collections import defaultdict
 
+class _TracerAliasLoader(importlib.abc.Loader):
+    def __init__(self, target_module):
+        self.target_module = target_module
+    def create_module(self, spec):
+        return self.target_module
+    def exec_module(self, module):
+        pass
+
 class ShadowResolver(importlib.abc.MetaPathFinder):
     """
     Wave 2 Shadow Resolver.
@@ -41,10 +49,11 @@ class ShadowResolver(importlib.abc.MetaPathFinder):
                 # Redirect to babylon60 implementation
                 self.tracer.log_redirect(fullname, babylon_fullname, caller)
                 try:
-                    # Temporarily disable ourselves to resolve the real target
-                    spec = importlib.util.find_spec(babylon_fullname)
-                    if spec is not None:
-                        return spec
+                    mod = importlib.import_module(babylon_fullname)
+                    spec = importlib.util.spec_from_loader(
+                        fullname, _TracerAliasLoader(mod), origin=getattr(mod, "__file__", None)
+                    )
+                    return spec
                 except Exception:
                     pass
             else:

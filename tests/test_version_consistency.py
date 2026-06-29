@@ -45,7 +45,7 @@ def test_changelog_has_entry_for_current_version() -> None:
 
 def test_fastapi_app_uses_module_version() -> None:
     """cortex/api/core.py must import __version__ and pass it to FastAPI()."""
-    core_path = ROOT / "cortex" / "api" / "core.py"
+    core_path = ROOT / "babylon60" / "api" / "core.py"
     source = core_path.read_text(encoding="utf-8")
 
     # 1. Verify the import is present
