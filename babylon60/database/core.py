@@ -5,7 +5,7 @@ Sovereign Connection Factory (KETER-∞ Metal-Level).
 Single source of truth for ALL SQLite connections in the CORTEX ecosystem.
 Every connection created through this module is guaranteed to have:
 - WAL journal mode (concurrent reads during writes)
-- busy_timeout of 2000ms (thermodynamic asphyxia limit / Landauer penalty)
+- busy_timeout of 5000ms (thermodynamic asphyxia limit / Landauer penalty)
 - NORMAL synchronous mode (performance without data loss)
 - Foreign key enforcement
 - mmap I/O (bypasses read() syscalls via kernel page cache)

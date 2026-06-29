@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath('.'))
 
 import cortex_rs
 from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.database.core import connect_async
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("inject_evi_ledger")
@@ -43,7 +44,7 @@ async def inject_primitives():
     # We must use the factory pattern since the database has the CortexConnection guard
     from cortex.database.core import CortexConnection
     
-    async with aiosqlite.connect(db_path, factory=CortexConnection) as conn:
+    async with connect_async(db_path, factory=CortexConnection) as conn:
         # Since we are writing to the audit ledger, we MUST explicitly authorize causal writes
         if hasattr(conn._conn, "authorize_causal_writes"):
             conn._conn.authorize_causal_writes()

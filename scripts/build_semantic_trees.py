@@ -18,6 +18,7 @@ import aiosqlite
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from cortex.engine.logic.atms import AtmsAdapter
+from babylon60.database.core import connect_async
 
 
 async def build_semantic_trees():
@@ -33,7 +34,7 @@ async def build_semantic_trees():
         print(f"Error initializing ATMS: {e}")
         sys.exit(1)
 
-    async with aiosqlite.connect(db_path) as db:
+    async with connect_async(db_path) as db:
         db.row_factory = aiosqlite.Row
 
         print("Fetching facts with fact_hash...")

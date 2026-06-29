@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 import aiosqlite
+from babylon60.database.core import connect_async
 
 # Add root to sys.path to ensure cortex can be imported
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,7 +34,7 @@ def log_to_ledger(action: str, resource: str, status: str):
     db_path = os.environ.get("CORTEX_DB_PATH", str(ROOT / "cortex_ledger.db"))
     
     async def _log():
-        async with aiosqlite.connect(db_path) as db:
+        async with connect_async(db_path) as db:
             ledger = EnterpriseAuditLedger(db)
             await ledger.ensure_table()
             await ledger.log_action(

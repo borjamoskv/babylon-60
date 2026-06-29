@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath('.'))
 
 import cortex_rs
 from cortex.audit.ledger import EnterpriseAuditLedger
+from babylon60.database.core import connect_async
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("inject_educational")
@@ -40,7 +41,7 @@ async def inject_primitives():
     ultramap.update_agent_position(agent_id, 0.0, 0.0, 0.0, "EDU_ROOT", 0.0)
 
     db_path = os.getenv("CORTEX_DB_PATH", "cortex_reality.db")
-    async with aiosqlite.connect(db_path) as conn:
+    async with connect_async(db_path) as conn:
         ledger = EnterpriseAuditLedger(conn=conn)
         await ledger.ensure_table()
 
