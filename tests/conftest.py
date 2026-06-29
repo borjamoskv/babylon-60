@@ -36,6 +36,11 @@ class CortexExtensionsRedirector(importlib.abc.MetaPathFinder):
 
 
 sys.meta_path.insert(0, CortexExtensionsRedirector())
+import os
+if os.environ.get("CORTEX_SHADOW_MODE"):
+    from babylon60.shadow_tracer import enable_tracer
+    enable_tracer(mode=os.environ.get("CORTEX_SHADOW_MODE"))
+
 from pathlib import Path
 
 # Set environment variables for tests globally before any imports/fixtures run
@@ -148,6 +153,21 @@ def pytest_configure(config):
 def pytest_sessionfinish(session, exitstatus):
     """Save exit status before finalization."""
     session.config.exitstatus = exitstatus
+    
+    # Export shadow tracer graph if enabled
+    import os
+    shadow_mode = os.environ.get("CORTEX_SHADOW_MODE")
+    if shadow_mode:
+        try:
+            from babylon60.shadow_tracer import _global_tracer
+            if _global_tracer:
+                filename = f"compatibility_delta_graph_{shadow_mode}.json"
+                _global_tracer.export_compatibility_graph(filename)
+                sys.stdout.write(f"\n[C5-REAL] Compatibility delta graph exported to {filename}\n")
+                sys.stdout.flush()
+        except Exception as e:
+            sys.stderr.write(f"\n[ERROR] Failed to export shadow graph: {e}\n")
+            sys.stderr.flush()
 
 
 def pytest_unconfigure(config):
