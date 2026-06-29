@@ -215,6 +215,14 @@ class CortexEngine(
         """Ignite the sovereign engine and its optimization layers."""
         await self.start_optimizer()
         await self._persistence.start()
+        
+        # [Mutation 3: Crypto/Dimension Agility]
+        try:
+            if self.embeddings:
+                await self.embeddings.check_and_reindex()
+        except Exception as e:
+            logger.warning("Re-indexing check skipped/failed: %s", e)
+            
         logger.info("🚀 [CORTEX] Sovereign Engine ignited (Ω₀-Ω₆).")
 
     async def close(self):

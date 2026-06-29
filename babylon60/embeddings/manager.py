@@ -204,3 +204,23 @@ class EmbeddingManager:
             )
             await conn.commit()
             logger.info("Fact #%d enriched: vector + metadata refined (V2)", fact_id)
+
+    async def check_and_reindex(self, tenant_id: str = "default") -> None:
+        """Sovereign Boot Sequence: Check dimension alignment and re-index if mutated."""
+        from babylon60.embeddings.reindex import ReindexPipeline
+        
+        pipeline = ReindexPipeline(self.engine, self)
+        current_dim = await pipeline.get_current_db_dimension()
+        
+        target_dim = self.dimension
+        
+        if current_dim is not None and current_dim != target_dim:
+            logger.warning(
+                "Embedding dimension mismatch detected (DB: %d, Provider: %d). "
+                "Initiating Re-indexing Pipeline (Ω₁)...", 
+                current_dim, target_dim
+            )
+            results = await pipeline.execute_reindex(tenant_id=tenant_id)
+            logger.info("Re-indexing complete: %s", results)
+        else:
+            logger.debug("Embedding dimensions aligned (%d). No re-index needed.", target_dim)
