@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import hashlib
 from enum import Enum
-from typing import Union
 
 
 class HashAlgorithm(Enum):
@@ -54,7 +53,7 @@ def get_active_algorithm() -> HashAlgorithm:
     return _active_algorithm
 
 
-def cortex_hash(data: Union[bytes, str]) -> str:
+def cortex_hash(data: bytes | str) -> str:
     """Compute the hex digest of data using the active CORTEX hash algorithm.
 
     This is the ONLY function that should be used for cryptographic hashing
@@ -72,7 +71,7 @@ def cortex_hash(data: Union[bytes, str]) -> str:
     return hashlib.new(_active_algorithm.value, data).hexdigest()
 
 
-def cortex_hash_truncated(data: Union[bytes, str], length: int = 16) -> str:
+def cortex_hash_truncated(data: bytes | str, length: int = 16) -> str:
     """Compute a truncated hex digest for identifiers and short hashes.
 
     Args:
@@ -85,7 +84,7 @@ def cortex_hash_truncated(data: Union[bytes, str], length: int = 16) -> str:
     return cortex_hash(data)[:length]
 
 
-def cortex_hmac(key: Union[bytes, str], data: Union[bytes, str]) -> str:
+def cortex_hmac(key: bytes | str, data: bytes | str) -> str:
     """Compute HMAC using the active CORTEX hash algorithm.
 
     Args:
@@ -104,7 +103,7 @@ def cortex_hmac(key: Union[bytes, str], data: Union[bytes, str]) -> str:
     return _hmac.new(key, data, hashlib.new(_active_algorithm.value).__class__).hexdigest()
 
 
-def cortex_hash_raw(data: Union[bytes, str]) -> bytes:
+def cortex_hash_raw(data: bytes | str) -> bytes:
     """Compute the raw binary digest (not hex) using the active algorithm.
 
     Useful for Merkle tree operations where binary concatenation is needed.

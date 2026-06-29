@@ -13,7 +13,6 @@ import hashlib
 import hmac
 import os
 from enum import Enum
-from typing import Union
 
 from babylon60.crypto.hash_registry import cortex_hash, cortex_hmac, get_active_algorithm
 
@@ -81,7 +80,7 @@ class HashProvider:
     """
 
     @staticmethod
-    def sha256(data: Union[bytes, str]) -> str:
+    def sha256(data: bytes | str) -> str:
         """Returns hex digest using the active CORTEX hash algorithm.
 
         Note: Despite the name, this now delegates to the active algorithm
@@ -91,7 +90,7 @@ class HashProvider:
         return cortex_hash(data)
 
     @staticmethod
-    def sha512(data: Union[bytes, str]) -> str:
+    def sha512(data: bytes | str) -> str:
         """Returns hex digest of SHA-512 hash (pinned, not configurable)."""
         if isinstance(data, str):
             data = data.encode("utf-8")
@@ -102,18 +101,18 @@ class SignatureProvider:
     """Provides asymmetric and symmetric signing capabilities."""
 
     @staticmethod
-    def sign_hmac(key: Union[bytes, str], data: Union[bytes, str]) -> str:
+    def sign_hmac(key: bytes | str, data: bytes | str) -> str:
         """Returns HMAC signature using the active CORTEX hash algorithm."""
         return cortex_hmac(key, data)
 
     @staticmethod
-    def sign_hmac_sha256(key: Union[bytes, str], data: Union[bytes, str]) -> str:
+    def sign_hmac_sha256(key: bytes | str, data: bytes | str) -> str:
         """Returns hex digest HMAC-SHA256 signature (legacy compatibility)."""
         return cortex_hmac(key, data)
 
     @staticmethod
     def verify_hmac_sha256(
-        key: Union[bytes, str], data: Union[bytes, str], signature: str
+        key: bytes | str, data: bytes | str, signature: str
     ) -> bool:
         """Constant-time verification of HMAC signature."""
         expected = SignatureProvider.sign_hmac_sha256(key, data)
@@ -125,7 +124,7 @@ class KDFProvider:
 
     @staticmethod
     def pbkdf2_hmac_sha256(
-        secret: Union[bytes, str], salt: bytes, iterations: int = 100000
+        secret: bytes | str, salt: bytes, iterations: int = 100000
     ) -> bytes:
         """Derives a cryptographic key using PBKDF2 with HMAC-SHA256."""
         if isinstance(secret, str):

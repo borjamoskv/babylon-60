@@ -41,4 +41,52 @@ impl AtmsGraph {
         self.entails.entry(parent).or_default().push(child);
         Ok(())
     }
+
+    #[pyo3(name = "invalidate_cascade")]
+    pub fn invalidate_cascade(&mut self, root_id: &str) -> Vec<String> {
+        use std::collections::VecDeque;
+
+        let mut queue = VecDeque::new();
+        let mut invalidated = Vec::new();
+        let mut visited = HashSet::new();
+
+        if self.nodes.contains(root_id) {
+            queue.push_back(root_id.to_string());
+            visited.insert(root_id.to_string());
+        }
+
+        while let Some(current) = queue.pop_front() {
+            self.nodes.remove(&current);
+            invalidated.push(current.clone());
+
+            if let Some(children) = self.entails.get(&current) {
+                for child in children {
+                    if !visited.contains(child) {
+                        visited.insert(child.clone());
+                        queue.push_back(child.clone());
+                    }
+                }
+            }
+        }
+
+        // Clean up from the graph
+        for node in &invalidated {
+            self.dependencies.remove(node);
+            self.entails.remove(node);
+            self.conflicts.remove(node);
+        }
+
+        for deps in self.dependencies.values_mut() {
+            deps.retain(|x| !visited.contains(x));
+        }
+        for ents in self.entails.values_mut() {
+            ents.retain(|x| !visited.contains(x));
+        }
+        for confs in self.conflicts.values_mut() {
+            confs.retain(|x| !visited.contains(x));
+        }
+
+        invalidated
+    }
 }
+

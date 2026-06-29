@@ -13,12 +13,13 @@ import asyncio
 import sys
 import time
 
+from rich.console import Console
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from rich.table import Table
+
 from babylon60.core import config
 from babylon60.extensions.llm.router import CortexLLMRouter
 from babylon60.extensions.swarm.centauro_engine import CentauroEngine
-from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn, BarColumn, TextColumn
-from rich.table import Table
 
 console = Console()
 

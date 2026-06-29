@@ -29,6 +29,21 @@ from cortex.extensions.swarm.nightshift_pipeline import NightShiftPipeline
 
 logger = logging.getLogger("cortex_extensions.swarm.nightshift_daemon")
 
+ENTROPY_SURVIVAL_THRESHOLD = 3.5
+
+
+def shannon_density(crystal_text: str) -> float:
+    """Calculate Shannon entropy of a string."""
+    if not crystal_text:
+        return 0.0
+    import collections
+    import math
+
+    total = len(crystal_text)
+    counts = collections.Counter(crystal_text)
+    freq = {char: count / total for char, count in counts.items()}
+    return -sum(p * math.log2(p) for p in freq.values())
+
 
 class NightShiftCrystalDaemon:
     """Autonomous daemon for periodic knowledge crystallization.
@@ -290,6 +305,10 @@ class NightShiftCrystalDaemon:
         except (sqlite3.Error, ImportError, ValueError, TypeError) as e:
             logger.error("🌙 [NIGHTSHIFT] Consolidation failed: %s", e)
             return {"error": str(e)}
+
+    def _entropy_gate(self, crystal_text: str) -> bool:
+        """Filter crystal text by Shannon entropy threshold."""
+        return shannon_density(crystal_text) > ENTROPY_SURVIVAL_THRESHOLD
 
     # ── Status ────────────────────────────────────────────────────────
 

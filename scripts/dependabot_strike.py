@@ -11,7 +11,6 @@ exergy_tier: P2
 import asyncio
 import sys
 
-from babylon60.core import config
 from babylon60.extensions.llm.router import CortexLLMRouter
 from babylon60.extensions.swarm.centauro_engine import CentauroEngine, Formation
 
