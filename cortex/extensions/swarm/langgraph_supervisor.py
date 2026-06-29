@@ -7,12 +7,11 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 
 try:
-    from langgraph.graph import END, StateGraph  # pyright: ignore[reportMissingImports]
+    from langgraph.graph import StateGraph  # pyright: ignore[reportMissingImports]
 
     LANGGRAPH_AVAILABLE = True
 except ImportError:
     StateGraph = None
-    END = None
     LANGGRAPH_AVAILABLE = False
 
 logger = logging.getLogger("cortex_extensions.swarm.supervisor")

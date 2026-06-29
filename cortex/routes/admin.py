@@ -40,7 +40,7 @@ from cortex.utils.export import export_facts
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 if TYPE_CHECKING:
-    from cortex.auth.manager import AuthManager as ApiKeyManager
+    pass
 
 __all__ = [
     "create_api_key",
