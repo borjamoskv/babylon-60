@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """
-Tests for the Import Resolution Ledger.
+Tests for the Import Resolution Ledger (SMT architecture).
 """
 
 import os
@@ -36,6 +36,8 @@ def test_ledger_creation_and_logging(tmp_path):
     assert start_entry["event"] == "SESSION_START"
     assert "session_id" in start_entry
     assert "public_key_pem" in start_entry
+    assert "tenant_id" in start_entry
+    assert "agent_id" in start_entry
     assert start_entry["prev_hash"] == "GENESIS"
     assert "entry_hash" in start_entry
     
@@ -52,6 +54,7 @@ def test_ledger_creation_and_logging(tmp_path):
     assert end_entry["event"] == "SESSION_END"
     assert end_entry["session_id"] == start_entry["session_id"]
     assert "signature" in end_entry
+    assert "merkle_root" in end_entry
     assert end_entry["prev_hash"] == res_entry["entry_hash"]
     assert "entry_hash" in end_entry
 
@@ -82,7 +85,13 @@ def test_ledger_tampering_detection(tmp_path):
     with open(ledger_file, "w", encoding="utf-8") as f:
         f.writelines(lines)
         
-    # Validation must now fail due to hash mismatch
+    # Validation must now fail due to hash mismatch (or merkle mismatch)
     verification = ImportResolutionLedger.verify_ledger(str(ledger_file))
     assert verification["status"] == "failed"
     assert verification["reason"] == "entry_hash_mismatch"
+
+def test_merkle_root_computation():
+    leaves = ["hash1", "hash2", "hash3"]
+    root = ImportResolutionLedger._compute_merkle_root(leaves)
+    assert isinstance(root, str)
+    assert len(root) == 64  # SHA-256 length
