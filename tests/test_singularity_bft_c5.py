@@ -137,4 +137,3 @@ async def test_vector_swarm_apoptosis(db_path):
         )
         count = (await cursor.fetchone())[0]
         assert count == 500
-

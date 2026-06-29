@@ -24,6 +24,7 @@ async def engine(tmp_path: Path, monkeypatch):
 
     # Ensure causal_edges exists
     from cortex.engine.flow.causality import AsyncCausalGraph
+
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)
         await cg.ensure_table()
@@ -47,6 +48,7 @@ async def test_composition_leakage_eth_address_and_salt(engine: CortexEngine):
         async with conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id_a,)) as cursor:
             row = await cursor.fetchone()
             import json
+
             meta_a = json.loads(row[0]) if row else {}
             assert "composition_leakage" not in meta_a
 
@@ -93,5 +95,6 @@ async def test_composition_leakage_different_projects(engine: CortexEngine):
         async with conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id_b,)) as cursor:
             row = await cursor.fetchone()
             import json
+
             meta_b = json.loads(row[0]) if row else {}
             assert "composition_leakage" not in meta_b

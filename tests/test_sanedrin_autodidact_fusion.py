@@ -15,6 +15,7 @@ async def test_epistemic_breaker_rejects_narrative(tmp_path):
     db_path = str(tmp_path / "cortex_test.db")
 
     from cortex.engine import CortexEngine
+
     engine = CortexEngine(db_path=db_path, auto_embed=False)
     await engine.init_db()
     await engine.close()

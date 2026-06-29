@@ -13,7 +13,7 @@ creates a semantic digest of the intended action and propagates it via Gossip.
 
 from __future__ import annotations
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_truncated
 import logging
 from dataclasses import dataclass
 
@@ -108,11 +108,11 @@ class GEACLCoordinator:
             "domain": domain,
             "best_model": best_response.label,
             "confidence": verdict.confidence,
-            "content_hash": hashlib.sha256(best_response.content.encode("utf-8")).hexdigest(),
+            "content_hash": cortex_hash(best_response.content.encode("utf-8")),
         }
 
         # The state key represents this specific decision boundary
-        intent_hash = hashlib.sha256(intent.encode("utf-8")).hexdigest()[:12]
+        intent_hash = cortex_hash_truncated(intent.encode("utf-8"), length=12)
         state_key = f"geacl_commit_{intent}_{intent_hash}"
 
         # 3. Propagate to Gossip anti-entropy protocol

@@ -22,9 +22,7 @@ def test_semantic_apoptosis_conversational_slop():
     guard = SemanticApoptosisGuard(max_noise_ratio=0.15)
 
     # Conversational slop with no code must immediately raise exception
-    slop_only = (
-        "Of course, here is the detailed explanation of how to optimize the causal engine."
-    )
+    slop_only = "Of course, here is the detailed explanation of how to optimize the causal engine."
     with pytest.raises(SemanticApoptosisError, match="consists entirely of conversational slop"):
         guard.assess_payload(slop_only)
 

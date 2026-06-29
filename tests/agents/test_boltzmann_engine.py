@@ -87,9 +87,9 @@ class TestBoltzmannEngineAgent:
         manifest = _make_manifest("demiurge-test", can_delegate=False)
         registry = ToolRegistry()
         registry.register(DummyTool("exergy_audit", "optimal"))
-        
+
         agent = BoltzmannEngineAgent(manifest, bus, registry)
-        
+
         result = await agent.execute_objective("Perform diagnostic scan")
         assert result["status"] == "SUCCESS"
         assert result["ooda_final_state"] == "complete"
@@ -102,7 +102,7 @@ class TestBoltzmannEngineAgent:
         registry.register(DummyTool("noop", "recovered"))  # successful step 2 (fallback)
 
         agent = BoltzmannEngineAgent(manifest, bus, registry)
-        
+
         result = await agent.execute_objective("Objective that will fail")
         assert result["status"] == "SUCCESS"
         assert result["ooda_final_state"] == "complete"
@@ -127,15 +127,17 @@ class TestBoltzmannEngineAgent:
                     sender="l4-worker-agent",
                     recipient=agent.agent_id,
                     kind=MessageKind.TASK_RESULT,
-                    payload={"result": {"objective": pending.payload["objective"], "status": "SUCCESS"}},
-                    correlation_id=pending.correlation_id
+                    payload={
+                        "result": {"objective": pending.payload["objective"], "status": "SUCCESS"}
+                    },
+                    correlation_id=pending.correlation_id,
                 )
                 await bus.send(reply)
                 # Dispatch it to the agent manually so handle_message receives it
                 await agent.handle_message(reply)
 
         worker_task = asyncio.create_task(simulate_l4_worker())
-        
+
         result = await agent.execute_objective("Delegate task")
         assert result["status"] == "SUCCESS"
         assert result["ooda_final_state"] == "complete"

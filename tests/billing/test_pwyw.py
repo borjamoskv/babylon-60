@@ -66,6 +66,7 @@ async def test_checkout_dynamic_price_data(monkeypatch):
     mock_stripe.checkout.Session.create.return_value = mock_session
 
     import cortex.routes.stripe as stripe_module
+
     monkeypatch.setattr(stripe_module, "config", config)
     monkeypatch.setattr(stripe_module, "_get_stripe", lambda: mock_stripe)
 
@@ -85,11 +86,14 @@ async def test_checkout_dynamic_price_data(monkeypatch):
     assert called_args["mode"] == "subscription"
     assert called_args["metadata"]["plan"] == "pwyw"
     assert called_args["metadata"]["amount_usd"] == "25.0"
-    
+
     line_items = called_args["line_items"]
     assert line_items[0]["price_data"]["unit_amount"] == 2500
     assert line_items[0]["price_data"]["recurring"] == {"interval": "month"}
-    assert line_items[0]["price_data"]["product_data"]["name"] == "CORTEX Proportional Quota Contribution"
+    assert (
+        line_items[0]["price_data"]["product_data"]["name"]
+        == "CORTEX Proportional Quota Contribution"
+    )
 
 
 # ─── Billing Gateway & Quota Scaling Tests ──────────────────────────
@@ -100,6 +104,7 @@ async def test_billing_gateway_pwyw_scaling(tmp_db, monkeypatch):
     """BillingIntegrityGateway should scale quota limits based on paid amount."""
     import aiosqlite
     from cortex.database.schema import CREATE_TENANTS
+
     async with aiosqlite.connect(tmp_db) as conn:
         await conn.execute(CREATE_TENANTS)
         await conn.commit()
@@ -110,6 +115,7 @@ async def test_billing_gateway_pwyw_scaling(tmp_db, monkeypatch):
     # Mock auth manager key creation
     mock_auth_manager = AsyncMock()
     import cortex.api.state as api_state
+
     monkeypatch.setattr(api_state, "auth_manager", mock_auth_manager)
 
     # Mock stripe key configuration
@@ -139,12 +145,16 @@ async def test_billing_gateway_pwyw_scaling(tmp_db, monkeypatch):
 
     # Assert the database contains the correct scaled quotas inside the tenant config
     import aiosqlite
+
     async with aiosqlite.connect(tmp_db) as conn:
         conn.row_factory = aiosqlite.Row
-        async with conn.execute("SELECT config FROM tenants WHERE id = ?", ("test-pwyw@cortex.com",)) as cursor:
+        async with conn.execute(
+            "SELECT config FROM tenants WHERE id = ?", ("test-pwyw@cortex.com",)
+        ) as cursor:
             row = await cursor.fetchone()
             assert row is not None
             import json
+
             config_data = json.loads(row["config"])
             assert config_data["plan"] == "pwyw"
             assert config_data["amount_usd"] == 15.00

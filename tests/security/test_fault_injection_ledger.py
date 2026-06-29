@@ -92,11 +92,10 @@ async def test_ledger_pinned_public_key_mismatch(monkeypatch):
     # 3. Set a mismatched public key in environment and verify it fails with ledger_public_key_mismatch
     from cryptography.hazmat.primitives.asymmetric import ed25519
     from cryptography.hazmat.primitives import serialization
-    
+
     wrong_key = ed25519.Ed25519PrivateKey.generate().public_key()
     wrong_pem = wrong_key.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
+        encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo
     ).decode("utf-8")
 
     monkeypatch.setenv("CORTEX_LEDGER_PUBLIC_KEY", wrong_pem)
@@ -109,4 +108,3 @@ async def test_ledger_pinned_public_key_mismatch(monkeypatch):
         assert verify_result.get("status") == "tampered"
         assert verify_result.get("reason") == "ledger_public_key_mismatch"
         await ledger_verify.close()
-

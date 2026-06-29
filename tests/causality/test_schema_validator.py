@@ -245,9 +245,7 @@ class TestL0Evidence:
 
     def test_invalid_taint_hash_non_hex(self, validator):
         bad = "g" * 64  # 'g' is not hex
-        assert not validator.validate_payload(
-            "evidence.schema", _evidence(cortex_taint_hash=bad)
-        )
+        assert not validator.validate_payload("evidence.schema", _evidence(cortex_taint_hash=bad))
 
     def test_invalid_source_type_enum(self, validator):
         assert not validator.validate_payload(
@@ -296,14 +294,10 @@ class TestL1Pattern:
         assert validator.validate_payload("pattern.schema", _pattern(shannon_entropy_score=1.0))
 
     def test_invalid_uuid_in_evidence_ids(self, validator):
-        assert not validator.validate_payload(
-            "pattern.schema", _pattern(evidence_ids=["not-uuid"])
-        )
+        assert not validator.validate_payload("pattern.schema", _pattern(evidence_ids=["not-uuid"]))
 
     def test_extra_field_rejected(self, validator):
-        assert not validator.validate_payload(
-            "pattern.schema", _pattern(bonus="nope")
-        )
+        assert not validator.validate_payload("pattern.schema", _pattern(bonus="nope"))
 
 
 # ── L2 Cognitive Model ───────────────────────────────────────────────────────
@@ -320,9 +314,7 @@ class TestL2Model:
         assert validator.validate_payload("model.schema", _model(confidence_level=level))
 
     def test_invalid_confidence_level(self, validator):
-        assert not validator.validate_payload(
-            "model.schema", _model(confidence_level="SUPER_HIGH")
-        )
+        assert not validator.validate_payload("model.schema", _model(confidence_level="SUPER_HIGH"))
 
     def test_empty_pattern_ids_violates_min_items(self, validator):
         assert not validator.validate_payload("model.schema", _model(pattern_ids=[]))
@@ -358,9 +350,7 @@ class TestL3Prediction:
         )
 
     def test_extra_field_rejected(self, validator):
-        assert not validator.validate_payload(
-            "prediction.schema", _prediction(ghost="leak")
-        )
+        assert not validator.validate_payload("prediction.schema", _prediction(ghost="leak"))
 
 
 # ── L4 Experiment ────────────────────────────────────────────────────────────
@@ -376,9 +366,7 @@ class TestL4Experiment:
         "ctx", ["SANDBOX_THREAD", "ISOLATED_BRANCH", "DRY_RUN", "ORPHAN_QUERY"]
     )
     def test_all_execution_contexts(self, validator, ctx):
-        assert validator.validate_payload(
-            "experiment.schema", _experiment(execution_context=ctx)
-        )
+        assert validator.validate_payload("experiment.schema", _experiment(execution_context=ctx))
 
     def test_invalid_execution_context(self, validator):
         assert not validator.validate_payload(
@@ -439,6 +427,7 @@ class TestAuditPipelineIntegration:
     @pytest.fixture
     def pipeline(self):
         from cortex.engine.causal.audit_pipeline import CortexAuditPipeline
+
         return CortexAuditPipeline()
 
     @pytest.mark.asyncio

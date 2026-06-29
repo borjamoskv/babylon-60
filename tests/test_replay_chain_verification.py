@@ -2,6 +2,7 @@
 """
 Verification tests for Cryptographic Trajectory Verification (Epoch 15).
 """
+
 import pytest
 import hashlib
 
@@ -16,6 +17,7 @@ class MockLedgerConnection:
     def execute(self, query, params=None):
         # Must return an awaitable or context manager wrapper
         return AioMockCursor(self.rows)
+
 
 class AioMockCursor:
     def __init__(self, rows):
@@ -55,11 +57,28 @@ async def test_replay_engine_verification():
     """Verify that ReplayEngine extracts and parses trajectories correctly."""
     # timestamp, action, resource, status, prev_hash, signature
     rows = [
-        ("audit_1", "2026-06-28T19:00:00Z", "task:start", "resource_1", "success", "GENESIS", "sig_1"),
-        ("audit_2", "2026-06-28T19:01:00Z", "task:step", "resource_2", "success", "hash_1", "sig_2"),
+        (
+            "audit_1",
+            "2026-06-28T19:00:00Z",
+            "task:start",
+            "resource_1",
+            "success",
+            "GENESIS",
+            "sig_1",
+        ),
+        (
+            "audit_2",
+            "2026-06-28T19:01:00Z",
+            "task:step",
+            "resource_2",
+            "success",
+            "hash_1",
+            "sig_2",
+        ),
     ]
-    
+
     conn = MockLedgerConnection(rows)
+
     # We mock EnterpriseAuditLedger to bypass key loading
     class MockLedger(EnterpriseAuditLedger):
         def __init__(self, connection):
@@ -71,9 +90,9 @@ async def test_replay_engine_verification():
 
     ledger = MockLedger(conn)
     engine = ReplayEngine(ledger)
-    
+
     trajectory = await engine.extract_trajectory(tenant_id="default", actor_id="agent_1")
-    
+
     assert len(trajectory) == 2
     assert trajectory[0]["audit_id"] == "audit_1"
     assert trajectory[0]["prev_hash"] == "GENESIS"

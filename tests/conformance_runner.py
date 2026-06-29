@@ -14,6 +14,7 @@ from cortex.engine.core.epistemic_object import Assertion, SupportRelation
 
 VECTORS_DIR = Path(__file__).parent.parent / "spec" / "vectors"
 
+
 def run_conformance_tests():
     if not VECTORS_DIR.exists():
         print("No conformance vectors found.")
@@ -41,7 +42,7 @@ def run_conformance_tests():
                     if p["type"] == "Assertion":
                         obj = Assertion(data=p["data"])
                         hashes.add(obj.identifier)
-                
+
                 # For TV-SER-010, the hashes of identical content must match
                 # meaning the set of hashes should have length 1
                 if len(hashes) == 1:
@@ -50,7 +51,9 @@ def run_conformance_tests():
                         print(f"  [PASS] {vector_id}")
                         success_count += 1
                     else:
-                        print(f"  [FAIL] {vector_id} - Hash mismatch. Expected: {vector.get('expected_hash')}, Got: {computed_hash}")
+                        print(
+                            f"  [FAIL] {vector_id} - Hash mismatch. Expected: {vector.get('expected_hash')}, Got: {computed_hash}"
+                        )
                         failure_count += 1
                 else:
                     print(f"  [FAIL] {vector_id} - Hashes did not converge: {hashes}")
@@ -60,7 +63,7 @@ def run_conformance_tests():
                 # Topology test
                 initial = vector.get("initial_state", {}).get("objects", {})
                 prop = vector["input_proposal"]
-                
+
                 if prop["type"] == "SupportRelation":
                     # Check dangling references
                     ev_id = prop["evidence_id"]
@@ -68,12 +71,14 @@ def run_conformance_tests():
                         actual_behavior = "ERR_DANGLING_REFERENCE"
                     else:
                         actual_behavior = "SUCCESS"
-                    
+
                     if actual_behavior == vector["expected_behavior"]:
                         print(f"  [PASS] {vector_id}")
                         success_count += 1
                     else:
-                        print(f"  [FAIL] {vector_id} - Expected: {vector['expected_behavior']}, Got: {actual_behavior}")
+                        print(
+                            f"  [FAIL] {vector_id} - Expected: {vector['expected_behavior']}, Got: {actual_behavior}"
+                        )
                         failure_count += 1
 
         except Exception as e:
@@ -83,6 +88,7 @@ def run_conformance_tests():
     print(f"\nConformance Run Complete: {success_count} Passed, {failure_count} Failed.")
     if failure_count > 0:
         exit(1)
+
 
 if __name__ == "__main__":
     run_conformance_tests()

@@ -73,9 +73,7 @@ def test_score_equation_with_mock_belief() -> None:
     )
 
     # 1. Relevance: Explicitly pass 1.0 relevance
-    score = scheduler.score(
-        belief, relevance=1.0, contamination_risk=0.1
-    )
+    score = scheduler.score(belief, relevance=1.0, contamination_risk=0.1)
 
     # Expected calculation:
     # Rel = 1.0, Conf = 1.0, Rec = exp(-1e-5 * 0) = 1.0

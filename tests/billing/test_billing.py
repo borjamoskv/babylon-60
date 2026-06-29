@@ -85,6 +85,7 @@ def test_stripe_invoice_serialization():
 def test_gateway_mock_creation(monkeypatch):
     """StripeBillingGateway should initialize and handle mock mode."""
     import cortex.extensions.billing.gateway as gw
+
     monkeypatch.setattr(gw.config, "STRIPE_SECRET_KEY", "sk_test_mock_123")
     monkeypatch.setattr(gw.config, "STRIPE_WEBHOOK_SECRET", "whsec_mock_456")
     monkeypatch.setattr(gw.config, "STRIPE_PRICE_TABLE", {"pro": "price_pro_123"})
@@ -158,6 +159,7 @@ def test_exergy_evaluation():
 def test_record_and_quarantine_flow(tmp_db, monkeypatch):
     """CausalMetering should save records and quarantine F2 events."""
     import cortex.extensions.billing.gateway as gw
+
     monkeypatch.setattr(gw.config, "STRIPE_SECRET_KEY", "sk_test_mock_123")
     gateway = StripeBillingGateway()
     metering = CausalMetering(db_path=tmp_db, gateway=gateway)

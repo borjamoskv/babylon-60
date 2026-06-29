@@ -34,7 +34,9 @@ _ENGINE_DIR = (
 
 
 if not _ENGINE_DIR.is_dir():
-    pytest.skip("cortex/engine directory not found; skipping engine tests.", allow_module_level=True)
+    pytest.skip(
+        "cortex/engine directory not found; skipping engine tests.", allow_module_level=True
+    )
 
 
 def _collect_engine_modules() -> list[str]:

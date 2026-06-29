@@ -76,8 +76,10 @@ async def test_store_validation_runs_ctre() -> None:
     sv._enforce_thermodynamics = mock_noop_sync
     sv._apply_exergy = mock_noop_sync
     sv._apply_semantic_dedup = mock_noop_dedup
+
     async def mock_privacy_shield(conn, content, project, tenant_id, meta):
         return meta
+
     mixin._apply_privacy_shield = mock_privacy_shield
 
     try:

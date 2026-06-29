@@ -33,8 +33,10 @@ except ImportError:
             C3_PROBABLE = "C3"
             C4_CONFIRMED = "C4"
             C5_AXIOMATIC = "C5"
+
         class BeliefObject:  # type: ignore
             pass
+
 
 logger = logging.getLogger(__name__)
 

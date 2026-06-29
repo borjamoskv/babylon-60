@@ -3,6 +3,7 @@ from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
 
 import pytest
 
+
 def test_exergy_yield_calculation():
     """Test the derivation of cognitive exergy."""
     # S_stoc = 15.0, S_det = 120.0, T = 2.0s
@@ -53,11 +54,15 @@ def test_ultrathink_authorization():
 def test_ultrathink_critical_authorization():
     """Verify that critical domains trigger with lower exergy and blast requirements."""
     # A standard node with blast radius 2 fails
-    auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(10.0, 200.0, 5.0, 2, epicenter_node="ordinary_node")
+    auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(
+        10.0, 200.0, 5.0, 2, epicenter_node="ordinary_node"
+    )
     assert auth is False
 
     # A critical node (e.g. "master_ledger") with blast radius 2 succeeds because radius is amplified and exergy threshold is halved
-    auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(10.0, 100.0, 10.0, 2, epicenter_node="master_ledger")
+    auth, msg, formation = UltrathinkPhysicsEngine.authorize_ultrathink(
+        10.0, 100.0, 10.0, 2, epicenter_node="master_ledger"
+    )
     # exergy = (100 - 10) / 10 = 9.0. Required for critical: 0.05 * 100 = 5.0. 9.0 >= 5.0 -> True.
     # effective_radius = 2 * 1.5 = 3. min_radius = 2 -> True.
     assert auth is True
@@ -83,10 +88,10 @@ def test_ultrathink_arsenal_path_resolution():
     """Verify that SYS_OPERATOR placeholders are resolved dynamically at runtime (VM-04)."""
     from cortex.agents.primitives.ultrathink_arsenal import get_ultrathink_arsenal
     import getpass
-    
+
     current_user = getpass.getuser()
     resolved_directives = get_ultrathink_arsenal()
-    
+
     # Locate a target that originally had SYS_OPERATOR
     found_target = False
     for directive in resolved_directives:
@@ -94,7 +99,7 @@ def test_ultrathink_arsenal_path_resolution():
             assert "SYS_OPERATOR" not in directive.target
             assert current_user in directive.target
             found_target = True
-            
+
     assert found_target is True
 
 
@@ -102,12 +107,9 @@ def test_estimate_shannon_entropy():
     """Verify that text Shannon Entropy is calculated accurately."""
     # Empty string should yield 0.0
     assert UltrathinkPhysicsEngine.estimate_shannon_entropy("") == 0.0
-    
+
     # Single repeating character should yield 0.0 (no uncertainty/entropy)
     assert UltrathinkPhysicsEngine.estimate_shannon_entropy("aaaaa") == 0.0
-    
+
     # Equal distribution of two characters (a, b) should yield 1.0 bit
     assert UltrathinkPhysicsEngine.estimate_shannon_entropy("abab") == pytest.approx(1.0, rel=1e-5)
-
-
-

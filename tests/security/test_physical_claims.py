@@ -73,7 +73,9 @@ async def test_ataque_b_direct_sql(tmp_path):
             else:
                 raise
 
-    assert not success, "The physical frontier exists, attack B has been repelled by the authorizer."
+    assert not success, (
+        "The physical frontier exists, attack B has been repelled by the authorizer."
+    )
 
 
 async def test_ataque_c_wal_injection(tmp_path):

@@ -8,10 +8,12 @@ import time
 from pathlib import Path
 import pytest
 
+
 @pytest.fixture(autouse=True)
 def disable_embeddings(monkeypatch):
     monkeypatch.setenv("CORTEX_NO_EMBED", "1")
     monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
+
 
 from cortex.engine.core.cortex_engine import CortexEngine
 
@@ -84,6 +86,7 @@ async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str, monke
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
     monkeypatch.setenv("CORTEX_TESTING", "1")
     from cortex.crypto.aes import reset_default_encrypter
+
     reset_default_encrypter()
 
     try:

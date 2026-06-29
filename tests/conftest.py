@@ -11,6 +11,7 @@ import importlib.util
 # Legacy aliases are now handled natively via cortex/__init__.py
 if os.environ.get("CORTEX_SHADOW_MODE"):
     from babylon60.shadow_tracer import enable_tracer
+
     enable_tracer(mode=os.environ.get("CORTEX_SHADOW_MODE"))
 
 from pathlib import Path
@@ -26,11 +27,13 @@ os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 import pytest
 import sqlite3
 
+
 @pytest.fixture(autouse=True)
 def default_testing_env(monkeypatch):
     monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "1")
     monkeypatch.setenv("CORTEX_NO_EMBED", "1")
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
+
 
 _raw_sqlite3_connect = sqlite3.connect
 
@@ -126,13 +129,15 @@ def pytest_configure(config):
 def pytest_sessionfinish(session, exitstatus):
     """Save exit status before finalization."""
     session.config.exitstatus = exitstatus
-    
+
     # Export shadow tracer graph if enabled
     import os
+
     shadow_mode = os.environ.get("CORTEX_SHADOW_MODE")
     if shadow_mode:
         try:
             from babylon60.shadow_tracer import _global_tracer
+
             if _global_tracer:
                 filename = f"compatibility_delta_graph_{shadow_mode}.json"
                 _global_tracer.export_compatibility_graph(filename)

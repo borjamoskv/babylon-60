@@ -1,8 +1,10 @@
 import time
 import pytest
 import torch
+
 torchhd = pytest.importorskip("torchhd")
 from cortex.memory.epistemic_membrane import EpistemicMembrane, MerkleLedger
+
 
 def test_ledger_performance_o1():
     """
@@ -39,7 +41,6 @@ def test_ledger_performance_o1():
     assert elapsed_2500 < elapsed_500 * 15.0 or (elapsed_2500 < 0.1 and elapsed_500 < 0.1)
 
 
-
 def test_epistemic_membrane_parameters_and_device():
     """
     Asserts device alignment and parameter customization in EpistemicMembrane.
@@ -50,7 +51,7 @@ def test_epistemic_membrane_parameters_and_device():
         threshold_consistency=0.75,
         threshold_novelty=0.90,
         noise_tolerance=0.10,
-        device=custom_device
+        device=custom_device,
     )
 
     assert membrane.threshold_consistency == 0.75
@@ -66,4 +67,3 @@ if __name__ == "__main__":
     print("Running parameters and device test...")
     test_epistemic_membrane_parameters_and_device()
     print("All tests passed.")
-

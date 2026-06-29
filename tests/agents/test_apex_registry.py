@@ -3,6 +3,7 @@
 Author: borjamoskv
 Level: C5-REAL
 """
+
 import json
 import re
 from pathlib import Path
@@ -117,6 +118,7 @@ class TestForgeIdempotency:
             parse_apex_core,
             select_canonical,
         )
+
         report = parse_apex_core(APEX_CORE_MD)
         canonical = select_canonical(report)
         assert len(canonical.primitives) == 100
