@@ -96,7 +96,7 @@ class CortexEngine(
         self._vec_available = False
         self._schema_ready = False
         self._ledger = None
-        self._embedder: LocalEmbedder | None = None
+        self._embedder: Any | None = None
         self._memory_manager = None
         self._memory_l1 = None
         self._memory_l3 = None

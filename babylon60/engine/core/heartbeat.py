@@ -16,7 +16,8 @@ import logging
 import time
 from typing import TYPE_CHECKING
 
-from babylon60.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, Priority, WorldMutation
+from babylon60.extensions.nexus.model import NexusWorldModel
+from babylon60.extensions.nexus.types import DomainOrigin, IntentType, Priority, WorldMutation
 from babylon60.utils import hygiene
 from babylon60.utils.semantic_heartbeat import SemanticHeartbeat
 

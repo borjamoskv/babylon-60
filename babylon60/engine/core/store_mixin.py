@@ -454,7 +454,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     def _invalidate_l1_cache(self, tenant_id: str) -> None:
         """Invalidate search L1 cache for the tenant."""
         try:
-            from babylon60.cache import RedisL1Cache
+            from babylon60.cache.redis_l1 import RedisL1Cache
 
             cache = RedisL1Cache.singleton()
             if cache.available:

@@ -13,14 +13,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from babylon60.crypto.hash_registry import cortex_hash
-
 import aiosqlite
 from cortex.audit.smt import smt_engine
 from cortex.database.core import causal_write
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.audit.ledger")
 
@@ -181,7 +181,6 @@ class EnterpriseAuditLedger:
         """Perform a full verification of the cryptographic chain.
         Returns {'status': 'verified'} if pristine, or {'status': 'tampered', 'corrupted_audit_id': id} if broken.
         """
-        import hashlib
         import json
 
         await self.ensure_table()
@@ -194,15 +193,15 @@ class EnterpriseAuditLedger:
                 if b"PUBLIC KEY" in pinned_bytes:
                     pinned_key = serialization.load_pem_public_key(pinned_bytes)
                 else:
-                    pinned_key = ed25519.Ed25519PublicKey.from_public_bytes(bytes.fromhex(pinned_pub_pem))
-                
+                    pinned_key = ed25519.Ed25519PublicKey.from_public_bytes(
+                        bytes.fromhex(pinned_pub_pem)
+                    )
+
                 my_bytes = self.public_key.public_bytes(
-                    encoding=serialization.Encoding.Raw,
-                    format=serialization.PublicFormat.Raw
+                    encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
                 )
                 pinned_raw_bytes = pinned_key.public_bytes(
-                    encoding=serialization.Encoding.Raw,
-                    format=serialization.PublicFormat.Raw
+                    encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw
                 )
                 if my_bytes != pinned_raw_bytes:
                     return {
@@ -227,33 +226,32 @@ class EnterpriseAuditLedger:
             return {"status": "verified", "blocks": 0}
 
         # Group by batch (same prev_hash and signature)
-        batches = []
-        current_batch = []
-        current_prev_hash = rows[0][9]
-        current_sig = rows[0][10]
+        batches: list[tuple[str, str, list[dict]]] = []
+        current_batch: list[dict] = []
+        current_prev_hash = rows[0]["prev_hash"]
+        current_sig = rows[0]["signature"]
 
         for row in rows:
-            # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature, 11=external_anchor
             # Validate individual audit_id to detect row-level tampering
             expected_audit_id_v2 = cortex_hash(
-                f"{row[2]}|{row[3]}|{row[4]}|{row[5]}|{row[6]}|{row[7]}|{row[8]}".encode()
+                f"{row['timestamp']}|{row['tenant_id']}|{row['actor_role']}|{row['actor_id']}|{row['action']}|{row['resource']}|{row['status']}".encode()
             )
             expected_audit_id_v1 = cortex_hash(
-                f"{row[2]}{row[3]}{row[4]}{row[5]}{row[6]}{row[7]}{row[8]}".encode()
+                f"{row['timestamp']}{row['tenant_id']}{row['actor_role']}{row['actor_id']}{row['action']}{row['resource']}{row['status']}".encode()
             )
-            if row[1] not in (expected_audit_id_v2, expected_audit_id_v1):
+            if row["audit_id"] not in (expected_audit_id_v2, expected_audit_id_v1):
                 return {
                     "status": "tampered",
-                    "corrupted_audit_id": row[1],
+                    "corrupted_audit_id": row["audit_id"],
                     "reason": "row_hash_mismatch",
                 }
 
-            if row[9] == current_prev_hash and row[10] == current_sig:
+            if row["prev_hash"] == current_prev_hash and row["signature"] == current_sig:
                 current_batch.append(row)
             else:
                 batches.append((current_prev_hash, current_sig, current_batch))
-                current_prev_hash = row[9]
-                current_sig = row[10]
+                current_prev_hash = row["prev_hash"]
+                current_sig = row["signature"]
                 current_batch = [row]
 
         if current_batch:
@@ -269,27 +267,28 @@ class EnterpriseAuditLedger:
             if prev_hash != expected_prev_hash:
                 return {
                     "status": "tampered",
-                    "corrupted_audit_id": batch_rows[0][1],
+                    "corrupted_audit_id": batch_rows[0]["audit_id"],
                     "reason": f"chain_broken (expected {expected_prev_hash}, got {prev_hash})",
                 }
 
             # Check if this batch is a COMPACTION_NODE
-            if len(batch_rows) == 1 and batch_rows[0][6] == "COMPACTION_NODE":
+            if len(batch_rows) == 1 and batch_rows[0]["action"] == "COMPACTION_NODE":
                 row = batch_rows[0]
-                # row: 0=rowid, 1=audit_id, 2=timestamp, 3=tenant_id, 4=actor_role, 5=actor_id, 6=action, 7=resource, 8=status, 9=prev_hash, 10=signature, 11=external_anchor
-                compaction_payload = f"COMPACTION:{row[9]}:{row[8]}:{row[7]}"
+                compaction_payload = (
+                    f"COMPACTION:{row['prev_hash']}:{row['status']}:{row['resource']}"
+                )
                 try:
                     self.public_key.verify(bytes.fromhex(signature), compaction_payload.encode())
                 except InvalidSignature:
                     return {
                         "status": "tampered",
-                        "corrupted_audit_id": row[1],
+                        "corrupted_audit_id": row["audit_id"],
                         "reason": "invalid_compaction_signature",
                     }
-                expected_prev_hash = row[8]
+                expected_prev_hash = row["status"]
                 continue
 
-            batch_audit_ids = [r[1] for r in batch_rows]
+            batch_audit_ids = [r["audit_id"] for r in batch_rows]
             for aid in batch_audit_ids:
                 local_smt.update(cortex_hash(aid.encode()), aid)
             merkle_root = local_smt.root
@@ -302,38 +301,47 @@ class EnterpriseAuditLedger:
             except InvalidSignature:
                 return {
                     "status": "tampered",
-                    "corrupted_audit_id": batch_rows[0][1],
+                    "corrupted_audit_id": batch_rows[0]["audit_id"],
                     "reason": "invalid_signature",
                 }
 
             # [C5-REAL] Verify external Rekor/TSA anchor if requested and present
             if os.environ.get("CORTEX_VERIFY_EXTERNAL_ANCHORS") == "true":
                 row = batch_rows[0]
-                if len(row) > 11 and row[11]:
+                if len(row) > 11 and row["external_anchor"]:
                     try:
-                        anchor_data = json.loads(row[11])
+                        anchor_data = json.loads(row["external_anchor"])
                         rekor_uuid = anchor_data.get("rekor_uuid")
                         if rekor_uuid and rekor_uuid != "mock_rekor":
                             from cortex.audit.rekor_client import RekorClient
+
                             rekor_client = RekorClient()
                             try:
                                 rekor_entry = await rekor_client.verify_entry(rekor_uuid)
                                 if not rekor_entry:
                                     return {
                                         "status": "tampered",
-                                        "corrupted_audit_id": row[1],
+                                        "corrupted_audit_id": row["audit_id"],
                                         "reason": f"rekor_anchor_missing (uuid {rekor_uuid})",
                                     }
                                 log_entry_data = list(rekor_entry.values())[0]
                                 body_b64 = log_entry_data.get("body")
                                 if body_b64:
                                     import base64
-                                    body_data = json.loads(base64.b64decode(body_b64).decode("utf-8"))
-                                    logged_hash = body_data.get("spec", {}).get("data", {}).get("hash", {}).get("value")
+
+                                    body_data = json.loads(
+                                        base64.b64decode(body_b64).decode("utf-8")
+                                    )
+                                    logged_hash = (
+                                        body_data.get("spec", {})
+                                        .get("data", {})
+                                        .get("hash", {})
+                                        .get("value")
+                                    )
                                     if logged_hash != entry_hash:
                                         return {
                                             "status": "tampered",
-                                            "corrupted_audit_id": row[1],
+                                            "corrupted_audit_id": row["audit_id"],
                                             "reason": f"rekor_hash_mismatch (expected {entry_hash}, got {logged_hash})",
                                         }
                             finally:
@@ -405,9 +413,7 @@ class EnterpriseAuditLedger:
                                     from cortex.audit.smt import SparseMerkleTree
 
                                     smt_state = SparseMerkleTree()
-                                    smt_state.update(
-                                        cortex_hash(audit_id.encode()), audit_id
-                                    )
+                                    smt_state.update(cortex_hash(audit_id.encode()), audit_id)
                                     merkle_root = smt_state.root
 
                                     entry_hash = cortex_hash(
@@ -595,9 +601,7 @@ class EnterpriseAuditLedger:
             for aid in batch_audit_ids:
                 smt_state.update(cortex_hash(aid.encode()), aid)
             merkle_root = smt_state.root
-            entry_hash = cortex_hash(
-                f"merkle_batch:{merkle_root}:{prev_hash}".encode()
-            )
+            entry_hash = cortex_hash(f"merkle_batch:{merkle_root}:{prev_hash}".encode())
 
             self.public_key.verify(bytes.fromhex(signature_hex), entry_hash.encode("utf-8"))
             return True

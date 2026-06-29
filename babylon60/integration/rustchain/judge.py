@@ -178,7 +178,7 @@ class TestRunnerJudge(Judge):
 
             try:
                 res = subprocess.run(
-                    [sys.executable, "-m", "pytest", str(test_file)],
+                    [sys.executable, "-m", "pytest", "-c", os.devnull, str(test_file)],
                     cwd=tmpdir,
                     capture_output=True,
                     text=True,

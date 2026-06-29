@@ -11,7 +11,7 @@ import uuid
 from typing import Any
 
 from babylon60.context.assembler import ContextAssembler
-from babylon60.engine import CortexEngine
+from babylon60.engine.core.cortex_engine import CortexEngine
 from babylon60.pipeline import DeliveryTarget, PipelineRequest, PipelineResult
 from babylon60.pipeline.executor import AgentExecutor
 from babylon60.pipeline.orchestrator import CortexOrchestrator

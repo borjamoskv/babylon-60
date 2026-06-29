@@ -10,7 +10,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from babylon60.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, WorldMutation
+from babylon60.extensions.nexus.model import NexusWorldModel
+from babylon60.extensions.nexus.types import DomainOrigin, IntentType, WorldMutation
 
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine as AsyncCortexEngine

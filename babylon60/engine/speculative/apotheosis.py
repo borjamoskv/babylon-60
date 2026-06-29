@@ -41,7 +41,8 @@ from babylon60.engine.cognitive.reflex import trigger_autonomic_reflex
 from babylon60.engine.meta.cognitive import scan_file_entropy
 from babylon60.engine.speculative.apotheosis_audits_mixin import ApotheosisAuditsMixin
 from babylon60.engine.temporal.rem_cycle import REMCoordinator
-from babylon60.extensions.immune.membrane import ImmuneMembrane, Verdict
+from babylon60.extensions.immune.filters.base import Verdict
+from babylon60.extensions.immune.membrane import ImmuneMembrane
 from babylon60.extensions.signals.bus import SignalBus
 from babylon60.services.notebooklm import NotebookLMService
 from babylon60.services.trust import TrustService
@@ -186,7 +187,8 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         if not self._cortex:
             return
         try:
-            from babylon60.extensions.policy import PolicyConfig, PolicyEngine
+            from babylon60.extensions.policy.engine import PolicyEngine
+            from babylon60.extensions.policy.models import PolicyConfig
 
             config = PolicyConfig(max_actions=5)
             policy = PolicyEngine(self._cortex, config)

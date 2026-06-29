@@ -192,7 +192,7 @@ class DelegatesMixin:
         tenant_id: str = "default",
     ) -> list:
         """Bellman Policy Engine - prioritized action queue."""
-        from babylon60.extensions.policy import PolicyEngine
+        from babylon60.extensions.policy.engine import PolicyEngine
 
         policy = PolicyEngine(self)  # pyright: ignore[reportArgumentType]
         return await policy.evaluate(project=project, tenant_id=tenant_id)

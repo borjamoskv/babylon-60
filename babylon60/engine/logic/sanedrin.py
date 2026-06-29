@@ -17,7 +17,8 @@ logger = logging.getLogger("cortex.engine.logic.sanedrin")
 
 import json
 
-from babylon60.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
+from babylon60.extensions.llm._models import CortexPrompt, IntentProfile
+from babylon60.extensions.llm.router import CortexLLMRouter
 
 
 class SanedrinNode:

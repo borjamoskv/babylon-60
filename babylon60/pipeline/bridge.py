@@ -52,7 +52,7 @@ class CortexPipelineBridge:
             return
 
         # 1. CortexEngine (memory, facts, ledger)
-        from babylon60.engine import CortexEngine
+        from babylon60.engine.core.cortex_engine import CortexEngine
 
         self._engine = CortexEngine(self._db_path)
         await self._engine.init_db()

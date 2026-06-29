@@ -361,7 +361,7 @@ class InferenceEngine:
             if existing:
                 continue
 
-            from babylon60.config import DB_PATH
+            from babylon60.core.paths import CORTEX_DB as DB_PATH
             from babylon60.guards.contradiction_guard import detect_contradictions
 
             # FALSATION PROTOCOL (L7): Prevent entropy leaks by culling contradictory derivations
