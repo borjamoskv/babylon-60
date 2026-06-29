@@ -58,6 +58,12 @@ class ProxyModule(types.ModuleType):
         else:
             setattr(self._real_module, name, value)
 
+    def __delattr__(self, name):
+        if name in ('_real_module', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
+            object.__delattr__(self, name)
+        else:
+            delattr(self._real_module, name)
+
     def __dir__(self):
         return dir(self._real_module)
 

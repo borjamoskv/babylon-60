@@ -63,6 +63,12 @@ class ProxyModule(types.ModuleType):
     def __dir__(self):
         return dir(self._real_module)
 
+    def __delattr__(self, name):
+        if name in ('_real_module', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
+            object.__delattr__(self, name)
+        else:
+            delattr(self._real_module, name)
+
 
 class LazyAliasLoader(importlib.abc.Loader):
     def __init__(self, target_name):
