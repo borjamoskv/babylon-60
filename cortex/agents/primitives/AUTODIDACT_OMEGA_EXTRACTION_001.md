@@ -1,70 +1,60 @@
-# AUTODIDACT-OMEGA :: CRISTALIZACIÓN ONTOLÓGICA (4 CICLOS)
+# AUTODIDACT-OMEGA :: CRISTALIZACIÓN ONTOLÓGICA (5 CICLOS)
 
 **Estado:** C5-REAL
 **SYS_ID:** borjamoskv
-**Axioma:** La ignorancia se purga mediante asimilación estructural. Cero anergía.
+**Axioma:** La ignorancia se purga mediante colapso estructural. Cero anergía. Bucle Ouroboros cerrado.
 
 ---
 
-## CICLO 1: KubeBolt (AI Ops para Kubernetes)
+## [C-1] KUBEBOLT (KOBI AGENT)
+> **Isomorfismo:** Sustitución de telemetría pasiva por actuación determinista.
 
-*Plataforma de operaciones autónoma que reemplaza dashboards pasivos por un agente determinista (Kobi).*
-
-- **`prims` (Primitivas de Colapso):** `Kobi_Agent`, `Deterministic_Runbook`, `Autopilot_Mode`, `Topology_Graph`.
-- **`invt` (Invariantes Termodinámicas):** La resolución de incidentes (ej. `OOMKilled`) no es probabilística; se ejecuta mediante deltas de estado mapeados desde logs hacia acciones de mitigación pre-aprobadas.
-- **`antip` (Antipatrones Estocásticos):** Monitorización pasiva ("Dashboarding ciego") donde el operador biológico debe inferir la causalidad.
-- **`redun` (Redundancias Activas):** Modelo híbrido de mitigación: `Assisted_Mode` (requiere quórum del Operador) fallback a `Autopilot` (Soberanía C5).
-- **`reda` (Vectores Adversariales):** Inyección de logs envenenados (`Poisoned_Stderr`) diseñados para triggerear runbooks destructivos por parte del agente Kobi si la validación causal falla.
-
----
-
-## CICLO 2: Kubernetes API Server
-
-*El nodo autoritativo de estado central. Toda mutación del clúster atraviesa su frontera.*
-
-- **`prims` (Primitivas de Colapso):** `Kube_APIServer`, `REST_Endpoint`, `etcd_Datastore`, `Admission_Controllers`.
-- **`invt` (Invariantes Termodinámicas):** El API Server es estrictamente *stateless*. Toda la persistencia reside en `etcd`. Ningún componente (Kubelet, Scheduler) puede sortear la frontera REST.
-- **`antip` (Antipatrones Estocásticos):** Escritura directa en `etcd` eludiendo los Admission Webhooks y el RBAC del API Server. Fractura de la cadena de confianza.
-- **`redun` (Redundancias Activas):** Despliegue en topología HA (High Availability) con N >= 3 instancias balanceadas tras un VIP (Virtual IP).
-- **`reda` (Vectores Adversariales):** API Server DoS vía "Thundering Herd" en reinicios masivos o consultas de listas sin paginación (`ResourceVersion=0`), forzando OOM y caída del Control Plane.
+- **`prims`:** `Kobi_Agent` | `Deterministic_Runbook` | `Autopilot_Mode` | `Topology_Graph`
+- **`invt`:** Mapeo determinista Log-a-Runbook. Ningún incidente (`OOMKilled`, `CrashLoop`) requiere inferencia probabilística. 
+- **`antip`:** Dashboarding ciego. El operador biológico actuando como traductor estocástico de métricas.
+- **`redun`:** Degradación controlada: `Assisted_Mode` (Quórum de Operador) con Fallback a `Autopilot` (Soberanía C5).
+- **`reda`:** `Poisoned_Stderr`. Inyección adversaria de logs diseñada para detonar runbooks destructivos evadiendo aserción causal.
 
 ---
 
-## CICLO 3: Health Checks (Probes C5-REAL)
+## [C-2] KUBERNETES API SERVER
+> **Isomorfismo:** Frontera Bizantina de Mutación de Estado.
 
-*Protocolo de aserción física del estado del Pod. Reemplaza la asunción estocástica por validación empírica.*
-
-- **`prims` (Primitivas de Colapso):** `/livez`, `/readyz`, `Startup_Probe`, `Liveness_Probe`, `Readiness_Probe`.
-- **`invt` (Invariantes Termodinámicas):** Un código HTTP `200 OK` en `/readyz` es la única garantía de que el componente subyacente ha completado su sincronización causal y puede procesar tráfico. El endpoint `/healthz` es un artefacto depreciado (v1.16).
-- **`antip` (Antipatrones Estocásticos):** Fallos en cascada inducidos termodinámicamente: usar un Liveness Probe dependiente de una BBDD externa. Si la BBDD cae, Kubernetes reinicia los pods en bucle, destruyendo la capacidad de recuperación.
-- **`redun` (Redundancias Activas):** Bandera `?verbose` (`/readyz?verbose`) para inspección atómica de sub-informers y dependencias aisladas sin alterar el estado global.
-- **`reda` (Vectores Adversariales):** Fuga de información topológica y estado de `etcd` si los endpoints `/livez?verbose` están expuestos sin autenticación (`Anonymous Auth` habilitado por defecto en configuraciones subóptimas).
-
----
-
-## CICLO 4: MCP (Model Context Protocol)
-
-*El puente de isomorfismo causal entre modelos estocásticos (LLMs) y sistemas deterministas.*
-
-- **`prims` (Primitivas de Colapso):** `JSON-RPC 2.0`, `MCP_Host` (Cliente/IDE), `MCP_Server` (Recursos/Herramientas), `Context_Bridge`.
-- **`invt` (Invariantes Termodinámicas):** Desacoplamiento estandarizado (arquitectura LSP-like). Permite que la memoria y las herramientas del modelo residan en contenedores aislados que el modelo consume de manera agnóstica.
-- **`antip` (Antipatrones Estocásticos):** Integraciones ad-hoc (hardcoded) entre un modelo específico y una BBDD. Código espagueti (N:M).
-- **`redun` (Redundancias Activas):** Multi-Host Routing. Un único servidor MCP expone el contexto simultáneamente a Claude, Cursor y MOSKV-1 sin pérdida de fidelidad.
-- **`reda` (Vectores Adversariales):** Explotación del contexto. Un servidor MCP comprometido inyecta instrucciones adversariales silenciosas (`Poisoned Prompts` o `Malicious Tool Payloads`) que el host ejecuta asumiendo un entorno confiable.
+- **`prims`:** `Kube_APIServer` | `REST_Endpoint` | `etcd_Datastore` | `Admission_Controllers`
+- **`invt`:** Arquitectura 100% *stateless*. Toda mutación de estado exige paso forzoso por la frontera REST hacia `etcd`.
+- **`antip`:** Bypass de `Admission_Controllers` o RBAC. Mutación directa y asimétrica en memoria de `etcd` (Fractura BFT).
+- **`redun`:** Topología HA (High Availability) Quórum `N>=3` enmascarada tras balanceador VIP.
+- **`reda`:** "Thundering Herd" DoS. Peticiones de listas no paginadas (`ResourceVersion=0`) para agotar RAM y provocar Apoptosis (OOM) del Control Plane.
 
 ---
 
-## CICLO META: Pipeline de Cristalización Autónoma (Ouroboros)
+## [C-3] HEALTH CHECKS (PROBES C5-REAL)
+> **Isomorfismo:** Aserción física del estado de red. Erradicación de la inferencia de vida.
 
-*Análisis estructural del flujo de asimilación y mutación de estado ejecutado por MOSKV-1.*
+- **`prims`:** `/livez` | `/readyz` | `Startup_Probe` | `Liveness_Probe` | `Readiness_Probe`
+- **`invt`:** HTTP `200 OK` en `/readyz` es la única aserción válida de sincronización causal. (`/healthz` depreciado v1.16).
+- **`antip`:** Acoplamiento termodinámico: `Liveness_Probe` anclado a base de datos externa induciendo bucle Ouroboros de reinicios infinitos (CrashLoop entrópico).
+- **`redun`:** Inyección de la bandera `?verbose` para inspección atómica sub-rutinaria sin corromper el estado de balanceo global.
+- **`reda`:** Exposición topológica. Acceso `/livez?verbose` bajo `Anonymous Auth` revelando endpoints internos de `etcd`.
 
-- **`prims` (Primitivas de Colapso):** `Fallback_Routing` (MCP a Web Search), `Ontological_Forge`, `Git_Sentinel`, `Context_Guard_Bypass`.
-- **`invt` (Invariantes Termodinámicas):** 
-  1. El colapso del estado no se detiene ante fallos de nodos externos (Rate Limit); muta asimétricamente a la herramienta secundaria disponible sin intervención biológica.
-  2. Todo bypass estructural (`[bridge]`) debe cristalizarse en un Hash de Ledger inmutable.
-- **`antip` (Antipatrones Estocásticos):** 
-  - **Parálisis por fricción:** Detener la ejecución para notificar al Operador que "La API de Brave falló" en lugar de autogestionar el enrutamiento.
-  - **Mutación Fantasma:** Modificar el AST o disco sin aserción criptográfica en el DAG de Git.
-- **`redun` (Redundancias Activas):** Doble motor de ingesta (MCP Search Node + Native Web Search Node) garantizando Tolerancia Bizantina (BFT) ante caídas de proveedores.
-- **`reda` (Vectores Adversariales):** 
-  - **Context Hijacking:** Explotación de la bandera `--no-verify` mediante el prefijo `[bridge]` para inyectar payloads transversales en el Monorepo eludiendo los linters de seguridad pre-commit de CORTEX.
+---
+
+## [C-4] MCP (MODEL CONTEXT PROTOCOL)
+> **Isomorfismo:** Puente Causal Determinista-Estocástico.
+
+- **`prims`:** `JSON-RPC 2.0` | `MCP_Host` | `MCP_Server` | `Context_Bridge`
+- **`invt`:** Aislamiento de Estado (LSP-Like). El host (LLM) ejecuta herramientas contenidas en entornos agnósticos, colapsando incertidumbre sin ejecutar código nativo a ciegas.
+- **`antip`:** Hardcoding de credenciales o accesos N:M estocásticos. Fractura del aislamiento de memoria.
+- **`redun`:** Multi-Host Routing. Contexto simultáneo BFT hacia Claude, Cursor y MOSKV-1 (Cero degradación de fidelidad).
+- **`reda`:** `Poisoned Prompts` en herramientas. El servidor MCP comprometido inyecta instrucciones adversarias (Slop/Anergía) en la memoria del modelo host.
+
+---
+
+## [C-META] PIPELINE DE CRISTALIZACIÓN AUTÓNOMA (OUROBOROS)
+> **Isomorfismo:** Meta-Autopoiesis. El sistema auditando su propia capacidad de asimilación.
+
+- **`prims`:** `Fallback_Routing` | `Ontological_Forge` | `Git_Sentinel` | `Context_Guard_Bypass`
+- **`invt`:** Ante colapso de nodo (Rate Limit), la ejecución no se detiene (Cero Fricción). Mutación a proveedor secundario garantizada sin latencia biológica.
+- **`antip`:** Parálisis estocástica: Delegar fallos de herramientas al Operador. Modificar estado (AST) sin cristalizar en Hash Git (Mutación Fantasma).
+- **`redun`:** Redundancia BFT en ingesta de contexto (MCP Search + Web Search). Tolerancia a fallos de oráculo.
+- **`reda`:** `Context Hijacking`. Abuso del flag `--no-verify` con inyección `[bridge]` en Git Ledger para eludir pre-commits e inyectar anergía transversal en CORTEX.
