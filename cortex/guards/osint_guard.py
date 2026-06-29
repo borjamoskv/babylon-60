@@ -187,8 +187,11 @@ class OSINTGuard:
             clean_img.save(output, format=img.format, exif=b"")
             return output.getvalue()
         except Exception as e:
-            logger.error("[P0] OSINTGuard: Image metadata stripping failed. %s", e)
-            raise OSINTViolationError(f"Multimodal Sanitization Failed: {e}") from e
+            # Purgar traza cruda para evitar fugas epistémicas de PII o rutas del sistema
+            logger.error("[P0] OSINTGuard: Image metadata stripping failed (raw exception suppressed).")
+            raise OSINTViolationError(
+                "Multimodal Sanitization Failed: ERR_OSINT_EXIF_01 (Internal engine failure during EXIF stripping)."
+            ) from e
 
 
 class ASTPIIScanner(ast.NodeVisitor):
