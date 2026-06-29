@@ -75,11 +75,12 @@ def _writer_process_target(db_path: Path, sync_event: multiprocessing.Event, fau
 @pytest.mark.parametrize(
     "fault_point", ["before_sqlite", "after_sqlite_before_ledger", "after_commit"]
 )
-async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str):
+async def test_sigkill_crash_consistency(tmp_path: Path, fault_point: str, monkeypatch):
     """
     Verifies that the database and ledger remain consistent under hard SIGKILL termination.
     SQLite WAL recovery should cleanly discard uncommitted transactions.
     """
+    monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
     db_path = tmp_path / "cortex_assurance.db"
 
     # 1. Initialize schema
