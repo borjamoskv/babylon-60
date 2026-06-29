@@ -75,6 +75,7 @@ class ImportTracer:
         self.project_root = Path(__file__).resolve().parents[1]
         self._installed = False
         self._resolver = None
+        self.ledger = None
 
     def get_caller_module(self):
         """Finds the name of the first user module up the stack."""
@@ -122,6 +123,8 @@ class ImportTracer:
             "caller": caller
         })
         self.imports[caller].add(target)
+        if self.ledger:
+            self.ledger.log_resolution(caller, source, "REDIRECTED", target)
 
     def log_would_break(self, source, caller):
         # Only log if not already recorded for this caller/source combination
@@ -131,6 +134,8 @@ class ImportTracer:
                 "caller": caller
             })
         self.imports[caller].add(source)
+        if self.ledger:
+            self.ledger.log_resolution(caller, source, "WOULD_BREAK", "None")
 
     def record_import(self, importer, imported):
         if importer and imported:
@@ -138,12 +143,24 @@ class ImportTracer:
                 # Filter to only care about cortex/babylon60 related imports
                 if ("cortex" in importer or "babylon60" in importer) or ("cortex" in imported or "babylon60" in imported):
                     self.imports[importer].add(imported)
+                    if self.ledger:
+                        res_type = "DIRECT"
+                        if "babylon60" in importer and "cortex" in imported:
+                            res_type = "BYPASS"
+                        self.ledger.log_resolution(importer, imported, res_type, "None")
 
     def install(self):
         """Installs the tracer hook into sys.meta_path and overrides standard import."""
         if self._installed:
             return
         
+        # Initialize ledger if configured
+        if os.environ.get("CORTEX_IMPORT_LEDGER") == "1" or os.environ.get("CORTEX_IMPORT_LEDGER") == "true":
+            from babylon60.import_ledger import ImportResolutionLedger
+            ledger_path = os.environ.get("CORTEX_IMPORT_LEDGER_PATH")
+            self.ledger = ImportResolutionLedger(filepath=ledger_path)
+            self.ledger.start_session()
+
         # Set up our shadow resolver at the top of meta_path
         self._resolver = ShadowResolver(self)
         sys.meta_path.insert(0, self._resolver)
@@ -178,6 +195,9 @@ class ImportTracer:
             sys.meta_path.remove(self._resolver)
         __builtins__["__import__"] = self._orig_import
         self._installed = False
+        if self.ledger:
+            self.ledger.end_session()
+            self.ledger = None
 
     def detect_cycles(self, collapsed: bool = False) -> list[list[str]]:
         """
