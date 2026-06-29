@@ -51,9 +51,6 @@ class ByzantineJudge:
             signature_b64 = prop.get("signature_b64")
             timestamp = prop.get("timestamp")
 
-            if timestamp is None or signature_b64 is None:
-                continue
-
             if not all([agent_id, code, signature_b64, timestamp]):
                 logger.warning(f"Proposal from {agent_id} lacks cryptographic fields. Slashed.")
                 if agent_id:
