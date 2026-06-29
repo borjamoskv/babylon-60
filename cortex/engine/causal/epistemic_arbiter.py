@@ -1,8 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import hashlib
-import json
 import logging
-from typing import Any, Callable
+from collections.abc import Callable
 
 from cortex.engine.flow.causality_models import (
     Claim,

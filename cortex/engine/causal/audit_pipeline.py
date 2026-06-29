@@ -1,5 +1,6 @@
 import logging
-from typing import Any, Dict
+from typing import Any
+
 from cortex.engine.causal.schema_validator import L0L6SchemaValidator
 
 logger = logging.getLogger(__name__)
@@ -13,9 +14,9 @@ class CortexAuditPipeline:
     
     def __init__(self) -> None:
         self.validator = L0L6SchemaValidator()
-        self._state: Dict[str, Any] = {}
+        self._state: dict[str, Any] = {}
         
-    async def process_l0_evidence(self, evidence: Dict[str, Any]) -> str:
+    async def process_l0_evidence(self, evidence: dict[str, Any]) -> str:
         if not self.validator.validate_payload("evidence.schema", evidence):
             raise ValueError("L0 Evidence Rejected: Schema mismatch or missing Taint Hash.")
         
@@ -24,7 +25,7 @@ class CortexAuditPipeline:
         logger.info(f"[L0] Evidence sealed: {evidence_id}")
         return evidence_id
         
-    async def process_l4_experiment(self, experiment: Dict[str, Any]) -> bool:
+    async def process_l4_experiment(self, experiment: dict[str, Any]) -> bool:
         """
         La Barrera Anti-Autojustificación.
         """
@@ -39,7 +40,7 @@ class CortexAuditPipeline:
         logger.info("[L4] Prediction Corroborated. Hypothesis survived. Proceeding to L5.")
         return True
         
-    async def execute_l5_intervention(self, intervention: Dict[str, Any]) -> str:
+    async def execute_l5_intervention(self, intervention: dict[str, Any]) -> str:
         """
         Mutación atómica C5-REAL.
         """
