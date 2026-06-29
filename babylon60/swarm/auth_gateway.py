@@ -80,7 +80,7 @@ class QuorumGateway:
             return False
 
         try:
-            from cortex.extensions.security.signatures import (
+            from babylon60.extensions.security.signatures import (
                 Ed25519Signer,
                 SignatureVerificationError,
             )

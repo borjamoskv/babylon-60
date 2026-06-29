@@ -5,9 +5,9 @@ import re
 from pathlib import Path
 from typing import Any
 
-from cortex.swarm.legion import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
-from cortex.swarm.legion_vectors import RED_TEAM_SWARM
-from cortex.swarm.nemesis_agent import NemesisAgentAdapter
+from babylon60.swarm.legion import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
+from babylon60.swarm.legion_vectors import RED_TEAM_SWARM
+from babylon60.swarm.nemesis_agent import NemesisAgentAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -209,7 +209,7 @@ class PhalanxBase(Squadron):
 
         # Evolución Exergética (TSI-Ω): 10% del enjambre es ExergyMaximizerAgent
         if idx % 10 == 8:
-            from cortex.swarm.exergy_agent import ExergyAgentAdapter
+            from babylon60.swarm.exergy_agent import ExergyAgentAdapter
 
             return ExergyAgentAdapter(agent_id, self.bus, self.engine)
 

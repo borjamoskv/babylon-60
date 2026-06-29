@@ -6,6 +6,6 @@ High-agency orchestration for 10,000+ autonomous agents.
 
 from __future__ import annotations
 
-from cortex.extensions.swarm.manager import SwarmManager
+from babylon60.extensions.swarm.manager import SwarmManager
 
 __all__ = ["SwarmManager"]

@@ -1,7 +1,8 @@
-from babylon60.crypto.hash_registry import cortex_hash
 import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 def default_serializer(obj):

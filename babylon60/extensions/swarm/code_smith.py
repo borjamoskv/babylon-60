@@ -8,7 +8,6 @@ Axioms: Ω₀ (Self-Reference), Ω₂ (Entropic Asymmetry), Ω₃ (Byzantine Def
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import hashlib
 import logging
 import time
@@ -17,13 +16,15 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Protocol
 
+from babylon60.crypto.hash_registry import cortex_hash
+
 logger = logging.getLogger("cortex_extensions.swarm.code_smith")
 
 
 # ── Constants ──────────────────────────────────────────────────────────────
 
 # Re-exported from ast_validator for backward compatibility
-from cortex.extensions.swarm.ast_validator import (
+from babylon60.extensions.swarm.ast_validator import (
     ASTValidationResult,
     ASTValidator,
 )

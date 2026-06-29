@@ -4,7 +4,6 @@ PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural
 Protocolo CORTEX: Analysis -> Extraction -> Reconstruction -> Scaling -> Verification
 """
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import ast
 import asyncio
 import logging
@@ -13,6 +12,8 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

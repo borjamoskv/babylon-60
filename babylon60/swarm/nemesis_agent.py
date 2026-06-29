@@ -3,9 +3,9 @@ import logging
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.mixins.deterministic_induction_mixin import DeterministicInductionMixin
-from cortex.swarm.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.mixins.deterministic_induction_mixin import DeterministicInductionMixin
+from babylon60.swarm.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 
 logger = logging.getLogger("cortex.nemesis_agent")
 

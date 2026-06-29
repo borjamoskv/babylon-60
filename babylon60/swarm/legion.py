@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from typing import Any, ClassVar
 
 try:
-    from cortex.cli.bicameral import bicameral
+    from babylon60.cli.bicameral import bicameral
 except ImportError:
     # Axiom Ω₃: Zero-Trust Logging - providing a stub if CLI is unavailable
     class BicameralStub:
@@ -25,7 +25,7 @@ except ImportError:
             logging.getLogger("cortex.motor").info(msg)
 
     bicameral = BicameralStub()
-from cortex.swarm.legion_vectors import RED_TEAM_SWARM, AttackVector
+from babylon60.swarm.legion_vectors import RED_TEAM_SWARM, AttackVector
 
 logger = logging.getLogger(__name__)
 __all__ = [
@@ -72,7 +72,7 @@ class AsyncSignalBus:
             import json
             import logging
 
-            from cortex.guards.landauer_guard import LandauerGuard
+            from babylon60.guards.landauer_guard import LandauerGuard
 
             # Serialize to measure thermodynamic density
             payload_str = json.dumps(signal.payload)
@@ -210,7 +210,7 @@ class Squadron(ABC):
         import json
         from datetime import datetime, timezone
 
-        from cortex.guards import CausalClosureGuard, SwarmProposal
+        from babylon60.guards.causal_closure_guard import CausalClosureGuard, SwarmProposal
 
         ledger_payload = {
             "type": "LedgerPayload",
@@ -221,7 +221,7 @@ class Squadron(ABC):
         }
         # ─── Cross-System Invariance Verification ───
         try:
-            from cortex.runtime.invariants.cross_system import CrossSystemInvariantCompiler
+            from babylon60.runtime.invariants.cross_system import CrossSystemInvariantCompiler
 
             shannon_trace = getattr(self.engine, "shannon_trace", None)
             substrate_ledger = getattr(self.engine, "substrate_ledger", None)

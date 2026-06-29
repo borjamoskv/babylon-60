@@ -16,13 +16,13 @@ C5-REAL - Zero disk overflow guaranteed.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import os
 import time
 
-from cortex.compat.optional import np
-from cortex.swarm.tensor_glial import TensorGlialLegion
+from babylon60.compat.optional import np
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.swarm.tensor_glial import TensorGlialLegion
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.staged_legion")
@@ -120,7 +120,7 @@ def execute_staged_reverse_engineering(
 
     # --- L3: Global Consensus from all Centurions ---
     logger.info("🪐 Collapsing %d Centurions into Global Consensus...", len(centurion_states))
-    from cortex.vsa_engine import VSAEngine
+    from babylon60.vsa_engine import VSAEngine
 
     vsa = VSAEngine(D=d_dim, algebra="HRR")  # pyright: ignore[reportCallIssue]
 

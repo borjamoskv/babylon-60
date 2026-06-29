@@ -6,7 +6,7 @@ from dataclasses import dataclass
 logger = logging.getLogger("cortex.swarm.verification")
 
 
-from cortex.security.types import RiskLevel
+from babylon60.security.types import RiskLevel
 
 RISK_PATH_MAP = {
     "cortex/engine": RiskLevel.CRITICAL,

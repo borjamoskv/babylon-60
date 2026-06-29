@@ -6,7 +6,7 @@ import logging
 import math
 import uuid
 
-from cortex.engine.forensic.slashing import SlashingEngine
+from babylon60.engine.forensic.slashing import SlashingEngine
 
 __all__ = ["ConsensusManager"]
 
@@ -40,7 +40,7 @@ class ConsensusManager:
         public_key: str = "",
         tenant_id: str = "default",
     ) -> str:
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         agent_id = str(uuid.uuid4())
         async with self.engine.session() as conn:
@@ -61,7 +61,7 @@ class ConsensusManager:
         value: int,
         reason: str | None = None,
     ) -> float:
-        from cortex.database.core import causal_write
+        from babylon60.database.core import causal_write
 
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
@@ -165,7 +165,7 @@ class ConsensusManager:
         return score
 
     async def _update_fact_score(self, fact_id: int, score: float, conn) -> None:
-        from cortex.engine.core.mutation_engine import MUTATION_ENGINE
+        from babylon60.engine.core.mutation_engine import MUTATION_ENGINE
 
         if score >= 1.5:
             conf = "verified"
@@ -258,7 +258,7 @@ class ConsensusManager:
     ) -> float:
         """Slash an agent's reputation manually for consensus deviation or taint."""
         async with self.engine.session() as conn:
-            from cortex.database.core import causal_write
+            from babylon60.database.core import causal_write
 
             with causal_write(conn):
                 new_rep = await SlashingEngine.slash(

@@ -288,8 +288,8 @@ class OmegaDaemon:
                 try:
                     from pathlib import Path
 
-                    from cortex.engine.evo.autopoiesis import AutopoiesisEngine
-                    from cortex.swarm.swarm_10k import SwarmCommander
+                    from babylon60.engine.evo.autopoiesis import AutopoiesisEngine
+                    from babylon60.swarm.swarm_10k import SwarmCommander
 
                     bus_path = Path("~/.cortex/10k_shards").expanduser()
                     commander = SwarmCommander(bus_path=bus_path, tenant_id="omega_daemon")
@@ -319,10 +319,11 @@ class OmegaDaemon:
                             import os
 
                             import keyring
-                            from cortex.engine.causal.taint_engine import (
+
+                            from babylon60.engine.causal.taint_engine import (
                                 generate_secure_taint_token,
                             )
-                            from cortex.storage.turbopuffer import TurbopufferVectorBackend
+                            from babylon60.storage.turbopuffer import TurbopufferVectorBackend
 
                             priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
                             if not priv_b64:

@@ -4,11 +4,12 @@ Byzantine Consensus (LEGION-Ω)
 Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import json
 import math
 from typing import Any, TypeVar
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 T = TypeVar("T")
 

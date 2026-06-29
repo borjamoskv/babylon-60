@@ -7,12 +7,13 @@ Axioms: Ω₃ (Byzantine), Ω₂ (Entropic Asymmetry), Ω₅ (Antifragile).
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("cortex_extensions.swarm.conflict_resolution")
 

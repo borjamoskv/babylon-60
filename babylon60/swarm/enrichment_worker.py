@@ -10,7 +10,7 @@ import asyncio
 import logging
 from typing import Any
 
-from cortex.engine.cognitive.capabilities import CapabilityRegistry
+from babylon60.engine.cognitive.capabilities import CapabilityRegistry
 
 logger = logging.getLogger("cortex.enrichment")
 

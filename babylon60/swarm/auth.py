@@ -10,13 +10,14 @@ reaches a 100% unanimous Zenith Consensus rating.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import json
 import logging
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.swarm.auth")
 

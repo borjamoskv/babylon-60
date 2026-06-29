@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
-from cortex.extensions.swarm.sortu_jit_executor import run_jit_sandbox
+from babylon60.extensions.swarm.sortu_jit_executor import run_jit_sandbox
 
 logger = logging.getLogger("cortex.autodidact.actuator")
 logging.basicConfig(level=logging.INFO)

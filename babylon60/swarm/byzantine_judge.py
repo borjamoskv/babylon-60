@@ -3,13 +3,13 @@
 Uses the SandboxJIT and Exergy economics to reach consensus on proposed code mutations.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 from typing import Any
 
-from cortex.crypto.keys import KeyManager, Signer, Verifier
-from cortex.engine.core.sandbox_jit import JITSandboxViolation, SandboxJIT
-from cortex.swarm.exergy import ExergyBank
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.crypto.keys import KeyManager, Signer, Verifier
+from babylon60.engine.core.sandbox_jit import JITSandboxViolation, SandboxJIT
+from babylon60.swarm.exergy import ExergyBank
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +51,9 @@ class ByzantineJudge:
             signature_b64 = prop.get("signature_b64")
             timestamp = prop.get("timestamp")
 
+            if timestamp is None or signature_b64 is None:
+                continue
+
             if not all([agent_id, code, signature_b64, timestamp]):
                 logger.warning(f"Proposal from {agent_id} lacks cryptographic fields. Slashed.")
                 if agent_id:
@@ -70,7 +73,7 @@ class ByzantineJudge:
             payload_hash = cortex_hash(code.encode("utf-8"))  # type: ignore
             try:
                 is_valid = Verifier.verify_signature(
-                    pub_key_b64, payload_hash, timestamp, signature_b64
+                    pub_key_b64, payload_hash, str(timestamp), str(signature_b64)
                 )  # type: ignore
             except (ValueError, TypeError) as e:
                 logger.warning(f"[SECURITY] Signature validation failed structurally: {e}")

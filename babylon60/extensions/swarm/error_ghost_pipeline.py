@@ -15,7 +15,6 @@ Architecture:
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import logging
 import threading
 import time
@@ -23,6 +22,8 @@ import traceback
 from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("cortex_extensions.swarm.error_ghost_pipeline")
 
@@ -224,7 +225,7 @@ class ErrorGhostPipeline:
     ) -> int | None:
         """Store ghost via CortexEngine (async path)."""
         try:
-            from cortex.engine import CortexEngine
+            from babylon60.engine.core.cortex_engine import CortexEngine
 
             engine = CortexEngine()
             fact_id = await engine.store(

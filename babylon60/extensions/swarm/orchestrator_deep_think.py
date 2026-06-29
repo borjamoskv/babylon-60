@@ -1,13 +1,13 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import asyncio
 import logging
 from typing import Any
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 try:
-    from cortex.extensions.agents.factory import create_agent  # type: ignore[import-not-found]
+    from babylon60.extensions.agents.factory import create_agent  # type: ignore[import-not-found]
 except ImportError:
 
     async def create_agent(*args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
@@ -15,12 +15,12 @@ except ImportError:
         raise NotImplementedError("cortex_extensions.agents.factory was removed")
 
 
-from cortex.extensions.swarm.infinite_minds import InfiniteMindsManager
+from babylon60.extensions.swarm.infinite_minds import InfiniteMindsManager
 
 try:
-    from cortex.memory.hdc.algebra import DEFAULT_DIM, bundle
-    from cortex.memory.hdc.codec import HDCEncoder
-    from cortex.memory.hdc.item_memory import ItemMemory
+    from babylon60.memory.hdc.algebra import DEFAULT_DIM, bundle
+    from babylon60.memory.hdc.codec import HDCEncoder
+    from babylon60.memory.hdc.item_memory import ItemMemory
 except ImportError:
     import logging
 
@@ -108,7 +108,7 @@ class DeepThinkOrchestrator:
                 # or custom interact(). We'll wrap deliberate or send a cortex_prompt directly.
                 # BaseCortexAgent generic usage:
                 if hasattr(agent, "router"):
-                    from cortex.extensions.llm.router import CortexPrompt, IntentProfile
+                    from babylon60.extensions.llm._models import CortexPrompt, IntentProfile
 
                     cortex_prompt = CortexPrompt(
                         system_instruction=f"{agent.persona.vision}\n{';'.join(agent.persona.axioms)}",
@@ -122,7 +122,7 @@ class DeepThinkOrchestrator:
                     text_response = await agent.deliberate()
 
             # Encode response to HDC vector and Bind Author (Vectorial Entanglement)
-            from cortex.memory.hdc.algebra import bind
+            from babylon60.memory.hdc.algebra import bind
 
             text_hv = self.encoder.encode_text(text_response[:2000])  # cap for speed
             agent_id_hv = self.encoder.encode_text(agent_id)
@@ -157,12 +157,13 @@ class DeepThinkOrchestrator:
         else:
             collapsed_hv = self.encoder.encode_text("void")
 
-        import hashlib
 
         hv_signature = cortex_hash_truncated(collapsed_hv.tobytes(), length=16)
 
         # Resonancia Bizantina (Consensus Calculation)
-        from cortex.memory.hdc.algebra import similarity  # type: ignore[reportAttributeAccessIssue]
+        from babylon60.memory.hdc.algebra import (
+            similarity,  # type: ignore[reportAttributeAccessIssue]
+        )
 
         sims = []
         for i in range(len(hvs)):

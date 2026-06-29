@@ -8,13 +8,14 @@ AGENTS.md Tenant Isolation: cache_key always includes tenant_id.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import hashlib
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 @lru_cache(maxsize=1024)

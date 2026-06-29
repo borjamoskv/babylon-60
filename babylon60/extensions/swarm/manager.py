@@ -15,12 +15,12 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.signals.bus import AsyncSignalBus
-from cortex.extensions.swarm.auto_fix import AutoFixPipeline
-from cortex.extensions.swarm.budget import get_budget_manager
-from cortex.extensions.swarm.protocols import SwarmIntent, SwarmSignalSchema, SwarmTopologyRole
-from cortex.extensions.swarm.verification_gate import RiskLevel, VerificationGate
-from cortex.extensions.swarm.worktree_isolation import isolated_worktree
+from babylon60.extensions.signals.bus import AsyncSignalBus
+from babylon60.extensions.swarm.auto_fix import AutoFixPipeline
+from babylon60.extensions.swarm.budget import get_budget_manager
+from babylon60.extensions.swarm.protocols import SwarmIntent, SwarmSignalSchema, SwarmTopologyRole
+from babylon60.extensions.swarm.verification_gate import RiskLevel, VerificationGate
+from babylon60.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex_extensions.swarm.manager")
 
@@ -186,7 +186,7 @@ class CapatazOrchestrator:
         self.tasks: dict[str, SwarmTask] = {}
         self.budget = get_budget_manager()
 
-        from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+        from babylon60.extensions.swarm.kv_prefix_registry import get_kv_registry
 
         self._kv_registry = get_kv_registry()
 
@@ -235,7 +235,7 @@ class CapatazOrchestrator:
                     )
             else:
                 with engine.session() as conn:
-                    from cortex.extensions.signals.bus import SignalBus
+                    from babylon60.extensions.signals.bus import SignalBus
 
                     bus = SignalBus(conn)
                     bus.emit(
@@ -376,7 +376,7 @@ class CapatazOrchestrator:
     async def preheat_prefix(self, system_prompt: str, tenant_id: str) -> None:
         """AX-042: Ping provider to cache prefix before the swarm hits it concurrently."""
         try:
-            from cortex.extensions.llm.provider import LLMProvider
+            from babylon60.extensions.llm.provider import LLMProvider
 
             logger.info("[%s] Capataz: Pre-heating KV Cache for swarm...", self.mission_id)
 

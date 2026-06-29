@@ -6,7 +6,6 @@ Agents must sign their LLM requests. The Proxy verifies their identity
 against the TrustMatrix before forwarding the request to the frontier model.
 """
 
-from babylon60.crypto.hash_registry import cortex_hash_raw
 import base64
 import logging
 import os
@@ -15,14 +14,16 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from babylon60.crypto.hash_registry import cortex_hash_raw
+
 try:
     import uvicorn
     from fastapi import FastAPI, HTTPException
 except ImportError:
     pass
 
-from cortex.consensus.pki import trust_matrix
-from cortex.extensions.llm.client import SovereignLLMClient  # Assume this is the real client
+from babylon60.consensus.pki import trust_matrix
+from babylon60.extensions.llm.client import SovereignLLMClient  # Assume this is the real client
 
 logger = logging.getLogger("cortex.swarm.inference_proxy")
 

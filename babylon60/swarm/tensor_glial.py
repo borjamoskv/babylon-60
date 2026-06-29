@@ -6,13 +6,13 @@ Zero-Copy `mmap` tensor map mapped across 10,000 swarm agents representing High-
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import os
 import threading
 import time
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.crypto.hash_registry import cortex_hash
 
 try:
     from numba import njit, prange  # pyright: ignore[reportMissingImports]
@@ -21,7 +21,7 @@ try:
 except ImportError:
     HAS_NUMBA = False
 
-from cortex.vsa_engine import VSAEngine
+from babylon60.vsa_engine import VSAEngine
 
 # --- Direct-Silicon JIT Kernels ---
 if HAS_NUMBA:

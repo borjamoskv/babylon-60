@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from cortex.database.core import connect as db_connect
+from babylon60.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex_extensions.swarm.budget")
 
@@ -73,7 +73,7 @@ class SwarmBudgetManager:
 
         now = time.monotonic()
         try:
-            from cortex.database.core import causal_write
+            from babylon60.database.core import causal_write
 
             with db_connect(str(self.db_path)) as conn:
                 with causal_write(conn):

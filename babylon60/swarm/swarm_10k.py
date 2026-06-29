@@ -16,11 +16,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from cortex.engine.cognitive.exergy_optimizer import ExergyOptimizer
-from cortex.engine.core.shared_bus import SovereignSharedBus
-from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
-from cortex.engine.forensic.slashing import SlashingPenalty
-from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
+from babylon60.engine.cognitive.exergy_optimizer import ExergyOptimizer
+from babylon60.engine.core.shared_bus import SovereignSharedBus
+from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
+from babylon60.engine.forensic.slashing import SlashingPenalty
+from babylon60.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 logger = logging.getLogger("cortex.swarm.swarm_10k")
 
@@ -303,9 +303,9 @@ class SwarmCommander:
     async def dispatch_optimal_hypotheses(self, count: int = 100) -> None:
         """Pulls optimal tasks from TopologyIndex based on CBR and dispatches them."""
 
-        from cortex.config import DB_PATH
-        from cortex.database.core import connect_async
-        from cortex.engine.causal.topological_arbitrage import TopologyIndex
+        from babylon60.core.config import DB_PATH
+        from babylon60.database.core import connect_async
+        from babylon60.engine.causal.topological_arbitrage import TopologyIndex
 
         async with await connect_async(DB_PATH) as db:
             topo = TopologyIndex(db)

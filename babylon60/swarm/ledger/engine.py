@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import sqlite3
 
-from cortex.database.core import CortexConnection
+from babylon60.database.core import CortexConnection
 
 from .models import SwarmEvent
 

@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import asyncio
 import logging
 from typing import Any
 
-from cortex.extensions.llm.router import CortexPrompt, IntentProfile
+from babylon60.crypto.hash_registry import cortex_hash_truncated
+from babylon60.extensions.llm._models import CortexPrompt, IntentProfile
 
 logger = logging.getLogger("cortex_extensions.swarm.psychohistory")
 

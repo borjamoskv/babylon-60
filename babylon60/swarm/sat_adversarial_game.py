@@ -1,9 +1,8 @@
 import logging
 from typing import Any
 
-from cortex.swarm.sat_genetic_swarm import SatGeneticSwarm
-
-from cortex.agents.sat_orchestrator import SatOrchestrator
+from babylon60.agents.sat_orchestrator import SatOrchestrator
+from babylon60.swarm.sat_genetic_swarm import SatGeneticSwarm
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)

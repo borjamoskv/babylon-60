@@ -11,8 +11,8 @@ import logging
 import os
 import time
 
-from cortex.compat.optional import np
-from cortex.swarm.tensor_glial import TensorGlialLegion
+from babylon60.compat.optional import np
+from babylon60.swarm.tensor_glial import TensorGlialLegion
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.gold_miner")

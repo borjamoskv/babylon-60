@@ -2,7 +2,7 @@
 import asyncio
 import logging
 
-from cortex.engine.core.bifurcation_engine import ExergyBifurcationEngine
+from babylon60.engine.core.bifurcation_engine import ExergyBifurcationEngine
 
 logger = logging.getLogger(__name__)
 

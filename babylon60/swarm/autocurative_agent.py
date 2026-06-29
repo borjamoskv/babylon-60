@@ -14,18 +14,18 @@ import time
 from collections import deque
 from typing import Any
 
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.evo._autocurative_config import AutoCurativeConfig
-from cortex.engine.evo._autocurative_helper import (
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.evo._autocurative_config import AutoCurativeConfig
+from babylon60.engine.evo._autocurative_helper import (
     execute_with_healing,
     handle_error,
     start_daemon,
 )
-from cortex.engine.evo._autocurative_state import AgentHealth, HealingEvent, HealingPhase
-from cortex.engine.evo.repair_strategies import (
+from babylon60.engine.evo._autocurative_state import AgentHealth, HealingEvent, HealingPhase
+from babylon60.engine.evo.repair_strategies import (
     REPAIR_REGISTRY,
 )
-from cortex.engine.forensic.circuit_breaker import CircuitBreaker
+from babylon60.engine.forensic.circuit_breaker import CircuitBreaker
 
 __all__ = [
     "AgentHealth",

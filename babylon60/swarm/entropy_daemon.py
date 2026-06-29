@@ -36,7 +36,7 @@ class EntropyDaemon:
         logger.info("[EntropyDaemon] Executing VACUUM and WAL hygiene...")
         db_size_before = os.path.getsize(self.db_path) if os.path.exists(self.db_path) else 0
 
-        from cortex.database.core import connect_async
+        from babylon60.database.core import connect_async
 
         async with await connect_async(self.db_path, timeout=60) as conn:
             # Checkpoint the Write-Ahead Log (WAL) to database file and truncate WAL
@@ -52,7 +52,7 @@ class EntropyDaemon:
 
         # APEX-008: Ouroboros Immune - scan for recursive logging
         try:
-            from cortex.engine.causal.ouroboros_immune import OuroborosImmuneSystem
+            from babylon60.engine.causal.ouroboros_immune import OuroborosImmuneSystem
 
             immune = OuroborosImmuneSystem()
             quarantined = immune.scan_and_quarantine()

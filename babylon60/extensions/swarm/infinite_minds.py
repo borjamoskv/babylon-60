@@ -14,9 +14,9 @@ import logging
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
-    from cortex.memory.models import CortexFactModel
+    from babylon60.memory.models import CortexFactModel
 
-from cortex.memory.semantic_ram import DynamicSemanticSpace
+from babylon60.memory.semantic_ram import DynamicSemanticSpace
 
 
 class ConvergenceDiagnostics(TypedDict, total=False):

@@ -24,8 +24,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from cortex.extensions.swarm.knowledge_radar import discover
-from cortex.extensions.swarm.nightshift_pipeline import NightShiftPipeline
+from babylon60.extensions.swarm.knowledge_radar import discover
+from babylon60.extensions.swarm.nightshift_pipeline import NightShiftPipeline
 
 logger = logging.getLogger("cortex_extensions.swarm.nightshift_daemon")
 
@@ -280,8 +280,8 @@ class NightShiftCrystalDaemon:
             return None
 
         try:
-            from cortex.extensions.swarm.crystal_consolidator import consolidate
-            from cortex.extensions.swarm.crystal_thermometer import scan_all_crystals
+            from babylon60.extensions.swarm.crystal_consolidator import consolidate
+            from babylon60.extensions.swarm.crystal_thermometer import scan_all_crystals
 
             logger.info("🌙 [NIGHTSHIFT] Phase 2: Consolidation (REM) for %s", cycle_id)
 

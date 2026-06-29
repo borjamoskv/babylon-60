@@ -12,10 +12,10 @@ from __future__ import annotations
 import json
 import logging
 import time
-
-from babylon60.crypto.hash_registry import cortex_hash
 from datetime import datetime, timezone
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex.ledger")
 

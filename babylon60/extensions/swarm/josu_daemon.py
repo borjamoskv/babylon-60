@@ -8,7 +8,7 @@ delivers validation-first results for human review.
 
 Architecture:
     JosuProactiveDaemon.proactive_loop()
-      └─> _query_pending_targets()      # Fetch ghosts from cortex.db
+      └─> _query_pending_targets()      # Fetch ghosts from babylon60.db
             └─> for each target:
                   └─> _spawn_pulse()     # Ephemeral Pulse agent (max_beats=15)
                         └─> _execute_and_validate()
@@ -30,8 +30,8 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
-from cortex.extensions.swarm.worktree_isolation import isolated_worktree
+from babylon60.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
+from babylon60.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex_extensions.swarm.josu_daemon")
 
@@ -113,7 +113,7 @@ class JosuProactiveDaemon:
 
         # Co-launch Toolbox watchdog (Ω₀ self-reference)
         try:
-            from cortex.mcp_server.toolbox_watchdog import (
+            from babylon60.mcp_server.toolbox_watchdog import (
                 ToolboxWatchdog,
             )
 
@@ -176,7 +176,7 @@ class JosuProactiveDaemon:
             try:
                 # Signal planning
                 async with self.db.session() as conn:
-                    from cortex.extensions.signals.bus import AsyncSignalBus
+                    from babylon60.extensions.signals.bus import AsyncSignalBus
 
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
@@ -219,7 +219,7 @@ class JosuProactiveDaemon:
                                 source=source_id,
                             )
                             # Invoke HumanEscalationPulse structurally
-                            from cortex.extensions.swarm.escalation import HumanEscalationPulse
+                            from babylon60.extensions.swarm.escalation import HumanEscalationPulse
 
                             raise HumanEscalationPulse(
                                 source_id,
@@ -248,7 +248,7 @@ class JosuProactiveDaemon:
                 logger.info("🌿 [JOSU] Worktree lab created at %s", wt_path)
 
                 async with self.db.session() as conn:
-                    from cortex.extensions.signals.bus import AsyncSignalBus
+                    from babylon60.extensions.signals.bus import AsyncSignalBus
 
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
@@ -256,7 +256,7 @@ class JosuProactiveDaemon:
                     )
 
                 # Import Pulse lazily to avoid circular deps
-                from cortex.engine.meta.metabolism import Metabolism
+                from babylon60.engine.meta.metabolism import Metabolism
 
                 metabolism = Metabolism(flatline_threshold=3.0)
 
@@ -269,7 +269,7 @@ class JosuProactiveDaemon:
                 #   agent.live()
 
                 # For now: delegate to AgentToolkit + simple heuristic
-                from cortex.extensions.aether.tools import AgentToolkit
+                from babylon60.extensions.aether.tools import AgentToolkit
 
                 toolkit = AgentToolkit(wt_path)
 

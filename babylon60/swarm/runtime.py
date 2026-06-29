@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 import asyncio
 import json
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any, Literal, Optional, Protocol
+
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 try:
     from opentelemetry import trace
@@ -134,7 +135,7 @@ class SubagentRunner:
         self._locks: dict[str, asyncio.Semaphore] = {}
         self.audit_callback = audit_callback
 
-        from cortex.swarm.router import SwarmRouter
+        from babylon60.swarm.router import SwarmRouter
 
         self.router = SwarmRouter(registry)
         self.torque_event = asyncio.Event()

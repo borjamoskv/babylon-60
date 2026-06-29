@@ -18,13 +18,14 @@ import uuid
 from typing import Any
 
 import aiosqlite
-from cortex.config import DB_PATH
-from cortex.engine.causal.taint_engine import generate_secure_taint_token
-from cortex.engine.causal.topological_arbitrage import TopologyIndex
-from cortex.extensions.skills.autodidact.epistemology import Hypothesis
-from cortex.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
-from cortex.swarm.state_store import CausalStateStore
 from pydantic import ValidationError
+
+from babylon60.core.config import DB_PATH
+from babylon60.engine.causal.taint_engine import generate_secure_taint_token
+from babylon60.engine.causal.topological_arbitrage import TopologyIndex
+from babylon60.extensions.skills.autodidact.epistemology import Hypothesis
+from babylon60.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
+from babylon60.swarm.state_store import CausalStateStore
 
 logger = logging.getLogger("cortex.swarm.supervisor")
 
@@ -65,7 +66,7 @@ class SwarmSupervisor:
 
         self._crypto_pool = ProcessPoolExecutor(max_workers=max(1, (os.cpu_count() or 2) // 2))
 
-        from cortex.engine.causal.append_log import CrystallizerDaemon
+        from babylon60.engine.causal.append_log import CrystallizerDaemon
 
         self._crystallizer = CrystallizerDaemon(db_path=db_path)
 
@@ -80,7 +81,7 @@ class SwarmSupervisor:
 
     async def initialize(self) -> None:
         """Starts the components and recovers ghost state."""
-        from cortex.database.core import connect_async
+        from babylon60.database.core import connect_async
 
         self._db = await connect_async(self.db_path)
         await self._db.execute("PRAGMA journal_mode=WAL;")
@@ -90,7 +91,7 @@ class SwarmSupervisor:
         await self.state_store.recover_in_flight_tasks(lease_id=None)
 
         try:
-            from cortex.embeddings import LocalEmbedder
+            from babylon60.embeddings import LocalEmbedder
 
             self._embedder = LocalEmbedder()
             logger.info("LocalEmbedder initialized for Semantic Cache.")
@@ -209,7 +210,7 @@ class SwarmSupervisor:
 
                     if self._embedder:
                         loop = asyncio.get_running_loop()
-                        from cortex.engine.core.semantic_hash import (
+                        from babylon60.engine.core.semantic_hash import (
                             is_semantically_equivalent,
                             semantic_fingerprint,
                         )
@@ -229,7 +230,7 @@ class SwarmSupervisor:
                         logger.info(
                             f"⚡ [Semantic Cache Hit] Bypassing LLM inference for task {task['id']}"
                         )
-                        from cortex.swarm.legion import SwarmSignal
+                        from babylon60.swarm.legion import SwarmSignal
 
                         synthetic_signal = SwarmSignal(
                             agent_id="semantic_cache",
@@ -266,7 +267,7 @@ class SwarmSupervisor:
                     logger.warning(
                         f"[EpistemicBreaker] Task {task['id']} rejected (Fable-Verify Failure): {epi_err}"
                     )
-                    from cortex.database.core import causal_write
+                    from babylon60.database.core import causal_write
 
                     with causal_write(self._db):
                         await self._db.execute(
@@ -287,7 +288,7 @@ class SwarmSupervisor:
                 # SANEDRIN VECTOR 3: Lease lock task using supervisor_id and 5-min TTL
                 from datetime import datetime, timedelta, timezone
 
-                from cortex.database.core import causal_write
+                from babylon60.database.core import causal_write
 
                 expires_at = (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat()
                 with causal_write(self._db):

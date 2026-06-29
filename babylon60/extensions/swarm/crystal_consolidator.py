@@ -23,8 +23,8 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-from cortex.extensions.swarm.crystal_thermometer import CrystalVitals
+from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
+from babylon60.extensions.swarm.crystal_thermometer import CrystalVitals
 
 logger = logging.getLogger("cortex_extensions.swarm.crystal_consolidator")
 
@@ -148,7 +148,7 @@ async def _execute_semantic_merge(
     Uses LLM synthesis to fuse content if they are highly similar,
     preserving unique details from both.
     """
-    from cortex.extensions.swarm.crystal_synthesis import synthesize_crystals
+    from babylon60.extensions.swarm.crystal_synthesis import synthesize_crystals
 
     # Only merge crystals that have embeddings available
     mergeable = [v for v in vitals if v.recommendation != "PURGE"]
@@ -298,9 +298,9 @@ async def _execute_heuristic_integration(
     dry_run: bool,
 ) -> None:
     """Connect Right-Brain HeuristicEngine to enable automated architectural suggestions."""
-    from cortex.engine.meta.right_brain import HeuristicEngine
-    from cortex.extensions.evolution.agents import AgentDomain
-    from cortex.extensions.evolution.free_energy import FreeEnergyState
+    from babylon60.engine.meta.right_brain import HeuristicEngine
+    from babylon60.extensions.evolution.agents import AgentDomain
+    from babylon60.extensions.evolution.free_energy import FreeEnergyState
 
     if len(vitals) < 2:
         return

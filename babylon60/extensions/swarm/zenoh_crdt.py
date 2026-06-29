@@ -19,7 +19,7 @@ except ImportError:
         "Asyncio emulation has been permanently purged for zero-copy determinism."
     )
 
-from cortex.memory.crdt import CRDTEngram
+from babylon60.memory.crdt import CRDTEngram
 
 logger = logging.getLogger("cortex.swarm.zenoh_crdt")
 
@@ -67,8 +67,8 @@ class ZenohCRDTBridge:
             signatures = {k: bytes.fromhex(v) for k, v in signatures_hex.items()}
 
             # Validate BFT Quorum using the distributed Trust Matrix
-            from cortex.consensus.bft_quorum import BFTQuorumGuard
-            from cortex.consensus.pki import trust_matrix
+            from babylon60.consensus.bft_quorum import BFTQuorumGuard
+            from babylon60.consensus.pki import trust_matrix
 
             known_peers = trust_matrix.get_known_peers()
             bft_guard = BFTQuorumGuard(known_peers)

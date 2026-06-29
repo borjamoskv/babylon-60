@@ -12,9 +12,10 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-from cortex.config import DB_PATH
-from cortex.database.core import causal_write, connect_async
-from cortex.guards import CausalClosureGuard, SwarmProposal
+
+from babylon60.core.config import DB_PATH
+from babylon60.database.core import causal_write, connect_async
+from babylon60.guards.causal_closure_guard import CausalClosureGuard, SwarmProposal
 
 # Replace with correct import for Ledger if needed, but the old code emitted SwarmProposal.
 
@@ -116,7 +117,7 @@ class CausalStateStore:
                 guard.verify_closure(proposal)
 
                 # SAGA Step 1.5: Cryptographic Taint Validation (APEX-002)
-                from cortex.engine.causal.taint_engine import enforce_taint_check
+                from babylon60.engine.causal.taint_engine import enforce_taint_check
 
                 taint_token = getattr(signal, "taint_token", None)
                 if (
@@ -154,7 +155,7 @@ class CausalStateStore:
 
                             # EPISTEMIC LOOP CLOSURE: Output becomes RawEvidence
                             try:
-                                from cortex.extensions.skills.autodidact.epistemology import (
+                                from babylon60.extensions.skills.autodidact.epistemology import (
                                     EvidenceSource,
                                     RawEvidence,
                                 )
@@ -226,7 +227,7 @@ class CausalStateStore:
                     guard = CausalClosureGuard()
                     guard.verify_closure(proposal)
 
-                    from cortex.engine.causal.taint_engine import enforce_taint_check
+                    from babylon60.engine.causal.taint_engine import enforce_taint_check
 
                     taint_token = getattr(signal, "taint_token", None)
                     if (
@@ -268,7 +269,7 @@ class CausalStateStore:
                             mutations.append({"table": "system_hypotheses", "params": (s.target,)})
 
                             try:
-                                from cortex.extensions.skills.autodidact.epistemology import (
+                                from babylon60.extensions.skills.autodidact.epistemology import (
                                     EvidenceSource,
                                     RawEvidence,
                                 )
@@ -299,7 +300,7 @@ class CausalStateStore:
                                 )
 
                 if mutations:
-                    from cortex.engine.causal.append_log import AppendOnlyLog
+                    from babylon60.engine.causal.append_log import AppendOnlyLog
 
                     AppendOnlyLog.append_batch(mutations)
 
@@ -345,7 +346,7 @@ class CausalStateStore:
             now_iso = datetime.now(timezone.utc).isoformat()
             query = "UPDATE system_hypotheses SET status = 'ACTIVE', owner_id = NULL, lease_expires_at = NULL WHERE status = 'IN_FLIGHT' AND lease_expires_at IS NOT NULL AND lease_expires_at < ?"
 
-            from cortex.database.core import causal_write
+            from babylon60.database.core import causal_write
 
             with causal_write(self._db):
                 async with self._db.execute(query, (now_iso,)) as cur:

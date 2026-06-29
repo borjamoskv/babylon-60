@@ -13,13 +13,13 @@ creates a semantic digest of the intended action and propagates it via Gossip.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_truncated
 import logging
 from dataclasses import dataclass
 
-from cortex.consensus.byzantine import ByzantineVerdict, WBFTConsensus
-from cortex.extensions.ha.gossip import GossipProtocol
-from cortex.extensions.thinking.fusion_models import ModelResponse, ThinkingHistory
+from babylon60.consensus.byzantine import ByzantineVerdict, WBFTConsensus
+from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_truncated
+from babylon60.extensions.ha.gossip import GossipProtocol
+from babylon60.extensions.thinking.fusion_models import ModelResponse, ThinkingHistory
 
 __all__ = ["GEACLCoordinator", "GeaclCommitResult"]
 

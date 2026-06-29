@@ -5,11 +5,11 @@ import logging
 import os
 import time
 
-from cortex.core.config import DB_PATH
-from cortex.crypto.provider import HashProvider
-from cortex.extensions.signals.bus import AsyncSignalBus
-from cortex.swarm.gossip_bus import GossipBus
-from cortex.swarm.tensor_glial import TensorGlialLegion
+from babylon60.core.config import DB_PATH
+from babylon60.crypto.provider import HashProvider
+from babylon60.extensions.signals.bus import AsyncSignalBus
+from babylon60.swarm.gossip_bus import GossipBus
+from babylon60.swarm.tensor_glial import TensorGlialLegion
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.autopulse")
@@ -203,7 +203,8 @@ async def _append_state_ledger(agent: str, payload: dict) -> None:
 
     try:
         import aiosqlite
-        from cortex.database.core import connect_async
+
+        from babylon60.database.core import connect_async
 
         async with await connect_async(DB_PATH) as conn:
             bus = AsyncSignalBus(conn)
@@ -268,7 +269,7 @@ async def _process_single_task(agent: str, payload: dict, anti_limerence, umap) 
     await _append_state_ledger(agent, payload)
 
     # [P2] Emit to Gossip Protocol for decentralized consensus
-    from cortex.swarm.autopulse import _gossip_bus
+    from babylon60.swarm.autopulse import _gossip_bus
 
     if _gossip_bus:
         await _gossip_bus.broadcast(

@@ -227,10 +227,10 @@ class AutoFixPipeline:
 
     async def _execute(self, task_dict: dict[str, Any]) -> dict[str, Any]:
         """Execute the fix task via Aether in an isolated worktree."""
-        from cortex.extensions.aether.models import AgentTask, TaskStatus
-        from cortex.extensions.aether.queue import TaskQueue
-        from cortex.extensions.aether.runner import AetherAgent
-        from cortex.extensions.swarm.worktree_isolation import isolated_worktree
+        from babylon60.extensions.aether.models import AgentTask, TaskStatus
+        from babylon60.extensions.aether.queue import TaskQueue
+        from babylon60.extensions.aether.runner import AetherAgent
+        from babylon60.extensions.swarm.worktree_isolation import isolated_worktree
 
         task = AgentTask.from_dict(task_dict)
         queue = TaskQueue()
@@ -329,7 +329,7 @@ class AutoFixPipeline:
     ) -> None:
         """Persist failed fix as a harder ghost with full context."""
         try:
-            from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
+            from babylon60.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
             pipeline = ErrorGhostPipeline()
             escalation = RuntimeError(

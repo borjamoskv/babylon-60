@@ -7,15 +7,16 @@ and adaptive agent formations for Zero-Trust problem solving.
 
 from __future__ import annotations
 
-from babylon60.crypto.hash_registry import cortex_hash
 import asyncio
 import logging
 from typing import Any, TypedDict, cast
 
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
-from cortex.extensions.swarm.byzantine import ByzantineConsensus
-from cortex.swarm.aleph_omega import AxiomaticLeapEngine
 from pydantic import BaseModel, Field
+
+from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.extensions.swarm.byzantine import ByzantineConsensus
+from babylon60.swarm.aleph_omega import AxiomaticLeapEngine
 
 __all__ = [
     "CentauroEngine",
@@ -89,7 +90,7 @@ class VirtualAgent:
         if self._router is not None:
             # ── C5-REAL path ──────────────────────────────────────────
             try:
-                from cortex.extensions.llm._models import CortexPrompt, IntentProfile
+                from babylon60.extensions.llm._models import CortexPrompt, IntentProfile
 
                 # War Council: Cognitive Diversity Mapping
                 intent_map = {
