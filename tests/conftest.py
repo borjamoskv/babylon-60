@@ -152,6 +152,8 @@ def pytest_unconfigure(config):
     """Force exit to prevent finalization hangs on leaked daemon threads."""
     if hasattr(config, "workerinput"):
         return
+    if config.pluginmanager.hasplugin("dsession"):
+        return
     import os
     import sys
 

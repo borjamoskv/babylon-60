@@ -229,7 +229,7 @@ class FactManager:
             log.error(
                 f"EXCEPTION IN _store_delegate: {type(e).__name__} - started_tx={started_tx}, in_transaction={conn.in_transaction}"
             )
-            if started_tx and conn.in_transaction:
+            if started_tx:
                 log.error("ROLLING BACK NOW")
                 await conn.rollback()
             else:
