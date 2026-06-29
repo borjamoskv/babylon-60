@@ -161,7 +161,7 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["cortex", "cortex.*", "cortex_extensions", "cortex_extensions.*"]
+include = ["cortex", "cortex.*", "cortex_extensions", "cortex_extensions.*", "babylon60", "babylon60.*"]
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
