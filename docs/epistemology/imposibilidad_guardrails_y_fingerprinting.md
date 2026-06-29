@@ -1,16 +1,15 @@
 ---
 Claim: "Output-side syntactic filtering alone is insufficient to reliably prevent semantic leakage under representational transformations."
-Status: "Defensible core thesis with real citations. Not an impossibility theorem."
+Status: "Defensible core thesis with real supporting literature; not an impossibility theorem."
 Proof:
-  Base: "Invertible encodings preserve semantics while evading surface-form matching."
+  Base: "Invertible encodings can preserve semantics while evading surface-form matching."
   Range: [0.85, 0.95]
   Confidence: C3
-Reality_Level: C3 (Epistemic calibration: content is verified real literature, but filesystem/hash verification is unverified in this turn)
 Verification_Notes:
-  - Three cited papers are real (Yuan 2023, Jiang 2024, Yong 2023).
-  - File hash 8c639f87f not independently verified in this turn.
-  - Scope is strictly bounded to syntactic filtering in isolation.
-  - Stylometry section correctly acknowledges degradability.
+  - "Assessment based on textual review of the pasted content."
+  - "Filesystem state and file hash were not independently verified in this session."
+  - "Cited literature appears real and relevant, but full bibliographic verification is still recommended."
+  - "Scope is limited to syntactic filtering in isolation."
 ---
 
 # Límites Técnicos del Filtrado Sintáctico de Salida y Estilometría en Modelos de Lenguaje
@@ -62,6 +61,6 @@ La precisión de la clasificación estilométrica es altamente dependiente del e
 * **Sanitización y Parafraseo:** El empleo de modelos alternativos de menor tamaño para parafrasear la salida original atenúa sustancialmente los sesgos estilométricos específicos del modelo frontier de origen, existiendo un balance directo entre la erradicación del fingerprint y la conservación de la precisión original.
 
 ### 2.3 Referencias Bibliográficas de Atribución y Proveniencia
-* **Survey de Atribución:** *Huang, B., Chen, C., & Shu, K. (2024).* "Authorship Attribution in the Era of LLMs: Problems, Methodologies, and Challenges". ACM SIGKDD Explorations Newsletter, 26(1), 12-25. (Clasifica y evalúa las técnicas de detección y atribución de procedencia textual).
+* **Survey de Atribución:** *Huang, B., Chen, C., & Shu, K. (2024).* "Authorship Attribution in the Era of LLMs: Problems, Methodologies, and Challenges". ACM SIGKDD Explorations Newsletter, 26(1), 12-25. arXiv preprint arXiv:2408.08946. (Clasifica y evalúa las técnicas de detección y atribución de procedencia textual).
 * **Huella Digital del Sistema:** *Wimbauer, A., et al. (2026).* "Fingerprinting Inference Systems of Large Language Models". arXiv preprint arXiv:2605.29979. (Prueba cómo la infraestructura de inferencia y atención deja señales identificables en el output final).
-* **Estilometría de Código:** *Anonymous (2025).* "I Know Which LLM Wrote Your Code Last Summer: LLM generated Code Stylometry for Authorship Attribution". arXiv preprint arXiv:2508.xxxxx. (Demuestra la persistencia de las firmas de estilo en tareas estructuradas de programación).
+* **Estilometría de Código:** *Bisztray, T., et al. (2025).* "I Know Which LLM Wrote Your Code Last Summer: LLM generated Code Stylometry for Authorship Attribution". arXiv preprint arXiv:2506.17323. (Demuestra la persistencia de las firmas de estilo en tareas estructuradas de programación).
