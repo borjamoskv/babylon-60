@@ -120,6 +120,10 @@ class CrystallizerDaemon:
                 break
             except Exception as e:
                 logger.error(f"[Crystallizer] AOL Drain failed: {e}")
+                try:
+                    await db.rollback()
+                except Exception as roll_err:
+                    logger.debug(f"Failed to rollback database transaction: {roll_err}")
                 # Rollback file state safely
                 if "processing_file" in locals() and processing_file.exists():
                     with open(AOL_FILE, "a", encoding="utf-8") as f_out:
