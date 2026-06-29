@@ -133,9 +133,9 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: d
     p.start()
 
     # Await in a non-blocking way to keep event loop alive
-    # We allow up to 2.0 seconds for process spawn/initialization overhead
+    # We allow up to 10.0 seconds for process spawn/initialization overhead
     # and strictly enforce timeout_ms on actual execution
-    spawn_timeout = 2.0
+    spawn_timeout = 10.0
     exec_timeout = timeout_ms / 1000.0
 
     timeout_triggered = False

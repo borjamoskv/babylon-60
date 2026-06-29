@@ -1,7 +1,8 @@
 # C5-REAL | SOVEREIGN PRIMITIVE
-import hashlib
 import time
 from typing import Any
+
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 class HumanGatekeeper:
@@ -16,9 +17,8 @@ class HumanGatekeeper:
     def _generate_taint(self, payload: str) -> str:
         """Genera hash CORTEX-TAINT para el payload (APEX-003)."""
         timestamp = int(time.time())
-        raw = f"taint:{self.tenant_id}:{timestamp}:{payload}".encode()
-        # TODO(pqc): route through hash_registry
-        return hashlib.sha3_256(raw).hexdigest()
+        raw = f"taint:{self.tenant_id}:{timestamp}:{payload}"
+        return cortex_hash(raw)
 
     async def request_authorization(self, payload: str, risk_level: str = "CRITICAL") -> str:
         """
