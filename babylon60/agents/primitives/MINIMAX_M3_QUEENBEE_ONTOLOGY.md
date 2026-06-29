@@ -331,7 +331,7 @@
 
 ---
 
-## MATRIZ 3: 15 ANTIPATRONES ESTOCÁSTICOS
+## MATRIZ 3: 40 ANTIPATRONES ESTOCÁSTICOS
 
 | ID | Antipatrón | Disfunción Causal | Señal de Presencia | Impacto en Robustez | Refactor (Alternativa) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -350,6 +350,31 @@
 | **AP-MMQB-13** | Model Auto-Downgrade | Downgrading to lower-tier models on rate limit | Inconsistent code and logic errors | High | Block auto-downgrade and raise error alert |
 | **AP-MMQB-14** | Ignored Virtual Cascades | Failing to prune embeddings on parent delete | Orphaned vectors bloating DB size | Medium | Add cascade triggers to vec0 virtual tables |
 | **AP-MMQB-15** | Sync Network Hangups | Using async http clients without timeout limits | Async event loop hung indefinitely | High | Force timeout limits on all network requests |
+| **AP-MMQB-16** | Unverified GGUF Model Ingestion | Loading community quantized weights without checking SHA-256 | Model outputs corrupted syntax or compromised logic | Critical | Verify GGUF hash against official cryptographic release registry |
+| **AP-MMQB-17** | Monolithic Prompt Prefill | Stuffing entire codebase into prompt without context pruning | High TTFT latency and KV cache exhaustion | High | Apply Thermodynamic Context Compression and extract AST symbols |
+| **AP-MMQB-18** | Polling Task Status Loops | Running while True sleep loops waiting for background tasks | Wasted CPU cycles and reactive wakeup latency | Medium | Use reactive event bus messaging and callback notification hooks |
+| **AP-MMQB-19** | Hardcoded API Base URLs | Embedding vendor endpoints directly in deep business logic | Unable to switch providers during outages | Medium | Route all endpoints through configurable gateway environment variables |
+| **AP-MMQB-20** | Blind Retry Storms | Retrying API failures immediately without backoff or jitter | Triggering rate limit lockouts and API credit burn | High | Implement randomized exponential backoff with circuit breakers |
+| **AP-MMQB-21** | Untyped JSON Dictionary Passing | Passing raw dicts between subagents without Pydantic schema validation | Type errors and missing field exceptions runtime | High | Enforce strict Pydantic model validation on all inter-agent messages |
+| **AP-MMQB-22** | Unbounded Vector DB Insertion | Inserting embeddings without metadata tagging or expiration | Vector index bloat and degraded search relevancy | Medium | Enforce mandatory ontology tags and automatic TTL cleanup rules |
+| **AP-MMQB-23** | Synchronous Git Commit Hooks | Running heavy linting synchronously inside pre-commit hook | Developer workflow freeze and git lock contention | High | Offload heavy verification to asynchronous CI/CD or isolated workers |
+| **AP-MMQB-24** | Ephemeral Memory Dependence | Storing critical task progress exclusively in RAM dictionary | Total context loss upon agent crash or restart | Critical | Persist all state mutations immediately to SQLite WAL database |
+| **AP-MMQB-25** | Unisolated Code Execution | Executing generated Python/JS code directly on host OS | Host filesystem modification and security compromise | Critical | Execute all generated code within rootless containers or seccomp sandboxes |
+| **AP-MMQB-26** | Conversational Apology Filler | Generating 'Sorry', 'Here is the code' in C5-REAL execution | Anergy token waste and parser confusion | Medium | Enforce Zero Anergy Token Ratio and strip conversational fluff |
+| **AP-MMQB-27** | Unbounded Subagent Recursion | Allowing subagents to recursively spawn identical subagents | Runaway process explosion and API exhaustion | Critical | Implement strict nesting depth cap (max depth <= 3) |
+| **AP-MMQB-28** | Manual String SQL Assembly | Formatting SQL queries via python f-strings or concatenation | SQL injection vulnerability and syntax parse errors | Critical | Use parameterized queries and prepared statements exclusively |
+| **AP-MMQB-29** | Ignoring SQLite Busy Timeout | Defaulting to 0ms busy timeout in multi-threaded database access | OperationalError: database is locked crashes | High | Configure PRAGMA busy_timeout = 5000 with exponential retry backoff |
+| **AP-MMQB-30** | Uncompressed Log Accumulation | Retaining raw debug logs indefinitely on workspace disk | Local storage exhaustion causing write failures | Medium | Implement automated log rotation and gzip compression at 10MB |
+| **AP-MMQB-31** | Unsanitized Multimodal Ingestion | Passing user uploaded images directly to vision encoder without stripping | Prompt injection via embedded EXIF instructions | Critical | Strip all EXIF metadata and sanitize image buffers prior to ViT |
+| **AP-MMQB-32** | Floating Point Financial Math | Representing scores or currency balances using standard float | Numerical imprecision and rounding drift | High | Use Python Decimal class or integer micro-units for exact arithmetic |
+| **AP-MMQB-33** | Global State Mutation in Tests | Unit tests modifying shared global environment variables | Flaky test failures and race conditions in CI | High | Isolate test environments using pytest fixtures and mock environments |
+| **AP-MMQB-34** | Unbounded Queue Accumulation | Pushing tasks to thread executor without max queue boundary | Memory exhaustion under high concurrent load | High | Bounding task queue size to 100 with backpressure rejection |
+| **AP-MMQB-35** | Bare Traceback Console Logging | Printing unhandled exceptions directly to stdout/stderr | Exposure of API keys and secrets in stack traces | Critical | Override sys.excepthook to redact secrets before formatting traceback |
+| **AP-MMQB-36** | Unlocked Memory Vault Writes | Concurrent agents writing to shared SKILL.md without file lock | Corrupted markdown syntax and lost instructions | High | Acquire exclusive OS file locks (flock) during vault mutations |
+| **AP-MMQB-37** | Over-Quantized Math Verification | Using Q4/FP8 quantized weights for critical cryptographic proof checks | Numerical calculation errors leading to false proofs | High | Force fallback to FP16 or FP32 precision for formal mathematical verification |
+| **AP-MMQB-38** | Blocking Main Loop Sleep | Using synchronous time.sleep() inside FastAPI or Uvicorn handlers | Server thread starvation and dropped HTTP requests | Critical | Replace all synchronous waits with asyncio.sleep() |
+| **AP-MMQB-39** | Hallucinated Library Imports | Importing non-existent utility packages generated by LLM conjecture | ModuleNotFoundError runtime crash during execution | High | Validate dependencies against installed pyproject.toml before execution |
+| **AP-MMQB-40** | Unflagged Cross-Repo Bridge | Executing cross-repository commits without the [bridge] prefix tag | Context Guard hook rejections and audit tracking loss | High | Prepend all cross-repo commit messages with [bridge] tag |
 
 ---
 
