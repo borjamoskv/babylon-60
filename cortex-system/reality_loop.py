@@ -491,14 +491,13 @@ def mutate_state(
     elif action == "trigger_rupture":
         state["rupture_count"] = int(state.get("rupture_count", 0)) + 1
         current_p = float(state.get("current_pressure", 0.0))
-        # Pressure relief valve: cap injection when already critical.
+        # Cap pressure increase if already high
         if current_p < 0.8:
             state["current_pressure"] = min(1.0, current_p + 0.3)
+            state["swarm_forced"] = True
         else:
-            state["current_pressure"] = 1.0  # max out — no further hammering
-            state["swarm_forced"] = False  # force cooldown next cycle
-            return state
-        state["swarm_forced"] = True
+            state["current_pressure"] = 1.0  # Max out but don't keep hammering
+            state["swarm_forced"] = False  # Force a cooldown next cycle
 
     elif action == "stable":
         state["current_pressure"] = max(0.0, float(state.get("current_pressure", 0.0)) - 0.05)
