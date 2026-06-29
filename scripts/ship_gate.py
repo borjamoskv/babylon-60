@@ -232,7 +232,7 @@ def check_tests(fast: bool = False) -> CheckResult:
     t0 = time.monotonic()
     marker = '-m "not slow"' if fast else ""
     result = _run(
-        f"uv run pytest tests/ {marker} --tb=line -q --no-header",
+        f"uv run pytest tests/ {marker} -n auto --tb=line -q --no-header",
         timeout=PYTEST_TIMEOUT,
     )
     ms = (time.monotonic() - t0) * 1000
