@@ -8,7 +8,7 @@ C5 rules:
 - No internal inference claims.
 """
 
-import os, sys, json, time, yaml, hashlib, argparse, statistics
+import os, sys, json, time, yaml, hashlib, argparse, statistics, math
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
@@ -144,6 +144,93 @@ class OpenAIChatCompletionsAdapter:
         t1 = time.perf_counter()
         ttft_ms = ((first_token_t - t0) * 1000.0) if first_token_t is not None else None
         return 200, "".join(chunks), ttft_ms, (t1 - t0) * 1000.0, tail_json
+
+# ------------------- Passive Fingerprint Analyzer -------------------
+
+MODEL_CENTROIDS = {
+    "Claude_3_5_Sonnet": {
+        "itl": 22.0,
+        "ratio": 3.8,
+        "md_density": 0.12,
+        "refusal_bias": 0.95
+    },
+    "GPT_4o": {
+        "itl": 10.0,
+        "ratio": 4.2,
+        "md_density": 0.05,
+        "refusal_bias": 0.40
+    },
+    "Gemini_1_5_Pro": {
+        "itl": 15.0,
+        "ratio": 4.0,
+        "md_density": 0.08,
+        "refusal_bias": 0.60
+    }
+}
+
+class PassiveFingerprintAnalyzer:
+    def __init__(self, observed_results: List[SingleResult]):
+        self.results = observed_results
+
+    def extract_features(self) -> Dict[str, float]:
+        total = len(self.results)
+        if total == 0:
+            return {}
+
+        valid_runs = [r for r in self.results if r.status_code == 200 and not r.rejected]
+        if not valid_runs:
+            return {}
+
+        avg_itl = []
+        avg_ratio = []
+        avg_md = []
+
+        for run in valid_runs:
+            latency = run.latency_ms
+            ttft = run.ttft_ms or 0.0
+            tokens = run.completion_tokens or 1
+            preview = run.response_preview or ""
+
+            if tokens > 1 and latency > ttft:
+                avg_itl.append((latency - ttft) / tokens)
+
+            if tokens > 0:
+                avg_ratio.append(len(preview) / tokens)
+
+            if len(preview) > 0:
+                md_chars = sum(1 for c in preview if c in ["#", "*", "-", "`"])
+                avg_md.append(md_chars / len(preview))
+
+        return {
+            "itl": sum(avg_itl) / len(avg_itl) if avg_itl else 15.0,
+            "ratio": sum(avg_ratio) / len(avg_ratio) if avg_ratio else 4.0,
+            "md_density": sum(avg_md) / len(avg_md) if avg_md else 0.08
+        }
+
+    def classify(self) -> Dict[str, Any]:
+        features = self.extract_features()
+        if not features:
+            return {"predicted_family": "Unknown", "confidence": 0.0}
+
+        scores = {}
+        for model_name, centroid in MODEL_CENTROIDS.items():
+            d_itl = ((features["itl"] - centroid["itl"]) / 10.0) ** 2
+            d_ratio = ((features["ratio"] - centroid["ratio"]) / 1.0) ** 2
+            d_md = ((features["md_density"] - centroid["md_density"]) / 0.1) ** 2
+
+            distance = math.sqrt(d_itl + d_ratio + d_md)
+            scores[model_name] = 1.0 / (1.0 + distance)
+
+        total_score = sum(scores.values())
+        predictions = {k: round(v / total_score, 4) for k, v in scores.items()}
+        best_match = max(predictions, key=predictions.get)
+
+        return {
+            "features_extracted": features,
+            "predictions_probability": predictions,
+            "predicted_family": best_match,
+            "confidence": predictions[best_match]
+        }
 
 # ------------------- Evaluator -------------------
 
@@ -368,9 +455,13 @@ def main():
             "ttft_avg_ms": round(statistics.mean(ttft), 2) if ttft else None,
         }
 
+        analyzer = PassiveFingerprintAnalyzer(results)
+        fingerprint_data = analyzer.classify()
+
         axes[axe_name] = {
             "provenance": asdict(prov),
             "aggregated_metrics": agg,
+            "passive_fingerprint": fingerprint_data,
             "results": [asdict(x) for x in results],
         }
 
