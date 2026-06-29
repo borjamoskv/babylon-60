@@ -385,10 +385,14 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
         # Check in-memory cache first to avoid O(N) database latency on request path
         now = time.monotonic()
         cached = _TENANT_PLAN_CACHE.get(tenant_id)
-        if cached and (now - cached[2] < _TENANT_PLAN_CACHE_TTL):
-            plan, plan_quota, _ = cached
+        if cached and (now - cached[2] < (5.0 if cached[0] == "fallback_error" else _TENANT_PLAN_CACHE_TTL)):
+            if cached[0] == "fallback_error":
+                plan, plan_quota = "free", None
+            else:
+                plan, plan_quota, _ = cached
         else:
             pool = getattr(request.app.state, "pool", None)
+            database_read_success = False
             if pool:
                 try:
                     async with pool.acquire() as conn:
@@ -411,10 +415,23 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
                                         batch_size=100,
                                         ledger_verify=True,
                                     )
-                                # Update cache
-                                _TENANT_PLAN_CACHE[tenant_id] = (plan, plan_quota, now)
+                                database_read_success = True
+                            else:
+                                plan, plan_quota = "free", None
+                                database_read_success = True
                 except Exception as e:
-                    logger.error("Failed to load tenant plan config: %s", e)
+                    logger.error("Failed to load tenant plan config from database: %s", e)
+
+            # Evict cache entries if capacity is reached to prevent memory leaks
+            if len(_TENANT_PLAN_CACHE) >= 1000:
+                _TENANT_PLAN_CACHE.clear()
+
+            if database_read_success:
+                _TENANT_PLAN_CACHE[tenant_id] = (plan, plan_quota, now)
+            else:
+                # Negative Caching: cache failure state with short TTL to prevent DB hammering
+                _TENANT_PLAN_CACHE[tenant_id] = ("fallback_error", None, now)
+                plan, plan_quota = "free", None
 
         request.state.plan = plan
         request.state.plan_quota = plan_quota
