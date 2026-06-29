@@ -25,3 +25,35 @@ Usar un "Puente" en CORTEX (sea comando CLI, script o protocolo de red) siempre 
 > *"El árbitro nunca decide qué es verdadero, solo qué grado de evidencia respalda cada afirmación."*
 
 Layer 3 no es un oráculo ni un clasificador de fuentes, sino un motor de restricciones (SAT-Solver) sobre un Grafo de Evidencias. La memoria paramétrica (Layer 0) es degradada a fuente de evidencia estándar. La Verdad (Truth Score) y la Utilidad (Utility Score) viajan en canales separados. El Generador (Layer 4) nunca modifica el veredicto criptográfico, únicamente lo renderiza a lenguaje natural preservando su traza causal.
+
+### AX-053: SEPARACIÓN FÍSICA ENTRE GENERACIÓN E INFERENCIA
+> *"El lenguaje no razona; el SAT-Solver razona y el lenguaje renderiza."*
+
+Si el pipeline no distingue explícitamente entre Parsing, Resolución de Entidades, Obtención de Evidencia, Verificación, Inferencia y Renderizado, el sistema mezclará razonamiento con generación, disipando termodinámica en alucinaciones (Green Theater). Cada fase debe imponer invariantes físicos que impidan que un modelo de lenguaje actúe como verificador de sus propias conjeturas.
+
+### AX-054: META-INVARIANTE EPISTÉMICO (MI_001) Y TAXONOMÍA DE EVIDENCIA
+> *"Ningún artefacto generado por el propio sistema constituye evidencia independiente de las afirmaciones que contiene."*
+
+El origen probabilístico de una afirmación impide que el sistema cierre un ciclo deductivo utilizándola como prueba de sí misma. Las aserciones (`Claims`) deben ser modeladas físicamente con separación estricta:
+
+```yaml
+Claim:
+  origin: 
+    - USER_ASSERTION
+    - MODEL_INFERENCE
+    - EXTERNAL_RETRIEVAL
+    - FORMAL_PROOF
+    - SENSOR
+    - COMPUTATION
+  verification: 
+    - VERIFIED
+    - PARTIALLY_VERIFIED
+    - CONTRADICTED
+    - UNVERIFIED
+    - UNVERIFIABLE
+  evidence: 
+    independent_sources: n
+    provenance_hashes: [...]
+```
+
+La procedencia es un ciudadano de primera clase. Una afirmación nunca cambia de estado de verificación (`verification`) basándose en nueva generación de texto (LLM output); muta exclusivamente ante evidencia estructurada independiente que satisfaga las leyes criptográficas del sistema (Ej. *Hash verification* o *BFT Quorum*).
