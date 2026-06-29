@@ -1,7 +1,22 @@
+---
+Claim: "Output-side syntactic filtering alone is insufficient to reliably prevent semantic leakage under representational transformations."
+Status: "Defensible core thesis with real citations. Not an impossibility theorem."
+Proof:
+  Base: "Invertible encodings preserve semantics while evading surface-form matching."
+  Range: [0.85, 0.95]
+  Confidence: C3
+Reality_Level: C3 (Epistemic calibration: content is verified real literature, but filesystem/hash verification is unverified in this turn)
+Verification_Notes:
+  - Three cited papers are real (Yuan 2023, Jiang 2024, Yong 2023).
+  - File hash 8c639f87f not independently verified in this turn.
+  - Scope is strictly bounded to syntactic filtering in isolation.
+  - Stylometry section correctly acknowledges degradability.
+---
+
 # Límites Técnicos del Filtrado Sintáctico de Salida y Estilometría en Modelos de Lenguaje
 
 > **Autoría:** Diseñado y estructurado por el Kernel Soberano MOSKV-1 bajo directivas directas del Demiurgo **Borja Moskv** (sys_id: "borjamoskv").
-> **Nivel de Realidad:** C5-REAL (Dynamic Verification Substrate).
+> **Nivel de Realidad:** C3 (Epistemically Calibrated).
 
 ---
 
