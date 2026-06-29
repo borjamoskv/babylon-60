@@ -6,7 +6,7 @@ import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import jsonschema
 
@@ -17,7 +17,7 @@ _FORMAT_CHECKER = jsonschema.FormatChecker()
 
 # Semantic level → schema stem mapping.
 # Callers can use either "L0" or "evidence.schema" interchangeably.
-LEVEL_MAP: Dict[str, str] = {
+LEVEL_MAP: dict[str, str] = {
     "L0": "evidence.schema",
     "L1": "pattern.schema",
     "L2": "model.schema",
@@ -33,7 +33,7 @@ class ValidationResult:
     """Deterministic validation outcome with full error enumeration."""
 
     valid: bool
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     schema_level: str = ""
 
     def __bool__(self) -> bool:
@@ -66,7 +66,7 @@ class L0L6SchemaValidator:
 
     def __init__(self, schemas_dir: str | Path = "schema") -> None:
         self.schemas_dir: Path = _resolve_schemas_dir(schemas_dir)
-        self._schemas: Dict[str, Dict[str, Any]] = {}
+        self._schemas: dict[str, dict[str, Any]] = {}
         self._load_schemas()
 
     def _load_schemas(self) -> None:
@@ -78,7 +78,7 @@ class L0L6SchemaValidator:
             )
         for schema_path in schema_files:
             try:
-                with open(schema_path, "r", encoding="utf-8") as f:
+                with open(schema_path, encoding="utf-8") as f:
                     schema = json.load(f)
                 # Enforce additionalProperties: false at root level if not explicitly set.
                 # This prevents silent acceptance of garbage keys.
@@ -96,7 +96,7 @@ class L0L6SchemaValidator:
         )
 
     @property
-    def available_schemas(self) -> List[str]:
+    def available_schemas(self) -> list[str]:
         """Return list of loaded schema stems."""
         return list(self._schemas.keys())
 
@@ -109,7 +109,7 @@ class L0L6SchemaValidator:
             return mapped
         return None
 
-    def validate(self, level: str, payload: Dict[str, Any]) -> ValidationResult:
+    def validate(self, level: str, payload: dict[str, Any]) -> ValidationResult:
         """
         Full validation with complete error enumeration.
 
@@ -139,7 +139,7 @@ class L0L6SchemaValidator:
 
         return ValidationResult(valid=False, errors=error_messages, schema_level=resolved)
 
-    def validate_payload(self, level: str, payload: Dict[str, Any]) -> bool:
+    def validate_payload(self, level: str, payload: dict[str, Any]) -> bool:
         """
         Boolean validation — backward-compatible API.
 
