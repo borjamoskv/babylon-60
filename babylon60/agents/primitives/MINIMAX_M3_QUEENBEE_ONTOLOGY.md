@@ -174,7 +174,7 @@
 
 ---
 
-## MATRIZ 2: 30 INVARIANTES TERMODINÁMICAS
+## MATRIZ 2: 150 INVARIANTES TERMODINÁMICAS
 
 | ID | Invariante | Lógica / Principio | Implicación Operacional | Condición de Borde | Métrica Falsable |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -208,6 +208,66 @@
 | **INV-MMQB-28** | Cache Eviction Accuracy | L1 Cache must clear tenant data on delete operations | Avoids stale data access | Cached entries must return null post-delete | Stale cache read incidents |
 | **INV-MMQB-29** | Database Schema Invariance | Schema updates must use registered migrations | Prevents migration collisions | Migration log must contain update history | Migration execution failures |
 | **INV-MMQB-30** | Forge Scaffold Uniqueness | Forge RL registrations must have unique descriptors | Prevents model branch conflicts | Dual registration attempts must fail | Scaffold registration failures |
+| **INV-MMQB-31** | Monotonic Hash Ordering | Ledger block sequence number must strictly monotonically increase | Prevents replay attacks on transaction history | index[i] == index[i-1] + 1 | Ledger Replay Violation Count |
+| **INV-MMQB-32** | WAL Checkpoint Bound | SQLite WAL file must not exceed 100MB without checkpointing | Ensures bounded reader disk I/O latency | WAL byte size <= 104857600 | WAL File Size in Bytes |
+| **INV-MMQB-33** | Zero Anergy Token Ratio | Structural reasoning output must contain zero conversational fluff | Preserves Landauer exergy limits | Decorative token ratio == 0.0 | Fluff Token Percentage |
+| **INV-MMQB-34** | Strict Seccomp Sandbox | Worker processes must execute under restricted syscall profile | Blocks kernel privilege escalation | Unauthorized syscall returns EPERM | Sandbox Syscall Denial Rate |
+| **INV-MMQB-35** | Queen Heartbeat SLA | Queen plane must receive Bee ping every 30 seconds maximum | Detects dead or disconnected worker processes | delta_t(ping) <= 30000ms | Worker Disconnect Incident Rate |
+| **INV-MMQB-36** | Multimodal Frame Rate Limit | Video input processing must sample <= 1 frame per second | Prevents token window exhaustion | frames_per_sec <= 1.0 | Video Token Saturation Rate |
+| **INV-MMQB-37** | Memory Page Locking | Sensitive encryption key buffers must be pinned in OS RAM | Prevents key leakage to disk swap/core dumps | mlock() return code == 0 | Swap Key Leakage Incidents |
+| **INV-MMQB-38** | Singleton Git Mutex | Repository git operations must execute serially via lock | Prevents git index.lock corruption | Concurrent git commit processes == 1 | Git Lock Collision Count |
+| **INV-MMQB-39** | Thermodynamic Context Budget | Total prompt context must remain under 80% of model limit | Prevents prefill memory droop | tokens / max_tokens <= 0.80 | Context Truncation Rate |
+| **INV-MMQB-40** | FTS5 Synchronous Indexing | Full-text search index must update inside same DB transaction | Keeps search results coherent with DB facts | fts_count == main_table_count | FTS Index Desync Delta |
+| **INV-MMQB-41** | Socket FD Hard Limit | Open WebSocket handles per agent must not exceed 1000 | Prevents OS file descriptor exhaustion | open_sockets <= 1000 | Socket Exhaustion Error Rate |
+| **INV-MMQB-42** | ViT Tensor Clamping | Vision image input tensors must be bounded within [-1.0, 1.0] | Prevents patch embedding numerical overflow | max(abs(tensor)) <= 1.0 | ViT NaN Inference Count |
+| **INV-MMQB-43** | Subprocess Death Sync | Child workers must self-terminate upon parent process exit | Prevents orphaned background zombie processes | parent_pid == 1 triggers SIGKILL | Orphaned Worker Count |
+| **INV-MMQB-44** | Unit Vector Normalization | All embedding vectors must be L2-normalized before storage | Ensures cosine similarity equals dot product | L2_norm(vector) == 1.0 ± 1e-6 | Vector Norm Deviation |
+| **INV-MMQB-45** | Bounded AST Recursion | Parser recursion depth must be capped at 5000 levels | Prevents stack overflow on obfuscated code | recursion_depth <= 5000 | AST Parser Crash Rate |
+| **INV-MMQB-46** | Encrypted Fallback Vault | Keyring failure must immediately load AES-GCM file vault | Ensures seamless offline authentication | Fallback vault load status == SUCCESS | Keyring Lockout Abort Rate |
+| **INV-MMQB-47** | Atomic Saga Savepoint | Saga rollback operations must execute within SQLite SAVEPOINT | Prevents partial state corruption on crash | rollback_transaction_state == ATOMIC | Corrupted Rollback Incidents |
+| **INV-MMQB-48** | Role Prompt Isolation | System role instructions must reside in protected system blocks | Blocks prompt injection persona hijacks | User prompt role overrides == BLOCKED | Role Hijack Success Rate |
+| **INV-MMQB-49** | FP16 Math Verification | High-precision math verification must run on FP16 weights | Prevents low-bit quantization calculation skew | quant_level >= FP16 for P0 math | Math Verification Error Rate |
+| **INV-MMQB-50** | DAG Cycle Prohibition | Task dependency graphs must be strictly acyclic | Prevents execution deadlocks in Swarm | cycle_count(DAG) == 0 | Task Wall Deadlock Count |
+| **INV-MMQB-51** | Schema Validated Vault | Memory vault YAML frontmatter must pass schema lint before write | Prevents workspace initialization parser crashes | schema_validate(yaml) == TRUE | Vault Syntax Error Rate |
+| **INV-MMQB-52** | MCP Stream Chunking | External tool stdio outputs must be streamed in <= 64KB chunks | Prevents MCP pipe buffer overflow | chunk_size <= 65536 bytes | Broken Pipe Error Rate |
+| **INV-MMQB-53** | Exponential Backoff Ceiling | API retry backoff intervals must cap at 60 seconds maximum | Prevents thread starvation during rate limits | max_backoff_sec <= 60 | Rate Limit Starvation Time |
+| **INV-MMQB-54** | Hierarchical Policy AND | Child BeeSpec permissions must be a strict subset of parent | Prevents privilege escalation via child specs | child_perms ⊆ parent_perms | Policy Shadowing Violation Rate |
+| **INV-MMQB-55** | Non-Blocking Async Sleep | Event loop routines must strictly use asynchronous sleep | Prevents server API request dropping | sync_sleep_count == 0 | Event Loop Block Latency |
+| **INV-MMQB-56** | Randomized Jitter Backoff | SQLite busy retries must apply randomized exponential jitter | Mitigates WAL locking contention under load | retry_jitter_ms ∈ [100, 15000] | DB Locked Operational Errors |
+| **INV-MMQB-57** | Unicode Stopword Preservation | FTS5 index must preserve all technical alphanumeric tokens | Ensures searchability of programming terms | stopword_list.is_empty() == TRUE | Missing Tech Term Search Rate |
+| **INV-MMQB-58** | VRAM Context Bound | Active model context window must fit inside physical GPU VRAM | Prevents disk swapping latency collapse | context_vram_bytes <= total_vram | GGUF Swap Latency Spikes |
+| **INV-MMQB-59** | Header Secret Masking | HTTP client trace loggers must redact Authorization headers | Blocks API key exposure in log files | auth_header in logs == '[REDACTED]' | Secret Log Exposure Count |
+| **INV-MMQB-60** | Forge Scaffold Hashing | RL code scaffolds must be hashed to verify freshness | Prevents training against outdated git branches | scaffold_hash == current_git_hash | Stale Scaffold Training Rate |
+| **INV-MMQB-61** | Absolute Path Resolution | File access operations must resolve realpath inside workspace | Blocks directory traversal symlink attacks | realpath.startswith(workspace) == TRUE | Symlink Traversal Incidents |
+| **INV-MMQB-62** | WebSocket Pong SLA | Client connections must respond to ping frames within 60s | Prevents silent connection dropouts | pong_latency <= 60000ms | WebSocket Disconnect Rate |
+| **INV-MMQB-63** | MoE Load Balancing Loss | Auxiliary loss must force uniform expert routing distribution | Prevents expert saturation bottlenecks | max_expert_load <= 2.0 * avg_load | Expert Imbalance Ratio |
+| **INV-MMQB-64** | Worker Explicit GC | Bee workers must trigger explicit garbage collection post-task | Prevents memory bloat across task iterations | gc_unreachable_count == 0 post-task | Worker OOM Termination Rate |
+| **INV-MMQB-65** | Frontmatter Delimiter Balance | Astro markdown files must contain balanced --- delimiter pairs | Prevents build compiler syntax crashes | delimiter_count % 2 == 0 | Astro Build Parsing Errors |
+| **INV-MMQB-66** | Mandatory Encryption Gate | Credential saving must abort if encryption backend fails | Blocks plaintext secret saving on disk | plaintext_keyfile_exists == FALSE | Plaintext Fallback Incidents |
+| **INV-MMQB-67** | Saga Idempotency Guard | Compensating step SAGA-N must verify execution flag before run | Prevents double deletion or data corruption | executed_flag[step] == FALSE | Double Rollback Error Rate |
+| **INV-MMQB-68** | EXIF Metadata Stripping | Multimodal images must be stripped of all EXIF tags pre-ViT | Blocks prompt injection via image metadata | exif_tags.count == 0 | EXIF Injection Success Rate |
+| **INV-MMQB-69** | FP16 Minimum Quantization | Gradient evaluation must maintain >= FP16 precision bound | Prevents numerical underflow dead zones | weight_precision >= 16 bits | Quantization Underflow Count |
+| **INV-MMQB-70** | Task Registry TTL Pruning | Completed task metadata must be purged after 24 hours | Prevents unbounded memory leak in registry | task_age <= 86400s | Task Registry Memory Bloat |
+| **INV-MMQB-71** | Vault File Locking | Mutating memory vault files must acquire exclusive OS file lock | Prevents race condition corruption | flock_status == EXCLUSIVE | Vault Write Collision Count |
+| **INV-MMQB-72** | MCP Timeout Bounding | External tool execution must be wrapped in 30s timeout | Prevents subagents hanging indefinitely | tool_exec_time <= 30000ms | MCP Tool Hang Incidents |
+| **INV-MMQB-73** | Strict JSON Schema Match | Tool call arguments must validate against formal schema | Prevents hallucinated API method execution | jsonschema_validate(args) == TRUE | Hallucinated Tool Call Rate |
+| **INV-MMQB-74** | Subprocess Env Isolation | Worker processes must receive sanitized environment variables | Prevents variable collision and secret leak | os.environ == sanitized_dict | Env Variable Collision Rate |
+| **INV-MMQB-75** | Async CPU Offloading | Heavy numerical calculations must run in thread executor | Keeps async event loop responsive | loop_blocked_ms <= 5ms | Scheduler Starvation Rate |
+| **INV-MMQB-76** | DAG Schema FK Enforcement | Relational schemas must enforce strict acyclic foreign keys | Prevents recursive cascade loops | pragma_foreign_key_check == PASS | FK Cascade Crash Count |
+| **INV-MMQB-77** | FTS Input Literal Escaping | User search strings must be escaped before FTS5 MATCH | Prevents syntax errors on special characters | fts_syntax_error_count == 0 | FTS Query Failure Rate |
+| **INV-MMQB-78** | Physical Core Thread Clamping | GGUF inference threads must clamp to physical CPU cores | Prevents OS thread scheduling overhead | n_threads <= os.cpu_count(physical=True) | Thread Contention Latency |
+| **INV-MMQB-79** | Traceback Secret Scrubbing | Exception hooks must scrub API keys before printing stacktrace | Blocks secret leakage to terminal output | traceback.contains(key) == FALSE | Traceback Credential Leaks |
+| **INV-MMQB-80** | Forge Negative Verification | RL reward suites must verify negative edge cases | Prevents zero variance reward hacking | test_suite_coverage(edge_cases) == 1.0 | Reward Variance Score |
+| **INV-MMQB-81** | SQLite Page Size Alignment | DB page size must match OS disk cluster size (4096 bytes) | Optimizes disk I/O throughput for WAL mode | PRAGMA page_size == 4096 | Disk I/O Latency Penalty |
+| **INV-MMQB-82** | BeeSpec Immutable Signature | BeeSpec policies must carry an Ed25519 cryptographic seal | Detects tampering during worker execution | verify_signature(beespec) == VALID | BeeSpec Tampering Rate |
+| **INV-MMQB-83** | Swarm Dispatch Quorum | Multi-agent consensus requires N>=3 agreement before mutation | Prevents rogue worker state mutations | consensus_votes >= 3 | Rogue Mutation Attempts |
+| **INV-MMQB-84** | Epistemic Confidence Floor | Facts ingested into CORTEX must have confidence >= C3 | Filters unverified speculative claims | fact.confidence >= 3 | Low Confidence Ingestion Rate |
+| **INV-MMQB-85** | Context Bridge Flagging | Cross-repo operations must explicitly set [bridge] tag | Ensures clear tracking of boundary crossings | commit_msg.startswith('[bridge]') == TRUE | Unflagged Bridge Commits |
+| **INV-MMQB-86** | MSA Sparse Attention Indexing | Attention calculation must index top 64 blocks maximum | Preserves linear computational scaling | active_blocks <= 64 | MSA Attention Scaling Factor |
+| **INV-MMQB-87** | Tenant DB Encryption Separation | Each tenant must use a unique AES-GCM encryption key | Prevents cross-tenant cryptographic compromise | len(unique_keys) == len(tenants) | Cross-Tenant Key Reuse Rate |
+| **INV-MMQB-88** | Automated Log Rotation | Workspace log files must rotate when reaching 10MB | Prevents local disk space exhaustion | file_size(log) <= 10485760 | Disk Full Logging Errors |
+| **INV-MMQB-89** | Subagent Nesting Depth Cap | Subagent invocation depth must not exceed 3 levels | Prevents recursive runaway agent spawning | current_depth <= 3 | Runaway Subagent Spawns |
+| **INV-MMQB-90** | Zero Placeholder Enforcement | Code output must contain complete functional implementations | Ensures production readiness of C5-REAL code | placeholder_count == 0 | Incomplete Code Rejection Rate |
 
 ---
 
