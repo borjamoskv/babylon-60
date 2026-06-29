@@ -957,5 +957,42 @@ Proof:
 ```
 - **Status**: ✅ COMPLETE — 25 Junio 2026
 
+---
+
+### Hito 57: Portal de Estado en Vivo del Manifold de Ejecución (Live Manifold Status Portal)
+- **Target**: `src/pages/dev/index.astro`, `babylon60/engine/core/reporter.py`
+- **Objective**: Desarrollo y despliegue del portal de telemetría y visualización del Manifold en tiempo real, permitiendo auditar la convergencia geométrica de los agentes y mitigando fugas de contexto (remediación UltraThink).
+- **Yield Target**: Cero fugas de contexto y visualización en tiempo real a través de SSE (Server-Sent Events).
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commit `6c7ebcc7d` (live manifold portal).
+```yaml
+Claim: Manifold telemetry portal deployed and SSE event routing active.
+Proof:
+  Base: "/pages/dev/index.astro renders dynamic JSON metrics from manifold_status.json."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-26
+```
+- **Status**: ✅ COMPLETE — 26 Junio 2026
+
+---
+
+### Hito 58: Ecosistema Autodidacta y Primitivas Educativas (Autodidact Knowledge Substrate)
+- **Target**: `cortex/extensions/autodidact/`, `scripts/injection/`
+- **Objective**: Inyección de flujos de aprendizaje JIT y primitivas educativas (EVI, Maldacena) a través del substrato `Ultramap` para posibilitar el auto-entrenamiento y enriquecimiento cognitivo del enjambre.
+- **Yield Target**: Cero fricción en la asimilación de nuevas primitivas y datasets tabulares en memoria.
+- **Reality Level**: `C5-REAL`
+- **Evidence**: Commits `e28e8eb35` (educational workflow), `16f6c3f2d` (evi hypothesis), `b09d672bc` (maldacena primitives).
+```yaml
+Claim: Autodidact knowledge primitives successfully injected and mapped to memory.
+Proof:
+  Base: "Maldacena and EVI hypothesis parsed and stored in the facts database."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-15
+```
+- **Status**: ✅ COMPLETE — 15 Junio 2026
+
+
 
 
