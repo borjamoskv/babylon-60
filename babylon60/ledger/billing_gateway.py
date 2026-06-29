@@ -107,18 +107,19 @@ class BillingIntegrityGateway:
             ).get("email", "unknown")
             plan = session.get("metadata", {}).get("plan", "pro")
 
-            amount_usd = 0.0
+            from decimal import Decimal
+            amount_usd = Decimal("0.0")
             if plan == "pwyw":
                 try:
-                    amount_usd = float(session.get("metadata", {}).get("amount_usd", 0.0))
-                except (ValueError, TypeError):
-                    amount_usd = 0.0
+                    amount_usd = Decimal(str(session.get("metadata", {}).get("amount_usd", "0.0")))
+                except Exception:
+                    amount_usd = Decimal("0.0")
 
-            if plan == "pwyw" and amount_usd > 0:
-                calls_limit = int(amount_usd * 10000)
-                rate_limit = min(30 + int(amount_usd * 5), 1000)
-                projects_limit = max(1, int(amount_usd / 2))
-                storage_bytes = int(amount_usd * 100 * 1024 * 1024)
+            if plan == "pwyw" and amount_usd > Decimal("0.0"):
+                calls_limit = int(amount_usd * Decimal("10000"))
+                rate_limit = min(30 + int(amount_usd * Decimal("5")), 1000)
+                projects_limit = max(1, int(amount_usd / Decimal("2")))
+                storage_bytes = int(amount_usd * Decimal(str(100 * 1024 * 1024)))
                 permissions = ["read", "write"]
             else:
                 from cortex.routes.stripe import PLAN_CONFIG
@@ -142,7 +143,7 @@ class BillingIntegrityGateway:
 
             tenant_config = {
                 "plan": plan,
-                "amount_usd": amount_usd,
+                "amount_usd": float(amount_usd),
                 "calls_limit": calls_limit,
                 "rate_limit": rate_limit,
                 "projects_limit": projects_limit,

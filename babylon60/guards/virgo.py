@@ -7,7 +7,8 @@ deterministic validation signature checks, and automatic ledger state rollbacks.
 
 from __future__ import annotations
 
-import hashlib
+import time
+from babylon60.crypto.hash_registry import cortex_hash
 import logging
 import math
 from typing import Any
@@ -84,7 +85,7 @@ class VirgoContextGuard:
         # B. Fallback to Deterministic HMAC/Hash binding (LEGACY or TEST mode)
         if not is_valid_sig and virgo_mode in ("LEGACY", "TEST"):
             # Expected deterministic hash: sha256(content + str(nonce) + project)
-            expected_hash = hashlib.sha256(f"{content}{nonce}{project}".encode()).hexdigest()
+            expected_hash = cortex_hash(f"{content}{nonce}{project}".encode())
             if logos_signature == expected_hash:
                 is_valid_sig = True
 

@@ -163,7 +163,7 @@ class EnterpriseAuditLedger:
                     merkle_root = smt_engine.root
                     self._last_hash = cortex_hash(
                         f"merkle_batch:{merkle_root}:{prev_hash}".encode()
-                    ).hexdigest()
+                    )
                 else:
                     self._last_hash = "GENESIS"
                 self._ready = True
@@ -237,10 +237,10 @@ class EnterpriseAuditLedger:
             # Validate individual audit_id to detect row-level tampering
             expected_audit_id_v2 = cortex_hash(
                 f"{row[2]}|{row[3]}|{row[4]}|{row[5]}|{row[6]}|{row[7]}|{row[8]}".encode()
-            ).hexdigest()
+            )
             expected_audit_id_v1 = cortex_hash(
                 f"{row[2]}{row[3]}{row[4]}{row[5]}{row[6]}{row[7]}{row[8]}".encode()
-            ).hexdigest()
+            )
             if row[1] not in (expected_audit_id_v2, expected_audit_id_v1):
                 return {
                     "status": "tampered",
@@ -412,7 +412,7 @@ class EnterpriseAuditLedger:
 
                                     entry_hash = cortex_hash(
                                         f"merkle_batch:{merkle_root}:{prev_hash}".encode()
-                                    ).hexdigest()
+                                    )
 
                                     pub_pem = self.public_key.public_bytes(
                                         encoding=serialization.Encoding.PEM,
@@ -497,7 +497,7 @@ class EnterpriseAuditLedger:
         timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         audit_id = cortex_hash(
             f"{timestamp}|{tenant_id}|{actor_role}|{actor_id}|{action}|{resource}|{status}".encode()
-        ).hexdigest()
+        )
 
         in_tx_before = self._conn.in_transaction
 
@@ -524,7 +524,7 @@ class EnterpriseAuditLedger:
                     merkle_root = smt_engine.root
                     current_last_hash = cortex_hash(
                         f"merkle_batch:{merkle_root}:{prev_hash_db}".encode()
-                    ).hexdigest()
+                    )
                 else:
                     current_last_hash = "GENESIS"
 
@@ -533,7 +533,7 @@ class EnterpriseAuditLedger:
                 merkle_root_new = smt_engine.root
                 entry_hash = cortex_hash(
                     f"merkle_batch:{merkle_root_new}:{current_last_hash}".encode()
-                ).hexdigest()
+                )
                 signature = self.private_key.sign(entry_hash.encode()).hex()
 
                 # 3. Insert synchronously inside the existing transaction
@@ -597,7 +597,7 @@ class EnterpriseAuditLedger:
             merkle_root = smt_state.root
             entry_hash = cortex_hash(
                 f"merkle_batch:{merkle_root}:{prev_hash}".encode()
-            ).hexdigest()
+            )
 
             self.public_key.verify(bytes.fromhex(signature_hex), entry_hash.encode("utf-8"))
             return True

@@ -17,6 +17,7 @@ class HumanGatekeeper:
         """Genera hash CORTEX-TAINT para el payload (APEX-003)."""
         timestamp = int(time.time())
         raw = f"taint:{self.tenant_id}:{timestamp}:{payload}".encode()
+        # TODO(pqc): route through hash_registry
         return hashlib.sha3_256(raw).hexdigest()
 
     async def request_authorization(self, payload: str, risk_level: str = "CRITICAL") -> str:

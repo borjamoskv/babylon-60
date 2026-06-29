@@ -5,7 +5,7 @@ Merkle Tree Utilities.
 Provides Merkle tree computation and verification for ledger checkpoints.
 """
 
-import hashlib
+from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = ["MerkleTree", "compute_merkle_root", "verify_merkle_proof"]
 
@@ -33,7 +33,7 @@ def compute_merkle_root(hashes: list[str]) -> str:
             right = current_level[i + 1] if i + 1 < len(current_level) else left
 
             combined = f"{left}{right}"
-            next_hash = hashlib.sha256(combined.encode()).hexdigest()
+            next_hash = cortex_hash(combined.encode())
             next_level.append(next_hash)
         current_level = next_level
 
@@ -60,7 +60,7 @@ def verify_merkle_proof(leaf_hash: str, proof: list[tuple[str, str]], root_hash:
         else:
             combined = f"{current_hash}{sibling}"
 
-        current_hash = hashlib.sha256(combined.encode()).hexdigest()
+        current_hash = cortex_hash(combined.encode())
 
     return current_hash == root_hash
 
@@ -88,7 +88,7 @@ class MerkleTree:
                 right = current_level[i + 1] if i + 1 < len(current_level) else left
 
                 combined = f"{left}{right}"
-                next_hash = hashlib.sha256(combined.encode()).hexdigest()
+                next_hash = cortex_hash(combined.encode())
                 next_level.append(next_hash)
             tree.append(next_level)
             current_level = next_level

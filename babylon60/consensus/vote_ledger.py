@@ -9,10 +9,11 @@ Parte de la Arquitectura de Soberanía Wave 5.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
 import time
+
+from babylon60.crypto.hash_registry import cortex_hash
 from datetime import datetime, timezone
 from typing import Any
 
@@ -58,7 +59,7 @@ class ImmutableVoteLedger:
             "timestamp": timestamp,
         }
         dump = json.dumps(payload, sort_keys=True)
-        return hashlib.sha256(dump.encode()).hexdigest()
+        return cortex_hash(dump.encode())
 
     async def append_vote(
         self,
@@ -257,7 +258,7 @@ class ImmutableVoteLedger:
         for i in range(0, len(hashes), 2):
             left = hashes[i]
             right = hashes[i + 1] if i + 1 < len(hashes) else left
-            combined = hashlib.sha256((left + right).encode()).hexdigest()
+            combined = cortex_hash((left + right).encode())
             new_level.append(combined)
 
         return self._build_merkle_tree(new_level)

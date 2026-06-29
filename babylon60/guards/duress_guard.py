@@ -44,7 +44,7 @@ class DuressGuard:
 
         # Emit synchronous Ledger event bypassing the async loop to guarantee recording
         try:
-            import hashlib
+            from babylon60.crypto.hash_registry import cortex_hash
             from datetime import datetime, timezone
 
             from cortex.database.core import connect
@@ -59,7 +59,7 @@ class DuressGuard:
                         "(audit_id, timestamp, tenant_id, actor_role, actor_id, action, resource, status, prev_hash, signature) "
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         (
-                            hashlib.sha256(timestamp.encode()).hexdigest(),
+                            cortex_hash(timestamp.encode()),
                             timestamp,
                             "global",
                             "system",
