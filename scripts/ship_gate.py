@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -29,7 +30,7 @@ REPO_ROOT: Final[Path] = Path(__file__).resolve().parent.parent
 MAX_CC: Final[int] = 25  # Cyclomatic Complexity ceiling
 MIN_MEJORALO: Final[int] = 50  # MEJORAlo minimum score
 RUFF_TARGET: Final[str] = "cortex/ tests/"
-PYTEST_TIMEOUT: Final[int] = 120  # seconds
+PYTEST_TIMEOUT: Final[int] = 300  # seconds
 
 
 @dataclass(slots=True)

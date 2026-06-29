@@ -220,7 +220,16 @@ class EnterpriseAuditLedger:
         async with self._conn.execute(
             "SELECT rowid, audit_id, timestamp, tenant_id, actor_role, actor_id, action, resource, status, prev_hash, signature, external_anchor FROM security_audit_log ORDER BY rowid ASC"
         ) as cursor:
-            rows = list(await cursor.fetchall())
+            description = cursor.description
+            col_map = {col[0]: idx for idx, col in enumerate(description)} if description else {}
+            rows_raw = list(await cursor.fetchall())
+
+        rows = []
+        for r in rows_raw:
+            if hasattr(r, "keys") or isinstance(r, dict):
+                rows.append(r)
+            else:
+                rows.append({col: r[idx] for col, idx in col_map.items()})
 
         if not rows:
             return {"status": "verified", "blocks": 0}
