@@ -129,8 +129,7 @@ def main() -> int:
             ok, reason = check_yaml_agent(file)
             status_char = "🟢" if ok else "🔴"
             print(f"  {status_char} {file.name} -> {reason}")
-            # Fail on our forged/target agents only to be safe, or just check them
-            if not ok and file.name in ["demiurge.yaml", "carnot.yaml", "maxwell.yaml", "prometheus.yaml", "boltzmann.yaml"]:
+            if not ok:
                 failed = True
                 
     # 2. Audit Workflows
@@ -141,6 +140,8 @@ def main() -> int:
                 ok, reason = check_markdown_workflow(file)
                 status_char = "🟢" if ok else "🔴"
                 print(f"  {status_char} {file.name} -> {reason}")
+                if not ok:
+                    failed = True
                 
     # 3. Audit Scripts
     for s_dir in scripts_dirs:
@@ -150,8 +151,8 @@ def main() -> int:
                 ok, reason = check_python_script(file)
                 status_char = "🟢" if ok else "🔴"
                 print(f"  {status_char} {file.name} -> {reason}")
-                # Only fail hard on our own script files
-                if not ok and file.name in ["validate_taxonomy.py", "migrate_workflows_to_cat60.py"]:
+                # Fail hard on any tool directory scripts (our controlled scripts)
+                if not ok and s_dir.name == "tools":
                     failed = True
                 
     if failed:
