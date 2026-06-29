@@ -66,8 +66,8 @@ def test_ultrathink_critical_authorization():
 
 def test_exergy_yield_calculation_overflow_handling():
     """Verify that extreme execution times do not trigger OverflowError (VM-03)."""
-    # 1.05 ** 10000 will overflow standard floats
-    exergy = UltrathinkPhysicsEngine.calculate_exergy_yield(10.0, 100.0, 10000.0)
+    # 1.05 ** 1000000 will overflow standard floats
+    exergy = UltrathinkPhysicsEngine.calculate_exergy_yield(10.0, 100.0, 1000000.0)
     assert exergy == 0.0
 
 

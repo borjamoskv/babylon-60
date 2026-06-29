@@ -69,7 +69,10 @@ class UltrathinkPhysicsEngine:
         
         # Penalización térmica no lineal (Ley de Landauer adaptada)
         # El tiempo de ejecución prolongado disipa ATP/Exergía como calor
-        thermal_dissipation = UltrathinkPhysicsEngine.LANDAUER_THERMAL_PENALTY ** execution_time
+        try:
+            thermal_dissipation = UltrathinkPhysicsEngine.LANDAUER_THERMAL_PENALTY ** execution_time
+        except OverflowError:
+            return 0.0
         
         if thermal_dissipation == 0:
             return 0.0
@@ -84,6 +87,9 @@ class UltrathinkPhysicsEngine:
         Devuelve el número de niveles y ramificaciones afectadas.
         [Optimización O(N) implementada vía deque]
         """
+        if not isinstance(dependency_graph, dict):
+            return 1
+
         visited = set()
         queue = deque([epicenter_node])
 
@@ -99,6 +105,8 @@ class UltrathinkPhysicsEngine:
                 queue.extend(n for n in neighbors if n not in visited)
             elif isinstance(neighbors, dict):
                 queue.extend(n for n in neighbors.keys() if n not in visited)
+            elif isinstance(neighbors, (set, tuple)):
+                queue.extend(n for n in neighbors if n not in visited)
 
         # The Blast Radius is the size of the affected cluster
         radius = len(visited)

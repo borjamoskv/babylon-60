@@ -1,6 +1,7 @@
 # [C5-REAL] ULTRATHINK ARSENAL
 # Exergy-Maximized APEX Directives derived from Operator Cognitive Autopsy
 from dataclasses import dataclass
+import getpass
 
 
 @dataclass
@@ -113,5 +114,16 @@ ULTRATHINK_ARSENAL: list[APEXDirective] = [
 ]
 
 def get_ultrathink_arsenal() -> list[APEXDirective]:
-    """Retorna las 100 primitivas cristalizadas para ejecución de Swarm."""
-    return ULTRATHINK_ARSENAL
+    """Retorna las 100 primitivas cristalizadas para ejecución de Swarm con resolución de paths."""
+    resolved_arsenal = []
+    current_user = getpass.getuser()
+    for directive in ULTRATHINK_ARSENAL:
+        target = directive.target
+        if "SYS_OPERATOR" in target:
+            target = target.replace("SYS_OPERATOR", current_user)
+        resolved_arsenal.append(APEXDirective(
+            target=target,
+            operation=directive.operation,
+            tolerance=directive.tolerance
+        ))
+    return resolved_arsenal
