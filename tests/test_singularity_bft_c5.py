@@ -7,15 +7,15 @@ from pathlib import Path
 import pytest
 import aiosqlite
 
-DB_PATH = Path("cortex_persist_bft_test.db")
+
+@pytest.fixture
+def db_path(tmp_path):
+    return tmp_path / f"cortex_persist_bft_test_{os.getpid()}.db"
 
 
 @pytest.fixture(autouse=True)
-async def setup_db():
-    if DB_PATH.exists():
-        DB_PATH.unlink()
-
-    async with aiosqlite.connect(DB_PATH) as db:
+async def setup_db(db_path):
+    async with aiosqlite.connect(db_path) as db:
         await db.execute("PRAGMA journal_mode=WAL")
         await db.execute("PRAGMA busy_timeout=5000")
         await db.execute("""
@@ -35,16 +35,14 @@ async def setup_db():
         """)
         await db.commit()
     yield
-    if DB_PATH.exists():
-        DB_PATH.unlink()
 
 
 @pytest.mark.asyncio
-async def test_vector_sqlite_wal_deadlock():
+async def test_vector_sqlite_wal_deadlock(db_path):
     """Vector 1: Concurrencia extrema N=10, timeout 5000ms"""
 
     async def worker(worker_id):
-        async with aiosqlite.connect(DB_PATH) as db:
+        async with aiosqlite.connect(db_path) as db:
             await db.execute("PRAGMA busy_timeout=5000")
             for i in range(100):
                 audit_id = hashlib.sha256(f"w{worker_id}_{i}_{time.time()}".encode()).hexdigest()
@@ -57,7 +55,7 @@ async def test_vector_sqlite_wal_deadlock():
     workers = [worker(i) for i in range(10)]
     await asyncio.gather(*workers)
 
-    async with aiosqlite.connect(DB_PATH) as db:
+    async with aiosqlite.connect(db_path) as db:
         cursor = await db.execute(
             "SELECT COUNT(*) FROM security_audit_log WHERE action='DEADLOCK_TEST'"
         )
@@ -66,12 +64,12 @@ async def test_vector_sqlite_wal_deadlock():
 
 
 @pytest.mark.asyncio
-async def test_vector_taint_engine_collapse():
+async def test_vector_taint_engine_collapse(db_path):
     """Vector 2: Injection of colliding SHA3-256 hashes (Rejection simulation)"""
     # SQLite PK constraint should reject colliding hashes
     hash_collision = hashlib.sha3_256(b"taint_collision_seed").hexdigest()
 
-    async with aiosqlite.connect(DB_PATH) as db:
+    async with aiosqlite.connect(db_path) as db:
         await db.execute(
             "INSERT INTO security_audit_log (audit_id, action) VALUES (?, ?)",
             (hash_collision, "TAINT_1"),
@@ -87,9 +85,9 @@ async def test_vector_taint_engine_collapse():
 
 
 @pytest.mark.asyncio
-async def test_vector_ledger_chain_break():
+async def test_vector_ledger_chain_break(db_path):
     """Vector 3: Mutation of Ed25519 signatures in historical nodes (Detection simulation)"""
-    async with aiosqlite.connect(DB_PATH) as db:
+    async with aiosqlite.connect(db_path) as db:
         # 1. Valid insert
         valid_hash = hashlib.sha256(b"valid_node").hexdigest()
         await db.execute(
@@ -114,13 +112,13 @@ async def test_vector_ledger_chain_break():
 
 
 @pytest.mark.asyncio
-async def test_vector_swarm_apoptosis():
+async def test_vector_swarm_apoptosis(db_path):
     """Vector 4: Injection of 500 parallel subagents demanding BFT consensus"""
 
     async def subagent_task(agent_id):
         # Simulate BFT assertion delay and write
         await asyncio.sleep(0.01)
-        async with aiosqlite.connect(DB_PATH) as db:
+        async with aiosqlite.connect(db_path) as db:
             await db.execute("PRAGMA busy_timeout=5000")
             audit_id = hashlib.sha256(f"agent_{agent_id}_{time.time()}".encode()).hexdigest()
             await db.execute(
@@ -133,9 +131,10 @@ async def test_vector_swarm_apoptosis():
     agents = [subagent_task(i) for i in range(500)]
     await asyncio.gather(*agents)
 
-    async with aiosqlite.connect(DB_PATH) as db:
+    async with aiosqlite.connect(db_path) as db:
         cursor = await db.execute(
             "SELECT COUNT(*) FROM security_audit_log WHERE action='SWARM_CONSENSUS'"
         )
         count = (await cursor.fetchone())[0]
         assert count == 500
+
