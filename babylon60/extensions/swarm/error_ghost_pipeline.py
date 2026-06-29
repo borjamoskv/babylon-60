@@ -232,7 +232,7 @@ class ErrorGhostPipeline:
                 content=content,
                 fact_type="ghost",
                 tags=["auto_ghost", "error_pipeline", source.split(":")[0]],
-                confidence="computed",
+                confidence="C3",
                 source=f"error_ghost_pipeline:{source}",
                 meta=meta,
             )

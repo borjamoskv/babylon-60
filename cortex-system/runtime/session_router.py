@@ -16,7 +16,16 @@ class SessionRouter:
     def __init__(self, db_path: str = "artist_cortex.db"):
         self.db_path = db_path
         self.engine = ArtistCortexEngine(db_path=self.db_path)
+        self._enforce_thermodynamic_locks()
         self._ensure_migrations()
+
+    def _enforce_thermodynamic_locks(self):
+        """R10: Concurrencia Confiable de DB."""
+        cursor = self.engine.conn.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL;")
+        cursor.execute("PRAGMA busy_timeout=5000;")
+        cursor.execute("PRAGMA synchronous=NORMAL;")
+        self.engine.conn.commit()
 
     def _ensure_migrations(self):
         """Applies foundational schema if tables are not initialized."""

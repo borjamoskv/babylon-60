@@ -14,7 +14,7 @@ class ProxyModule(types.ModuleType):
         object.__setattr__(self, '_real_module', real_module)
 
     def __getattribute__(self, name):
-        if name in ('_real_module', '__class__', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
+        if name in ('_real_module', '_initialized', '__class__', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
             try:
                 return object.__getattribute__(self, name)
             except AttributeError:
@@ -73,7 +73,7 @@ class ProxyModule(types.ModuleType):
         return val
 
     def __setattr__(self, name, value):
-        if name in ('_real_module', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
+        if name in ('_real_module', '_initialized', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
             object.__setattr__(self, name, value)
         elif isinstance(value, types.ModuleType):
             object.__setattr__(self, name, value)
@@ -81,7 +81,7 @@ class ProxyModule(types.ModuleType):
             setattr(self._real_module, name, value)
 
     def __delattr__(self, name):
-        if name in ('_real_module', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
+        if name in ('_real_module', '_initialized', '__spec__', '__loader__', '__path__', '__file__', '__name__'):
             object.__delattr__(self, name)
         elif name in object.__getattribute__(self, '__dict__'):
             object.__delattr__(self, name)

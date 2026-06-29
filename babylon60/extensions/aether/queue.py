@@ -7,6 +7,7 @@ Thread-safe O(1) pop via atomic UPDATE+SELECT.
 from __future__ import annotations
 
 import logging
+import os
 import sqlite3
 import time
 from contextlib import contextmanager
@@ -48,11 +49,15 @@ class TaskQueue:
 
     def __init__(self, db_path: Path | str | None = None) -> None:
         if db_path is None:
-            db_path = Path.home() / ".cortex" / "aether.db"
-            # Auto-migrate legacy jules.db if it exists
-            legacy_path = Path.home() / ".cortex" / "jules.db"
-            if not db_path.exists() and legacy_path.exists():
-                legacy_path.rename(db_path)
+            cortex_db_path = os.getenv("CORTEX_DB_PATH")
+            if cortex_db_path:
+                db_path = Path(cortex_db_path) / "aether.db"
+            else:
+                db_path = Path.home() / ".cortex" / "aether.db"
+                # Auto-migrate legacy jules.db if it exists
+                legacy_path = Path.home() / ".cortex" / "jules.db"
+                if not db_path.exists() and legacy_path.exists():
+                    legacy_path.rename(db_path)
         self._db_path = Path(db_path)
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()

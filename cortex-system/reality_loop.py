@@ -175,13 +175,26 @@ async def emit_event(source: str, event_type: str, payload: Dict[str, Any], bus:
 
 
 # =============================================================================
-# C5-REAL Autopoiesis (Self-Modification)
+# C5-REAL Autopoiesis (AST Syntactic Isomorphism)
 # =============================================================================
+
+class ThresholdMutator(ast.NodeTransformer):
+    def __init__(self, new_orig: float, new_dist: float):
+        self.new_orig = new_orig
+        self.new_dist = new_dist
+
+    def visit_Assign(self, node):
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            if node.targets[0].id == "ORIGINALITY_THRESHOLD":
+                node.value = ast.Constant(value=round(self.new_orig, 3))
+            elif node.targets[0].id == "DISTRIBUTION_THRESHOLD":
+                node.value = ast.Constant(value=round(self.new_dist, 3))
+        return node
 
 def mutate_reward_model(metric: Dict[str, Any]) -> bool:
     """
-    Actively mutates the reward_model.py parameters based on system fatigue and entropy,
-    validates the AST, and executes a Git Sentinel commit (C5-REAL).
+    Actively mutates the reward_model.py parameters using deterministic AST transformation.
+    Eliminates Regex fragility. Executes a Git Sentinel commit (C5-REAL).
     """
     model_path = ROOT / "policies" / "reward_model.py"
     if not model_path.exists():
@@ -190,27 +203,24 @@ def mutate_reward_model(metric: Dict[str, Any]) -> bool:
     with model_path.open("r", encoding="utf-8") as f:
         content = f.read()
         
-    # Calculate new thresholds based on current entropy and fatigue
     entropy = float(metric.get("entropy", 0.5))
     fatigue = float(metric.get("fatigue", 0.0))
     
-    # If entropy is low, we demand higher originality
     new_orig = max(0.20, min(0.60, 0.34 + (0.5 - entropy) * 0.1))
-    # If fatigue is high, we lower distribution threshold to reduce pressure
     new_dist = max(0.15, min(0.40, 0.26 - (fatigue * 0.1)))
     
-    # Mutate using Regex
-    content = re.sub(r"ORIGINALITY_THRESHOLD\s*=\s*[\d\.]+", f"ORIGINALITY_THRESHOLD = {new_orig:.3f}", content)
-    content = re.sub(r"DISTRIBUTION_THRESHOLD\s*=\s*[\d\.]+", f"DISTRIBUTION_THRESHOLD = {new_dist:.3f}", content)
-    
-    # AST Validation
+    # Structural Isomorphism: parse, mutate, unparse
     try:
-        ast.parse(content)
+        tree = ast.parse(content)
+        mutator = ThresholdMutator(new_orig, new_dist)
+        mutated_tree = mutator.visit(tree)
+        ast.fix_missing_locations(mutated_tree)
+        new_content = ast.unparse(mutated_tree)
     except SyntaxError:
         return False
         
     with model_path.open("w", encoding="utf-8") as f:
-        f.write(content)
+        f.write(new_content)
         
     # Git Sentinel Auto-Commit
     try:
