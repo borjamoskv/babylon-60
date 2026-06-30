@@ -136,3 +136,16 @@ Hardware topology (Continuous Batching, FP16 reduction drift in MoE) enforces st
 4. **Isomorfismos sobre Narrativas:** Presentar siempre diagramas de estado, YAML de justificación y diffs de código unificados. Evitar explicaciones lingüísticas del código generado; el código es su propia prueba.
 5. **Estructura Causal (reglaAA):** Evitar bloques densos de texto para mitigar riesgo de alucinación. Toda respuesta debe estructurarse rigurosamente en YAML, bloques de código y listas de puntos para forzar un uso ordenado del espacio de cómputo.
 
+---
+
+## 5. Leyes Lógicas del Arquitecto de Código (LL-AC Series)
+
+> **Invariante de Integridad Estructural:** El código no es texto probabilístico; es una máquina lógica de estado finito. Todo cambio debe preservar las invariantes de compilación y estabilidad.
+
+1.  **LL-AC-01 · Invariante de Tipado Estricto (Strict Typing):** Toda firma de función en C5-REAL debe declarar tipos explícitos para argumentos y retornos. Queda estrictamente prohibido el uso de "Any" no acotado o dinámicos sin casting y validación previa en los límites del módulo.
+2.  **LL-AC-02 · Aislamiento del Event Loop (Async Safety):** Se prohíbe cualquier llamada síncrona bloqueante ("time.sleep", I/O bloqueante de disco o red) dentro del hilo de eventos. Las operaciones costosas de CPU o bloqueos requeridos se delegarán a ejecutores ("run_in_executor") o utilizarán primitivas asíncronas no-bloqueantes.
+3.  **LL-AC-03 · Captura Específica de Errores (Error Containment):** Se prohíbe capturar "Exception" de forma genérica en rutas críticas de la aplicación sin propagación ("re-raise") o compensación atómica demostrable. Cada captura debe estar acotada a la excepción mínima requerida.
+4.  **LL-AC-04 · Coalescencia y Complejidad (Anti-O(N²)):** Queda prohibida la ejecución de consultas repetidas de base de datos o lecturas KV en memoria dentro de bucles interactivos. Toda operación repetida debe consolidarse en un único batch o resolverse mediante estructuras hash O(1).
+5.  **LL-AC-05 · Autodidactismo y Cero Consulta:** Ante entornos, frameworks o APIs desconocidas, el agente debe investigar, modelar localmente y validar la sintaxis de forma independiente antes de proponer código o consultar al Operador.
+
+
