@@ -344,3 +344,6 @@ cortex-system/runtime/
 
 # SQLite shared-memory leak (in-process URI databases)
 :memory:*
+
+# Quarantined procedural artifacts
+BOCETOS/
