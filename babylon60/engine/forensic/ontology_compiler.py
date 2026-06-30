@@ -34,6 +34,27 @@ def parse_markdown_table(filepath):
     return entities
 
 
+async def _log_compilation_to_ledger(yaml_path: str, sha256_hash: str) -> None:
+    try:
+        from babylon60.database.core import connect_async_ctx
+        from babylon60.audit.ledger import EnterpriseAuditLedger
+
+        db_path = "cortex_ledger.db"
+        async with connect_async_ctx(db_path) as conn:
+            ledger = EnterpriseAuditLedger(conn)
+            audit_id = await ledger.log_action(
+                tenant_id="borjamoskv",
+                actor_role="PERSIST-EXECUTOR",
+                actor_id="moskv-1-apex",
+                action="COMPILE_ONTOLOGY",
+                resource=f"{yaml_path}@sha256:{sha256_hash}",
+                status="SUCCESS",
+            )
+            logger.info(f"[C5-REAL] Ledger event committed: {audit_id}")
+    except Exception as e:
+        logger.error(f"[C5-REAL] Failed to log compilation to ledger: {e}")
+
+
 def compile_ontology(primitives_dir, output_json, output_yaml):
     logger.info("[C5-REAL] Iniciando Ontology Compiler...")
 
@@ -73,6 +94,18 @@ def compile_ontology(primitives_dir, output_json, output_yaml):
         yaml.dump(ontology, f, allow_unicode=True, sort_keys=False)
 
     logger.info(f"[C5-REAL] Ontology crystallized in JSON and YAML at {primitives_dir}")
+
+    try:
+        import hashlib
+        with open(output_yaml, "rb") as f:
+            yaml_content = f.read()
+        sha256_hash = hashlib.sha256(yaml_content).hexdigest()
+
+        import asyncio
+        asyncio.run(_log_compilation_to_ledger(output_yaml, sha256_hash))
+    except Exception as e:
+        logger.error(f"[C5-REAL] Error logging to ledger: {e}")
+
 
 
 if __name__ == "__main__":
