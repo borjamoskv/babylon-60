@@ -89,7 +89,7 @@ class DuressGuard:
         return os.path.exists(cls.LOCK_FILE)
 
     @classmethod
-    def validate(cls, content: str) -> bool:
+    def validate(cls, content: Any) -> bool:
         """
         Check if content contains the Duress Code.
         Returns False if duress is detected (validation fails).
@@ -101,7 +101,12 @@ class DuressGuard:
             return False
 
         code = cls.get_duress_code()
-        if code in content:
+        
+        # C5-REAL: Extraemos representación de string fuerte para evadir 
+        # envoltorios estructurales del hypervisor (ej. list[Content])
+        content_str = str(content)
+        
+        if code in content_str:
             cls.execute_apoptosis()
             return False
 
