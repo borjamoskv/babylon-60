@@ -13,8 +13,13 @@ Commands:
     stats      — Mostrar estadísticas del dataset compilado
     health     — Verificar estado de Ollama y modelos disponibles
 """
-
 from __future__ import annotations
+
+import os
+
+# Secure absolute offline autarchy for HF model loading
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["HF_HUB_CACHE"] = os.path.expanduser("~/.babylon60/huggingface")
 
 import asyncio
 import json
@@ -402,7 +407,13 @@ def main() -> None:
         workspace = sys.argv[2] if len(sys.argv) > 2 else None
         cmd_compile(workspace)
     elif command == "train":
-        cmd_train()
+        iters = 50
+        if len(sys.argv) > 2:
+            try:
+                iters = int(sys.argv[2])
+            except ValueError:
+                pass
+        cmd_train(iters=iters)
     elif command == "register":
         cmd_register()
     elif command == "validate":

@@ -17,6 +17,11 @@ import asyncio
 import json
 import logging
 import os
+
+# Secure absolute offline autarchy for HF model loading inside training tasks
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["HF_HUB_CACHE"] = os.path.expanduser("~/.babylon60/huggingface")
+
 import subprocess
 import sys
 import time
