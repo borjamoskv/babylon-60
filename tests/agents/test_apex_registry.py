@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-REGISTRY_DIR = Path(__file__).resolve().parent.parent.parent / "cortex" / "agents" / "primitives"
+REGISTRY_DIR = Path(__file__).resolve().parent.parent.parent / "babylon60" / "agents" / "primitives"
 APEX_CORE_MD = REGISTRY_DIR / "APEX_CORE.md"
 APEX_REGISTRY_JSON = REGISTRY_DIR / "apex_registry_100.json"
 
