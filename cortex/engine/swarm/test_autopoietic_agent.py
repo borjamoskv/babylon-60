@@ -37,7 +37,7 @@ from cortex.engine.swarm.autopoietic_agent import (
     AutopoieticAgent,
     EvolutionConfig,
 )
-from cortex.engine.uncategorized.genesis import (
+from cortex.engine.reflection.genesis import (
     AgentBlueprint,
     AgentSpecies,
     GenesisEngine,

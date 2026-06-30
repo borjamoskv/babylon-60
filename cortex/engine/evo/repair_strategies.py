@@ -101,7 +101,7 @@ class InjectTimeoutGuard:
             # Apply timeout guard via ISA rewrite if tree is available
             tree = context.get("dispatch_tree")
             if tree is not None:
-                from cortex.engine.uncategorized.reflexion import TreeRewriter
+                from cortex.engine.reflection.reflexion import TreeRewriter
 
                 new_tree = TreeRewriter.add_timeout_guard(tree, timeout_ms=timeout_ms)
                 context["dispatch_tree"] = new_tree
@@ -270,7 +270,7 @@ class ProbeAndResetBreaker:
         try:
             breaker = context.get("circuit_breaker")
             if breaker is not None:
-                from cortex.engine.uncategorized.circuit_breaker import CircuitState
+                from cortex.engine.healing.circuit_breaker import CircuitState
 
                 if breaker.state == CircuitState.OPEN:
                     # Force half-open for probe

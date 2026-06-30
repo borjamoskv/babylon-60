@@ -4,7 +4,7 @@ import time
 from typing import Any
 
 from cortex.engine.flow import execution_ledger as ledger
-from cortex.engine.uncategorized.cost_scheduler import ExergyCostScheduler
+from cortex.engine.scheduling.cost_scheduler import ExergyCostScheduler
 
 logger = logging.getLogger("cortex.engine.core.engine")
 

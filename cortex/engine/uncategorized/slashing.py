@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("cortex.engine.uncategorized.slashing")
+logger = logging.getLogger("cortex.engine.slashing")
 
 
 @dataclass

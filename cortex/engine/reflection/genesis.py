@@ -43,7 +43,7 @@ __all__ = [
     "SpawnedAgent",
 ]
 
-logger = logging.getLogger("cortex.engine.uncategorized.genesis")
+logger = logging.getLogger("cortex.engine.reflection.genesis")
 
 
 # ─── Agent Blueprint ─────────────────────────────────────────────

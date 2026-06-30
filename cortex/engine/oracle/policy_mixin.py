@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from cortex.engine.uncategorized.forgetting_models import (
+from cortex.engine.forgetting.forgetting_models import (
     EvictionVerdict,
     OracleReport,
     PolicyRecommendation,

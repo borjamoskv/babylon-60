@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cortex_extensions.llm.manager import LLMManager
 
-logger = logging.getLogger("cortex.engine.uncategorized.crystallizer")
+logger = logging.getLogger("cortex.engine.crystallizer")
 
 CRYSTALLIZATION_PROMPT = """
 SISTEMA: Eres un Cristalizador de Información de CORTEX (Axiom Ω₁₃).

@@ -23,7 +23,7 @@ except ImportError:
     Request = Any  # type: ignore
     StreamResponse = Any  # type: ignore
 
-from cortex.engine.uncategorized.reporter import SovereignReporter
+from cortex.engine.analytics.reporter import SovereignReporter
 
 logger = logging.getLogger("cortex.reporterd")
 

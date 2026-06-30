@@ -38,7 +38,7 @@ from cortex.engine.evo.genome import (
     StrategyGenome,
 )
 from cortex.engine.meta._autopoietic_oracle import EvolutionConfig, FitnessOracle
-from cortex.engine.uncategorized.genesis import (
+from cortex.engine.reflection.genesis import (
     GenesisEngine,
 )
 from cortex.isa.builder import AgentOp

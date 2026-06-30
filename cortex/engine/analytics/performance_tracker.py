@@ -30,7 +30,7 @@ __all__ = [
     "SubsystemMetrics",
 ]
 
-logger = logging.getLogger("cortex.engine.uncategorized.performance_tracker")
+logger = logging.getLogger("cortex.engine.analytics.performance_tracker")
 
 # ─── Types ────────────────────────────────────────────────────────
 

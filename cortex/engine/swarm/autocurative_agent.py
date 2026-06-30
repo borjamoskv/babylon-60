@@ -24,8 +24,8 @@ from cortex.engine.evo._autocurative_state import AgentHealth, HealingEvent, Hea
 from cortex.engine.evo.repair_strategies import (
     REPAIR_REGISTRY,
 )
-from cortex.engine.uncategorized.circuit_breaker import CircuitBreaker
-from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.healing.circuit_breaker import CircuitBreaker
+from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
 __all__ = [
     "AgentHealth",
