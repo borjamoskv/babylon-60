@@ -22,11 +22,11 @@ from cortex.engine.core.store_mixin import StoreMixin
 from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
 from cortex.engine.swarm.agent_mixin import AgentMixin
-from cortex.engine.uncategorized.durability import PersistenceSupervisor
-from cortex.engine.uncategorized.query_mixin import QueryMixin
-from cortex.engine.uncategorized.search_mixin import SearchMixin
-from cortex.engine.uncategorized.sync_mixin import SyncMixin
-from cortex.engine.uncategorized.transaction_mixin import TransactionMixin
+from cortex.engine.core.durability import PersistenceSupervisor
+from cortex.engine.query.query_mixin import QueryMixin
+from cortex.engine.query.search_mixin import SearchMixin
+from cortex.engine.sync.sync_mixin import SyncMixin
+from cortex.engine.transaction.transaction_mixin import TransactionMixin
 
 if TYPE_CHECKING:
     from cortex.consensus.manager import ConsensusManager
