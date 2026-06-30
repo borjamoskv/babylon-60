@@ -1,9 +1,11 @@
 use argon2::{Argon2, Algorithm, Version, Params, PasswordHash, PasswordHasher, PasswordVerifier};
 use argon2::password_hash::{rand_core::OsRng, SaltString};
 use pyo3::prelude::*;
+use zeroize::Zeroize;
 
 #[pyfunction]
 pub fn hash_password(password: &str) -> PyResult<String> {
+    let mut password_bytes = password.as_bytes().to_vec();
     let salt = SaltString::generate(&mut OsRng);
     // Use the exact same parameters as cortex/auth/manager.py:
     // m_cost = 65536, t_cost = 2, p_cost = 1, output length = 32
@@ -11,8 +13,10 @@ pub fn hash_password(password: &str) -> PyResult<String> {
         .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Invalid Argon2 params: {}", e)))?;
     let argon2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
     
-    let hash = argon2.hash_password(password.as_bytes(), &salt)
+    let hash = argon2.hash_password(&password_bytes, &salt)
         .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Hashing failed: {}", e)))?;
+    
+    password_bytes.zeroize();
     
     Ok(hash.to_string())
 }
