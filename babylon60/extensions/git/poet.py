@@ -18,9 +18,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from babylon60.extensions.git.poet_data import EMOJI_MAP, SCOPE_MAP, TEMPLATES, TYPE_REGEX
-
 from babylon60.crypto.hash_registry import cortex_hash_truncated
+from babylon60.extensions.git.poet_data import EMOJI_MAP, SCOPE_MAP, TEMPLATES, TYPE_REGEX
 
 logger = logging.getLogger("cortex_extensions.git.poet")
 

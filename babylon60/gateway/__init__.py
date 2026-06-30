@@ -11,7 +11,12 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from babylon60.extensions.signals.bus import SignalBus
-    from babylon60.gateway.router import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
+    from babylon60.gateway.router import (
+        GatewayIntent,
+        GatewayRequest,
+        GatewayResponse,
+        GatewayRouter,
+    )
 
 __all__ = [
     "GatewayIntent",

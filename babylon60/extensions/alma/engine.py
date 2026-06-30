@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from babylon60.extensions.alma.taste import TasteVerdict
 
 import aiosqlite
+
 from babylon60.config import DB_PATH
 from babylon60.database.core import connect_async_ctx
 from babylon60.telemetry.metrics import metrics

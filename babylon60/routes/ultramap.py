@@ -6,8 +6,9 @@ Ultramap / EDG (Epistemic Dependency Graph) Router.
 import logging
 from typing import Any
 
-from babylon60.database.pool import CortexConnectionPool
 from fastapi import APIRouter, Request
+
+from babylon60.database.pool import CortexConnectionPool
 
 logger = logging.getLogger("cortex.routes.ultramap")
 

@@ -11,6 +11,8 @@ import logging
 from enum import Enum
 from typing import Any
 
+from pydantic import BaseModel, Field
+
 from babylon60.extensions.llm.manager import LLMManager
 from babylon60.extensions.llm.router import IntentProfile
 from babylon60.extensions.music_engine.adapters import (
@@ -20,7 +22,6 @@ from babylon60.extensions.music_engine.adapters import (
     UdioV4Adapter,
 )
 from babylon60.extensions.music_engine.dsp_apotheosis import DSPApotheosis
-from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 

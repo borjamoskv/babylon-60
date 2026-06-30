@@ -7,9 +7,10 @@ Endpoints for visualizing the memory graph in 3D.
 
 import sqlite3
 
-from babylon60.auth import AuthResult, require_permission
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+
+from babylon60.auth import AuthResult, require_permission
 
 __all__ = [
     "GraphData",

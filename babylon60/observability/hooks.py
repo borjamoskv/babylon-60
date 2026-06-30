@@ -2,8 +2,9 @@
 import re
 import time
 
-from babylon60.observability.telemetry import telemetry
 from google.antigravity import hooks
+
+from babylon60.observability.telemetry import telemetry
 
 _timers = {}
 

@@ -35,9 +35,10 @@ import logging
 import os
 import time
 from collections import deque
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, AsyncIterator
+from typing import Any
 
 logger = logging.getLogger("cortex.training.moskv1_core")
 

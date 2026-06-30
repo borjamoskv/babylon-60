@@ -23,14 +23,13 @@ import time
 from typing import Any
 from uuid import uuid4
 
-from babylon60.guards import AntiLimerenceGuard
-
 from babylon60.agents.builtins.copilot_agent import CopilotAgent, create_copilot_agent
 from babylon60.agents.copilot_contracts import (
     CopilotContextPayload,
     SuggestionVerdict,
 )
 from babylon60.agents.message_schema import MessageKind, new_message
+from babylon60.guards import AntiLimerenceGuard
 
 logger = logging.getLogger("cortex.agents.copilot.server")
 

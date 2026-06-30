@@ -7,7 +7,10 @@ from babylon60.extensions.health.collectors.mnemonic import (
     FactCountCollector,
     SnapshotAgeCollector,
 )
-from babylon60.extensions.health.collectors.system import OrphanedBrowserCollector, SystemLoadCollector
+from babylon60.extensions.health.collectors.system import (
+    OrphanedBrowserCollector,
+    SystemLoadCollector,
+)
 
 BUILTINS = [
     DbCollector,

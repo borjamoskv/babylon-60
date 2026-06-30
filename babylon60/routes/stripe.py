@@ -18,10 +18,10 @@ import logging
 import os
 import time
 
-from babylon60.core import config
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
+from babylon60.core import config
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 __all__ = [

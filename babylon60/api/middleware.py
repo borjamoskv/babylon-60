@@ -19,10 +19,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final
 
-from babylon60.utils.i18n import DEFAULT_LANGUAGE, get_trans
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+
+from babylon60.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -494,6 +495,7 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
         """Asynchronously reports usage to Stripe via background task with secure DB lookup."""
         try:
             import stripe  # pyright: ignore[reportMissingImports]
+
             from babylon60.auth.manager import get_auth_manager
             from babylon60.core import config
 

@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import numpy as np
+
 from babylon60.simulation.primitives import MemoryTrajectory
 
 

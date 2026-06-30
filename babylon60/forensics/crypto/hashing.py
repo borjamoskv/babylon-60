@@ -3,9 +3,8 @@
 from collections.abc import Mapping
 from typing import Any
 
-from babylon60.utils.canonical import canonical_json
-
 from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.utils.canonical import canonical_json
 
 
 def canonical_json_bytes(payload: Any) -> bytes:

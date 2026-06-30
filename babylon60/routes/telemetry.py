@@ -8,12 +8,12 @@ import asyncio
 import logging
 from typing import Any
 
-from babylon60.api.deps import get_async_engine
-from babylon60.engine import CortexEngine as AsyncCortexEngine
 from fastapi import APIRouter, Depends, HTTPException, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
+from babylon60.api.deps import get_async_engine
 from babylon60.crypto.hash_registry import cortex_hash
+from babylon60.engine import CortexEngine as AsyncCortexEngine
 
 logger = logging.getLogger("cortex.api.telemetry")
 router = APIRouter(tags=["telemetry"])

@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.extensions.evolution.ast_mutators import (
     _AstAnalyzer,
     _BlockingPatternDetector,
@@ -20,8 +21,6 @@ from babylon60.extensions.evolution.ast_mutators import (
     _DocstringInjector,
     _EntropyAnnihilator,
 )
-
-from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex_extensions.evolution.ouroboros")
 

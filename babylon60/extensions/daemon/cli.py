@@ -20,6 +20,11 @@ import sys
 from pathlib import Path
 
 import click
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+
+from babylon60 import __version__
 from babylon60.extensions.daemon import (
     BUNDLE_ID,
     DEFAULT_COOLDOWN,
@@ -29,11 +34,6 @@ from babylon60.extensions.daemon import (
     MoskvDaemon,
 )
 from babylon60.extensions.platform.sys import get_service_dir, is_linux, is_macos, is_windows
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-
-from cortex import __version__
 
 __all__ = [
     "PLIST_SOURCE",

@@ -7,8 +7,9 @@ Streaming real-time graph updates and Doubt Circuit alerts to the dashboard.
 import json
 import logging
 
-from babylon60.engine.meta.metacognition import DoubtCircuit
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
+from babylon60.engine.meta.metacognition import DoubtCircuit
 
 router = APIRouter(tags=["topology"])
 logger = logging.getLogger("cortex.api.topology")

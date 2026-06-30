@@ -18,8 +18,8 @@ if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
     from babylon60.extensions.timing import TimingTracker
 
+from babylon60 import __version__
 from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from cortex import __version__
 
 # Theme and Console
 cortex_theme = Theme(

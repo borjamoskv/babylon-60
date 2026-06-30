@@ -30,9 +30,10 @@ import hmac
 import logging
 from typing import Annotated, Any
 
-from babylon60.gateway import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
+
+from babylon60.gateway import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
 
 logger = logging.getLogger("cortex.gateway.telegram")
 
@@ -248,6 +249,7 @@ async def telegram_webhook(
 
     # Send reply back to Telegram
     import httpx
+
     from babylon60.guards.url_guard import SafeTransport
 
     token = os.environ.get("CORTEX_TELEGRAM_TOKEN", "")

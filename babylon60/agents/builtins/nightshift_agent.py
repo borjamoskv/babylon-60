@@ -12,13 +12,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from babylon60.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
-
 from babylon60.agents.base import BaseAgent
 from babylon60.agents.bus import MessageBus
 from babylon60.agents.manifest import AgentManifest
 from babylon60.agents.message_schema import AgentMessage, MessageKind, new_message
 from babylon60.agents.tools import ToolRegistry
+from babylon60.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
 
 logger = logging.getLogger(__name__)
 

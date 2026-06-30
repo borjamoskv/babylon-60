@@ -9,6 +9,7 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 import httpx
+
 from babylon60.extensions.llm._resilience import CircuitBreakerError, is_retryable
 
 logger = logging.getLogger("cortex_extensions.llm")

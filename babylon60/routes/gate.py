@@ -5,6 +5,8 @@ SovereignGate API Router.
 REST endpoints for remote operator approval of L3 actions.
 """
 
+from fastapi import APIRouter, Depends, HTTPException
+
 from babylon60.auth import require_permission
 from babylon60.extensions.gate import (
     GateError,
@@ -17,7 +19,6 @@ from babylon60.types.models import (
     GateApprovalRequest,
     GateStatusResponse,
 )
-from fastapi import APIRouter, Depends, HTTPException
 
 __all__ = [
     "approve_action",

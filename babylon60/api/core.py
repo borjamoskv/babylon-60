@@ -13,20 +13,12 @@ import logging
 import sqlite3
 from contextlib import asynccontextmanager
 
-from babylon60.auth import AuthManager
-from babylon60.extensions.llm.quota import QuotaRejectedError
-from babylon60.extensions.metering.middleware import MeteringMiddleware
-from babylon60.extensions.swarm.manager import get_swarm_manager
-from babylon60.extensions.timing import TimingTracker
-from babylon60.routes import api_router
-from babylon60.telemetry.metrics import MetricsMiddleware, metrics
-from babylon60.utils.i18n import DEFAULT_LANGUAGE, get_trans
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 import babylon60.api.state as api_state
-from cortex import __version__, config
+from babylon60 import __version__, config
 from babylon60.api.middleware import (
     ContentSizeLimitMiddleware,
     CortexBillingMiddleware,
@@ -36,8 +28,16 @@ from babylon60.api.middleware import (
     SovereignIsolationMiddleware,
     TracingMiddleware,
 )
+from babylon60.auth import AuthManager
 from babylon60.engine import CortexEngine
+from babylon60.extensions.llm.quota import QuotaRejectedError
+from babylon60.extensions.metering.middleware import MeteringMiddleware
+from babylon60.extensions.swarm.manager import get_swarm_manager
+from babylon60.extensions.timing import TimingTracker
 from babylon60.mcp_server.knowledge_watcher import start_knowledge_daemon
+from babylon60.routes import api_router
+from babylon60.telemetry.metrics import MetricsMiddleware, metrics
+from babylon60.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
 __all__ = [
     "ContentSizeLimitMiddleware",
@@ -62,7 +62,6 @@ logger = logging.getLogger("uvicorn.error")
 async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
     from babylon60.database.pool import CortexConnectionPool
-
     from babylon60.engine import CortexEngine as AsyncCortexEngine
 
     db_path = config.DB_PATH
@@ -110,7 +109,7 @@ async def lifespan(app: FastAPI):
     # 3. Global Auth Registration
     import babylon60.auth
 
-    cortex.auth.manager._auth_manager = auth_manager  # type: ignore[reportAttributeAccessIssue]
+    babylon60.auth.manager._auth_manager = auth_manager  # type: ignore[reportAttributeAccessIssue]
 
     # 4. Temporal Tracking
     from babylon60.database.core import connect as db_connect
@@ -158,7 +157,8 @@ async def lifespan(app: FastAPI):
         await engine.close()
         await auth_manager.close()
         timing_conn.close()
-        cortex.auth.manager._auth_manager = None  # type: ignore[reportAttributeAccessIssue]
+        import babylon60.auth
+        babylon60.auth.manager._auth_manager = None  # type: ignore[reportAttributeAccessIssue]
         api_state.engine = None
         api_state.auth_manager = None
         api_state.tracker = None

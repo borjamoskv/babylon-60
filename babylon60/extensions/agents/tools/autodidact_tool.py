@@ -4,9 +4,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from pydantic import BaseModel, Field
+
 # Importación de la Cúspide O(1)
 from babylon60.extensions.skills.autodidact.actuator import autodidact_pipeline
-from pydantic import BaseModel, Field
 
 logger = logging.getLogger("CORTEX.TOOLS.AUTODIDACT")
 

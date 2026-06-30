@@ -5,8 +5,9 @@ Reality Level: C5-REAL
 """
 
 import instructor
-from babylon60.extensions.nous.models import NousAST
 from openai import AsyncOpenAI
+
+from babylon60.extensions.nous.models import NousAST
 
 
 class NousCompilerV2:

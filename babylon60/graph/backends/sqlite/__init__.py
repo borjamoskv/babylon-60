@@ -3,6 +3,7 @@
 import logging
 
 import aiosqlite
+
 from babylon60.graph.backends.base import GraphBackend
 from babylon60.graph.backends.sqlite.algorithms import SQLiteAlgorithmsMixin
 from babylon60.graph.backends.sqlite.query import SQLiteQueryMixin

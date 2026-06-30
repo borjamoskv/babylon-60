@@ -33,7 +33,6 @@ from babylon60.engine.evo._autocurative_config import AutoCurativeConfig
 from babylon60.engine.forensic.predictive_healer import Prediction, PredictiveHealer
 from babylon60.engine.self_optimizer import OptimizerConfig, SelfOptimizer
 
-
 __all__ = ["HealingStack", "HealingStackConfig"]
 
 logger = logging.getLogger("cortex.engine.evo.healing_stack")

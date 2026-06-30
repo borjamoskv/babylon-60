@@ -11,11 +11,12 @@ from __future__ import annotations
 import logging
 import time
 
-from babylon60.extensions.llm.sovereign import SovereignLLM
-from babylon60.gateway.spoof import SpoofManager
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+
+from babylon60.extensions.llm.sovereign import SovereignLLM
+from babylon60.gateway.spoof import SpoofManager
 
 logger = logging.getLogger("cortex.gateway.openai")
 

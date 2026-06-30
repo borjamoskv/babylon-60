@@ -10,11 +10,12 @@ import logging
 import os
 import time
 
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+
 from babylon60.memory.encoder import AsyncEncoder
 from babylon60.memory.models import CortexFactModel
 from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
 
 logger = logging.getLogger("cortex.mcp_server.knowledge_watcher")
 

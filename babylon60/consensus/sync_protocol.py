@@ -47,7 +47,7 @@ class BFTMerger:
         # Validación Estructural y CORTEX-TAINT
         import os
 
-        from babylon60.engine.causal.taint_engine import canonicalize_content, _fast_sha3, canonicalize_content
+        from babylon60.engine.causal.taint_engine import _fast_sha3, canonicalize_content
         
         # 1. Aserción de Invarianza Estructural (Node Hash)
         node_copy = node.copy()

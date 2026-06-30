@@ -3,11 +3,12 @@
 Search Router.
 """
 
+from fastapi import APIRouter, Depends, Query
+
 from babylon60.api.deps import get_async_engine
 from babylon60.auth import AuthResult, require_permission
 from babylon60.engine import CortexEngine as AsyncCortexEngine
 from babylon60.types.models import SearchRequest, SearchResult
-from fastapi import APIRouter, Depends, Query
 
 __all__ = ["search_facts", "search_facts_get"]
 

@@ -8,6 +8,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 import numpy as np
+
 from babylon60.observability.caf import lagrangian, select_next
 from babylon60.observability.efel import SystemState, encode_state, encode_task
 from babylon60.observability.fdf import FailureField, Particle, simulate_field

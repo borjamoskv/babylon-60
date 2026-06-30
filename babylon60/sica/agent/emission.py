@@ -3,10 +3,9 @@
 import logging
 from typing import Any
 
+from babylon60.agents.message_schema import AgentMessage, MessageKind, new_message
 from babylon60.sica.agent.stats import _LifetimeStats
 from babylon60.sica.meta_level import MetaJudgment
-
-from babylon60.agents.message_schema import AgentMessage, MessageKind, new_message
 
 logger = logging.getLogger("cortex.sica.agent.emission")
 

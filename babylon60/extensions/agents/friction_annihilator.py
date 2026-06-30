@@ -12,9 +12,10 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from babylon60.engine.smte.llm_mutator import LLMMutator  # pyright: ignore[reportAttributeAccessIssue]
-
 from babylon60.agents.mixins import EngineAwareMixin
+from babylon60.engine.smte.llm_mutator import (
+    LLMMutator,  # pyright: ignore[reportAttributeAccessIssue]
+)
 
 logger = logging.getLogger("cortex_extensions.agents.friction_annihilator")
 

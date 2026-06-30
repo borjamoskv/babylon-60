@@ -14,12 +14,11 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from babylon60.memory.manager import CortexMemoryManager
-
 from babylon60.agents.base import ReactiveTaskAgent
 from babylon60.agents.bus import MessageBus
 from babylon60.agents.manifest import AgentManifest
 from babylon60.agents.tools import ToolRegistry
+from babylon60.memory.manager import CortexMemoryManager
 
 logger = logging.getLogger(__name__)
 

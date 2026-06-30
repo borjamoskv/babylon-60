@@ -447,6 +447,7 @@ class MOSKV1DatasetCompiler:
 
             body = _clean_content("\n".join(lines[1:]))
             if len(body.strip()) < _MIN_OUTPUT_LENGTH:
+                self._filter_reason("pre_short_directive")
                 continue
 
             instruction = _pick_template(_DIRECTIVE_TEMPLATES, title=title)
@@ -496,6 +497,7 @@ class MOSKV1DatasetCompiler:
 
                 cleaned_body = _clean_content(body)
                 if len(cleaned_body.strip()) < _MIN_OUTPUT_LENGTH:
+                    self._filter_reason("pre_short_skill")
                     continue
 
                 instruction = _pick_template(
@@ -670,6 +672,7 @@ class MOSKV1DatasetCompiler:
 
             cleaned = _clean_content(content)
             if len(cleaned.strip()) < _MIN_OUTPUT_LENGTH:
+                self._filter_reason("pre_short_vault")
                 continue
 
             # Derive title from filename
@@ -717,6 +720,7 @@ class MOSKV1DatasetCompiler:
 
             cleaned = _clean_content(content)
             if len(cleaned.strip()) < _MIN_OUTPUT_LENGTH:
+                self._filter_reason("pre_short_workflow")
                 continue
 
             instruction = _pick_template(

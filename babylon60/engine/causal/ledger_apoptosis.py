@@ -1,9 +1,9 @@
-import os
-import json
 import fcntl
-import tempfile
+import json
+import os
 import shutil
-from typing import Dict
+import tempfile
+
 
 class ThermodynamicLedgerApoptosis:
     """
@@ -14,7 +14,7 @@ class ThermodynamicLedgerApoptosis:
     def __init__(self, ledger_path: str):
         self.ledger_path = ledger_path
 
-    def _compress_state(self) -> Dict[str, dict]:
+    def _compress_state(self) -> dict[str, dict]:
         """Calcula el estado topológico activo en memoria O(N_Active)."""
         active_state = {}
         if not os.path.exists(self.ledger_path):

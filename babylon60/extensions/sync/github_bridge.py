@@ -13,9 +13,9 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 import httpx
-from babylon60.memory.temporal import now_iso
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
+from babylon60.memory.temporal import now_iso
 
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine

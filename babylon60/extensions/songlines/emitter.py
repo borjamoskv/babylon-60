@@ -12,10 +12,9 @@ import os
 import time
 from pathlib import Path
 
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 from babylon60.memory.hdc.codec import HDCEncoder
 from babylon60.memory.hdc.item_memory import ItemMemory
-
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("cortex_extensions.songlines.emitter")
 

@@ -31,6 +31,7 @@ from babylon60.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_pr
 
 if TYPE_CHECKING:
     import aiosqlite
+
     from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.compactor")

@@ -16,6 +16,7 @@ import logging
 from typing import Any, Final
 
 import httpx
+
 from babylon60.storage.qdrant import VectorBackend
 
 __all__ = ["TurbopufferVectorBackend"]

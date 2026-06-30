@@ -11,9 +11,10 @@ import shutil
 import sys
 from pathlib import Path
 
+from rich.console import Console
+
 from babylon60.extensions.daemon import BUNDLE_ID
 from babylon60.extensions.platform.sys import get_service_dir
-from rich.console import Console
 
 __all__ = [
     "install_linux",

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from cortex import __version__ as CORTEX_VERSION
+from babylon60 import __version__ as CORTEX_VERSION
 from babylon60.database.core import connect_async, load_sqlite_vec_async
 
 

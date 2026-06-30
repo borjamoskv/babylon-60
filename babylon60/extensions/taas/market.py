@@ -4,8 +4,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from babylon60.engine import CortexEngine
 from pydantic import BaseModel
+
+from babylon60.engine import CortexEngine
 
 logger = logging.getLogger("cortex.taas")
 

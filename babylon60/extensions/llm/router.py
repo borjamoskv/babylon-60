@@ -352,6 +352,7 @@ class CortexLLMRouter:
     async def _try_provider(self, provider: BaseProvider, prompt: CortexPrompt) -> Result[str, str]:
         """Try a single provider, returning Result."""
         import httpx
+
         from babylon60.extensions.llm.quota import QuotaRejectedError
 
         try:

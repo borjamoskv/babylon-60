@@ -16,10 +16,9 @@ from dataclasses import dataclass, field
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
+from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.extensions.immune.chaos import ChaosScenario, async_interceptor
 from babylon60.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
-
-from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex_extensions.red_team.hydra_chaos")
 

@@ -29,7 +29,7 @@ def test_cli_apoptosis_aof(tmp_path):
     assert "Retained 1 active nodes" in result.output
     
     # Check that only node_1 remains
-    with open(aof_file, "r", encoding="utf-8") as f:
+    with open(aof_file, encoding="utf-8") as f:
         lines = f.readlines()
         
     assert len(lines) == 1

@@ -29,7 +29,6 @@ import time
 from typing import Any
 from uuid import uuid4
 
-from babylon60.crypto.hash_registry import cortex_hash_truncated
 from babylon60.agents.base import BaseAgent
 from babylon60.agents.copilot_contracts import (
     CodeEdit,
@@ -45,6 +44,7 @@ from babylon60.agents.copilot_contracts import (
 from babylon60.agents.manifest import AgentManifest
 from babylon60.agents.message_schema import AgentMessage, MessageKind, new_message
 from babylon60.agents.tools import ToolRegistry
+from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 logger = logging.getLogger("cortex.agents.copilot")
 

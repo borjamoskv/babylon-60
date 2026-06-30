@@ -3,8 +3,8 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
+
 import click
 from rich.panel import Panel
 from rich.text import Text

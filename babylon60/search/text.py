@@ -7,6 +7,7 @@ import sqlite3
 from typing import Any
 
 import aiosqlite
+
 from babylon60.memory.temporal import build_temporal_filter_params
 from babylon60.search.models import SearchResult
 from babylon60.search.utils import (

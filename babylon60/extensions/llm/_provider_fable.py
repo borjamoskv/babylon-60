@@ -6,6 +6,7 @@ import logging
 from typing import Any, Optional
 
 import httpx
+
 from babylon60.engine.causal.taint_engine import generate_secure_taint_token
 from babylon60.extensions.llm._resilience import resilient_call
 from babylon60.extensions.llm._stealth import apply_causal_jitter, sanitize_response

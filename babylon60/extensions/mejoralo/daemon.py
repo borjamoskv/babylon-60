@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from babylon60.cli import get_engine  # pyright: ignore
 from babylon60.extensions.daemon.monitors.canary import CanaryMonitor
 from babylon60.extensions.mejoralo.constants import (
     DAEMON_DEFAULT_SCAN_INTERVAL,
@@ -24,8 +25,6 @@ from babylon60.extensions.mejoralo.constants import (
 from babylon60.extensions.mejoralo.engine import MejoraloEngine
 from babylon60.extensions.thinking.fusion import ContextFusion
 from babylon60.telemetry.metrics import MetricsRegistry
-
-from babylon60.cli import get_engine  # pyright: ignore
 
 logger = logging.getLogger("cortex_extensions.mejoralo.daemon")
 

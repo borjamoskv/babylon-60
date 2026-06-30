@@ -34,6 +34,10 @@ import time
 from pathlib import Path
 from typing import Any
 
+from babylon60.agents.base import BaseAgent
+from babylon60.agents.manifest import AgentManifest
+from babylon60.agents.message_schema import AgentMessage, MessageKind
+from babylon60.agents.tools import ToolRegistry
 from babylon60.sica.agent.assessment import SelfAssessor
 from babylon60.sica.agent.emission import AgentEmitter
 from babylon60.sica.agent.stats import _LifetimeStats
@@ -47,11 +51,6 @@ from babylon60.sica.meta_level import MetaAction, MetaJudgment, MetaLevel
 from babylon60.sica.object_level import ExecutionTrace, ObjectLevel, StepOutcome
 from babylon60.sica.persistence import load_or_default, save_genome
 from babylon60.sica.strategy import SearchStrategy
-
-from babylon60.agents.base import BaseAgent
-from babylon60.agents.manifest import AgentManifest
-from babylon60.agents.message_schema import AgentMessage, MessageKind
-from babylon60.agents.tools import ToolRegistry
 
 logger = logging.getLogger("cortex.sica.agent")
 

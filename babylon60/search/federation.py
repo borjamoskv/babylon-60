@@ -22,6 +22,7 @@ import sqlite3
 from pathlib import Path
 
 import aiosqlite
+
 from babylon60.core.paths import COLD_STORAGE_DB, PERSONAL_DB
 from babylon60.search.models import SearchResult, SearchScope
 from babylon60.search.text import text_search, text_search_sync

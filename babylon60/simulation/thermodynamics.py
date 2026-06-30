@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 
 import numpy as np
+
 from babylon60.simulation.primitives import MemoryTrajectory
 
 

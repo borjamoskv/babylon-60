@@ -5,10 +5,11 @@ import dataclasses
 import logging
 from typing import TYPE_CHECKING, Any, cast
 
+from pydantic import ValidationError
+
 from babylon60.engine.cognitive.models import Fact, row_to_fact
 from babylon60.engine.core.store_validators import validate_content
 from babylon60.utils.canonical import now_iso
-from pydantic import ValidationError
 
 if TYPE_CHECKING:
     from babylon60.extensions.interfaces.engine import EngineProtocol
@@ -310,26 +311,26 @@ class FactManager:
 
     async def graph(self, *args, **kwargs) -> Any:
         """Retrieve graph visualization data, delegated to QueryMixin."""
-        import babylon60.graph
 
         async with self.engine.session() as conn:
-            return await cortex.graph.get_graph(conn, *args, **kwargs)
+            import babylon60.graph
+            return await babylon60.graph.get_graph(conn, *args, **kwargs)
 
     async def query_entity(self, *args, **kwargs) -> Any:
         """Query detailed information about an entity, delegated to QueryMixin."""
-        import babylon60.graph
 
         async with self.engine.session() as conn:
-            return await cortex.graph.query_entity(conn, *args, **kwargs)
+            import babylon60.graph
+            return await babylon60.graph.query_entity(conn, *args, **kwargs)
 
     async def find_path(self, *args, **kwargs) -> Any:
-        import babylon60.graph
 
         async with self.engine.session() as conn:
-            return await cortex.graph.find_path(conn, *args, **kwargs)
+            import babylon60.graph
+            return await babylon60.graph.find_path(conn, *args, **kwargs)
 
     async def get_context_subgraph(self, *args, **kwargs) -> Any:
-        import babylon60.graph
 
         async with self.engine.session() as conn:
-            return await cortex.graph.get_context_subgraph(conn, *args, **kwargs)
+            import babylon60.graph
+            return await babylon60.graph.get_context_subgraph(conn, *args, **kwargs)

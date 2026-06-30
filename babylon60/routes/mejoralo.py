@@ -5,6 +5,8 @@ MEJORAlo Router.
 API endpoints for the MEJORAlo v7.3 protocol.
 """
 
+from fastapi import APIRouter, Depends, Query
+
 from babylon60.api.deps import get_engine
 from babylon60.auth import require_permission
 from babylon60.engine import CortexEngine
@@ -19,7 +21,6 @@ from babylon60.types.models import (
     MejoraloShipResponse,
     ShipSealModel,
 )
-from fastapi import APIRouter, Depends, Query
 
 __all__ = [
     "get_history",

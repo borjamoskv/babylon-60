@@ -12,10 +12,9 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any
 
+import cortex_rs
 from babylon60.auth.backends import BaseAuthBackend
 from babylon60.auth.models import APIKey, AuthResult
-
-import cortex_rs
 from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = ["AuthManager", "get_auth_manager", "reset_auth_manager"]

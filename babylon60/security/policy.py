@@ -7,6 +7,7 @@ import time
 from collections.abc import Mapping
 from typing import Any
 
+from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.guards.landauer_guard import LandauerGuard
 from babylon60.security.types import (
     ImmuneArtifact,
@@ -16,8 +17,6 @@ from babylon60.security.types import (
     SealRecord,
     SealViolation,
 )
-
-from babylon60.crypto.hash_registry import cortex_hash
 
 # ---------- 5. State machine ----------
 

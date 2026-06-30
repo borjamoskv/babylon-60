@@ -16,6 +16,7 @@ import logging
 import os
 
 import httpx
+
 from babylon60.extensions.notifications.adapters.base import BaseAdapter
 from babylon60.extensions.notifications.events import CortexEvent
 

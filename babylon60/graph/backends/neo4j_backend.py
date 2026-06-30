@@ -3,8 +3,9 @@
 
 import os
 
-from babylon60.graph.backends.base import GraphBackend
 from neo4j import AsyncGraphDatabase
+
+from babylon60.graph.backends.base import GraphBackend
 
 
 class Neo4jBackend(GraphBackend):

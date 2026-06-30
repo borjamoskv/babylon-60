@@ -13,6 +13,8 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 import httpx
+from rich.console import Console
+
 from babylon60.extensions.llm._audit import spectral_audit
 from babylon60.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from babylon60.extensions.llm._presets import get_prefix_cache_config, load_presets
@@ -28,7 +30,6 @@ from babylon60.extensions.llm._stealth import (
 )
 from babylon60.extensions.llm.gemini_cache import get_gemini_gateway
 from babylon60.extensions.llm.quota import SovereignQuotaManager
-from rich.console import Console
 
 __all__ = ["LLMProvider"]
 

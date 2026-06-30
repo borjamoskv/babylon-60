@@ -14,6 +14,7 @@ import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from babylon60.cli.common import console  # pyright: ignore
 from babylon60.extensions.mejoralo.constants import (
     DEVILS_ADVOCATE_THRESHOLD,
     SWARM_BASE_TEMPERATURE,
@@ -22,8 +23,6 @@ from babylon60.extensions.mejoralo.constants import (
     SWARM_TEMPERATURE_STEP,
     SWARM_TIMEOUT_SECONDS,
 )
-
-from babylon60.cli.common import console  # pyright: ignore
 
 if TYPE_CHECKING:
     from babylon60.extensions.mejoralo.engine import MejoraloEngine

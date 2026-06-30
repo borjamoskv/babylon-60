@@ -14,9 +14,8 @@ import os
 import time
 from typing import Any, Protocol
 
-from babylon60.database.core import causal_write, connect_async
-
 from babylon60.agents.message_schema import AgentMessage
+from babylon60.database.core import causal_write, connect_async
 
 logger = logging.getLogger("cortex.agents.bus")
 

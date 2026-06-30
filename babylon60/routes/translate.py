@@ -5,9 +5,10 @@ import os
 from typing import Final
 
 import httpx
-from babylon60.auth import AuthResult, require_permission
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+
+from babylon60.auth import AuthResult, require_permission
 
 __all__ = ["TranslateRequest", "TranslateResponse", "router", "translate_texts"]
 

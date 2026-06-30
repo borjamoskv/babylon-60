@@ -7,10 +7,9 @@ import sys
 import time
 
 from babylon60.config import DB_PATH
+from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.database.core import connect
 from babylon60.extensions.signals.bus import SignalBus
-
-from babylon60.crypto.hash_registry import cortex_hash
 
 # Sovereign Memory & Execution Imports
 _CORTEX_CORE = os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core")

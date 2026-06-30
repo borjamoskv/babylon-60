@@ -27,12 +27,11 @@ import logging
 import time
 from typing import Any
 
+from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.extensions.zkortex.commitment import KnowledgeCommitment
 from babylon60.extensions.zkortex.merkle import ZKMembershipProof
 from babylon60.extensions.zkortex.prover import ZKOrtexProver
 from babylon60.extensions.zkortex.range_proof import ZKRangeProof
-
-from babylon60.crypto.hash_registry import cortex_hash
 
 logger = logging.getLogger("cortex_extensions.zkortex.opacity")
 

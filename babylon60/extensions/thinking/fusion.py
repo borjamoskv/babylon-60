@@ -6,6 +6,8 @@ import asyncio
 import logging
 from typing import Any
 
+from pydantic import BaseModel, Field, ValidationError
+
 from babylon60.extensions.llm.boundary import ImmuneBoundary
 from babylon60.extensions.thinking.fusion_models import (
     FusedThought,
@@ -15,7 +17,6 @@ from babylon60.extensions.thinking.fusion_models import (
     _jaccard,
     _tokenize,
 )
-from pydantic import BaseModel, Field, ValidationError
 
 __all__ = ["ContextFusion", "ThoughtFusion"]
 

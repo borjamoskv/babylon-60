@@ -35,7 +35,7 @@ def cmd_compile(workspace: str | None = None) -> None:
     print(f"   Workspace: {ws}")
     print()
 
-    stats = compiler.compile_full_dataset()
+    compiler.compile_full_dataset()
 
     # Export with train/val/test split
     sharegpt_path = compiler.export_sharegpt(split=True)
@@ -58,10 +58,9 @@ def cmd_compile(workspace: str | None = None) -> None:
 
 
 def cmd_train(
-    model: str = "mlx-community/Qwen2.5-Coder-32B-Instruct-4bit",
-    iters: int = 1000,
+    model: str = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
+    iters: int = 200,
     batch_size: int = 2,
-    lora_rank: int = 32,
     lora_layers: int = 16,
     learning_rate: float = 2e-5,
 ) -> None:
@@ -81,21 +80,31 @@ def cmd_train(
             print("❌ Dataset not found. Run 'compile' first.")
             sys.exit(1)
 
+    # Use non-deprecated mlx_lm subcommand syntax
     cmd = [
-        sys.executable, "-m", "mlx_lm.lora",
+        sys.executable, "-m", "mlx_lm", "lora",
         "--model", model,
+        "--train",
         "--data", str(dataset_dir),
         "--adapter-path", str(adapter_path),
+        "--fine-tune-type", "lora",
+        "--optimizer", "adamw",
+        "--mask-prompt",
+        "--num-layers", str(lora_layers),
         "--iters", str(iters),
         "--batch-size", str(batch_size),
-        "--lora-layers", str(lora_layers),
-        "--lora-rank", str(lora_rank),
         "--learning-rate", str(learning_rate),
+        "--steps-per-report", "10",
+        "--steps-per-eval", "50",
+        "--max-seq-length", "2048",
+        "--save-every", "100",
+        "--seed", "42",
     ]
 
     print(f"🧠 MLX LoRA Training — {model}")
-    print(f"   Iterations: {iters} | Batch: {batch_size} | Rank: {lora_rank}")
-    print(f"   Learning Rate: {learning_rate}")
+    print(f"   Iterations: {iters} | Batch: {batch_size} | Layers: {lora_layers}")
+    print(f"   Learning Rate: {learning_rate} | Optimizer: adamw")
+    print("   Max Seq Length: 2048 | Mask Prompt: True")
     print(f"   Output: {adapter_path}")
     print()
 
@@ -198,13 +207,13 @@ def cmd_validate() -> None:
     avg_inst = sum(instruction_lengths) / n if n else 0
 
     # Shannon entropy of output length distribution
-    length_buckets = Counter(l // 100 * 100 for l in output_lengths)
-    total_l = sum(length_buckets.values())
+    length_buckets = Counter(length // 100 * 100 for length in output_lengths)
+    total_length = sum(length_buckets.values())
     len_entropy = -sum(
-        (c / total_l) * math.log2(c / total_l)
+        (c / total_length) * math.log2(c / total_length)
         for c in length_buckets.values()
         if c > 0
-    ) if total_l > 0 else 0.0
+    ) if total_length > 0 else 0.0
 
     # ─── Report ────────────────────────────────────────────────────
     print("═══ MOSKV-1 DATASET VALIDATION v2.0 ═══")

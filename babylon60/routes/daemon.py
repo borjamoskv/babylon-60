@@ -3,9 +3,10 @@
 Daemon Router.
 """
 
+from fastapi import APIRouter, Depends, Request
+
 from babylon60.auth import AuthResult, require_permission
 from babylon60.utils.i18n import get_trans
-from fastapi import APIRouter, Depends, Request
 
 __all__ = ["daemon_status"]
 

@@ -3,6 +3,7 @@ import random
 from typing import Any
 
 import numpy as np
+
 from babylon60.observability.fdf import FailureField, Particle
 
 

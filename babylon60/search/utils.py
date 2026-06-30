@@ -8,6 +8,7 @@ import sqlite3
 from typing import Any
 
 import aiosqlite
+
 from babylon60.crypto.aes import CortexEncrypter
 from babylon60.search.models import SearchResult
 

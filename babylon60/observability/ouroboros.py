@@ -3,6 +3,7 @@ import time
 from dataclasses import dataclass, field
 
 import numpy as np
+
 from babylon60.observability.exergy_engine import ExecutionTrace
 
 MAX_FAILURE_REVENUE_MULTIPLIER = 3.0

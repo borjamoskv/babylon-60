@@ -1,8 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 import logging
 
-from babylon60.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
 from mcp.server.fastmcp import FastMCP
+
+from babylon60.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
 
 logger = logging.getLogger("cortex.mcp_server.music")
 

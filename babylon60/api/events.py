@@ -4,9 +4,10 @@ import json
 import logging
 from collections.abc import AsyncGenerator
 
-from babylon60.extensions.signals.bus import AsyncSignalBus
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
+
+from babylon60.extensions.signals.bus import AsyncSignalBus
 
 router = APIRouter(prefix="/v1/public/events", tags=["events"])
 logger = logging.getLogger("cortex.api.events")

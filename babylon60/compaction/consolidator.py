@@ -161,6 +161,7 @@ class BeliefConsolidator:
         by _MAX_EVENTS_PER_CYCLE (200). GPU-accelerated embedding.
         """
         import numpy as np
+
         from babylon60.engine.core.semantic_hash import batch_fingerprint
 
         if len(contents) < _MIN_CLUSTER_SIZE:

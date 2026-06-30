@@ -8,10 +8,11 @@ from datetime import datetime, timezone
 from typing import Any
 
 import pandas as pd
-from babylon60.extensions.daemon.models import TrendsAlert
-from babylon60.extensions.daemon.sidecar.trends_oracle.config import TrendsConfig
 from pytrends.request import TrendReq  # pyright: ignore[reportMissingImports]
 from requests.exceptions import RequestException
+
+from babylon60.extensions.daemon.models import TrendsAlert
+from babylon60.extensions.daemon.sidecar.trends_oracle.config import TrendsConfig
 
 logger = logging.getLogger("moskv-daemon")
 

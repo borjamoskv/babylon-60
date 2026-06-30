@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 
 import aiosqlite
+
 from babylon60.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex_extensions.sap.oliver")

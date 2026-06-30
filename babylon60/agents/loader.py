@@ -12,13 +12,12 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from babylon60.agents.schema import AgentRole
 from babylon60.memory.frequency import BIFTRouter, ContinuousMemorySystem
 from babylon60.memory.guardrails import SessionGuardrail
 from babylon60.memory.resonance import AdaptiveResonanceGate
 from babylon60.memory.sparse import MushroomBodyEncoder
 from babylon60.memory.working import WorkingMemoryL1
-
-from babylon60.agents.schema import AgentRole
 
 logger = logging.getLogger("cortex.agents.loader")
 

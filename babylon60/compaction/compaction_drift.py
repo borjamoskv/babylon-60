@@ -33,6 +33,7 @@ async def apply_drift_check(
 
     try:
         import numpy as np
+
         from babylon60.memory.drift import DriftMonitor, model_hash_from_name
 
         embedder = getattr(engine, "_embedder", None)

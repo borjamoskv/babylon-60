@@ -8,11 +8,12 @@ from __future__ import annotations
 import asyncio
 from collections.abc import AsyncGenerator
 
+from fastapi import APIRouter, Depends, Query, Request
+from sse_starlette.sse import EventSourceResponse
+
 from babylon60.api.deps import get_async_engine
 from babylon60.auth import AuthResult, require_permission
 from babylon60.engine import CortexEngine as AsyncCortexEngine
-from fastapi import APIRouter, Depends, Query, Request
-from sse_starlette.sse import EventSourceResponse
 
 __all__ = ["events_router"]
 

@@ -9,8 +9,8 @@ from contextlib import contextmanager
 import click
 from rich.panel import Panel
 
+from babylon60 import __version__
 from babylon60.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
-from cortex import __version__
 
 
 @contextmanager

@@ -20,9 +20,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from babylon60.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
+
+from babylon60.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 
 logger = logging.getLogger("cortex.gateway.rest")
 

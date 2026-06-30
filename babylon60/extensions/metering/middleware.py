@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import logging
 
-from babylon60.extensions.metering.quotas import QuotaEnforcer
-from babylon60.extensions.metering.tracker import UsageTracker
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+
+from babylon60.extensions.metering.quotas import QuotaEnforcer
+from babylon60.extensions.metering.tracker import UsageTracker
 
 __all__ = ["MeteringMiddleware"]
 

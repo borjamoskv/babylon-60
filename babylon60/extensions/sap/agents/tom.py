@@ -13,6 +13,7 @@ import logging
 from typing import Any
 
 import aiosqlite
+
 from babylon60.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex_extensions.sap.tom")

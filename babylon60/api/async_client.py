@@ -19,9 +19,9 @@ import os
 from typing import Any
 
 import httpx
-from babylon60.extensions.immune.chaos import ChaosGate, async_interceptor
 
 from babylon60.api.client import CortexError, Fact
+from babylon60.extensions.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["AsyncCortexClient"]
 

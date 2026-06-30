@@ -10,6 +10,7 @@ import logging
 import os
 
 import httpx
+
 from babylon60.audit.ledger import EnterpriseAuditLedger
 from babylon60.guards.egress_guard import EgressGuard
 

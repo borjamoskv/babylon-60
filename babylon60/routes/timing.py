@@ -6,12 +6,13 @@ Timing Router.
 import logging
 import sqlite3
 
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from starlette.concurrency import run_in_threadpool
+
 import babylon60.api.state as api_state
 from babylon60.auth import AuthResult, require_permission
 from babylon60.types.models import HeartbeatRequest, TimeSummaryResponse
 from babylon60.utils.i18n import get_trans
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from starlette.concurrency import run_in_threadpool
 
 __all__ = [
     "get_time_history",

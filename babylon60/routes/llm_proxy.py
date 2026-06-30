@@ -18,9 +18,10 @@ import re
 from collections.abc import AsyncGenerator
 
 import httpx
-from babylon60.extensions.signals.bus import AsyncSignalBus
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
+
+from babylon60.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.exergy.middleware")
 
