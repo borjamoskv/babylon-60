@@ -1,7 +1,7 @@
 import pytest
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from babylon60.consensus.bft_quorum import BFTQuorumGuard
+from babylon60.consensus.bft_quorum import BFTQuorumGuard, BFTQuorumError
 
 
 @pytest.fixture
@@ -29,6 +29,7 @@ def test_bft_quorum_met(bft_guard, keys):
     signatures = {
         "agent_1": keys["agent_1"].sign(payload),
         "agent_2": keys["agent_2"].sign(payload),
+        "agent_3": keys["agent_3"].sign(payload),
     }
 
     assert bft_guard.authorize_payload(payload, signatures) is True
@@ -40,7 +41,8 @@ def test_bft_quorum_not_met_insufficient(bft_guard, keys):
     # Provide 0 signatures -> Should fail
     signatures = {}
 
-    assert bft_guard.authorize_payload(payload, signatures) is False
+    with pytest.raises(BFTQuorumError):
+        bft_guard.authorize_payload(payload, signatures)
 
 
 def test_bft_quorum_not_met_rogue(bft_guard, keys):
@@ -52,7 +54,8 @@ def test_bft_quorum_not_met_rogue(bft_guard, keys):
         "rogue_agent": keys["rogue_agent"].sign(payload),
     }
 
-    assert bft_guard.authorize_payload(payload, signatures) is False
+    with pytest.raises(BFTQuorumError):
+        bft_guard.authorize_payload(payload, signatures)
 
 
 def test_bft_quorum_standalone():

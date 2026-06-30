@@ -8,6 +8,7 @@ import hashlib
 import pytest
 
 from babylon60.consensus.merkle import compute_merkle_root, verify_merkle_proof, MerkleTree
+from babylon60.crypto.hash_registry import cortex_hash
 
 
 # ── compute_merkle_root ──────────────────────────────────────────────────
@@ -26,7 +27,7 @@ class TestComputeMerkleRoot:
     def test_two_hashes_deterministic(self):
         h0 = hashlib.sha256(b"leaf_0").hexdigest()
         h1 = hashlib.sha256(b"leaf_1").hexdigest()
-        expected = hashlib.sha256(f"{h0}{h1}".encode()).hexdigest()
+        expected = cortex_hash(f"{h0}\x00{h1}".encode())
         assert compute_merkle_root([h0, h1]) == expected
 
     def test_odd_number_duplicates_last(self):
@@ -40,9 +41,9 @@ class TestComputeMerkleRoot:
         hashes = [hashlib.sha256(f"leaf_{i}".encode()).hexdigest() for i in range(4)]
         root = compute_merkle_root(hashes)
         # Manually compute
-        h01 = hashlib.sha256(f"{hashes[0]}{hashes[1]}".encode()).hexdigest()
-        h23 = hashlib.sha256(f"{hashes[2]}{hashes[3]}".encode()).hexdigest()
-        expected_root = hashlib.sha256(f"{h01}{h23}".encode()).hexdigest()
+        h01 = cortex_hash(f"{hashes[0]}\x00{hashes[1]}".encode())
+        h23 = cortex_hash(f"{hashes[2]}\x00{hashes[3]}".encode())
+        expected_root = cortex_hash(f"{h01}\x00{h23}".encode())
         assert root == expected_root
 
     def test_deterministic_same_input_same_output(self):
