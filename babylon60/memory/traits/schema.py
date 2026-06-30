@@ -46,7 +46,8 @@ class SchemaTrait:
             conn.execute("PRAGMA busy_timeout=5000")
 
             try:
-                conn.enable_load_extension(True)
+                if hasattr(conn, "enable_load_extension"):
+                    conn.enable_load_extension(True)
                 sqlite_vec.load(conn)
                 self._vector_enabled = True
                 logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")

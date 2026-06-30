@@ -5,7 +5,8 @@ import sqlite_vec
 
 def main():
     conn = sqlite3.connect(":memory:")
-    conn.enable_load_extension(True)
+    if hasattr(conn, "enable_load_extension"):
+        conn.enable_load_extension(True)
     sqlite_vec.load(conn)
     try:
         conn.executescript("""

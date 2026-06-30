@@ -17,7 +17,8 @@ class ArtistCortexEngine:
     def _init_db(self):
         """Initializes connection and loads sqlite-vec."""
         self.conn = sqlite3.connect(self.db_path)
-        self.conn.enable_load_extension(True)
+        if hasattr(self.conn, "enable_load_extension"):
+            self.conn.enable_load_extension(True)
         try:
             # Requires sqlite-vec to be installed on the system paths
             import sqlite_vec

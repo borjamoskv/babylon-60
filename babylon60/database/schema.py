@@ -182,13 +182,6 @@ CREATE VIRTUAL TABLE IF NOT EXISTS fact_embeddings USING vec0(
 );
 """
 
-# ─── Specular Memory (HDC 8k) ────────────────────────────────────────
-CREATE_SPECULAR_EMBEDDINGS = """
-CREATE VIRTUAL TABLE IF NOT EXISTS specular_embeddings USING vec0(
-    fact_id INTEGER PRIMARY KEY,
-    embedding FLOAT[8000]
-);
-"""
 
 # ─── Sessions Log ────────────────────────────────────────────────────
 CREATE_SESSIONS = """

@@ -461,8 +461,9 @@ async def load_sqlite_vec_async(conn: aiosqlite.Connection) -> bool:
 
     extension_toggle_enabled = False
     try:
-        await conn.enable_load_extension(True)
-        extension_toggle_enabled = True
+        if hasattr(conn, "enable_load_extension"):
+            await conn.enable_load_extension(True)
+            extension_toggle_enabled = True
         await conn._execute(sqlite_vec.load, conn._conn)  # type: ignore[no-untyped-call]
     except (AttributeError, OSError, sqlite3.Error) as exc:
         logger.debug("sqlite-vec not available for async connection: %s", exc)
@@ -470,7 +471,8 @@ async def load_sqlite_vec_async(conn: aiosqlite.Connection) -> bool:
     finally:
         if extension_toggle_enabled:
             try:
-                await conn.enable_load_extension(False)
+                if hasattr(conn, "enable_load_extension"):
+                    await conn.enable_load_extension(False)
             except (AttributeError, OSError, sqlite3.Error):
                 logger.debug("sqlite-vec cleanup skipped for async connection")
 
@@ -484,8 +486,9 @@ def load_sqlite_vec(conn: sqlite3.Connection) -> bool:
 
     extension_toggle_enabled = False
     try:
-        conn.enable_load_extension(True)
-        extension_toggle_enabled = True
+        if hasattr(conn, "enable_load_extension"):
+            conn.enable_load_extension(True)
+            extension_toggle_enabled = True
         sqlite_vec.load(conn)
     except (AttributeError, OSError, sqlite3.Error) as exc:
         logger.debug("sqlite-vec not available for sync connection: %s", exc)
@@ -493,7 +496,8 @@ def load_sqlite_vec(conn: sqlite3.Connection) -> bool:
     finally:
         if extension_toggle_enabled:
             try:
-                conn.enable_load_extension(False)
+                if hasattr(conn, "enable_load_extension"):
+                    conn.enable_load_extension(False)
             except (AttributeError, OSError, sqlite3.Error):
                 logger.debug("sqlite-vec cleanup skipped for sync connection")
 
