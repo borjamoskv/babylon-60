@@ -123,14 +123,15 @@ class HDCVectorStoreL2:
             # Vector Table (sqlite-vec uses float[N])
             dim = self._encoder.dimension
             if self._vec_loaded:
-                self._conn.execute(f"""  # nosec
+                # nosec
+                self._conn.execute(f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS hdc_vec_facts USING vec0(
                         embedding float[{dim}]
                     )
                 """)
 
-                # Specular Vector Table (G10 Intent Alignment)
-                self._conn.execute(f"""  # nosec
+                # nosec
+                self._conn.execute(f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS hdc_specular_vec_facts USING vec0(
                         embedding float[{dim}]
                     )
