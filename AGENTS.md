@@ -309,7 +309,7 @@ uvicorn babylon60.api:app --reload  # optional: API server
 3. Prefer **O(1) structures** (dicts/sets) over repeated O(N) scans.
 4. **Use standard library first** — minimize dependencies.
 5. Imports must remain **sorted and grouped** (Ruff enforces).
-6. Tests should **mirror the `cortex/` structure**.
+6. Tests should **mirror the `babylon60/` structure**.
 
 ### 6.2.1 Coding Agent Hygiene (Jules / Sweep / Copilots)
 
@@ -328,7 +328,7 @@ A change is **INCOMPLETE** if any applicable step is missing:
 
 1. - [ ] **Tests** — coverage for modified or new behavior.
 2. - [ ] **Typing** — explicit type hints on all public surfaces.
-3. - [ ] **Migrations** — for schema changes: review `cortex/migrations/`, verify via `cortex/migrate.py`, document rollback target.
+3. - [ ] **Migrations** — for schema changes: review `babylon60/migrations/`, verify via `babylon60/migrate.py`, document rollback target.
 4. - [ ] **Trust Impact** — ledger/audit review for any guard, encryption, taint, or tenant isolation change.
 5. - [ ] **Async Correctness** — no blocking calls, proper timeout/cancellation, resource cleanup.
 6. - [ ] **Documentation** — update if public behavior, API contract, or CLI parity changes.
@@ -371,7 +371,7 @@ INVARIANT: Never assume prior session state. Always verify from Git DAG (AX-041)
 | Operations | [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Runtime and maintenance |
 | SDK Surface | [`docs/SDK-SURFACE.md`](docs/SDK-SURFACE.md) | Public API surface documentation |
 | Developer Guide | [`docs/developer-guide.md`](docs/developer-guide.md) | Development workflow and patterns |
-| APEX Core Registry | [`cortex/agents/primitives/APEX_CORE.md`](cortex/agents/primitives/APEX_CORE.md) | 100 Sovereign APEX Primitives & Invariants Registry |
+| APEX Core Registry | [`babylon60/agents/primitives/APEX_CORE.md`](babylon60/agents/primitives/APEX_CORE.md) | 100 Sovereign APEX Primitives & Invariants Registry |
 
 ### Nested AGENTS.md
 
