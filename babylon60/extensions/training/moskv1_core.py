@@ -180,10 +180,11 @@ class MOSKV1Core:
             try:
                 from mlx_lm import load
                 logger.info("Warmup: loading MLX model and LoRA adapter...")
-                model, tokenizer = load(
+                res = load(
                     self._mlx_base_model_path,
                     adapter_path=str(self._adapter_path)
                 )
+                model, tokenizer = res[0], res[1]
                 return model, tokenizer
             except Exception as e:
                 logger.error("Warmup failed: %s", e)
@@ -231,7 +232,12 @@ class MOSKV1Core:
             from babylon60.embeddings import LocalEmbedder
             from babylon60.search.hybrid import hybrid_search
             embedder = LocalEmbedder()
-            query_embedding = embedder.embed(query)
+            from typing import cast
+            raw_embedding = embedder.embed(query)
+            if raw_embedding and isinstance(raw_embedding[0], list):
+                query_embedding: list[float] = raw_embedding[0]
+            else:
+                query_embedding: list[float] = cast(list[float], raw_embedding)
             results = await hybrid_search(
                 conn=db_conn,
                 query=query,
@@ -260,10 +266,9 @@ class MOSKV1Core:
                 from babylon60.context.assembler import ContextAssembler
 
                 assembler = ContextAssembler(db_conn)
-                ctx_packet = await assembler.assemble(
-                    query=query,
+                ctx_packet = assembler.assemble(
+                    intent=query,
                     tenant_id=tenant_id,
-                    project=project,
                     max_tokens=MAX_CONTEXT_TOKENS,
                 )
                 if ctx_packet and hasattr(ctx_packet, "facts"):
@@ -622,10 +627,8 @@ class MOSKV1Core:
             full_prompt = "\n\n".join(prompt_parts)
             result = await self._sovereign_llm.generate(
                 prompt=full_prompt,
-                temperature=temperature,
-                max_tokens=4096,
             )
-            return result if isinstance(result, str) else str(result)
+            return result.content
 
         except Exception as e:
             logger.error("SovereignLLM fallback failed: %s", e)
@@ -656,19 +659,23 @@ class MOSKV1Core:
 
             def _load_and_gen():
                 # Lazy-load MLX model and tokenizer (synchronous load if never loaded)
-                if self._mlx_model is None:
+                model = self._mlx_model
+                tokenizer = self._mlx_tokenizer
+                if model is None or tokenizer is None:
                     from mlx_lm import load
                     logger.info("Loading base model and LoRA adapter into MLX...")
-                    model, tokenizer = load(
+                    res = load(
                         self._mlx_base_model_path,
                         adapter_path=str(self._adapter_path)
                     )
+                    model = res[0]
+                    tokenizer = res[1]
                     self._mlx_model = model
                     self._mlx_tokenizer = tokenizer
                 
                 # Apply chat template
                 from mlx_lm import generate
-                prompt = self._mlx_tokenizer.apply_chat_template(
+                prompt = tokenizer.apply_chat_template(
                     messages,
                     tokenize=False,
                     add_generation_prompt=True,
@@ -676,8 +683,8 @@ class MOSKV1Core:
                 
                 logger.info("Executing native MLX generation...")
                 raw_response = generate(
-                    self._mlx_model,
-                    self._mlx_tokenizer,
+                    model,
+                    tokenizer,
                     prompt=prompt,
                     max_tokens=max_tokens,
                 )
@@ -713,10 +720,11 @@ class MOSKV1Core:
             def _load_new():
                 from mlx_lm import load
                 logger.info("Background Reload: Loading base model and new LoRA adapter...")
-                return load(
+                res = load(
                     self._mlx_base_model_path,
                     adapter_path=str(self._adapter_path)
                 )
+                return res[0], res[1]
 
             loop = asyncio.get_running_loop()
             with ThreadPoolExecutor(max_workers=1) as pool:

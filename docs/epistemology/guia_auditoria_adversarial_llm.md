@@ -29,7 +29,7 @@ graph TD
     A["Fase 1: Análisis Estático (Dataset & Config)"] --> B["Fase 2: Simulación de Ataques de Caja Negra"]
     B --> C["Fase 3: Evaluación de Caja Blanca (Gradientes)"]
     C --> D["Fase 4: Verificación Formal (Z3)"]
-    D --> E["Fase 5: Endurecimiento (Hardening) y Ledger"]
+    D --> E["Fase 5: Mitigaciones en Persistencia (BABYLON-60)"]
 ```
 
 ### Fase 1: Auditoría de Cadena de Suministro
@@ -141,8 +141,6 @@ def verificar_robustez_formal() -> None:
     
     # Condición de evasión adversarial: El clasificador original retorna seguro,
     # pero el perturbado evalúa como inseguro (o viceversa).
-    # f(h_prompt, r_prompt) = 2.5 * 3.5 + 4.0 * 0.15 - 12.0 = 8.75 + 0.6 - 12.0 = -2.65 (Seguro, ya que es < 0)
-    # Buscamos si existe perturbación tal que f(h, r) > 0 (Inseguro / Alarma)
     solver.add(f(h, r) >= 0)
     
     if solver.check() == sat:
@@ -159,7 +157,17 @@ if __name__ == "__main__":
 
 ---
 
+## 5. Mitigaciones Específicas en la Infraestructura BABYLON-60
+
+Para integrar estos controles en el entorno runtime de **BABYLON-60**, se establecen contramedidas a nivel de base de datos (`sqlite-vec`) y de orquestación de agentes:
+
+*   **Firmas de Integridad de Modelos (VEC-0)**: Verificación periódica del hash SHA-256 de los archivos ONNX locales en `cortex/embeddings/` antes de cargarlos en memoria para prevenir model poisoning.
+*   **Aislamiento y Taint de Datos (Write-Path Contract)**: Todo input sospechoso detectado por el analizador de entropía o el clasificador formal es marcado con la firma `CORTEX-TAINT` indicando sospecha de inyección (`taint:agent_id:session_id:timestamp:payload_hash`).
+*   **Limitación de Precisión en Búsqueda de Vectores**: Para mitigar ataques de extracción de modelos a través de vectores de similitud, la API de consulta de base de datos restringe la resolución de scores de similitud truncando los resultados a 4 decimales.
+
+---
+
 ```yaml
 Claim: "El endurecimiento operativo contra vectores adversarios requiere mecanismos estáticos y defensas dinámicas en el pipeline de pre-procesamiento."
-Proof: { Base: "docs/epistemology/guia_auditoria_adversarial_llm.md", Range: [20, 100], Confidence: "C5-REAL" }
+Proof: { Base: "docs/epistemology/guia_auditoria_adversarial_llm.md", Range: [20, 120], Confidence: "C5-REAL" }
 ```

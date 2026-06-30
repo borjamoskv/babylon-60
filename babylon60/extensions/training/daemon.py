@@ -162,8 +162,8 @@ class AutonomousTrainingDaemon:
             workspace_path = Path(__file__).resolve().parents[3]
             logger.info("🔧 Pre-compiling static dataset from workspace: %s", workspace_path)
             
-            compiler = MOSKV1DatasetCompiler(min_exergy=0.45)
-            compiler.compile_full_dataset(workspace_path)
+            compiler = MOSKV1DatasetCompiler(workspace_path=workspace_path, min_exergy=0.45)
+            compiler.compile_full_dataset()
             logger.info("✅ Pre-compilation complete.")
         except Exception as ce:
             logger.error("Failed pre-compiling static dataset: %s. Continuing with existing files.", ce)
