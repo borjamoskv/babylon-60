@@ -347,3 +347,4 @@ cortex-system/runtime/
 
 # Quarantined procedural artifacts
 BOCETOS/
+outputs/
