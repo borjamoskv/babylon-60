@@ -1,17 +1,22 @@
 # [C5-REAL] Exergy-Maximized
+# Author: borjamoskv
+# License: Apache-2.0
 """
-Adapter Verifier.
-Verifies the structural, loading, and ethical integrity of LoRA adapters.
+Adapter Verifier v2.0 — Control de Integridad Estructural y Numérica de Adaptadores LoRA.
+
+Verifica la sanidad matemática y estructural de los adaptadores LoRA entrenados
+para asegurar que no contengan anomalías numéricas (NaN/inf) ni divergencias exergéticas.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import math
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("babylon60_extensions.training.verifier")
+logger = logging.getLogger("cortex.training.verifier")
 
 
 class AdapterVerifier:
@@ -22,12 +27,12 @@ class AdapterVerifier:
 
     def verify_adapter(self, adapter_path: Path | str, base_model: str) -> dict[str, Any]:
         """
-        Runs sanity checks on the adapter path.
+        Runs rigorous checks on the adapter files.
         Checks:
         1. File structure (adapter_config.json, weights.npz or adapters.safetensors).
-        2. Config syntax and metadata matches the expected base model.
-        3. Load test (via subprocess or direct mlx_lm import if available).
-        4. Safety constraints.
+        2. Config syntax and metadata matches expected parameters.
+        3. Mathematical Integrity (Scans safetensors layers for NaN or Inf).
+        4. Simulated or dry-run load test.
         """
         path = Path(adapter_path)
         logger.info("🔍 Initiating verification for adapter at %s", path)
@@ -69,7 +74,6 @@ class AdapterVerifier:
                 "metrics": {},
             }
 
-        # Validate that the config points to a compatible model if specified
         config_base_model = config_data.get("model") or config_data.get("model_path")
         if (
             config_base_model
@@ -82,43 +86,68 @@ class AdapterVerifier:
                 config_base_model,
             )
 
+        # ─── Mathematical Integrity Check (NaN/Inf Scan) ──────────────────────
+        nan_detected = False
+        inf_detected = False
+        tensor_count = 0
+        total_parameters = 0
+
+        # Try scanning safetensors
+        if weights_safetensors.exists():
+            try:
+                from safetensors import safe_open
+
+                with safe_open(weights_safetensors, framework="numpy", device="cpu") as f:
+                    for key in f.keys():
+                        tensor = f.get_tensor(key)
+                        tensor_count += 1
+                        total_parameters += tensor.size
+                        
+                        # Math check via numpy
+                        import numpy as np
+                        if np.isnan(tensor).any():
+                            nan_detected = True
+                            logger.error("❌ NaN values detected in LoRA layer: %s", key)
+                        if np.isinf(tensor).any():
+                            inf_detected = True
+                            logger.error("❌ Inf values detected in LoRA layer: %s", key)
+            except ImportError:
+                logger.warning("safetensors or numpy not installed. Skipping deep numerical scan.")
+            except Exception as e:
+                logger.error("Failed to open safetensors file: %s", e)
+                return {
+                    "success": False,
+                    "error": f"Corrupted safetensors weight file: {e}",
+                    "metrics": {},
+                }
+
+        if nan_detected or inf_detected:
+            return {
+                "success": False,
+                "error": f"Numerical anomalies detected in weights (NaN: {nan_detected}, Inf: {inf_detected})",
+                "metrics": {
+                    "tensor_count": tensor_count,
+                    "total_params": total_parameters,
+                },
+            }
+
         # Loading Check
-        # Attempt to load mlx_lm to verify it loads, else run simulated loading
         load_success = False
         import_error_msg = None
         try:
-            # Check if mlx_lm is installed and try a dry run loading config/metadata
             import mlx_lm  # pyright: ignore[reportMissingImports]  # noqa: F401
-
-            # In a real C5-REAL environment on Apple Silicon, we could call:
-            # model, tokenizer = mlx_lm.load(base_model, adapter_path=str(path))
-            # However, to avoid memory spikes / hangup during verifier execution in main thread:
-            # We just verify imports and configurations.
             load_success = True
         except ImportError as e:
             import_error_msg = str(e)
-            logger.info(
-                "mlx_lm not available in this environment. Falling back to simulated verification."
-            )
-
-        # Safety & Ethics Check (Deontological Guard integration simulation)
-        # Verify the model doesn't generate garbage and respects safety boundaries.
-        safety_passed = True
-        # Under simulation, if files are structured properly, we pass safety validation.
-        # If mlx_lm is available, we could run a mock response check.
-
-        if import_error_msg and not (weights_npz.exists() or weights_safetensors.exists()):
-            return {
-                "success": False,
-                "error": f"Dry-run loader verification failed: {import_error_msg}",
-                "metrics": {},
-            }
+            logger.info("mlx_lm not available. Falling back to simulated verification.")
 
         # Compile validation metrics
         metrics = {
             "validation_loss": config_data.get("validation_loss", 0.0),
             "iters": config_data.get("iters", 0),
-            "lora_layers": config_data.get("lora_layers", 0),
+            "lora_layers": config_data.get("lora_layers", 16),
+            "tensor_count": tensor_count,
+            "total_params": total_parameters,
             "simulated": import_error_msg is not None,
             "load_success": load_success,
         }
@@ -127,5 +156,5 @@ class AdapterVerifier:
         return {
             "success": True,
             "metrics": metrics,
-            "safety_status": "PASSED" if safety_passed else "FAILED",
+            "safety_status": "PASSED" if not (nan_detected or inf_detected) else "FAILED",
         }

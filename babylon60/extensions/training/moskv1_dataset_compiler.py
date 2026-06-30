@@ -380,8 +380,12 @@ class MOSKV1DatasetCompiler:
             self._filter_reason("duplicate")
             return False
 
+        # Purge HTML comments and XML tags from instructions to prevent leakages
+        entry.instruction = _HTML_COMMENT_RE.sub("", entry.instruction)
+        entry.instruction = _SYSTEM_XML_TAGS_RE.sub("", entry.instruction).strip()
+
         # Length bounds
-        inst_len = len(entry.instruction.strip())
+        inst_len = len(entry.instruction)
         output_len = len(entry.output.strip())
         
         if output_len < _MIN_OUTPUT_LENGTH:
@@ -769,7 +773,10 @@ class MOSKV1DatasetCompiler:
 
         count = 0
         try:
-            conn = sqlite3.connect(str(db_path_resolved))
+            # R10 Compliance: Rigid busy_timeout (5000ms) and WAL mode active
+            conn = sqlite3.connect(str(db_path_resolved), timeout=5.0)
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("PRAGMA busy_timeout=5000")
             conn.row_factory = sqlite3.Row
 
             # Extract high-confidence facts

@@ -148,6 +148,42 @@ class MOSKV1Core:
         self._mlx_tokenizer = None
         self._mlx_base_model_path = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
 
+    async def warmup(self) -> bool:
+        """Pre-warm model weights into unified memory asynchronously."""
+        adapter_file = self._adapter_path / "adapters.safetensors"
+        if not adapter_file.exists():
+            logger.debug("No adapters found, skipping warmup.")
+            return False
+
+        if self._mlx_model is not None:
+            return True
+
+        import asyncio
+        from concurrent.futures import ThreadPoolExecutor
+
+        def _load():
+            try:
+                from mlx_lm import load
+                logger.info("Warmup: loading MLX model and LoRA adapter...")
+                model, tokenizer = load(
+                    self._mlx_base_model_path,
+                    adapter_path=str(self._adapter_path)
+                )
+                return model, tokenizer
+            except Exception as e:
+                logger.error("Warmup failed: %s", e)
+                return None, None
+
+        loop = asyncio.get_running_loop()
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            model, tokenizer = await loop.run_in_executor(pool, _load)
+            if model and tokenizer:
+                self._mlx_model = model
+                self._mlx_tokenizer = tokenizer
+                logger.info("Warmup complete. MOSKV-1 loaded in Metal memory.")
+                return True
+        return False
+
     def clear_history(self) -> None:
         """Reset conversation history."""
         self._history.clear()

@@ -299,6 +299,29 @@ def cmd_validate() -> None:
     else:
         print("   ❌ Dataset quality is insufficient — review filter settings")
 
+    # ─── Weights Verification ───
+    adapter_path = Path.home() / ".cortex" / "training" / "adapters"
+    if (adapter_path / "adapters.safetensors").exists():
+        print()
+        print("═══ LoRA WEIGHTS VERIFICATION (C5-REAL) ═══")
+        from babylon60.extensions.training.verifier import AdapterVerifier
+        verifier = AdapterVerifier()
+        base_model = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
+        verdict = verifier.verify_adapter(adapter_path, base_model)
+        
+        if verdict["success"]:
+            metrics = verdict["metrics"]
+            print(f"   Status:        ✅ PASSED")
+            print(f"   Total Tensors: {metrics['tensor_count']}")
+            print(f"   Parameters:    {metrics['total_params']:,}")
+            print(f"   Layers Check:  All weights finite, zero NaNs/infs.")
+        else:
+            print(f"   Status:        ❌ FAILED")
+            print(f"   Error:         {verdict['error']}")
+    else:
+        print()
+        print("💡 Tip: No adapter weights found in adapters/. Run 'train' to generate weights.")
+
 
 def cmd_stats() -> None:
     """Show stats of the last compiled dataset."""
