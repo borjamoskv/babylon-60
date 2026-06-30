@@ -44,6 +44,18 @@ class Dual:
     def __rsub__(self, other: float) -> Dual:
         return Dual(other - self.val, -self.der)
 
+    def __neg__(self) -> Dual:
+        return Dual(-self.val, -self.der)
+
+    def __pos__(self) -> Dual:
+        return Dual(self.val, self.der)
+
+    def __abs__(self) -> Dual:
+        # Derivative of |x| is sign(x) for x != 0.
+        # At x=0, we define it as 1.0 (subgradient convention).
+        sign = 1.0 if self.val >= 0 else -1.0
+        return Dual(abs(self.val), self.der * sign)
+
     def __mul__(self, other: Dual | float) -> Dual:
         if isinstance(other, Dual):
             return Dual(
@@ -92,6 +104,22 @@ class Dual:
         if self.val <= 0:
             raise ValueError("Logarithm domain error.")
         return Dual(math.log(self.val), self.der / self.val)
+
+    def sqrt(self) -> Dual:
+        if self.val <= 0:
+            raise ValueError("Square root domain error.")
+        val = math.sqrt(self.val)
+        return Dual(val, self.der / (2.0 * val))
+
+    def sinh(self) -> Dual:
+        return Dual(math.sinh(self.val), self.der * math.cosh(self.val))
+
+    def cosh(self) -> Dual:
+        return Dual(math.cosh(self.val), self.der * math.sinh(self.val))
+
+    def tanh(self) -> Dual:
+        val = math.tanh(self.val)
+        return Dual(val, self.der * (1.0 - val ** 2))
 
 
 def complex_step_derivative(f: Callable[[complex], complex], x: float, h: float = 1e-20) -> float:
