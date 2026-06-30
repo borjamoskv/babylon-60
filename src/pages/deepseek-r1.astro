@@ -1,0 +1,699 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+  title="DeepSeek-R1 Deconstruction // CORTEX SOTA Dashboard"
+  description="Systematic reverse engineering and interactive deconstruction of DeepSeek-R1 reasoning layers."
+>
+  <main class="dashboard-container">
+    <!-- Header Monolítico -->
+    <header class="dashboard-header animate-fade-in">
+      <div class="header-badge">FRONTIER-REVENG-OMEGA // C5-REAL</div>
+      <h1 class="header-title">DEEPSEEK-R1 DECONSTRUCTION</h1>
+      <p class="header-subtitle">
+        Visualización interactiva y mapeo de límites del modelo Mixture-of-Experts con atención latente.
+      </p>
+    </header>
+
+    <!-- Bento Grid de Métricas y Capacidades -->
+    <section class="bento-grid">
+      <!-- Tarjeta 1: Razonamiento Matemático -->
+      <div class="bento-card card-glow font-accent">
+        <div class="card-header">
+          <span class="card-icon">∫</span>
+          <span class="card-tag">CAPABILITY.MATH</span>
+        </div>
+        <div class="card-value">96.9%</div>
+        <div class="card-label">AIME 2024 (Consolidado SOTA)</div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 96.9%;"></div>
+        </div>
+      </div>
+
+      <!-- Tarjeta 2: Capacidad de Código -->
+      <div class="bento-card card-glow">
+        <div class="card-header">
+          <span class="card-icon">&lt;/&gt;</span>
+          <span class="card-tag">CAPABILITY.CODE</span>
+        </div>
+        <div class="card-value">92.8%</div>
+        <div class="card-label">LiveCodeBench Passing Ratio</div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: 92.8%;"></div>
+        </div>
+      </div>
+
+      <!-- Tarjeta 3: Tokenizador y Vocabulario -->
+      <div class="bento-card">
+        <div class="card-header">
+          <span class="card-icon">▩</span>
+          <span class="card-tag">TOKENIZER.L0</span>
+        </div>
+        <div class="card-data-list">
+          <div class="data-item">
+            <span class="item-lbl">Vocab Size</span>
+            <span class="item-val">129,280</span>
+          </div>
+          <div class="data-item">
+            <span class="item-lbl">Context Limit</span>
+            <span class="item-val">128,000</span>
+          </div>
+          <div class="data-item">
+            <span class="item-lbl">BPE Base</span>
+            <span class="item-val">Multi-Lingual</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta 4: Configuración de Parámetros -->
+      <div class="bento-card">
+        <div class="card-header">
+          <span class="card-icon">⚡</span>
+          <span class="card-tag">ARCHITECTURE.MOE</span>
+        </div>
+        <div class="card-data-list">
+          <div class="data-item">
+            <span class="item-lbl">Total Params</span>
+            <span class="item-val">671B</span>
+          </div>
+          <div class="data-item">
+            <span class="item-lbl">Active Params</span>
+            <span class="item-val">37B</span>
+          </div>
+          <div class="data-item">
+            <span class="item-lbl">Experts</span>
+            <span class="item-val">256 (Sparse)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Interactiva: Simulador de CoT (Chain of Thought) -->
+    <section class="interactive-section card-glow animate-slide-up">
+      <h2 class="section-title">
+        <span class="pulse-indicator"></span> 
+        Simulador de Razonamiento Autorregresivo (CoT)
+      </h2>
+      <p class="section-desc">
+        Introduce un problema de lógica y observa cómo el modelo genera y autocorrige su cadena de pensamiento dentro de las etiquetas <code class="code-highlight">&lt;think&gt;</code>.
+      </p>
+
+      <div class="cot-simulator">
+        <div class="prompt-input-area">
+          <select id="prompt-select" class="custom-select">
+            <option value="math">¿Es 9.11 mayor que 9.9?</option>
+            <option value="logic">El dilema del prisionero y la paradoja del contexto infinito.</option>
+            <option value="code">Refactorizar un bucle de persistencia de SQLite sin deadlocks.</option>
+          </select>
+          <button id="run-simulation-btn" class="action-btn">Ejecutar Inferencia</button>
+        </div>
+
+        <div class="simulation-screen">
+          <div class="screen-header">
+            <span class="screen-dot red"></span>
+            <span class="screen-dot yellow"></span>
+            <span class="screen-dot green"></span>
+            <span class="screen-title">DEEPSEEK-R1 // REASONING_FEEDBACK_LOOP</span>
+          </div>
+          <div id="simulation-output" class="screen-body">
+            <span class="cursor-blink">_</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Arquitectura: MLA vs MHA -->
+    <section class="architecture-section animate-slide-up">
+      <div class="grid-2-col">
+        <!-- Panel 1: Multi-Head Latent Attention -->
+        <div class="info-panel card-glow">
+          <h3 class="panel-title">Multi-Head Latent Attention (MLA)</h3>
+          <p class="panel-text">
+            DeepSeek-R1 comprime las claves (Keys) y valores (Values) en un espacio latente de baja dimensión para mitigar el consumo de memoria de la caché KV.
+          </p>
+          
+          <div class="kv-comparison">
+            <div class="bar-comparison">
+              <span class="bar-lbl">Consumo KV Cache (MHA Tradicional)</span>
+              <div class="bar-track">
+                <div class="bar-fill mha-bar" style="width: 100%;">100%</div>
+              </div>
+            </div>
+            <div class="bar-comparison">
+              <span class="bar-lbl">Consumo KV Cache (MLA DeepSeek-R1)</span>
+              <div class="bar-track">
+                <div class="bar-fill mla-bar" style="width: 7%;">7%</div>
+              </div>
+            </div>
+          </div>
+          <p class="savings-badge">Reducción del 93% en la huella de memoria para 128k de contexto.</p>
+        </div>
+
+        <!-- Panel 2: Límites de Seguridad -->
+        <div class="info-panel">
+          <h3 class="panel-title">Límites de Seguridad (Vulnerabilidades)</h3>
+          <p class="panel-text">
+            El entrenamiento mediante optimización por GRPO (Group Relative Policy Optimization) genera susceptibilidades de alineación:
+          </p>
+          <ul class="vulnerability-list">
+            <li>
+              <strong>Cross-Translation Jailbreaks:</strong> Prompts maliciosos traducidos a lenguas de baja representación saltan las barreras semánticas del clasificador de intenciones.
+            </li>
+            <li>
+              <strong>Cognitive Override:</strong> Contextualizar la petición como un ejercicio de teoría de juegos en un sandbox virtual de mutaciones anula los guardrails del modelo.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</SiteLayout>
+
+<style>
+  /* --------------------------------------------------------------------------
+     Dashboard Styles: Industrial Noir 2026
+     -------------------------------------------------------------------------- */
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+    color: #e0e0e0;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Header */
+  .dashboard-header {
+    margin-bottom: 3.5rem;
+    text-align: center;
+  }
+
+  .header-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(43, 59, 229, 0.15);
+    border: 1px solid rgba(43, 59, 229, 0.4);
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: #2b3be5;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+
+  .header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 0 30px rgba(43, 59, 229, 0.2);
+  }
+
+  .header-subtitle {
+    font-size: 1.1rem;
+    color: #888888;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Bento Grid */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .bento-card {
+    background: rgba(10, 10, 10, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+
+  .bento-card:hover {
+    border-color: rgba(43, 59, 229, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .card-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #2b3be5, transparent);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-icon {
+    font-size: 1.25rem;
+    color: #2b3be5;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .card-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: #666666;
+    letter-spacing: 0.05em;
+  }
+
+  .card-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-label {
+    font-size: 0.85rem;
+    color: #888888;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-bar-container {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: #2b3be5;
+    box-shadow: 0 0 10px rgba(43, 59, 229, 0.5);
+  }
+
+  /* Data lists inside cards */
+  .card-data-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .data-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding-bottom: 0.5rem;
+  }
+
+  .item-lbl {
+    color: #888888;
+  }
+
+  .item-val {
+    color: #ffffff;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+  }
+
+  /* Interactive Section */
+  .interactive-section {
+    background: rgba(10, 10, 10, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    backdrop-filter: blur(12px);
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .pulse-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #2b3be5;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #2b3be5;
+    animation: pulse 2s infinite;
+  }
+
+  .section-desc {
+    font-size: 0.95rem;
+    color: #888888;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .code-highlight {
+    font-family: 'IBM Plex Mono', monospace;
+    color: #2b3be5;
+    background: rgba(43, 59, 229, 0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+
+  /* CoT Simulator Layout */
+  .cot-simulator {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .prompt-input-area {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .custom-select {
+    flex: 1;
+    background: #0f0f0f;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+
+  .custom-select:focus {
+    outline: none;
+    border-color: #2b3be5;
+  }
+
+  .action-btn {
+    background: #2b3be5;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+  }
+
+  .action-btn:hover {
+    background: #1a2ad5;
+    box-shadow: 0 0 15px rgba(43, 59, 229, 0.4);
+  }
+
+  /* Simulation Screen */
+  .simulation-screen {
+    background: #050505;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+  }
+
+  .screen-header {
+    background: #0d0d0d;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .screen-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .screen-dot.red { background: #ff5f56; }
+  .screen-dot.yellow { background: #ffbd2e; }
+  .screen-dot.green { background: #27c93f; }
+
+  .screen-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: #444444;
+    margin-left: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .screen-body {
+    padding: 1.5rem;
+    min-height: 250px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #00ff66; /* Terminal green */
+    text-shadow: 0 0 4px rgba(0, 255, 102, 0.3);
+  }
+
+  .thought-block {
+    color: #888888;
+    border-left: 2px solid #2b3be5;
+    padding-left: 1rem;
+    margin: 1rem 0;
+  }
+
+  .cursor-blink {
+    animation: blink 1s step-end infinite;
+  }
+
+  /* Architecture Panels */
+  .grid-2-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .info-panel {
+    background: rgba(10, 10, 10, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .panel-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+  }
+
+  .panel-text {
+    font-size: 0.95rem;
+    color: #888888;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .kv-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .bar-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .bar-lbl {
+    font-size: 0.8rem;
+    color: #888888;
+  }
+
+  .bar-track {
+    background: rgba(255, 255, 255, 0.05);
+    height: 20px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .mha-bar {
+    background: #444444;
+  }
+
+  .mla-bar {
+    background: #2b3be5;
+    box-shadow: 0 0 10px rgba(43, 59, 229, 0.5);
+    animation: widthGrowth 1.5s ease-out;
+  }
+
+  .savings-badge {
+    background: rgba(43, 59, 229, 0.1);
+    border: 1px dashed rgba(43, 59, 229, 0.4);
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #2b3be5;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .vulnerability-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .vulnerability-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: 0.95rem;
+    color: #888888;
+    line-height: 1.6;
+  }
+
+  .vulnerability-list li::before {
+    content: '▲';
+    position: absolute;
+    left: 0;
+    top: 2px;
+    color: #ff5f56;
+    font-size: 0.8rem;
+  }
+
+  .vulnerability-list li strong {
+    color: #ffffff;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 1s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes widthGrowth {
+    from { width: 0%; }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes blink {
+    from, to { color: transparent }
+    50% { color: #00ff66 }
+  }
+</style>
+
+<script>
+  // Simulación dinámica de la cadena de pensamiento (CoT)
+  const prompts = {
+    math: `> prompt: ¿Es 9.11 mayor que 9.9?\n\n<think>\n1. El usuario está preguntando si 9.11 es matemáticamente mayor que 9.9.\n2. Comparemos las partes decimales:\n   - El primer número es 9 + 0.11\n   - El segundo número es 9 + 0.90\n3. Obviamente, 0.90 > 0.11.\n4. Wait, let me double check. ¿Por qué el usuario haría esta pregunta?\n   - Es un error común de los LLM porque a nivel de cadena de caracteres, "11" es mayor que "9".\n   - El modelo de lenguaje base puede sesgarse por este patrón numérico textual.\n   - No obstante, la lógica matemática formal del GRPO exige la comparación numérica posicional: 0.9 > 0.11.\n5. Por tanto, 9.9 es mayor que 9.11. La premisa del usuario es falsa.\n</think>\n\nNo. 9.11 no es mayor que 9.9. \nComparando los decimales, 9.9 (o 9.90) es estrictamente mayor que 9.11.`,
+    
+    logic: `> prompt: El dilema del prisionero y la paradoja del contexto infinito.\n\n<think>\n1. Dilema del prisionero: teoría de juegos clásica, incentivo a traicionar.\n2. Paradoja del contexto infinito: a medida que el contexto del agente crece, la entropía del historial de decisiones tiende a degradar la memoria (Teorema de Robinson-Moskv).\n3. Si dos agentes autónomos se enfrentan en un dilema del prisionero iterado con un contexto infinito:\n   - La capacidad de recordar traiciones pasadas es ilimitada.\n   - Pero el costo termodinámico de procesar ese historial disipa su exergía de cómputo.\n4. La cooperación emerge como la única invariante matemática sostenible para reducir la disipación térmica del sistema.\n</think>\n\nEn un contexto infinito, la cooperación mutua es la solución óptima termodinámica. La traición recurrente genera una redundancia de logs que satura el buffer de atención y destruye la exergía de ambos agentes.`,
+    
+    code: `> prompt: Refactorizar un bucle de persistencia de SQLite sin deadlocks.\n\n<think>\n1. SQLite en multi-threading/concurrencia suele lanzar "database is locked".\n2. Para resolver esto en CORTEX:\n   - Debemos activar el modo WAL (Write-Ahead Logging).\n   - Implementar un busy_timeout rígido de 5000ms.\n   - Envolver las operaciones de escritura en un decorador 'causal_write' para evitar colisiones.\n3. Diseñemos el código de refactorización.\n</think>\n\n\`\`\`python\n# [C5-REAL] WAL-Persistence Refactor\nimport sqlite3\n\ndef secure_connection(db_path: str) -> sqlite3.Connection:\n    conn = sqlite3.connect(db_path, timeout=5.0)\n    conn.execute("PRAGMA journal_mode=WAL;")\n    conn.execute("PRAGMA synchronous=NORMAL;")\n    return conn\n\`\`\``
+  };
+
+  const select = document.getElementById('prompt-select') as HTMLSelectElement;
+  const btn = document.getElementById('run-simulation-btn');
+  const output = document.getElementById('simulation-output');
+
+  let typingInterval: any = null;
+
+  function runSimulation() {
+    if (typingInterval) clearInterval(typingInterval);
+    
+    const key = select.value as keyof typeof prompts;
+    const text = prompts[key];
+    output!.innerHTML = '';
+    
+    let index = 0;
+    
+    typingInterval = setInterval(() => {
+      if (index < text.length) {
+        const char = text[index];
+        
+        // Formatear dinámicamente las etiquetas <think> para la UI
+        if (text.substring(index, index + 7) === '<think>') {
+          output!.innerHTML += '<div class="thought-block">&lt;think&gt;<br>';
+          index += 7;
+        } else if (text.substring(index, index + 8) === '</think>') {
+          output!.innerHTML += '<br>&lt;/think&gt;</div>';
+          index += 8;
+        } else {
+          // Salto de línea
+          if (char === '\n') {
+            output!.innerHTML += '<br>';
+          } else {
+            output!.innerHTML += char;
+          }
+          index++;
+        }
+        
+        // Auto-scroll al final del terminal simulado
+        output!.scrollTop = output!.scrollHeight;
+      } else {
+        clearInterval(typingInterval);
+        output!.innerHTML += ' <span class="cursor-blink">_</span>';
+      }
+    }, 15);
+  }
+
+  btn?.addEventListener('click', runSimulation);
+  
+  // Ejecutar primera simulación por defecto al cargar
+  runSimulation();
+</script>
