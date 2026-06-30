@@ -140,7 +140,7 @@ class DeploySkill:
         # bootstrap-db
         if command == "bootstrap-db":
             try:
-                from cortex.core import config as cortex_config  # type: ignore
+                from babylon60.core import config as cortex_config  # type: ignore
                 if cortex_config.STORAGE_MODE == "postgres" and report.database_url:
                     _deploy_module.bootstrap_postgres(report.database_url)
                     detail = {"backend": "postgres", "dsn": report.database_url[:40] + "..."}
@@ -169,7 +169,7 @@ class DeploySkill:
         # manifest
         if command == "manifest":
             try:
-                from cortex.core import config as cortex_config  # type: ignore
+                from babylon60.core import config as cortex_config  # type: ignore
                 target = "production" if cortex_config.PROD else "local"
                 manifest_path = _deploy_module.write_manifest(report, target=target)
                 return {

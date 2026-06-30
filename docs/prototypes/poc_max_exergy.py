@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
-from cortex.extensions.hypervisor.belief_engine import BeliefEngine
-from cortex.extensions.hypervisor.belief_object import (
+from babylon60.extensions.hypervisor.belief_engine import BeliefEngine
+from babylon60.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
     BeliefStatus,

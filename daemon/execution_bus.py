@@ -32,7 +32,7 @@ def _sign_artifact(event: EventV1, artifact: dict[str, Any]) -> dict[str, Any]:
         priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
 
     if priv_b64:
-        from cortex.engine.causal.taint_engine import generate_secure_taint_token
+        from babylon60.engine.causal.taint_engine import generate_secure_taint_token
         try:
             content = json.dumps(artifact, sort_keys=True, separators=(',', ':'))
             token = generate_secure_taint_token(
