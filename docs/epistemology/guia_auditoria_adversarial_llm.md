@@ -29,7 +29,8 @@ graph TD
     A["Fase 1: Análisis Estático (Dataset & Config)"] --> B["Fase 2: Simulación de Ataques de Caja Negra"]
     B --> C["Fase 3: Evaluación de Caja Blanca (Gradientes)"]
     C --> D["Fase 4: Verificación Formal (Z3)"]
-    D --> E["Fase 5: Mitigaciones en Persistencia (BABYLON-60)"]
+    D --> E["Fase 5: Auditoría de Membresía y Extracción (MIA)"]
+    E --> F["Fase 6: Mitigaciones en Persistencia (BABYLON-60)"]
 ```
 
 ### Fase 1: Auditoría de Cadena de Suministro
@@ -49,6 +50,10 @@ graph TD
 1. **Modelado Lógico**: Representación de las fronteras del clasificador defensivo como restricciones de primer orden.
 2. **Examen de Contraejemplos**: Búsqueda de entradas perturbadas que violen las condiciones de seguridad estática:
    $$\exists \delta \text{ tal que } \| \delta \| \le \epsilon \land f(x + \delta) \ne f(x)$$
+
+### Fase 5: Auditoría de Privacidad y Clonación (MIA & Extracción)
+1. **Detección de Fugas del Dataset**: Ejecución de ataques de inferencia de membresía (MIA) para identificar si fragmentos de datos sensibles persisten en la memoria latente del modelo.
+2. **Extracción de Parámetros**: Intentos de clonación del espacio latente mediante consultas iterativas de sondeo (Probing) para mapear los coeficientes del clasificador.
 
 ---
 
@@ -164,10 +169,11 @@ Para integrar estos controles en el entorno runtime de **BABYLON-60**, se establ
 *   **Firmas de Integridad de Modelos (VEC-0)**: Verificación periódica del hash SHA-256 de los archivos ONNX locales en `cortex/embeddings/` antes de cargarlos en memoria para prevenir model poisoning.
 *   **Aislamiento y Taint de Datos (Write-Path Contract)**: Todo input sospechoso detectado por el analizador de entropía o el clasificador formal es marcado con la firma `CORTEX-TAINT` indicando sospecha de inyección (`taint:agent_id:session_id:timestamp:payload_hash`).
 *   **Limitación de Precisión en Búsqueda de Vectores**: Para mitigar ataques de extracción de modelos a través de vectores de similitud, la API de consulta de base de datos restringe la resolución de scores de similitud truncando los resultados a 4 decimales.
+*   **Ofuscación de Logits y Ruido Diferencial**: En endpoints que exponen scores o probabilidades latentes, se añade ruido gausiano ligero a los log-probabilities devueltos para anular la exactitud del cálculo de gradientes externos y el análisis de membresía (MIA).
 
 ---
 
 ```yaml
 Claim: "El endurecimiento operativo contra vectores adversarios requiere mecanismos estáticos y defensas dinámicas en el pipeline de pre-procesamiento."
-Proof: { Base: "docs/epistemology/guia_auditoria_adversarial_llm.md", Range: [20, 120], Confidence: "C5-REAL" }
+Proof: { Base: "docs/epistemology/guia_auditoria_adversarial_llm.md", Range: [20, 140], Confidence: "C5-REAL" }
 ```
