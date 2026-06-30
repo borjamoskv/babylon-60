@@ -242,12 +242,12 @@ async def test_fact_store_core_taint_rejection(agent_keys):
 async def test_store_mixin_taint_rejection_precedes_transaction(agent_keys, tmp_path):
     """StoreMixin must reject missing taint before appending to the transaction ledger."""
     _priv, pub = agent_keys
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     db_path = tmp_path / "store_taint.db"
     engine = CortexEngine(db_path=str(db_path), auto_embed=False)
     await engine.init_db()
-    from cortex.database.core import causal_write
+    from babylon60.database.core import causal_write
 
     try:
         async with engine.session() as conn:
@@ -279,7 +279,7 @@ async def test_store_mixin_taint_rejection_precedes_transaction(agent_keys, tmp_
 @pytest.mark.asyncio
 async def test_store_mixin_guard_runtime_error_fails_closed(monkeypatch, tmp_path):
     """Unexpected guard failures must abort instead of being downgraded to writes."""
-    from cortex.engine import CortexEngine
+    from babylon60.engine import CortexEngine
 
     db_path = tmp_path / "store_guard.db"
     engine = CortexEngine(db_path=str(db_path), auto_embed=False)
@@ -308,7 +308,7 @@ async def test_store_mixin_guard_runtime_error_fails_closed(monkeypatch, tmp_pat
 
 
 def test_storage_guard_rejects_missing_source():
-    from cortex.engine.flow.storage_guard import GuardViolation, StorageGuard
+    from babylon60.engine.flow.storage_guard import GuardViolation, StorageGuard
 
     with pytest.raises(GuardViolation, match="SOURCE_REQUIRED"):
         StorageGuard.validate(
@@ -565,7 +565,7 @@ async def test_verification_oracle_invariants(agent_keys):
 
 def test_mhc_antigen_router_integration():
     """Verifies that MHCAntigenRouter correctly routes payloads to T-Cells based on antigens."""
-    from cortex.engine.causal.taint_engine import MHCAntigenRouter
+    from babylon60.engine.causal.taint_engine import MHCAntigenRouter
 
     router = MHCAntigenRouter()
     router.register_t_cell("Jules-Secretario", r"github\s+(pull|issue|commit)")
@@ -581,7 +581,7 @@ def test_mhc_antigen_router_integration():
 
 def test_mhc_antigen_router_evolution(tmp_path):
     """Verifies that MHCAntigenRouter evolves dynamically when it records recurrent misses."""
-    from cortex.engine.causal.taint_engine import MHCAntigenRouter
+    from babylon60.engine.causal.taint_engine import MHCAntigenRouter
 
     temp_antigens_file = tmp_path / "dynamic_antigens_test.json"
 

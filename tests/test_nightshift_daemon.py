@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from cortex.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
+from babylon60.extensions.swarm.nightshift_daemon import NightShiftCrystalDaemon
 
 
 @pytest.fixture
@@ -148,8 +148,12 @@ class TestNightShiftCrystalDaemon:
 
         task = asyncio.create_task(run_daemon())
 
-        # Let it do at least one loop
-        await asyncio.sleep(0.1)
+        # Let it do at least one loop, polling to prevent flaky test timeouts
+        for _ in range(20):
+            if mock_run_cycle.call_count >= 1:
+                break
+            await asyncio.sleep(0.1)
+        
         daemon.stop()
 
         await task

@@ -173,7 +173,7 @@ async def test_circuit_breaker_trips():
     breaker = agent._breakers.get("memory")
     assert breaker is not None
     # After 2 failures with threshold=2, breaker should be OPEN
-    assert breaker.state == CircuitState.OPEN
+    assert breaker.state.name == "OPEN"
 
 
 # ─── Test: Diagnosis Classification ──────────────────────────────

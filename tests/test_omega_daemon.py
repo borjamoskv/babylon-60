@@ -1,6 +1,6 @@
 import pytest
 import asyncio
-import cortex.swarm.omega_daemon as omega
+import babylon60.swarm.omega_daemon as omega
 
 
 @pytest.mark.asyncio
@@ -8,7 +8,12 @@ async def test_omega_daemon_start_stop():
     """OmegaDaemon inicia y se detiene sin crash usando asyncio."""
     daemon = omega.OmegaDaemon(reclaim_on_critical=False)
     task = asyncio.create_task(daemon.start(interval_s=0.05))
-    await asyncio.sleep(0.1)
+    # Wait for at least one loop
+    for _ in range(20):
+        if daemon.loop_count >= 1:
+            break
+        await asyncio.sleep(0.1)
+        
     daemon.stop()
     await task
     assert daemon.loop_count >= 1

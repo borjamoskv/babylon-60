@@ -24,7 +24,8 @@ async def test_landauer_daemon_lifecycle():
     assert agent._daemon_task is not None
     assert not agent._daemon_task.done()
 
-    await asyncio.sleep(0.15)  # Wait for at least one loop
+    # Wait for at least one loop
+    await asyncio.sleep(0.15)
 
     await agent.stop()
     assert agent._daemon_task is None

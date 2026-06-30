@@ -9,7 +9,7 @@ from pathlib import Path
 
 from click.testing import CliRunner
 
-from cortex.cli.forensics_cmds import forensics_cmds
+from babylon60.cli.forensics_cmds import forensics_cmds
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXED_TS = "2026-05-05T00:00:00+00:00"
@@ -173,16 +173,16 @@ def test_forensics_cli_rejects_manifest_paths_outside_base(tmp_path) -> None:
 
 def test_forensics_command_is_experimental_in_root_cli(monkeypatch) -> None:
     import importlib
-    import cortex.cli.common
-    import cortex.cli.forensics_cmds
+    import babylon60.cli.common
+    import babylon60.cli.forensics_cmds
 
-    if "forensics" in cortex.cli.common.cli.commands:
-        del cortex.cli.common.cli.commands["forensics"]
+    if "forensics" in babylon60.cli.common.cli.commands:
+        del babylon60.cli.common.cli.commands["forensics"]
 
     monkeypatch.delenv("CORTEX_ENABLE_EXPERIMENTAL_CLI", raising=False)
-    importlib.reload(getattr(cortex.cli.forensics_cmds, "_real_module", cortex.cli.forensics_cmds))
-    assert "forensics" not in cortex.cli.common.cli.commands
+    importlib.reload(getattr(babylon60.cli.forensics_cmds, "_real_module", babylon60.cli.forensics_cmds))
+    assert "forensics" not in babylon60.cli.common.cli.commands
 
     monkeypatch.setenv("CORTEX_ENABLE_EXPERIMENTAL_CLI", "1")
-    importlib.reload(getattr(cortex.cli.forensics_cmds, "_real_module", cortex.cli.forensics_cmds))
-    assert "forensics" in cortex.cli.common.cli.commands
+    importlib.reload(getattr(babylon60.cli.forensics_cmds, "_real_module", babylon60.cli.forensics_cmds))
+    assert "forensics" in babylon60.cli.common.cli.commands
