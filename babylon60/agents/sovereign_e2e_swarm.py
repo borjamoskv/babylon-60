@@ -93,6 +93,7 @@ async def main():
         """,
         hooks=[
             radar_de_entropia_inicio,
+            apoptosis_p100_guard,
             zero_ask_override,
             protocolo_ship_omega,
         ],
