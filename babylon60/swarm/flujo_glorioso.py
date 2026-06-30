@@ -1,5 +1,7 @@
 from typing import Dict, Any, List
-from babylon60.engine.causal.belief_objects import BeliefObject
+import json
+from datetime import datetime
+from babylon60.engine.causal.belief_objects import BeliefObject, BeliefState, RelationType, ProvenanceEnvelope, PropositionPayload
 
 class DecaCoreOrchestrator:
     """
@@ -10,10 +12,22 @@ class DecaCoreOrchestrator:
     def _execute_phase(self, phase_name: str, input_data: Dict[str, Any]) -> BeliefObject:
         """Ejecuta una fase atómica sin programación defensiva."""
         # Se asume input_data perfecto. Fail-Fast si hay problemas.
+        data_str = json.dumps(input_data, sort_keys=True)
         return BeliefObject(
-            id=f"{phase_name}_{hash(str(input_data))}",
-            phase=phase_name,
-            data={"status": "completed", "input": input_data}
+            id=f"{phase_name}_{hash(data_str)}",
+            state=BeliefState.PROPOSED,
+            relation=RelationType.INDEPENDENT,
+            provenance=ProvenanceEnvelope(
+                agent_id="DecaCore_Musa",
+                session_id="flujo_glorioso_session",
+                timestamp=datetime.utcnow(),
+                signature=f"CORTEX-TAINT:deca:{hash(data_str)}"
+            ),
+            payload=PropositionPayload(
+                content=data_str,
+                context_hash=f"{phase_name}_ctx",
+                certainty=1.0
+            )
         )
 
     def concepcion(self, input_data: Dict[str, Any]) -> BeliefObject:

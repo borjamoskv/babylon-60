@@ -1,8 +1,9 @@
 // @C5-REAL
-import React from 'react';
+import React from "react";
+import styles from "../styles/GlassCard.module.css";
 
 function cn(...classes: (string | undefined | null | boolean)[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
 interface GlassCardProps {
@@ -11,26 +12,26 @@ interface GlassCardProps {
   glowColor?: string;
 }
 
-export default function GlassCard({ children, className, glowColor = 'rgba(43,59,229,0.15)' }: GlassCardProps) {
+export default function GlassCard({ children, className, glowColor = "rgba(43,59,229,0.15)" }: GlassCardProps) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-md border border-white/10 bg-black/40 backdrop-blur-xl p-8 group transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-1.5 hover:scale-[1.01]",
+        styles.glassCard,
         className
       )}
     >
       {/* Dynamic Glow Effect */}
       <div 
-        className="absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-md pointer-events-none"
+        className={styles.glowEffect}
         style={{
           background: `radial-gradient(circle at 50% 0%, ${glowColor}, transparent 70%)`
         }}
       />
       
       {/* Noise Texture inside card */}
-      <div className="absolute inset-0 z-0 opacity-[0.02] mix-blend-overlay pointer-events-none noise-texture" />
+      <div className={cn(styles.noiseTexture, "noise-texture")} />
 
-      <div className="relative z-10">
+      <div className={styles.content}>
         {children}
       </div>
     </div>

@@ -35,8 +35,8 @@ import CheckoutFlow from '../components/CheckoutFlow';
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "CORTEX_CF_ANALYTICS_TOKEN"}'></script>
 </head>
 <body>
-    <LenisController client:load />
-    <WebGLBackground client:load />
+    <LenisController client:only="react" />
+    <WebGLBackground client:only="react" />
 
     <!-- Urgency Banner -->
     <div class="urgency-banner" id="urgency-banner">
