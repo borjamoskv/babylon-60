@@ -2,10 +2,11 @@ import os
 import re
 from pathlib import Path
 
-# Paths to search
-WORKSPACE_ROOT = Path("/Users/borjafernandezangulo/30_CORTEX")
-GLOBAL_SKILLS_ROOT = Path("/Users/borjafernandezangulo/.gemini/config/skills")
-COLD_STORAGE_WORKFLOWS = Path("/Users/borjafernandezangulo/COLD_STORAGE/cortex-config/workflows")
+# Dynamic home directory detection to prevent PII Bleed (Host Identity / Email)
+HOME = Path.home()
+WORKSPACE_ROOT = HOME / "30_CORTEX"
+GLOBAL_SKILLS_ROOT = HOME / ".gemini" / "config" / "skills"
+COLD_STORAGE_WORKFLOWS = HOME / "COLD_STORAGE" / "cortex-config" / "workflows"
 
 # Target inventory file
 INVENTORY_MD_PATH = WORKSPACE_ROOT / "docs" / "CORTEX_EXERGY_INVENTORY.md"
@@ -211,8 +212,9 @@ def build_inventory_markdown():
         
         abs_path = find_absolute_path(name, ctype, opath)
         if abs_path:
-            # Format link with file:/// scheme
-            link_path = f"[{opath}](file://{abs_path})"
+            # Prevent exposing local username to avoid PII bleed checks
+            relative_user_path = str(abs_path).replace(str(HOME), "~")
+            link_path = f"[{opath}](file://{relative_user_path})"
         else:
             link_path = f"`{opath}`"
             

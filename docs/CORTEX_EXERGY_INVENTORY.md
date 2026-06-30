@@ -26,41 +26,41 @@ Proof: { Base: "Ratio of executable markdown blocks vs descriptive prose", Range
 | Rank | Component Name | Type | Primary File Path / Identifier | Exergy | Status / Notes |
 |---|---|---|---|---|---|
 | 1 | `Deep-Research-SOTA-Edition-OMEGA` | Skill | `skills/Deep-Research-SOTA-Edition-OMEGA` | **97.8** | Active JIT compiled |
-| 2 | `accidental-data-loss-prevention` | Skill | [skills/accidental-data-loss-prevention](file:///Users/borjafernandezangulo/.gemini/config/skills/accidental-data-loss-prevention/SKILL.md) | **97.4** | Active JIT compiled |
+| 2 | `accidental-data-loss-prevention` | Skill | [skills/accidental-data-loss-prevention](file://~/.gemini/config/skills/accidental-data-loss-prevention/SKILL.md) | **97.4** | Active JIT compiled |
 | 3 | `test_governor_catalog.py` | Engine | `engines/autopoiesis/test_governor_catalog.py` | **97.0** | AST calculated (Optimized from 77.5) |
 | 4 | `verification-before-completion` | Skill | `skills/verification-before-completion` | **97.0** | Active JIT compiled |
-| 5 | `Browser-CDP-Automation-OMEGA` | Skill | [skills/Browser-CDP-Automation-OMEGA](file:///Users/borjafernandezangulo/.gemini/config/skills/Browser-CDP-Automation-OMEGA/SKILL.md) | **96.2** | Active JIT compiled |
-| 6 | `managing-python-dependencies` | Skill | [skills/managing-python-dependencies](file:///Users/borjafernandezangulo/.gemini/config/skills/managing-python-dependencies/SKILL.md) | **96.2** | Active JIT compiled |
+| 5 | `Browser-CDP-Automation-OMEGA` | Skill | [skills/Browser-CDP-Automation-OMEGA](file://~/.gemini/config/skills/Browser-CDP-Automation-OMEGA/SKILL.md) | **96.2** | Active JIT compiled |
+| 6 | `managing-python-dependencies` | Skill | [skills/managing-python-dependencies](file://~/.gemini/config/skills/managing-python-dependencies/SKILL.md) | **96.2** | Active JIT compiled |
 | 7 | `Cortex-Research-Loop-OMEGA` | Skill | `skills/Cortex-Research-Loop-OMEGA` | **95.4** | Active JIT compiled |
-| 8 | `Agent-Paper-RedTeam-OMEGA` | Skill | [skills/Agent-Paper-RedTeam-OMEGA](file:///Users/borjafernandezangulo/.gemini/config/skills/_archived/Agent-Paper-RedTeam-OMEGA/SKILL.md) | **95.0** | Active JIT compiled |
+| 8 | `Agent-Paper-RedTeam-OMEGA` | Skill | [skills/Agent-Paper-RedTeam-OMEGA](file://~/.gemini/config/skills/_archived/Agent-Paper-RedTeam-OMEGA/SKILL.md) | **95.0** | Active JIT compiled |
 | 9 | `antigravity-topology.md` | Workflow | `workflows/antigravity-topology.md` | **95.0** | Heuristic parse |
-| 10 | `Autodidact-Research-OMEGA` | Skill | [skills/Autodidact-Research-OMEGA](file:///Users/borjafernandezangulo/.gemini/config/skills/.tombstone/Autodidact-Research-OMEGA/SKILL.md) | **95.0** | Active JIT compiled |
+| 10 | `Autodidact-Research-OMEGA` | Skill | [skills/Autodidact-Research-OMEGA](file://~/.gemini/config/skills/.tombstone/Autodidact-Research-OMEGA/SKILL.md) | **95.0** | Active JIT compiled |
 | 11 | `Crystallize-Knowledge-JIT` | Skill | `skills/Crystallize-Knowledge-JIT` | **95.0** | Active JIT compiled |
-| 12 | `Antigravity-Github-Omega` | Skill | [skills/Antigravity-Github-Omega](file:///Users/borjafernandezangulo/.gemini/config/skills/Antigravity-Github-Omega/SKILL.md) | **94.6** | Active JIT compiled |
-| 13 | `Autodidact-History-OMEGA` | Skill | [skills/Autodidact-History-OMEGA](file:///Users/borjafernandezangulo/.gemini/config/skills/.tombstone/Autodidact-History-OMEGA/SKILL.md) | **94.6** | Active JIT compiled |
-| 14 | `Aesthetic-Foundry-Omega` | Skill | [skills/Aesthetic-Foundry-Omega](file:///Users/borjafernandezangulo/.gemini/config/skills/Aesthetic-Foundry-Omega/SKILL.md) | **94.2** | Active JIT compiled |
+| 12 | `Antigravity-Github-Omega` | Skill | [skills/Antigravity-Github-Omega](file://~/.gemini/config/skills/Antigravity-Github-Omega/SKILL.md) | **94.6** | Active JIT compiled |
+| 13 | `Autodidact-History-OMEGA` | Skill | [skills/Autodidact-History-OMEGA](file://~/.gemini/config/skills/.tombstone/Autodidact-History-OMEGA/SKILL.md) | **94.6** | Active JIT compiled |
+| 14 | `Aesthetic-Foundry-Omega` | Skill | [skills/Aesthetic-Foundry-Omega](file://~/.gemini/config/skills/Aesthetic-Foundry-Omega/SKILL.md) | **94.2** | Active JIT compiled |
 | 15 | `Apollo-Autodidact-OMEGA` | Skill | `skills/Apollo-Autodidact-OMEGA` | **94.2** | Active JIT compiled |
 | 16 | `Cortex-Live-Broadcaster` | Skill | `skills/Cortex-Live-Broadcaster` | **94.2** | Active JIT compiled |
 | 17 | `karpathy-recursive-swarm.md` | Workflow | `workflows/karpathy-recursive-swarm.md` | **94.1** | Heuristic parse |
 | 18 | `Apollo-Extractor-OMEGA` | Skill | `skills/Apollo-Extractor-OMEGA` | **93.8** | Active JIT compiled |
 | 19 | `Autodidact-21EDO-OMEGA` | Skill | `skills/Autodidact-21EDO-OMEGA` | **93.8** | Active JIT compiled |
-| 20 | `Autonomous-Audit-OMEGA` | Skill | [skills/Autonomous-Audit-OMEGA](file:///Users/borjafernandezangulo/.gemini/config/skills/.tombstone/Autonomous-Audit-OMEGA/SKILL.md) | **93.8** | Active JIT compiled |
+| 20 | `Autonomous-Audit-OMEGA` | Skill | [skills/Autonomous-Audit-OMEGA](file://~/.gemini/config/skills/.tombstone/Autonomous-Audit-OMEGA/SKILL.md) | **93.8** | Active JIT compiled |
 | 21 | `borja-moskv-ultrathink` | Skill | `skills/borja-moskv-ultrathink` | **93.8** | Active JIT compiled |
 | 22 | `Ouroboros-Strike-OMEGA` | Skill | `skills/Ouroboros-Strike-OMEGA` | **93.8** | Active JIT compiled |
-| 23 | `Python-Extractor-OMEGA` | Skill | [skills/Python-Extractor-OMEGA](file:///Users/borjafernandezangulo/.gemini/config/skills/Python-Extractor-OMEGA/SKILL.md) | **93.8** | Active JIT compiled |
+| 23 | `Python-Extractor-OMEGA` | Skill | [skills/Python-Extractor-OMEGA](file://~/.gemini/config/skills/Python-Extractor-OMEGA/SKILL.md) | **93.8** | Active JIT compiled |
 | 24 | `agent-memory-patterns` | Skill | `skills/agent-memory-patterns` | **93.4** | TOMBSTONED (Death Protocol Executed) |
 | 25 | `Episodic-Memory-OMEGA` | Skill | `skills/Episodic-Memory-OMEGA` | **93.4** | Active JIT compiled |
-| 26 | `Estado-Del-Arte-OMEGA` | Skill | [skills/Estado-Del-Arte-OMEGA](file:///Users/borjafernandezangulo/.gemini/config/skills/.tombstone/Estado-Del-Arte-OMEGA/SKILL.md) | **93.4** | Active JIT compiled |
+| 26 | `Estado-Del-Arte-OMEGA` | Skill | [skills/Estado-Del-Arte-OMEGA](file://~/.gemini/config/skills/.tombstone/Estado-Del-Arte-OMEGA/SKILL.md) | **93.4** | Active JIT compiled |
 | 27 | `picasso-synergies.md` | Workflow | `workflows/picasso-synergies.md` | **93.1** | Heuristic parse |
 | 28 | `browser-hijack-guard` | Skill | `skills/browser-hijack-guard` | **93.0** | Active JIT compiled |
-| 29 | `Exergy-Engine-OMEGA` | Skill | [skills/Exergy-Engine-OMEGA](file:///Users/borjafernandezangulo/.gemini/config/skills/.tombstone/Exergy-Engine-OMEGA/SKILL.md) | **92.6** | Active JIT compiled |
+| 29 | `Exergy-Engine-OMEGA` | Skill | [skills/Exergy-Engine-OMEGA](file://~/.gemini/config/skills/.tombstone/Exergy-Engine-OMEGA/SKILL.md) | **92.6** | Active JIT compiled |
 | 30 | `filologa-de-combate` | Skill | `skills/filologa-de-combate` | **92.6** | Active JIT compiled |
 | 31 | `ouroboros-settlement.md` | Workflow | `workflows/ouroboros-settlement.md` | **92.6** | Heuristic parse |
 | 32 | `Alpha-Target-OMEGA` | Skill | `skills/Alpha-Target-OMEGA` | **92.2** | Active JIT compiled |
 | 33 | `API-Provider-OMEGA` | Skill | `skills/API-Provider-OMEGA` | **92.2** | Active JIT compiled |
 | 34 | `API-Sentinel-OMEGA` | Skill | `skills/API-Sentinel-OMEGA` | **92.2** | TOMBSTONED (Death Protocol Executed) |
 | 35 | `memory-bridge.md` | Workflow | `workflows/memory-bridge.md` | **92.2** | Heuristic parse |
-| 36 | `ouroboros-infinity` | Skill | [skills/ouroboros-infinity](file:///Users/borjafernandezangulo/.gemini/config/skills/ouroboros-infinity/SKILL.md) | **92.2** | Active JIT compiled |
+| 36 | `ouroboros-infinity` | Skill | [skills/ouroboros-infinity](file://~/.gemini/config/skills/ouroboros-infinity/SKILL.md) | **92.2** | Active JIT compiled |
 | 37 | `UI-Mechanisms-Rule` | Skill | `skills/UI-Mechanisms-Rule` | **92.2** | TOMBSTONED (Death Protocol Executed) |
 | 38 | `sovereign_bridge.py` | Engine | `engines/sovereign_bridge.py` | **92.0** | AST calculated (Optimized from 77.9) |
 | 39 | `codebase-analysis` | Skill | `skills/codebase-analysis` | **91.8** | Active JIT compiled |
@@ -83,7 +83,7 @@ Proof: { Base: "Ratio of executable markdown blocks vs descriptive prose", Range
 | 56 | `find-skills` | Skill | `skills/find-skills` | **89.4** | Active JIT compiled |
 | 57 | `swift-forge` | Skill | `skills/swift-forge` | **89.4** | Active JIT compiled |
 | 58 | `fast_fix_and_test.md` | Workflow | `workflows/fast_fix_and_test.md` | **89.2** | Heuristic parse |
-| 59 | `Sortu-APEX` | Skill | [skills/Sortu-APEX](file:///Users/borjafernandezangulo/.gemini/config/skills/Sortu-APEX/SKILL.md) | **89.0** | Active JIT compiled |
+| 59 | `Sortu-APEX` | Skill | [skills/Sortu-APEX](file://~/.gemini/config/skills/Sortu-APEX/SKILL.md) | **89.0** | Active JIT compiled |
 | 60 | `web-forge` | Skill | `skills/web-forge` | **88.6** | TOMBSTONED (Death Protocol Executed) |
 | 61 | `webs-plus` | Skill | `skills/webs-plus` | **88.6** | Active JIT compiled |
 | 62 | `session-close.md` | Workflow | `workflows/session-close.md` | **88.4** | Heuristic parse |
@@ -105,7 +105,7 @@ Proof: { Base: "Ratio of executable markdown blocks vs descriptive prose", Range
 | 78 | `lea_omega_purge.sh` | Script | `scripts/lea_omega_purge.sh` | **75.0** | Heuristic parse |
 | 79 | `kimi-invoke.md` | Workflow | `workflows/kimi-invoke.md` | **74.3** | Heuristic parse |
 | 80 | `session-boot.md` | Workflow | `workflows/session-boot.md` | **73.0** | Heuristic parse |
-| 81 | `antigravity.md` | Workflow | [workflows/antigravity.md](file:///Users/borjafernandezangulo/30_CORTEX/.agents/workflows/antigravity.md) | **72.9** | Heuristic parse |
+| 81 | `antigravity.md` | Workflow | [workflows/antigravity.md](file://~/30_CORTEX/.agents/workflows/antigravity.md) | **72.9** | Heuristic parse |
 | 82 | `promote_from_playground.py` | Script | `scripts/promote_from_playground.py` | **70.0** | AST calculated (Optimized from 26.0) |
 | 83 | `build_knowledge_index.py` | Script | `scripts/build_knowledge_index.py` | **69.0** | AST calculated (Optimized from 31.0) |
 | 84 | `equilibrium_engine_v3.py` | Engine | `engines/equilibrium_engine_v3.py` | **67.0** | AST calculated (Optimized from 60.0) |
@@ -124,7 +124,7 @@ Proof: { Base: "Ratio of executable markdown blocks vs descriptive prose", Range
 | 97 | `kv-aware-routing-omega.md` | Workflow | `workflows/kv-aware-routing-omega.md` | **50.0** | Heuristic parse |
 | 98 | `playground-promotion.md` | Workflow | `workflows/playground-promotion.md` | **50.0** | Heuristic parse |
 | 99 | `program-closer-agent.md` | Workflow | `workflows/program-closer-agent.md` | **50.0** | Heuristic parse |
-| 100 | `RFC-CORTEX-NATIVE-AI.md` | Workflow | [workflows/RFC-CORTEX-NATIVE-AI.md](file:///Users/borjafernandezangulo/30_CORTEX/.agents/workflows/RFC-CORTEX-NATIVE-AI.md) | **50.0** | Heuristic parse |
+| 100 | `RFC-CORTEX-NATIVE-AI.md` | Workflow | [workflows/RFC-CORTEX-NATIVE-AI.md](file://~/30_CORTEX/.agents/workflows/RFC-CORTEX-NATIVE-AI.md) | **50.0** | Heuristic parse |
 | 101 | `system-card-tactical-read.md` | Workflow | `workflows/system-card-tactical-read.md` | **50.0** | Heuristic parse |
 | 102 | `night_shift.py` | Engine | `engines/night-shift/night_shift.py` | **46.0** | AST calculated (Optimized from 38.0) |
 | 103 | `governor.py` | Engine | `engines/autopoiesis/governor.py` | **44.0** | AST calculated (Optimized from 9.0) |
