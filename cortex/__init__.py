@@ -167,7 +167,6 @@ class _CortexFinder:
         if fullname in ("cortex", "cortex_extensions") or fullname.startswith(("cortex.", "cortex_extensions.")):
             target_name = _map_name(fullname)
             try:
-                # Only return a spec if it is actually a module or package, not an attribute
                 import importlib.util
                 if importlib.util.find_spec(target_name) is not None:
                     from importlib.machinery import ModuleSpec
@@ -180,7 +179,14 @@ class _CortexFinder:
         return _CortexCompat(spec.name)
 
     def exec_module(self, module):
-        pass
+        target_name = _map_name(module.__name__)
+        try:
+            real_mod = importlib.import_module(target_name)
+            for k, v in real_mod.__dict__.items():
+                if k not in {"__name__", "__spec__", "__loader__", "__package__"}:
+                    setattr(module, k, v)
+        except Exception:
+            pass
 
     def find_module(self, fullname, path=None):
         if fullname in ("cortex", "cortex_extensions") or fullname.startswith(("cortex.", "cortex_extensions.")):
