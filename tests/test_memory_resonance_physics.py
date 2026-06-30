@@ -97,3 +97,45 @@ async def test_adaptive_resonance_gate_collision_collapses_neighbor():
     collapsed_neighbor = vs.store["weak_neighbor"]
     assert collapsed_neighbor.energy_level == 0.0
     assert collapsed_neighbor.metadata.get("status") == "contradicted"
+
+
+@pytest.mark.asyncio
+async def test_adaptive_resonance_gate_speculative_vs_c5_collision():
+    """Verify that a speculative candidate (< C5) colliding semantically with established C5 truth is blocked."""
+    vs = DummyVectorStore()
+    gate = AdaptiveResonanceGate(vector_store=vs, rho=0.7)
+
+    # 1. Insert established C5 truth neighbor
+    vecino = CortexSemanticEngram(
+        id="c5_established_truth",
+        tenant_id="test",
+        project_id="test",
+        content="CORTEX runs strictly on C5-REAL level.",
+        embedding=[0.5, 0.5],
+        timestamp=1000.0,
+        confidence="C5",
+        metadata={"confidence_score": "C5"},
+        cognitive_layer="semantic",
+    )
+    await vs.upsert(vecino)
+
+    # 2. Speculative candidate (C2) with same embedding but different statement
+    candidato = CortexSemanticEngram(
+        id="speculative_claim",
+        tenant_id="test",
+        project_id="test",
+        content="CORTEX runs mostly on C2-SIM level.",
+        embedding=[0.5, 0.5],
+        timestamp=1001.0,
+        confidence="C2",
+        metadata={"confidence_score": "C2"},
+        cognitive_layer="semantic",
+    )
+
+    # Evaluate in the gate
+    status, engram = await gate.gate(candidate=candidato)
+
+    # Ingestion must be blocked due to semantic collision with C5 established truth
+    assert status == "blocked"
+    assert engram.id == "speculative_claim"
+    assert "speculative_claim" not in vs.store

@@ -48,6 +48,46 @@ def cosine_similarity(
     return float(dot / (norm_a * norm_b))
 
 
+def is_less_than_c5(confidence_val: Any) -> bool:
+    """Return True if confidence is explicitly less than C5/1.0, or not C5/1.0."""
+    if not confidence_val:
+        return True
+    val_str = str(confidence_val).strip().upper()
+    if val_str in ("C5", "1.0", "1"):
+        return False
+    return True
+
+
+def confidence_to_float(c_val: Any) -> float:
+    """Map ordinal confidence levels or strings to float weights [0.0 - 1.0]."""
+    if not c_val:
+        return 0.5
+    val_str = str(c_val).strip().upper()
+    mapping = {
+        "C5": 1.0,
+        "C4": 0.8,
+        "C3": 0.6,
+        "C2": 0.4,
+        "C1": 0.2,
+        "1.0": 1.0,
+        "0.8": 0.8,
+        "0.6": 0.6,
+        "0.4": 0.4,
+        "0.2": 0.2,
+    }
+    try:
+        return mapping.get(val_str, float(val_str))
+    except ValueError:
+        return 0.5
+
+
+def get_confidence_val(engram: Any) -> Any:
+    """Extract confidence cleanly prioritizing metadata over class attributes."""
+    if hasattr(engram, "metadata") and engram.metadata and "confidence_score" in engram.metadata:
+        return engram.metadata["confidence_score"]
+    return getattr(engram, "confidence", None)
+
+
 class AdaptiveResonanceGate:
     """ART-v2 inspired gate that controls memory write operations.
 
@@ -138,6 +178,15 @@ class AdaptiveResonanceGate:
             # Semantic Similarity
             sim = cosine_similarity(candidate.embedding, neighbor.embedding)
 
+            # Reality hierarchy check: skip resonance if candidate is speculative (< C5)
+            # and neighbor is established C5 truth, and contents differ.
+            if sim >= 0.80 and candidate.content.strip().lower() != neighbor.content.strip().lower():
+                cand_speculative = is_less_than_c5(get_confidence_val(candidate))
+                neigh_established = not is_less_than_c5(get_confidence_val(neighbor))
+                if cand_speculative and neigh_established:
+                    # Skip resonance to let it collide in epistemic physics resolution
+                    continue
+
             # Metabolic Modifier: Lower energy engrams are harder to "wake up"
             current_energy = neighbor.energy_level
             metabolic_penalty = (1.0 - current_energy) * 0.05
@@ -212,8 +261,8 @@ class AdaptiveResonanceGate:
         claims_to_resolve = []
 
         # Convert candidate to Claim
-        candidate_confidence = (
-            candidate.metadata.get("confidence_score", 0.8) if candidate.metadata else 0.8
+        candidate_confidence = confidence_to_float(
+            candidate.metadata.get("confidence_score") or candidate.confidence
         )
         candidate_claim = Claim(
             id=candidate.id,
@@ -233,8 +282,10 @@ class AdaptiveResonanceGate:
         )
         claims_to_resolve.append(candidate_claim)
 
-        # Map neighbors to detect explicit contradictions
+        # Map neighbors to detect explicit and implicit contradictions
         neighbor_map = {}
+        has_c5_collision = False
+
         for neighbor in neighbors:
             if type(neighbor).__name__ != "CortexSemanticEngram":
                 continue
@@ -245,11 +296,28 @@ class AdaptiveResonanceGate:
 
             if cand_contr == neighbor.id or neigh_contr == candidate.id:
                 is_contradictory = True
+            else:
+                # IMPLICIT COLLISION: speculative fact vs established C5 truth
+                sim = cosine_similarity(candidate.embedding, neighbor.embedding)
+                # If they are semantically very similar (>80% similarity) but have different text content
+                if sim >= 0.80 and candidate.content.strip().lower() != neighbor.content.strip().lower():
+                    cand_speculative = is_less_than_c5(get_confidence_val(candidate))
+                    neigh_established = not is_less_than_c5(get_confidence_val(neighbor))
+                    if cand_speculative and neigh_established:
+                        is_contradictory = True
+                        has_c5_collision = True
+                        logger.info(
+                            "ART GATE: Implicit collision detected between speculative candidate (%s) "
+                            "and established C5 neighbor %s (sim=%.3f).",
+                            get_confidence_val(candidate),
+                            neighbor.id,
+                            sim,
+                        )
 
             if is_contradictory:
                 conflict_detected = True
-                neighbor_confidence = (
-                    neighbor.metadata.get("confidence_score", 0.8) if neighbor.metadata else 0.8
+                neighbor_confidence = confidence_to_float(
+                    neighbor.metadata.get("confidence_score") or neighbor.confidence
                 )
                 neigh_claim = Claim(
                     id=neighbor.id,
@@ -273,10 +341,10 @@ class AdaptiveResonanceGate:
             # Analyze trace of the candidate claim
             candidate_trace = next(t for t in traces if candidate.id in t.trace_steps[0])
 
-            # If candidate collapses, block ingestion
-            if candidate_trace.verdict == EpistemicStatus.CONTRADICTED:
+            # If candidate collapses or explicitly collided with an established C5 truth, block ingestion
+            if candidate_trace.verdict == EpistemicStatus.CONTRADICTED or has_c5_collision:
                 logger.warning(
-                    "ART GATE: Ingestion blocked. Candidate claim collapsed by physics collision."
+                    "ART GATE: Ingestion blocked. Speculative claim collapsed by established C5 truth."
                 )
                 return ("blocked", candidate)
 
