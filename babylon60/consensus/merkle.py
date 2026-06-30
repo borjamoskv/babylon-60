@@ -32,7 +32,7 @@ def compute_merkle_root(hashes: list[str]) -> str:
             # Handle odd number of elements by duplicating the last one
             right = current_level[i + 1] if i + 1 < len(current_level) else left
 
-            combined = f"{left}{right}"
+            combined = f"{left}\x00{right}"
             next_hash = cortex_hash(combined.encode())
             next_level.append(next_hash)
         current_level = next_level
@@ -56,9 +56,9 @@ def verify_merkle_proof(leaf_hash: str, proof: list[tuple[str, str]], root_hash:
 
     for sibling, position in proof:
         if position == "L":
-            combined = f"{sibling}{current_hash}"
+            combined = f"{sibling}\x00{current_hash}"
         else:
-            combined = f"{current_hash}{sibling}"
+            combined = f"{current_hash}\x00{sibling}"
 
         current_hash = cortex_hash(combined.encode())
 
@@ -87,7 +87,7 @@ class MerkleTree:
                 left = current_level[i]
                 right = current_level[i + 1] if i + 1 < len(current_level) else left
 
-                combined = f"{left}{right}"
+                combined = f"{left}\x00{right}"
                 next_hash = cortex_hash(combined.encode())
                 next_level.append(next_hash)
             tree.append(next_level)
