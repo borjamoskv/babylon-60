@@ -34,10 +34,6 @@ dependencies = [
     "aiosqlite>=0.20.0",
     "cryptography>=47.0.0",
     "pydantic>=2.7.0",
-    "langchain-community>=0.4.2",
-    "langchain-core>=1.4.7",
-    "langchain-ollama>=1.1.0",
-    "confluent-kafka>=2.1.0",
 ]
 
 [project.urls]
@@ -48,6 +44,14 @@ Issues = "https://github.com/borjamoskv/Cortex-Persist/issues"
 Changelog = "https://github.com/borjamoskv/Cortex-Persist/releases"
 
 [project.optional-dependencies]
+llm = [
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.4.7",
+    "langchain-ollama>=1.1.0",
+]
+streaming = [
+    "confluent-kafka>=2.1.0",
+]
 compute = [
     "numpy",
 ]
@@ -135,7 +139,7 @@ quality = [
     "radon>=6.0.1",
 ]
 all = [
-    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality]",
+    "cortex-persist[llm,streaming,compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,acceleration,bci,graph,quality]",
 ]
 
 [project.scripts]
@@ -149,7 +153,7 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["cortex", "cortex.*"]
+include = ["cortex", "cortex.*", "cortex_extensions", "cortex_extensions.*"]
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
@@ -193,7 +197,7 @@ exclude = ["experimental", "notebooks", "skills", "engine-c5", "bounty_hunt", "c
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "G", "TID"]
-ignore = ["E501", "E402", "B008", "W291", "W293", "S", "UP045", "TID251", "G004", "B904", "E701"]
+ignore = ["E501", "E402", "B008", "W291", "W293", "S", "UP045", "G004", "B904", "E701"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20", "B017", "TID251", "F401", "F841", "I001"]
