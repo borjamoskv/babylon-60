@@ -15,6 +15,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from babylon60.memory.engrams import CortexSemanticEngram
+from babylon60.telemetry.metrics import metrics
 
 if TYPE_CHECKING:
     from babylon60.extensions.sovereign.endocrine import DigitalEndocrine
@@ -346,6 +347,14 @@ class AdaptiveResonanceGate:
                 logger.warning(
                     "ART GATE: Ingestion blocked. Speculative claim collapsed by established C5 truth."
                 )
+                
+                # Emitir métrica de telemetría factual
+                metrics.inc(
+                    "cortex_contradictions_total",
+                    labels={"domain": candidate.tenant_id or "unknown"},
+                    meta={"candidate_id": candidate.id}
+                )
+                
                 return ("blocked", candidate)
 
             # Update neighbors affected by the collision

@@ -7,7 +7,7 @@ CREATE CONSTRAINT IF NOT EXISTS FOR (n:BrainRegion) REQUIRE n.id IS UNIQUE;
 // L1 Motor & Autonomic
 MERGE (:BrainRegion {id:'bulbo_raquideo', layer:'L1', function:'vital_rhythms', compute:'PID0_daemon', latency_ms:'<5'});
 MERGE (:BrainRegion {id:'puente_varolio', layer:'L1', function:'sleep_wake_routing', compute:'load_balancer_cron', latency_ms:'10'});
-MERGE (:BrainRegion {id:'cerebelo', layer:'L1', function:'motor_prediction', compute:'fpu_pid_controller', latency_ms:'15'});
+MERGE (:BrainRegion {id:'cerebelo', layer:'L1', function:'motor_prediction_and_error_correction', compute:'adaptive_fpu_pid', latency_ms:'5'});
 MERGE (:BrainRegion {id:'formacion_reticular', layer:'L1', function:'arousal', compute:'interrupt_controller', latency_ms:'50'});
 
 // L2 Limbic & Memory
@@ -39,4 +39,7 @@ MERGE (:BrainRegion {id:'amigdala'})-[:INTERRUPT]->(:BrainRegion {id:'prefrontal
 MERGE (:BrainRegion {id:'hipocampo'})-[:FEEDS_CONTEXT]->(:BrainRegion {id:'prefrontal'});
 
 MERGE (:BrainRegion {id:'prefrontal'})-[:CONTROLS]->(:BrainRegion {id:'frontal'});
+MERGE (:BrainRegion {id:'frontal'})-[:MOTOR_PLAN]->(:BrainRegion {id:'cerebelo'});
+MERGE (:BrainRegion {id:'cerebelo'})-[:TIMING_SIGNAL]->(:BrainRegion {id:'ganglios_basales'});
+MERGE (:BrainRegion {id:'cerebelo'})-[:ERROR_CORRECTION]->(:BrainRegion {id:'motor_output'});
 MERGE (:BrainRegion {id:'frontal'})-[:EXECUTES]->(:BrainRegion {id:'motor_output'});

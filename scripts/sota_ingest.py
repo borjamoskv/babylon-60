@@ -83,8 +83,8 @@ class SOTAVectorEngine:
     @property
     def model(self):
         if self._model is None:
-            # Local execution for maximum isolation
-            self._model = SentenceTransformer("all-MiniLM-L6-v2")
+            # Local execution for maximum isolation, upgraded to SOTA BAAI weights
+            self._model = SentenceTransformer("BAAI/bge-large-en-v1.5")
         return self._model
 
     def emit_empty_verification(self) -> None:
@@ -126,7 +126,7 @@ class SOTAVectorEngine:
         document_text = f"Insight: {node.Core_Insight}\nMechanism: {node.Mechanism}\nDelta: {node.Capability_Delta.Description}"
         
         # Embedding extraction
-        print(f"Extracting dense embedding (all-MiniLM-L6-v2) for domain {node.Domain}...", file=sys.stderr)
+        print(f"Extracting dense embedding (BAAI/bge-large-en-v1.5) for domain {node.Domain}...", file=sys.stderr)
         embedding = self.model.encode(document_text).tolist()
         
         # Provenance ID generation (deterministic hash)
