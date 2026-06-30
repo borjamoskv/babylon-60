@@ -259,47 +259,67 @@ class SwarmWorker:
     def process_file(self, path: Path) -> Optional[dict[str, Any]]:
         processing_path = PROCESSING / path.name
 
-        # Atomic move to processing.
-        shutil.move(str(path), str(processing_path))
+        try:
+            # Atomic move to processing.
+            shutil.move(str(path), str(processing_path))
+        except Exception as e:
+            print(f"[WORKER ERROR] Failed to move {path.name}: {e}", file=sys.stderr)
+            quarantine_dir = ROOT / "quarantine"
+            quarantine_dir.mkdir(exist_ok=True)
+            try:
+                shutil.move(str(path), str(quarantine_dir / path.name))
+            except Exception:
+                path.unlink(missing_ok=True)
+            raise
 
-        job = load_json(processing_path)
-        agent_chain: list[str] = job.get("agent_chain", [])
-        constraints: dict[str, Any] = job.get("constraints", {})
+        try:
+            job = load_json(processing_path)
+            agent_chain: list[str] = job.get("agent_chain", [])
+            constraints: dict[str, Any] = job.get("constraints", {})
 
-        artifact: dict[str, Any] = {"status": "init", "job_id": job.get("job_id")}
+            artifact: dict[str, Any] = {"status": "init", "job_id": job.get("job_id")}
 
-        print(f"[WORKER] Job {job.get('job_id')} | chain: {agent_chain}")
+            print(f"[WORKER] Job {job.get('job_id')} | chain: {agent_chain}")
 
-        for agent_name in agent_chain:
-            agent = self.resolve_agent(agent_name)
-            artifact = agent.run(artifact, constraints)
+            for agent_name in agent_chain:
+                agent = self.resolve_agent(agent_name)
+                artifact = agent.run(artifact, constraints)
 
-            print(f"  -> {agent.name}: {artifact['status']}")
+                print(f"  -> {agent.name}: {artifact['status']}")
 
-            if artifact["status"] == "rejected":
-                break
+                if artifact["status"] == "rejected":
+                    break
 
-        # Save final artifact.
-        out_name = f"artifact_{job.get('job_id')}.json"
-        out_path = OUTBOX / out_name
-        save_json(out_path, artifact)
+            # Save final artifact.
+            out_name = f"artifact_{job.get('job_id')}.json"
+            out_path = OUTBOX / out_name
+            save_json(out_path, artifact)
 
-        # Emit feedback.
-        feedback = build_feedback(job, artifact)
-        fb_name = f"feedback_{job.get('job_id')}.json"
+            # Emit feedback.
+            feedback = build_feedback(job, artifact)
+            fb_name = f"feedback_{job.get('job_id')}.json"
 
-        # Write to local feedback.
-        save_json(FEEDBACK / fb_name, feedback)
+            # Write to local feedback.
+            save_json(FEEDBACK / fb_name, feedback)
 
-        # Write to cortex feedback if available.
-        if CORTEX_FEEDBACK.exists():
-            save_json(CORTEX_FEEDBACK / fb_name, feedback)
+            # Write to cortex feedback if available.
+            if CORTEX_FEEDBACK.exists():
+                save_json(CORTEX_FEEDBACK / fb_name, feedback)
 
-        # Cleanup processing.
-        processing_path.unlink(missing_ok=True)
+            print(f"[WORKER] Completed. Output: {out_path}")
+            return feedback
+        except Exception as e:
+            print(f"[WORKER ERROR] Failed processing {processing_path.name}: {e}", file=sys.stderr)
+            quarantine_dir = ROOT / "quarantine"
+            quarantine_dir.mkdir(exist_ok=True)
+            try:
+                shutil.move(str(processing_path), str(quarantine_dir / processing_path.name))
+            except Exception:
+                processing_path.unlink(missing_ok=True)
+            raise
+        finally:
+            processing_path.unlink(missing_ok=True)
 
-        print(f"[WORKER] Completed. Output: {out_path}")
-        return feedback
 
     def run_once(self) -> list[dict[str, Any]]:
         results: list[dict[str, Any]] = []
