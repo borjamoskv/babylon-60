@@ -96,7 +96,7 @@ def check_git_state() -> CheckResult:
     
     passed = result.returncode == 0 and not result.stdout.strip()
     if not passed:
-        detail = "dirty working tree" if result.stdout.strip() else "git status failed"
+        detail = f"dirty working tree: {result.stdout.strip()}" if result.stdout.strip() else "git status failed"
     else:
         detail = "clean"
         

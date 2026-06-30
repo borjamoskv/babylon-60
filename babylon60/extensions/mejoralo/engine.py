@@ -56,9 +56,15 @@ class MejoraloEngine:
         self, project: str, score_before: int, score_after: int, actions: list[str]
     ) -> int:
         """Record a Mejoralo session in the fact ledger."""
-        # Implementation depends on CortexEngine's fact storage
-        # This is a placeholder for the actual implementation
-        return 0
+        from .ledger import record_session as ledger_record_session
+
+        return ledger_record_session(
+            engine=self.engine,
+            project=project,
+            score_before=score_before,
+            score_after=score_after,
+            actions=actions,
+        )
 
     def history(self, project: str, limit: int = 10) -> list[dict[str, Any]]:
         """Retrieve historical Mejoralo sessions for a project."""
