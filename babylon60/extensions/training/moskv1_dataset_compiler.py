@@ -246,19 +246,26 @@ def _clean_content(text: str) -> str:
 
 
 def _truncate_output(text: str, max_length: int = _MAX_OUTPUT_LENGTH) -> str:
-    """Truncate output to max_length, preserving complete blocks."""
+    """Truncate output to max_length, preserving complete blocks and closing code blocks."""
     if len(text) <= max_length:
         return text
     # Try to cut at a paragraph boundary
     truncated = text[:max_length]
     last_double_newline = truncated.rfind("\n\n")
     if last_double_newline > max_length * 0.6:
-        return truncated[:last_double_newline].strip()
-    # Cut at last complete line
-    last_newline = truncated.rfind("\n")
-    if last_newline > max_length * 0.8:
-        return truncated[:last_newline].strip()
-    return truncated.strip()
+        res = truncated[:last_double_newline].strip()
+    else:
+        # Cut at last complete line
+        last_newline = truncated.rfind("\n")
+        if last_newline > max_length * 0.8:
+            res = truncated[:last_newline].strip()
+        else:
+            res = truncated.strip()
+
+    # Ensure open markdown code blocks are closed to preserve syntax validity
+    if res.count("```") % 2 != 0:
+        res += "\n```"
+    return res
 
 
 # ─── Data Models ────────────────────────────────────────────────────────────
