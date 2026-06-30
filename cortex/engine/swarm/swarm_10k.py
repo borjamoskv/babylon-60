@@ -18,9 +18,9 @@ from typing import Any
 
 from cortex.database.core import connect_async_ctx
 from cortex.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
-from cortex.engine.exergy_optimizer import ExergyOptimizer
-from cortex.engine.shared_bus import SovereignSharedBus
-from cortex.engine.slashing import SlashingPenalty
+from cortex.engine.uncategorized.exergy_optimizer import ExergyOptimizer
+from cortex.engine.uncategorized.shared_bus import SovereignSharedBus
+from cortex.engine.uncategorized.slashing import SlashingPenalty
 from cortex_extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 logger = logging.getLogger("cortex.engine.swarm.swarm_10k")
@@ -333,6 +333,21 @@ class SwarmCommander:
     async def execute_global_dispatch(self, tasks: list[dict], parallel: bool = True) -> None:
         """Route massive workload across the Sharded hierarchy."""
         if parallel:
+            # Check if any requested domain is overclocked to bypass bucketed serialization
+            domains = {t.get("domain", "default") for t in tasks}
+            overclocked = False
+            for d in domains:
+                leg = self.legions.get(d)
+                if leg and leg._overclocked:
+                    overclocked = True
+                    break
+
+            if overclocked:
+                # Double Speed / Overclocked path: direct parallel execution with no bucket throttling
+                # Concurrency is increased to 250 (double speed!)
+                await self.execute_parallel_dispatch(tasks, concurrency=250)
+                return
+
             # V7 Optimization: Bucketed Dispatch for Thermal Stability (KDF 0.05)
             await self.execute_bucketed_dispatch(tasks, bucket_size=100)
             return

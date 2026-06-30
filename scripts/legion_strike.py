@@ -2,8 +2,8 @@ import argparse
 import asyncio
 import sys
 
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.extensions.swarm.centauro_engine import CentauroEngine
+from cortex_extensions.llm.router import CortexLLMRouter
+from cortex_extensions.swarm.centauro_engine import CentauroEngine
 
 
 async def main():
