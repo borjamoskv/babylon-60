@@ -91,6 +91,7 @@ def check_ruff() -> CheckResult:
 def check_git_state() -> CheckResult:
     """Git State — clean & aligned with origin."""
     t0 = time.monotonic()
+    _run("git update-index --refresh")
     result = _run("git status --porcelain")
     ms = (time.monotonic() - t0) * 1000
     
