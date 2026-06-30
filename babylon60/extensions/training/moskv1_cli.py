@@ -314,7 +314,10 @@ def cmd_stats() -> None:
             entries.append(json.loads(line))
 
     total_tokens = (
-        sum(sum(len(m.get("content", "")) for m in e.get("conversations", [])) for e in entries)
+        sum(
+            sum(len(m.get("content", "")) for m in (e.get("messages") or e.get("conversations") or []))
+            for e in entries
+        )
         // 4
     )
 

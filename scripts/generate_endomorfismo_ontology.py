@@ -333,6 +333,12 @@ SYS_ID borjamoskv
 """
 
 # Guardar archivos
+with open(os.path.join(ontology_dir, "endomorfismo_primitivas_01.md"), "w") as f:
+    f.write(primitivas_01_50_content)
+
+with open(os.path.join(ontology_dir, "endomorfismo_primitivas_02.md"), "w") as f:
+    f.write(primitivas_51_100_content)
+
 with open(os.path.join(ontology_dir, "endomorfismo_invariantes_01.md"), "w") as f:
     f.write(invariantes_01_50_content)
 
