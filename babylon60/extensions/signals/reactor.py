@@ -65,7 +65,8 @@ class SignalReactor:
                 processed += 1
                 # Small breath between signals to avoid flooding the loop
                 await breathe(0.01)
-            except (ValueError, AttributeError, RuntimeError, OSError) as e:
+            except Exception as e:  # noqa: BLE001
+                # Deliberate fault-isolation boundary for background loops
                 logger.exception(
                     "Reactor failed to process signal #%d (%s): %s",
                     signal.id,
@@ -84,13 +85,7 @@ class SignalReactor:
         # --- TriggerEngine evaluation (declarative) ---
         te = self._get_trigger_engine()
         if te is not None:
-            try:
-                await te.evaluate(signal)
-            except (RuntimeError, ValueError, OSError):
-                logger.debug(
-                    "TriggerEngine evaluation failed for %s",
-                    signal.event_type,
-                )
+            await te.evaluate(signal)
 
         # --- Hardcoded reflexes (legacy fallback) ---
         etype = signal.event_type
@@ -111,59 +106,46 @@ class SignalReactor:
         """Lazy-initialize the TriggerEngine with default triggers."""
         if self._trigger_engine is not None:
             return self._trigger_engine
-        try:
-            from babylon60.extensions.signals.trigger_engine import (
-                TriggerEngine,
-            )
-            from babylon60.extensions.signals.trigger_registry import (
-                register_defaults,
-            )
+        
+        from babylon60.extensions.signals.trigger_engine import (
+            TriggerEngine,
+        )
+        from babylon60.extensions.signals.trigger_registry import (
+            register_defaults,
+        )
 
-            te = TriggerEngine()
-            register_defaults(te)
-            self._trigger_engine = te
-            logger.info(
-                "TriggerEngine initialized with %d conditions",
-                len(te.list_triggers()),
-            )
-            return te
-        except (RuntimeError, ValueError, OSError):
-            logger.debug("TriggerEngine not available - continuing")
-            return None
+        te = TriggerEngine()
+        register_defaults(te)
+        self._trigger_engine = te
+        logger.info(
+            "TriggerEngine initialized with %d conditions",
+            len(te.list_triggers()),
+        )
+        return te
 
     async def _handle_experience_recorded(self, signal: Any) -> None:
         """Reflex: Reconcile an experience into stratified memory layers."""
         if not self.engine or not self.engine.memory:
-            logger.warning(
-                "Experience reconciliation failed: Engine or MemoryManager not available."
-            )
-            return
+            raise RuntimeError("Experience reconciliation failed: Engine or MemoryManager not available.")
 
-        try:
-            logger.info("Reactor: Reconciling experience signal #%d", signal.id)
-            await self.engine.memory.reconcile_experience(signal)
-        except (RuntimeError, OSError, AttributeError) as e:
-            logger.exception("Failed to reconcile experience reflex: %s", e)
+        logger.info("Reactor: Reconciling experience signal #%d", signal.id)
+        await self.engine.memory.reconcile_experience(signal)
 
     async def _handle_compact_needed(self, signal: Any) -> None:
         """Reflex: Automate memory compaction."""
         project = signal.project or signal.payload.get("project")
         if not project:
-            logger.warning("compact:needed signal missing project context.")
-            return
+            raise ValueError("compact:needed signal missing project context.")
 
-        try:
-            from babylon60.compaction.compactor import compact
+        from babylon60.compaction.compactor import compact
 
-            logger.info("Reactor triggering autonomous compaction for [%s]", project)
+        logger.info("Reactor triggering autonomous compaction for [%s]", project)
 
-            # compact is already async
-            result = await compact(engine=self.engine, project=project, dry_run=False)
+        # compact is already async
+        result = await compact(engine=self.engine, project=project, dry_run=False)
 
-            if result:
-                logger.info("Reflex: Compaction done for %s. -%d facts.", project, result.reduction)
-        except (ImportError, RuntimeError, OSError) as e:
-            logger.exception("Failed to run compaction reflex: %s", e)
+        if result:
+            logger.info("Reflex: Compaction done for %s. -%d facts.", project, result.reduction)
 
     async def _handle_fact_stored(self, signal: Any) -> None:
         """Reflex: Regenerate snapshot (with cooldown)."""
@@ -171,16 +153,13 @@ class SignalReactor:
         if now - self._last_snapshot_time < self._snapshot_cooldown:
             return
 
-        try:
-            from babylon60.extensions.sync import export_snapshot
+        from babylon60.extensions.sync import export_snapshot
 
-            logger.info("Reactor triggering autonomous snapshot export.")
-            await export_snapshot(self.engine)
+        logger.info("Reactor triggering autonomous snapshot export.")
+        await export_snapshot(self.engine)
 
-            self._last_snapshot_time = now
-            logger.info("Reflex: Snapshot updated.")
-        except (ImportError, RuntimeError, OSError) as e:
-            logger.exception("Failed to run snapshot reflex: %s", e)
+        self._last_snapshot_time = now
+        logger.info("Reflex: Snapshot updated.")
 
     async def run_loop(self, interval: float = 5.0) -> None:
         """Start a non-blocking infinite loop for standalone usage. (PULMONES)"""
@@ -190,7 +169,8 @@ class SignalReactor:
                 count = await self.process_once()
                 if count > 0:
                     logger.debug("Reactor: Processed %d signal(s)", count)
-            except (RuntimeError, OSError, ValueError) as e:
+            except Exception as e:  # noqa: BLE001
+                # Deliberate fault-isolation boundary for the reactor process
                 logger.exception("Reactor loop error: %s", e)
 
             await breathe(interval)
