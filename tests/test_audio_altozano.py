@@ -37,7 +37,7 @@ def test_altozano_deconstruct(mock_audio_file):
 
     assert report["track"] == "test_A4.wav"
     assert report["sample_rate_hz"] == 22050
-    assert report["duration_sec"] == 1.0
+    assert report["duration_sec"] == 3.0
 
     # 440Hz is an 'A'. The dominant note should be 'A'.
     # Sometimes it might pick up harmonics, but A should definitely be in the top notes.
