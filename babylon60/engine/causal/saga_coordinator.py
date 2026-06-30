@@ -23,6 +23,7 @@ from babylon60.engine.causal.taint_engine import (
     enforce_taint_check,
     secure_state_commit,
 )
+from babylon60.crypto.aes import get_default_encrypter
 
 logger = logging.getLogger("babylon60.engine.causal.saga_coordinator")
 
@@ -79,7 +80,20 @@ class SagaCoordinator:
             logger.error(f"[SAGA] Aborted at SAGA-3: Schema mismatch for {schema_name}")
             raise ValueError("SAGA Aborted: Schema mismatch.")
 
-        # SAGA-4: Encryption (Deferred/Transparent for now)
+        # SAGA-4: Encryption
+        if metadata.get("encrypt", False):
+            try:
+                encrypter = get_default_encrypter()
+                encrypted_content = encrypter.encrypt_str(content, tenant_id=tenant_id)
+                if encrypted_content is not None:
+                    content = encrypted_content
+                    metadata["cortex_encrypted"] = True
+            except Exception as e:
+                await self.ledger.log_action(
+                    tenant_id, actor_role, actor_id, "WRITE_REJECTED", resource, status=f"Encryption Failed: {e}"
+                )
+                logger.error(f"[SAGA] Aborted at SAGA-4: {e}")
+                raise ValueError(f"SAGA Aborted: Encryption failed - {e}")
 
         # SAGA-6: DB Write Transaction boundaries
         in_tx_before = self.ledger._conn.in_transaction

@@ -52,3 +52,4 @@ class AgentManifest:
 
     # Tenant isolation
     tenant_id: str = "default"
+    project_id: str = "default"

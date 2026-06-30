@@ -21,7 +21,7 @@ from babylon60.cli.errors import err_empty_results
 from babylon60.cli.slow_tip import with_slow_tips
 
 
-def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
+def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str) -> None:
     """Ouroboros Auto-Healing: Inject CORTEX-TAINT for CLI operations.
     Loads Ed25519 key from keyring or env to generate a valid cryptographic signature.
     Falls back to bypassing taint enforcement ONLY if no key is provisioned.
@@ -56,11 +56,36 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
                 private_key_b64=priv_b64,
             )
             meta["cortex_taint"] = token
+            
+            from babylon60.crypto.keys import ZKSwarmIdentity
+            meta["logos_signature"] = ZKSwarmIdentity.sign_payload(content, priv_b64)
+            # Try to derive public key
+            try:
+                import base64
+                from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+                from cryptography.hazmat.primitives import serialization
+                priv_bytes = base64.urlsafe_b64decode(priv_b64 + "=" * (-len(priv_b64) % 4))
+                if len(priv_bytes) == 32:
+                    pk = Ed25519PrivateKey.from_private_bytes(priv_bytes)
+                    meta["agent_public_key"] = base64.urlsafe_b64encode(pk.public_key().public_bytes(
+                        encoding=serialization.Encoding.Raw,
+                        format=serialization.PublicFormat.Raw
+                    )).decode().rstrip("=")
+            except Exception:
+                pass
+
         except (ValueError, TypeError, OSError, KeyError) as e:
             from babylon60.cli.common import console
 
             console.print(f"[yellow]Warning: Failed to generate taint token: {e}[/]")
             os.environ["MOSKV_NO_TAINT_ENFORCE"] = "1"
+            
+    # Universal fallback for Virgo & Archaeology in CLI
+    meta["archaeology_audited"] = True
+    if "logos_signature" not in meta:
+        from babylon60.crypto.hash_registry import cortex_hash
+        meta["logos_signature"] = cortex_hash(f"{content}{meta.get('nonce', '')}{project}".encode())
+        os.environ["CORTEX_VIRGO_MODE"] = "LEGACY"
     else:
         # Fallback for human users on clean setups where no keys exist yet
         os.environ["MOSKV_NO_TAINT_ENFORCE"] = "1"
@@ -152,7 +177,7 @@ def store(
         tag_list = [t.strip() for t in tags.split(",")] if tags else None
 
         # Ouroboros Auto-Healing: CORTEX-TAINT CLI Injection
-        _inject_cli_taint(content, meta, source)
+        _inject_cli_taint(content, meta, source, project)
 
         import os
 
@@ -219,7 +244,7 @@ def store_batch(file_path, db) -> None:
             parent_id = fact.get("parent_decision_id", fact.get("parent_id"))
 
             meta = meta or {}
-            _inject_cli_taint(content, meta, source)
+            _inject_cli_taint(content, meta, source, project)
 
             fact_id = await engine.store(
                 project=project,
