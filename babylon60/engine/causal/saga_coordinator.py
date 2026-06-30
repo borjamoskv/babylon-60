@@ -65,6 +65,21 @@ class SagaCoordinator:
             logger.error(f"[SAGA] Aborted at SAGA-1/2: {e}")
             raise ValueError(f"SAGA Aborted: {e}")
 
+        # SAGA-2.5: BFT Quorum (Ouroboros)
+        if "bft_signatures" in metadata:
+            from babylon60.consensus.bft_quorum import BFTQuorumGuard, BFTQuorumError
+            bft_sigs = metadata["bft_signatures"]
+            known_peers = metadata.get("bft_known_peers", {})
+            try:
+                guard = BFTQuorumGuard(known_peers)
+                guard.authorize_payload(content.encode('utf-8'), bft_sigs)
+            except BFTQuorumError as e:
+                await self.ledger.log_action(
+                    tenant_id, actor_role, actor_id, "WRITE_REJECTED", resource, status=f"BFT Quorum Failed: {e}"
+                )
+                logger.error(f"[SAGA] Aborted at SAGA-2.5: {e}")
+                raise ValueError(f"SAGA Aborted: {e}")
+
         # SAGA-3: Schema Validation
         payload = {"content": content, "metadata": metadata}
         # In test mode, we might not have schemas defined. We will allow simple dict validation or skip if 'mock_schema'

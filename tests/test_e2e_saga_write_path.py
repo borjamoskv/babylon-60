@@ -196,3 +196,92 @@ async def test_saga_write_path_with_encryption(tmp_path: Path, clean_payload: st
             frozen_content = frozen_state["content"]
             assert frozen_content.startswith("v6_aesgcm:")
             assert frozen_content != clean_payload
+
+
+@pytest.mark.asyncio
+async def test_saga_write_path_bft_quorum(tmp_path: Path, clean_payload: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CORTEX_TEST_ENV", "1")
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "0")
+    
+    db_file = str(tmp_path / "saga_test_bft.db")
+    
+    # Generate N=4 peers
+    peers = {
+        f"peer_{i}": ZKSwarmIdentity.generate_keypair() for i in range(4)
+    }
+    known_peers = {pid: kp.private_key.public_key() for pid, kp in peers.items()}
+    
+    # F = (4-1)//3 = 1. Required Quorum = 2f+1 = 3.
+    
+    async with connect_async_ctx(db_file) as conn:
+        with causal_write(conn):
+            await conn.execute("CREATE TABLE agents (id TEXT PRIMARY KEY, public_key TEXT, is_active INTEGER)")
+            await conn.execute("INSERT INTO agents (id, public_key, is_active) VALUES ('test_agent', ?, 1)", (peers["peer_0"].public_key_b64,))
+            await conn.commit()
+            
+        ledger = EnterpriseAuditLedger(conn)
+        await ledger.ensure_table()
+        
+        coordinator = SagaCoordinator(ledger)
+        
+        # Primary taint token from peer_0
+        token = generate_secure_taint_token(
+            agent_id="test_agent",
+            session_id="test_session",
+            content=clean_payload,
+            private_key_b64=peers["peer_0"].private_key_b64,
+            curve="ed25519"
+        )
+        
+        # 1) Generate signatures from 2 peers (less than quorum of 3)
+        bft_sigs_failed = {
+            "peer_0": peers["peer_0"].private_key.sign(clean_payload.encode('utf-8')),
+            "peer_1": peers["peer_1"].private_key.sign(clean_payload.encode('utf-8'))
+        }
+        
+        metadata_failed = {
+            "bft_signatures": bft_sigs_failed,
+            "bft_known_peers": known_peers
+        }
+        
+        # Should fail with ValueError containing BFTQuorumError
+        with pytest.raises(ValueError, match="SAGA Aborted: Ouroboros Quorum NOT met"):
+            await coordinator.execute_write_path(
+                tenant_id="test_tenant",
+                actor_role="test_role",
+                actor_id="test_agent",
+                resource="test_resource",
+                content=clean_payload,
+                taint_token=token,
+                schema_name="mock_schema",
+                metadata=metadata_failed
+            )
+            
+        # 2) Generate signatures from 3 peers (meets quorum of 3)
+        bft_sigs_success = {
+            "peer_0": peers["peer_0"].private_key.sign(clean_payload.encode('utf-8')),
+            "peer_1": peers["peer_1"].private_key.sign(clean_payload.encode('utf-8')),
+            "peer_2": peers["peer_2"].private_key.sign(clean_payload.encode('utf-8'))
+        }
+        
+        metadata_success = {
+            "bft_signatures": bft_sigs_success,
+            "bft_known_peers": known_peers
+        }
+        
+        with patch("babylon60.agents.primitives.dispatcher.apex_dispatcher.execute") as mock_exec:
+            mock_exec.return_value = "mock_hash"
+            
+            audit_id = await coordinator.execute_write_path(
+                tenant_id="test_tenant",
+                actor_role="test_role",
+                actor_id="test_agent",
+                resource="test_resource",
+                content=clean_payload,
+                taint_token=token,
+                schema_name="mock_schema",
+                metadata=metadata_success
+            )
+            
+            assert audit_id is not None
+            assert mock_exec.called
