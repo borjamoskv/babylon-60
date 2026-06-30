@@ -358,3 +358,38 @@ async def test_wait_for_background_timeout(manager):
 
     # Queue should have been auto-drained due to timeout logic (since CORTEX_TESTING is set)
     assert manager._bg_queue.empty()
+
+
+@pytest.mark.asyncio
+async def test_store_semantic_deduplication(manager, mock_mem0_pipeline):
+    """Test store returning a deduplicated semantic ID if cosine similarity is >90% (distance < 0.10)."""
+    manager._mem0_pipeline = mock_mem0_pipeline
+    manager.thalamus.filter = AsyncMock(
+        return_value=(True, "encode:new", None),
+    )
+
+    mock_cursor = MagicMock()
+    mock_cursor.fetchone.side_effect = [
+        None,  # First query: exact string check -> no match
+        {"id": "semantic_existing_123", "distance": 0.05}  # Second query: semantic check -> match (< 0.10)
+    ]
+
+    mock_conn = MagicMock()
+    mock_conn.cursor.return_value = mock_cursor
+    manager._l2._get_conn = MagicMock(return_value=mock_conn)
+
+    result_id = await manager.store(
+        tenant_id="t1",
+        project_id="p1",
+        content="This is semantically very similar fact",
+        metadata={
+            "confidence_score": "C5",
+            "source_metadata": {
+                "origin": "system",
+                "author": "test",
+                "confidence_in_source": 1.0
+            }
+        }
+    )
+
+    assert result_id == "deduplicated_semantic:semantic_existing_123"

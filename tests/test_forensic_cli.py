@@ -173,7 +173,6 @@ def test_forensics_cli_rejects_manifest_paths_outside_base(tmp_path) -> None:
 
 def test_forensics_command_is_experimental_in_root_cli(monkeypatch) -> None:
     import importlib
-    import sys
     import babylon60.cli.common
     import babylon60.cli.forensics_cmds
 
