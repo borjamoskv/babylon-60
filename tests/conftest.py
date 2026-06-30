@@ -108,8 +108,10 @@ def inject_test_master_key(monkeypatch):
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
 
     from babylon60.crypto.aes import reset_default_encrypter
+    from babylon60.extensions.security.tenant import tenant_id_var
 
     reset_default_encrypter()
+    tenant_id_var.set("default")
 
 
 @pytest.fixture(autouse=True)
