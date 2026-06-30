@@ -20,8 +20,7 @@ jobs:
 
       - name: 2.5. Validación Estructural (Fail-Fast Termodinámico)
         run: |
-          npm install -g ajv-cli
-          ajv validate -s schema/telemetry.schema.json -d data/telemetry.json
+          npx -y ajv-cli validate -s schema/telemetry.schema.json -d data/telemetry.json
 
       - name: 3. Calcular Invariante y Criptografía (Provenance Hash)
         id: crypto_hash
@@ -30,14 +29,17 @@ jobs:
           DATA_HASH=$(sha256sum data/telemetry.json | awk '{print $1}')
           echo "PROVENANCE_HASH=$DATA_HASH" >> $GITHUB_ENV
           echo "Hash generado con éxito: $DATA_HASH"
-      - name: 4. Inyectar Matriz de Datos en el Worker
+      - name: 4. Inyectar AST Limpio en el Worker (Zero Anergía)
         run: |
-          # Leer el contenido de telemetría purificada
-          DATA_CONTENT=$(cat data/telemetry.json | tr -d '\n' | sed 's/"/\\"/g')
-          
-          # Reemplazar los marcadores dinámicos dentro del script del Worker antes del renderizado
-          sed -i "s/PROVENANCE_HASH_PLACEHOLDER/${{ env.PROVENANCE_HASH }}/g" src/worker.js
-          sed -i "s/DATA_STREAM_PLACEHOLDER/$DATA_CONTENT/g" src/worker.js
+          # Inyección determinista mediante motor NodeJS, sin parseos de runtime.
+          node -e "
+            const fs = require('fs');
+            let tpl = fs.readFileSync('src/worker.js', 'utf8');
+            const data = fs.readFileSync('data/telemetry.json', 'utf8');
+            tpl = tpl.replace('\"DATA_STREAM_PLACEHOLDER\"', data);
+            tpl = tpl.replace(/PROVENANCE_HASH_PLACEHOLDER/g, process.env.PROVENANCE_HASH);
+            fs.writeFileSync('src/worker.js', tpl);
+          "
       - name: 5. Despliegue Perimetral Inmediato en Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:

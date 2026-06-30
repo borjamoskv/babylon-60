@@ -10,7 +10,7 @@ const RAG_DATA_STREAM = {
   knowledge_graph: {
     target_q: "¿Latencia media NVMe-oF sobre RoCEv2 en congestión?",
     target_a: "12.4µs (p99:18.2µs) @85% load. PFC-active. Hardware: Mellanox ConnectX-6.",
-    telemetry_matrix: RAW_TELEMETRY === "DATA_STREAM_PLACEHOLDER" ? {} : JSON.parse(RAW_TELEMETRY), // Inyección directa de la matriz empírica
+    telemetry_matrix: RAW_TELEMETRY, // V8 Isolate: Pre-compilado en AST (Zero Anergía)
     anchors: ["arxiv:2303.00001", "sign:0x71C...B29"]
   }
 };
