@@ -38,6 +38,7 @@ dependencies = [
     "tenacity>=8.2.0",
     "keyring>=25.7.0",
     "cbor2>=6.1.2",
+    "openai>=1.0.0",
 ]
 
 [project.urls]
