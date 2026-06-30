@@ -123,6 +123,33 @@ async def store_fact(
 
     _meta = dict(metadata) if metadata else {}
 
+    # Ouroboros C5-REAL Guard: Taint Provenance Injection at the Edge
+    if "CORTEX-TAINT" not in _meta and "cortex_taint" not in _meta:
+        try:
+            from babylon60.crypto.keys import KeyManager
+            from babylon60.engine.causal.taint_engine import generate_secure_taint_token
+
+            km = KeyManager("cortex_persist_enterprise")
+            actor_id = tenant_id if tenant_id and tenant_id != "default" else "system"
+            
+            priv_key = km.get_private_key_b64(actor_id)
+            if not priv_key:
+                km.generate_and_store_key(actor_id)
+                priv_key = km.get_private_key_b64(actor_id)
+                
+            if priv_key:
+                taint_sig = generate_secure_taint_token(
+                    agent_id=actor_id,
+                    session_id=str(parent_decision_id) if parent_decision_id else "genesis",
+                    content=content,
+                    private_key_b64=priv_key,
+                )
+                _meta["CORTEX-TAINT"] = taint_sig
+            else:
+                logger.warning("C5-REAL: Could not retrieve key for %s, SAGA-2 might abort.", actor_id)
+        except Exception as e:
+            logger.warning("C5-REAL: Failed to inject CORTEX-TAINT at the edge: %s", e)
+
     adjusted_layer = manager._determine_layer(project_id, layer)
 
     if matched_schema := manager._schema_engine.match_schema(content):
