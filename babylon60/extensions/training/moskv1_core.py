@@ -39,6 +39,7 @@ import os
 # Secure absolute offline autarchy for HF model loading
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+os.environ["HF_HUB_CACHE"] = os.path.expanduser("~/.babylon60/huggingface")
 
 import time
 from collections import deque

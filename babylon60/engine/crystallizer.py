@@ -1,10 +1,26 @@
+import json
 import logging
 from typing import Any
+
+from pydantic import BaseModel, Field, ValidationError
 
 from babylon60.agents.primitives.dispatcher import apex_dispatcher
 from babylon60.engine.entropy import entropy_annihilator
 
 logger = logging.getLogger(__name__)
+
+
+class SovereignFactSchema(BaseModel):
+    """[C5-REAL] Strict Pydantic Schema for storing facts.
+    Mandatorily exiges 'provenance' and 'confidence_score' to prevent C4-SIM leakage.
+    """
+    project: str = Field(..., min_length=1)
+    content: str = Field(..., min_length=1)
+    provenance: str = Field(..., min_length=1)
+    confidence_score: float = Field(..., ge=0.0, le=1.0)
+    fact_type: str = Field(default="knowledge")
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class AutoCrystallizer:
@@ -16,6 +32,35 @@ class AutoCrystallizer:
 
     def __init__(self) -> None:
         pass
+
+    def validate_facts_json(self, raw_json: str | list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """
+        [C5-REAL] Validates a list of facts (e.g. from _facts.json) using SovereignFactSchema.
+        Raises pydantic.ValidationError if validation fails.
+        """
+        if isinstance(raw_json, str):
+            try:
+                data = json.loads(raw_json)
+            except (json.JSONDecodeError, TypeError) as e:
+                raise ValueError(f"Invalid JSON format: {e}") from e
+        else:
+            data = raw_json
+
+        if not isinstance(data, list):
+            raise ValueError("Input data must be a list of facts.")
+
+        validated_facts = []
+        for idx, item in enumerate(data):
+            if not isinstance(item, dict):
+                raise ValueError(f"Fact at index {idx} must be a JSON object/dictionary.")
+            try:
+                validated_fact = SovereignFactSchema(**item)
+                validated_facts.append(validated_fact.model_dump())
+            except ValidationError as e:
+                logger.error(f"[AutoCrystallizer] Ingestion Validation failed at index {idx}: {e}")
+                raise
+
+        return validated_facts
 
     def crystallize_fact(self, raw_data: str) -> dict[str, Any]:
         """
