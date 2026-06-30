@@ -27,6 +27,12 @@ class _CortexCompat(types.ModuleType):
                 f"(babylon60.{name} not found)"
             )
 
+    def __delattr__(self, name):
+        try:
+            super().__delattr__(name)
+        except AttributeError:
+            pass
+
 
 # Install the compatibility redirect
 import babylon60 as babylon60  # noqa: E402
@@ -42,11 +48,11 @@ sys.modules[__name__] = _compat
 
 # Also install a meta_path finder for deep submodule imports
 class _CortexFinder:
-    """Meta path finder that redirects cortex.* to babylon60.*."""
+    """Meta path finder that redirects cortex.* and cortex_extensions.* to babylon60.*."""
 
     def find_spec(self, fullname, path, target=None):
-        if fullname == "cortex" or fullname.startswith("cortex."):
-            target_name = fullname.replace("cortex", "babylon60", 1)
+        if fullname in ("cortex", "cortex_extensions") or fullname.startswith(("cortex.", "cortex_extensions.")):
+            target_name = fullname.replace("cortex_extensions", "babylon60.extensions", 1).replace("cortex", "babylon60", 1)
             try:
                 # Only return a spec if it is actually a module or package, not an attribute
                 import importlib.util
@@ -58,21 +64,21 @@ class _CortexFinder:
         return None
 
     def create_module(self, spec):
-        target = spec.name.replace("cortex", "babylon60", 1)
+        target = spec.name.replace("cortex_extensions", "babylon60.extensions", 1).replace("cortex", "babylon60", 1)
         return importlib.import_module(target)
 
     def exec_module(self, module):
         pass
 
     def find_module(self, fullname, path=None):
-        if fullname == "cortex" or fullname.startswith("cortex."):
+        if fullname in ("cortex", "cortex_extensions") or fullname.startswith(("cortex.", "cortex_extensions.")):
             return self
         return None
 
     def load_module(self, fullname):
         if fullname in sys.modules:
             return sys.modules[fullname]
-        target = fullname.replace("cortex", "babylon60", 1)
+        target = fullname.replace("cortex_extensions", "babylon60.extensions", 1).replace("cortex", "babylon60", 1)
         mod = importlib.import_module(target)
         sys.modules[fullname] = mod
         return mod
