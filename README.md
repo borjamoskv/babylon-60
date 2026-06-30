@@ -50,7 +50,7 @@ Every AI agent framework answers *"what should the agent do next?"*
 None of them answer *"can you **prove** what the agent did, and that it hasn't been altered by entropy?"*
 
 Generative AI output is fundamentally **probabilistic conjecture**. Traditional logs blindly trust stochastic output.
-BABYLON-60 intercepts that output, enforces a deterministic shield via **Z3 SMT Guards**, and commits the resulting state to an append-only Hash-chain Ledger. 
+BABYLON-60 intercepts that output, enforces a deterministic shield via **Z3 SMT Guards**, and commits the resulting state to an append-only Hash-chain Ledger.
 
 - **LangGraph** gives you checkpoints. BABYLON-60 gives you **cryptographic proof those checkpoints haven't been tampered with.**
 - **Mem0** gives you semantic memory. BABYLON-60 gives you **a hash-chain ledger of every memory access and mutation.**
@@ -97,11 +97,12 @@ async def apex_agent(prompt: str):
 
 ## ▀▄ THERMODYNAMIC ARCHITECTURE (SAGA & OUROBOROS)
 
-BABYLON-60 treats an agent's execution history not as a log, but as a **point in a high-dimensional metric space**. Two runs are either equivalent or measurably divergent. 
+BABYLON-60 treats an agent's execution history not as a log, but as a **point in a high-dimensional metric space**. Two runs are either equivalent or measurably divergent.
 
 To maintain **C5-REAL** execution in the face of stocastic variance, BABYLON-60 applies the **Ouroboros Consensus** and the **SAGA Write-Path Contract**.
 
 ### The Write-Path Contract (SAGA)
+
 All non-trivial state mutations MUST follow this unidirectional flow. If a proposal fails validation or lacks a valid `CORTEX-TAINT` signature, it executes the compensating Saga sequence in reverse and aborts immediately.
 
 ```text
