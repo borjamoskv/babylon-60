@@ -678,9 +678,9 @@ fn main() {
         depth: 1,
     };
 
-    let ws = match connect("ws://127.0.0.1:8001") {
+    let ws = match connect("ws://127.0.0.1:8081") {
         Ok((socket, _)) => {
-            println!("[CORTEX] Telemetry link established on ws://127.0.0.1:8001");
+            println!("[CORTEX] Telemetry link established on ws://127.0.0.1:8081");
             Some(socket)
         }
         Err(_) => None,
