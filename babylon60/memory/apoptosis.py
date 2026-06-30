@@ -175,8 +175,8 @@ class ApoptosisAgent:
                     with causal_write(conn):
                         placeholders = ",".join(["?"] * len(tombstone_ids))
                         await conn.execute(
-                            f"UPDATE facts SET is_tombstoned = 1 WHERE id IN ({placeholders})",
-                            tombstone_ids,
+                            f"UPDATE facts SET is_tombstoned = 1 WHERE id IN ({placeholders}) AND tenant_id = ?",
+                            tombstone_ids + [tenant_id],
                         )
                         await conn.commit()
                         stats["tombstoned"] = len(tombstone_ids)

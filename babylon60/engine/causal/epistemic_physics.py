@@ -27,7 +27,7 @@ class SemanticParticle:
             self.mass = 0.5
 
         # Determinar posición semántica (embedding). Intentar leer de metadatos o crear dummy bidimensional.
-        self.position = None
+        self.position: list[float] | None = None
 
         # Buscar en metadatos de las evidencias
         for e in claim.evidence_list:
@@ -43,16 +43,21 @@ class SemanticParticle:
             y = ((h // 1000) % 1000) / 500.0 - 1.0
             self.position = [x, y]
 
-        self.velocity = [0.0] * len(self.position)
+        # Garantizar que pyright sepa que position nunca es None a partir de este punto
+        assert self.position is not None
+
+        self.velocity: list[float] = [0.0] * len(self.position)
         self.active = True
 
     def apply_impulse(self, impulse: list[float]):
+        assert self.position is not None
         for i in range(len(self.position)):
             self.velocity[i] += impulse[i] / self.mass
 
     def update(self, dt: float, decay_rate: float):
         if not self.active:
             return
+        assert self.position is not None
         for i in range(len(self.position)):
             self.position[i] += self.velocity[i] * dt
             self.velocity[i] *= 1.0 - decay_rate * dt
@@ -101,6 +106,7 @@ class EpistemicPhysicsArbiter:
                             break
 
                     if is_contradictory:
+                        assert p1.position is not None and p2.position is not None
                         # Distancia euclidiana en el espacio semántico
                         squared_sum = sum(
                             (x1 - x2) ** 2 for x1, x2 in zip(p1.position, p2.position, strict=True)

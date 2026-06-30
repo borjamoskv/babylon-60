@@ -60,7 +60,8 @@ class SanedrinNode:
 
         # Fallback to deterministic collision if LLM fails
         if res.is_err():
-            logger.error(f"[Sanhedrin] Node {self.node_id} failed inference: {res.error}")
+            err_msg = getattr(res, "error", "Unknown error")
+            logger.error(f"[Sanhedrin] Node {self.node_id} failed inference: {err_msg}")
             chosen_claim = id_a if hash(id_a) > hash(id_b) else id_b
             density = 0.5
         else:

@@ -211,7 +211,7 @@ class ContextCacheManager:
             import numpy as np
 
             from babylon60.memory.encoder import AsyncEncoder
-            from babylon60.memory.models import CortexFactModel
+            from babylon60.memory.models import CortexFactModel, SourceMetadata
             from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
             from babylon60.utils.turboquant import optimize_vector_qjl
 
@@ -251,6 +251,7 @@ class ContextCacheManager:
                     "mmap_uri": safetensors_path,
                     "provider": provider,
                 },
+                source_metadata=SourceMetadata(origin="system", author="kv_cache_engine", confidence_in_source=1.0)
             )
 
             # Direct connection to SQLite Layer (MMAP Pointer Only)

@@ -26,7 +26,9 @@ _MIN_PROJECT_SUPPORT = 3
 class NeuralGrowthEngine:
     """Orchestrates structural evolution based on hormonal feedback."""
 
-    async def synaptic_pruning(self, conn: aiosqlite.Connection, storer: Any = None) -> int:
+    async def synaptic_pruning(
+        self, conn: aiosqlite.Connection, storer: Any = None, tenant_id: str = "default"
+    ) -> int:
         """Consolidates facts and promotes bridges based on growth levels."""
         growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)
         if growth < 0.5:
@@ -35,20 +37,23 @@ class NeuralGrowthEngine:
 
         logger.info("🧠 [GROWTH] Synaptic Phase Active (Growth: %.2f)", growth)
 
-        consolidated = await self._consolidate_redundant_facts(conn)
-        promoted = await self._promote_successful_bridges(conn, storer)
+        consolidated = await self._consolidate_redundant_facts(conn, tenant_id)
+        promoted = await self._promote_successful_bridges(conn, storer, tenant_id)
 
         return consolidated + promoted
 
-    async def _consolidate_redundant_facts(self, conn: aiosqlite.Connection) -> int:
+    async def _consolidate_redundant_facts(
+        self, conn: aiosqlite.Connection, tenant_id: str
+    ) -> int:
         """
         Merges redundant 'tentative' facts with high semantic similarity.
         (Heuristic: same project, same type, overlapping content).
         """
         cursor = await conn.execute(
-            "SELECT project, content, COUNT(*) as cnt "
-            "FROM facts WHERE fact_type = 'bridge' AND valid_until IS NULL "
-            "GROUP BY project, content HAVING cnt > 1"
+            "SELECT project, content, count(*) as cnt "
+            "FROM facts WHERE fact_type = 'bridge' AND valid_until IS NULL AND tenant_id = ? "
+            "GROUP BY project, content HAVING cnt > 1",
+            (tenant_id,)
         )
         dupes = await cursor.fetchall()
 
@@ -57,8 +62,8 @@ class NeuralGrowthEngine:
             logger.info("🔗 [GROWTH] Consolidating %d duplicate bridges in %s", cnt, project)
             inner_cursor = await conn.execute(
                 "SELECT id FROM facts WHERE project = ? AND content = ? "
-                "AND fact_type = 'bridge' AND valid_until IS NULL ORDER BY id ASC",
-                (project, content),
+                "AND fact_type = 'bridge' AND valid_until IS NULL AND tenant_id = ? ORDER BY id ASC",
+                (project, content, tenant_id),
             )
             rows = await inner_cursor.fetchall()
             master_id = rows[0][0]  # type: ignore[reportIndexIssue]
@@ -78,7 +83,7 @@ class NeuralGrowthEngine:
         return count
 
     async def _promote_successful_bridges(
-        self, conn: aiosqlite.Connection, storer: Any = None
+        self, conn: aiosqlite.Connection, storer: Any = None, tenant_id: str = "default"
     ) -> int:
         """Promotes successful bridges to global_axioms."""
         growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)
@@ -86,10 +91,10 @@ class NeuralGrowthEngine:
             return 0
 
         cursor = await conn.execute(
-            "SELECT content, COUNT(DISTINCT project) as project_count "
-            "FROM facts WHERE fact_type = 'bridge' AND valid_until IS NULL "
+            "SELECT content, count(DISTINCT project) as project_count "
+            "FROM facts WHERE fact_type = 'bridge' AND valid_until IS NULL AND tenant_id = ? "
             "GROUP BY content HAVING project_count >= ?",
-            (_MIN_PROJECT_SUPPORT,),
+            (tenant_id, _MIN_PROJECT_SUPPORT),
         )
         candidates = await cursor.fetchall()
 

@@ -78,7 +78,7 @@ async def embed_fact_async(
             import numpy as np
 
             from babylon60.memory.hdc.algebra import bind
-            from babylon60.memory.models import CortexFactModel
+            from babylon60.memory.models import CortexFactModel, SourceMetadata
 
             fact_hv = memory_manager._hdc_encoder.encode_text(content)
             context_hv = memory_manager.get_context_vector()
@@ -97,6 +97,8 @@ async def embed_fact_async(
                         content=content,
                         embedding=fact_hv.tolist(),
                         specular_embedding=intent_hv.tolist(),
+                        confidence="C5",
+                        source_metadata=SourceMetadata(origin="system", author="embedding_engine", confidence_in_source=1.0)
                     )
                     await memory_manager._hdc.memorize(fact)
                     logger.debug("Vector Alpha (HDC) indexed for fact %d", fact_id)
