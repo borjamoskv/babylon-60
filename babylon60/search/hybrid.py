@@ -98,6 +98,9 @@ async def hybrid_search(
     # Over-fetch by 2x to ensure sufficient overlap for RRF
     fetch_limit = top_k * 2
 
+    fact_type = kwargs.get("fact_type")
+    tags = kwargs.get("tags")
+
     sem_task = semantic_search(
         conn,
         query_embedding,
@@ -106,16 +109,21 @@ async def hybrid_search(
         project=project,
         as_of=as_of,
         confidence=confidence,
+        fact_type=fact_type,
+        tags=tags,
     )
     txt_task = text_search(
         conn,
         query,
         tenant_id=tenant_id,
         project=project,
+        fact_type=fact_type,
+        tags=tags,
         limit=fetch_limit,
         as_of=as_of,
         confidence=confidence,
     )
+
 
     try:
         sem_results, txt_results = await asyncio.gather(sem_task, txt_task)

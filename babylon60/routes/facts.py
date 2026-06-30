@@ -47,6 +47,7 @@ class SearchMemoryRequest(BaseModel):
     k: int = Field(5, ge=1, le=50)
     project: str | None = None
     tags: list[str] | None = None
+    fact_type: str | None = None
     as_of: str | None = None
 
 
@@ -237,6 +238,8 @@ async def search_facts(
         project=req.project,
         tenant_id=auth.tenant_id,
         as_of=req.as_of,
+        tags=req.tags,
+        fact_type=req.fact_type,
     )
     return [
         FactResponse(
