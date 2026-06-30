@@ -60,6 +60,7 @@ from cortex.database.messages import (
     _TxBegin,
     _TxCommit,
     _TxRollback,
+    _WriteManyOp,
     _WriteOp,
 )
 from cortex.utils.result import Err, Ok, Result
@@ -221,33 +222,9 @@ class SqliteWriteWorker:
             return Err("SqliteWriteWorker is not running")
 
         loop = asyncio.get_running_loop()
-
-        # Begin
-        begin = _TxBegin(future=loop.create_future())
-        self._queue.put(begin)
-        result = await begin.future
-        if isinstance(result, Err):
-            return result
-
-        total_rows = 0
-        for sql, params in operations:
-            op_result = await self.execute(sql, params)
-            if isinstance(op_result, Err):
-                # Rollback on error
-                rollback = _TxRollback(future=loop.create_future())
-                self._queue.put(rollback)
-                await rollback.future
-                return op_result
-            total_rows += op_result.value
-
-        # Commit
-        commit = _TxCommit(future=loop.create_future())
-        self._queue.put(commit)
-        commit_result = await commit.future
-        if isinstance(commit_result, Err):
-            return Err(f"Commit failed: {commit_result.error}")
-
-        return Ok(total_rows)
+        op = _WriteManyOp(operations=operations, future=loop.create_future())
+        self._queue.put(op)
+        return await op.future
 
     @asynccontextmanager
     async def transaction(self):
@@ -314,6 +291,8 @@ class SqliteWriteWorker:
             return True
         if isinstance(msg, _WriteOp):
             self._process_write(conn, msg, loop)
+        elif isinstance(msg, _WriteManyOp):
+            self._process_write_many(conn, msg, loop)
         elif isinstance(msg, _TxBegin):
             self._handle_tx_sql(conn, loop, msg.future, "BEGIN IMMEDIATE")
         elif isinstance(msg, _TxCommit):
@@ -334,6 +313,8 @@ class SqliteWriteWorker:
                 remaining = self._queue.get_nowait()
                 if isinstance(remaining, _WriteOp):
                     self._process_write(conn, remaining, loop)
+                elif isinstance(remaining, _WriteManyOp):
+                    self._process_write_many(conn, remaining, loop)
             except queue.Empty:
                 break
         loop.call_soon_threadsafe(fut.set_result, Ok(None))
@@ -393,6 +374,59 @@ class SqliteWriteWorker:
             loop.call_soon_threadsafe(
                 op.future.set_result,
                 Err(f"SQLite write error: {e}"),
+            )
+
+    def _process_write_many(
+        self,
+        conn: sqlite3.Connection,
+        op: _WriteManyOp,
+        loop: asyncio.AbstractEventLoop,
+    ) -> None:
+        """Process multiple write operations in a single transaction in the executor."""
+        start_wait = time.monotonic()
+        wait_ms = (time.monotonic() - start_wait) * 1000
+        try:
+            start_exec = time.monotonic()
+            
+            # Start transaction explicitly if not in one
+            in_transaction = conn.in_transaction
+            if not in_transaction:
+                conn.execute("BEGIN IMMEDIATE")
+                
+            total_rows = 0
+            for sql, params in op.operations:
+                cursor = conn.execute(sql, params)
+                total_rows += cursor.rowcount
+                
+            if not in_transaction:
+                conn.commit()
+                
+            exec_ms = (time.monotonic() - start_exec) * 1000
+
+            # Update metrics
+            ops = self._metrics["total_ops"]
+            m_wait = self._metrics["avg_wait_ms"]
+            m_exec = self._metrics["avg_exec_ms"]
+
+            self._metrics["avg_wait_ms"] = (m_wait * ops + wait_ms) / (ops + 1)
+            self._metrics["avg_exec_ms"] = (m_exec * ops + exec_ms) / (ops + 1)
+            self._metrics["total_ops"] += 1
+
+            loop.call_soon_threadsafe(op.future.set_result, Ok(total_rows))
+
+            self._write_count += len(op.operations)
+            if self._write_count >= self._CHECKPOINT_INTERVAL:
+                self._maybe_checkpoint(conn, loop)
+
+        except sqlite3.Error as e:
+            logger.warning("WriteMany failed: %s | First SQL: %s", e, op.operations[0][0][:100] if op.operations else "")
+            try:
+                conn.rollback()
+            except sqlite3.Error:
+                pass
+            loop.call_soon_threadsafe(
+                op.future.set_result,
+                Err(f"SQLite execute_many error: {e}"),
             )
 
     def _maybe_checkpoint(self, conn: sqlite3.Connection, loop: asyncio.AbstractEventLoop) -> None:

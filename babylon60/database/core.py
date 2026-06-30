@@ -428,16 +428,18 @@ async def apply_pragmas_async(conn: aiosqlite.Connection) -> None:
     Use this when you can't use connect_async() directly
     (e.g., connection pool creates its own connections).
     """
-    await conn.execute("PRAGMA journal_mode=WAL;")
-    await conn.execute("PRAGMA synchronous=NORMAL;")
-    await conn.execute("PRAGMA foreign_keys=ON;")
-    await conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS};")
-    await conn.execute(f"PRAGMA mmap_size={MMAP_SIZE};")
-    await conn.execute(f"PRAGMA page_size={PAGE_SIZE};")
-    await conn.execute(f"PRAGMA cache_size={CACHE_SIZE_KB};")
-    await conn.execute("PRAGMA temp_store=MEMORY;")
-    await conn.execute("PRAGMA threads=4;")  # Optimize sqlite-vec sorting/indexing
-    await conn.execute(f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT};")
+    await conn.executescript(f"""
+        PRAGMA journal_mode=WAL;
+        PRAGMA synchronous=NORMAL;
+        PRAGMA foreign_keys=ON;
+        PRAGMA busy_timeout={BUSY_TIMEOUT_MS};
+        PRAGMA mmap_size={MMAP_SIZE};
+        PRAGMA page_size={PAGE_SIZE};
+        PRAGMA cache_size={CACHE_SIZE_KB};
+        PRAGMA temp_store=MEMORY;
+        PRAGMA threads=4;
+        PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT};
+    """)
     await conn.commit()
 
 

@@ -25,6 +25,7 @@ __all__ = [
     "_TxCommit",
     "_TxRollback",
     "_WriteOp",
+    "_WriteManyOp",
 ]
 
 
@@ -75,7 +76,17 @@ class _Shutdown:
     )
 
 
-_Message = _WriteOp | _TxBegin | _TxCommit | _TxRollback | _Shutdown
+@dataclass(frozen=True)
+class _WriteManyOp:
+    """Multiple write operations to be processed as a single unit by the worker."""
+
+    operations: list[tuple[str, tuple[Any, ...]]]
+    future: asyncio.Future[Result[int, str]] = field(
+        default_factory=lambda: asyncio.get_event_loop().create_future()
+    )
+
+
+_Message = _WriteOp | _WriteManyOp | _TxBegin | _TxCommit | _TxRollback | _Shutdown
 
 
 class TransactionProxy:
