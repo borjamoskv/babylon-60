@@ -42,7 +42,7 @@ try:
 except ImportError:
     AppKit = None
 
-logger = logging.getLogger("cortex.neural")
+logger = logging.getLogger("babylon60.neural")
 
 
 def calculate_entropy(text: str) -> float:

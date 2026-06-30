@@ -22,7 +22,7 @@ import aiosqlite
 
 from babylon60.database.core import connect_async_ctx
 
-logger = logging.getLogger("cortex.reporter")
+logger = logging.getLogger("babylon60.reporter")
 
 
 @dataclass

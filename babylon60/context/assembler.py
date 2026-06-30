@@ -17,7 +17,7 @@ from typing import Any
 
 from babylon60.pipeline import ContextPacket
 
-logger = logging.getLogger("cortex.context.assembler")
+logger = logging.getLogger("babylon60.context.assembler")
 
 KNOWLEDGE_DIR = os.environ.get(
     "CORTEX_KNOWLEDGE_DIR", os.path.expanduser("~/.gemini/antigravity/knowledge")
@@ -196,8 +196,12 @@ class ContextAssembler:
 
                                 # Score: 0.5 base + 0.1 per name match + content match boost
                                 content_lower = content.lower()
-                                content_match = sum(1 for term in query_terms if term in content_lower)
-                                relevance = 0.5 + (0.1 * match_count) + min(0.3, 0.05 * content_match)
+                                content_match = sum(
+                                    1 for term in query_terms if term in content_lower
+                                )
+                                relevance = (
+                                    0.5 + (0.1 * match_count) + min(0.3, 0.05 * content_match)
+                                )
 
                                 token_cost = len(content) // 4
                                 if token_cost > budget:
@@ -444,4 +448,3 @@ class ContextAssembler:
                     )
         except Exception as e:
             logger.warning("  [FACTS] Async query failed: %s", e)
-

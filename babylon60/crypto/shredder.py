@@ -35,7 +35,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("cortex.crypto.shredder")
+logger = logging.getLogger("babylon60.crypto.shredder")
 
 __all__ = ["CryptoShredder", "ShredBatchResult", "ShredResult"]
 

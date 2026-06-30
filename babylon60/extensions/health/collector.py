@@ -16,7 +16,7 @@ from babylon60.extensions.health.collectors import BUILTINS
 from babylon60.extensions.health.models import MetricSnapshot
 from babylon60.extensions.health.registry import CollectorRegistry
 
-logger = logging.getLogger("cortex_extensions.health.collector")
+logger = logging.getLogger("babylon60_extensions.health.collector")
 
 __all__ = ["CollectorRegistry", "HealthCollector", "create_default_registry"]
 

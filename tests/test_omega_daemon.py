@@ -13,7 +13,7 @@ async def test_omega_daemon_start_stop():
         if daemon.loop_count >= 1:
             break
         await asyncio.sleep(0.1)
-        
+
     daemon.stop()
     await task
     assert daemon.loop_count >= 1

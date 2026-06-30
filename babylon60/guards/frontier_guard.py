@@ -6,7 +6,7 @@ from pathlib import Path
 from babylon60.guards.models import ALLOWED_TIERS
 from babylon60.utils.errors import SovereignViolation
 
-logger = logging.getLogger("cortex.guards.frontier")
+logger = logging.getLogger("babylon60.guards.frontier")
 
 
 class FrontierModelGuard:

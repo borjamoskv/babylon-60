@@ -21,7 +21,7 @@ except ImportError:
 
 from babylon60.memory.crdt import CRDTEngram
 
-logger = logging.getLogger("cortex.swarm.zenoh_crdt")
+logger = logging.getLogger("babylon60.swarm.zenoh_crdt")
 
 
 class ZenohCRDTBridge:

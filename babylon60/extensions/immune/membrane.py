@@ -18,7 +18,7 @@ from babylon60.extensions.immune.filters.entropic_quarantine import EntropicQuar
 from babylon60.extensions.immune.filters.entropy import EntropyFilter
 from babylon60.extensions.immune.filters.reversibility import ReversibilityFilter
 
-logger = logging.getLogger("cortex_extensions.immune.membrane")
+logger = logging.getLogger("babylon60_extensions.immune.membrane")
 
 
 @dataclass(frozen=True)

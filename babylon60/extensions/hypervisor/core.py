@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 __all__ = ["AgencyHypervisor"]
 
-logger = logging.getLogger("cortex_extensions.hypervisor")
+logger = logging.getLogger("babylon60_extensions.hypervisor")
 
 
 class AgencyHypervisor:

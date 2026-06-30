@@ -11,7 +11,7 @@ from babylon60.ledger.models import LedgerEvent
 from babylon60.ledger.queue import EnrichmentQueue
 from babylon60.ledger.store import LedgerStore
 
-logger = logging.getLogger("cortex.ledger.writer")
+logger = logging.getLogger("babylon60.ledger.writer")
 
 
 class _OriginSignaturePolicy(Protocol):

@@ -17,7 +17,7 @@ from typing import Any, Final
 
 __all__ = ["TursoBackend"]
 
-logger = logging.getLogger("cortex.storage.turso")
+logger = logging.getLogger("babylon60.storage.turso")
 
 # Threshold for "slow" queries in milliseconds
 SLOW_QUERY_THRESHOLD_MS: Final[int] = 500

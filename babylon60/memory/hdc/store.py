@@ -31,7 +31,7 @@ from babylon60.memory.models import CortexFactModel
 
 __all__ = ["HDCVectorStoreL2"]
 
-logger = logging.getLogger("cortex.memory.hdc.store")
+logger = logging.getLogger("babylon60.memory.hdc.store")
 
 
 class HDCVectorStoreL2:

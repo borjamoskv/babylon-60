@@ -11,7 +11,7 @@ from typing import Any
 
 from babylon60.engine.cognitive.models import Fact
 
-logger = logging.getLogger("cortex.metadata")
+logger = logging.getLogger("babylon60.metadata")
 
 
 class MetadataEngine:

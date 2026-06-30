@@ -9,7 +9,7 @@ from typing import Any, TypeVar
 
 from babylon60.extensions.training.ttt_engine import TTTEngine
 
-logger = logging.getLogger("cortex.conscious_recurrence")
+logger = logging.getLogger("babylon60.conscious_recurrence")
 
 R = TypeVar("R")
 

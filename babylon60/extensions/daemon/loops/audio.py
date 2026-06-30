@@ -7,7 +7,7 @@ import logging
 
 from babylon60.extensions.daemon.utils import run_osascript
 
-logger = logging.getLogger("cortex_extensions.daemon.loops.audio")
+logger = logging.getLogger("babylon60_extensions.daemon.loops.audio")
 
 
 async def audio_mixer_loop(state):

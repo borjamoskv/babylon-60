@@ -77,7 +77,11 @@ def _lang() -> str | None:
     """Detect current language from environment or context."""
     import os
 
-    return os.environ.get("MOSKV_LANG", os.environ.get("CORTEX_LANG")) or os.environ.get("LANG", "en")[:2] or None
+    return (
+        os.environ.get("MOSKV_LANG", os.environ.get("CORTEX_LANG"))
+        or os.environ.get("LANG", "en")[:2]
+        or None
+    )
 
 
 def _t(key: str, **kwargs) -> str:

@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from babylon60.database.core import connect as db_connect
 
-logger = logging.getLogger("cortex.darknet.ledger")
+logger = logging.getLogger("babylon60.darknet.ledger")
 
 
 @dataclass

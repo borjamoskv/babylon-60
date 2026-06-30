@@ -26,10 +26,10 @@ from enum import Enum
 class HashAlgorithm(Enum):
     """Supported hash algorithms with forward-compatibility for PQC era."""
 
-    SHA256 = "sha256"        # Current default — quantum-safe (128-bit post-Grover)
-    SHA3_256 = "sha3_256"    # Transition candidate — different construction (Keccak)
-    SHA512 = "sha512"        # Higher security margin
-    SHA3_512 = "sha3_512"    # Maximum post-quantum margin
+    SHA256 = "sha256"  # Current default — quantum-safe (128-bit post-Grover)
+    SHA3_256 = "sha3_256"  # Transition candidate — different construction (Keccak)
+    SHA512 = "sha512"  # Higher security margin
+    SHA3_512 = "sha3_512"  # Maximum post-quantum margin
 
 
 # Module-level singleton: the active algorithm for all CORTEX hashing.

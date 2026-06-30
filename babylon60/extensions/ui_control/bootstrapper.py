@@ -18,7 +18,7 @@ except ImportError:
     ApplicationServices = None
     Quartz = None
 
-logger = logging.getLogger("cortex_extensions.ui_control.bootstrapper")
+logger = logging.getLogger("babylon60_extensions.ui_control.bootstrapper")
 
 
 class PermsBootstrapper:

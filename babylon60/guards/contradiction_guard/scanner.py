@@ -21,7 +21,8 @@ from babylon60.guards.contradiction_guard.utils import (
     _tokenize,
 )
 
-logger = logging.getLogger("cortex.guards.contradiction.scanner")
+logger = logging.getLogger("babylon60.guards.contradiction.scanner")
+
 
 def _build_token_index(group: list[dict[str, Any]]) -> dict[str, list[int]]:
     """Build inverted index: token -> list of decision indices in the group."""

@@ -8,7 +8,7 @@ from typing import Any
 
 import aiohttp
 
-logger = logging.getLogger("cortex.sentinel")
+logger = logging.getLogger("babylon60.sentinel")
 
 TARGET_ADDRESS = "0x0083022683E56a51Ef1199573411ba6c2ab60000"
 ETHERSCAN_API_URL = "https://api.etherscan.io/api"

@@ -21,7 +21,7 @@ from babylon60.extensions.manifold.dimensions import (
 )
 from babylon60.extensions.manifold.models import DimensionType, WaveState
 
-logger = logging.getLogger("cortex_extensions.manifold.core")
+logger = logging.getLogger("babylon60_extensions.manifold.core")
 
 
 class TesseractManifold:

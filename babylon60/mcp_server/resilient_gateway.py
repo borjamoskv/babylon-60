@@ -51,7 +51,7 @@ except ImportError:
 
 from babylon60.utils.pulmones import CircuitBreaker, PulmonesQueue
 
-logger = logging.getLogger("cortex.mcp_server.resilient_gateway")
+logger = logging.getLogger("babylon60.mcp_server.resilient_gateway")
 
 # ─── Configuration ───────────────────────────────────────────────────
 

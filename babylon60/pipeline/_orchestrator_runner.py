@@ -23,7 +23,7 @@ from babylon60.pipeline._orchestrator_exceptions import (
     PipelineCancelledError,
 )
 
-logger = logging.getLogger("cortex.pipeline.orchestrator")
+logger = logging.getLogger("babylon60.pipeline.orchestrator")
 
 
 class RunnerMixin:

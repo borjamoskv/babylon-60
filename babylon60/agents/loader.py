@@ -19,7 +19,7 @@ from babylon60.memory.resonance import AdaptiveResonanceGate
 from babylon60.memory.sparse import MushroomBodyEncoder
 from babylon60.memory.working import WorkingMemoryL1
 
-logger = logging.getLogger("cortex.agents.loader")
+logger = logging.getLogger("babylon60.agents.loader")
 
 
 class AgentInstance:

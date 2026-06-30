@@ -8,7 +8,7 @@ to prevent the RSI loop from repeating prohibited patterns.
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.verification.counterexample")
+logger = logging.getLogger("babylon60.verification.counterexample")
 
 
 async def learn_from_failure(

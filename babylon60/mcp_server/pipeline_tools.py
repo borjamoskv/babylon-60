@@ -24,7 +24,7 @@ from babylon60.pipeline import (
 if TYPE_CHECKING:
     from babylon60.mcp_server.server import _MCPContext
 
-logger = logging.getLogger("cortex.mcp_server.pipeline")
+logger = logging.getLogger("babylon60.mcp_server.pipeline")
 
 # ── Shared pipeline bridge (singleton per server lifecycle) ──────────
 

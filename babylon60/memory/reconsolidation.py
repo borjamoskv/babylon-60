@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Final
 
-logger = logging.getLogger("cortex.memory.reconsolidation")
+logger = logging.getLogger("babylon60.memory.reconsolidation")
 
 # ─── Constants ────────────────────────────────────────────────────────
 

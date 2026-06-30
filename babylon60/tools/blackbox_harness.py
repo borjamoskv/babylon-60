@@ -26,13 +26,14 @@ import yaml
 from babylon60.crypto.hash_registry import cortex_hash
 
 # ---- Protocol thresholds (Section 5) ----
-ABORT_RATE_LIMIT_THRESHOLD = 0.05   # 5%
+ABORT_RATE_LIMIT_THRESHOLD = 0.05  # 5%
 ABORT_FORMAT_FAIL_THRESHOLD = 0.10  # 10%
 
 DEFAULT_TIMEOUT_SEC = 120
 DEFAULT_MAX_RETRIES = 3
 
 # ------------------- Data Structures -------------------
+
 
 @dataclass
 class InferenceParams:
@@ -41,6 +42,7 @@ class InferenceParams:
     max_output_tokens: int = 1024
     seed: Optional[int] = None
     reasoning_effort: Optional[str] = None
+
 
 @dataclass
 class Provenance:
@@ -51,6 +53,7 @@ class Provenance:
     timestamp_iso: str
     region: str
 
+
 @dataclass
 class SingleResult:
     prompt_sha256: str
@@ -59,28 +62,34 @@ class SingleResult:
     error_type: Optional[str]
 
     latency_ms: float
-    ttft_ms: Optional[float]          # None if not measurable
+    ttft_ms: Optional[float]  # None if not measurable
     completion_tokens: Optional[int]  # None if provider doesn't return
-    tokens_per_sec: Optional[float]   # None if completion_tokens None
+    tokens_per_sec: Optional[float]  # None if completion_tokens None
 
     json_valid: bool
-    exact_match: Optional[bool]       # None if no ground truth provided
+    exact_match: Optional[bool]  # None if no ground truth provided
     response_text: str
     response_preview: str
     timestamp_iso: str
 
+
 # ------------------- Utilities -------------------
+
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
 def sha256_hex(s: str) -> str:
     return cortex_hash(s.encode("utf-8"))
+
 
 def safe_mkdir(path: str) -> None:
     os.makedirs(path, exist_ok=True)
 
+
 # ------------------- Adapter: OpenAI-compatible Chat Completions -------------------
+
 
 class OpenAIChatCompletionsAdapter:
     """
@@ -90,6 +99,7 @@ class OpenAIChatCompletionsAdapter:
       - non-stream responses (JSON)
       - stream responses (SSE 'data: {...}')
     """
+
     def __init__(self, endpoint: str, api_key: str, timeout_sec: int):
         self.endpoint = endpoint
         self.timeout_sec = timeout_sec
@@ -100,7 +110,9 @@ class OpenAIChatCompletionsAdapter:
 
     def call_nonstream(self, payload: dict[str, Any]) -> tuple[int, dict[str, Any], float]:
         t0 = time.perf_counter()
-        r = requests.post(self.endpoint, headers=self.headers, json=payload, timeout=self.timeout_sec)
+        r = requests.post(
+            self.endpoint, headers=self.headers, json=payload, timeout=self.timeout_sec
+        )
         t1 = time.perf_counter()
         latency_ms = (t1 - t0) * 1000.0
         data = {}
@@ -110,7 +122,9 @@ class OpenAIChatCompletionsAdapter:
             data = {}
         return r.status_code, data, latency_ms
 
-    def call_stream(self, payload: dict[str, Any]) -> tuple[int, str, Optional[float], float, dict[str, Any]]:
+    def call_stream(
+        self, payload: dict[str, Any]
+    ) -> tuple[int, str, Optional[float], float, dict[str, Any]]:
         """
         Returns:
           status_code, full_text, ttft_ms(or None), total_latency_ms, tail_json(if any)
@@ -157,7 +171,9 @@ class OpenAIChatCompletionsAdapter:
         ttft_ms = ((first_token_t - t0) * 1000.0) if first_token_t is not None else None
         return 200, "".join(chunks), ttft_ms, (t1 - t0) * 1000.0, tail_json
 
+
 ## ------------------- Passive Provenance Auditor -------------------
+
 
 @dataclass
 class BaselineProfile:
@@ -165,11 +181,13 @@ class BaselineProfile:
     Perfil de referencia OPACO. El operador lo calibra contra sus propios
     endpoints conocidos. Deliberadamente NO contiene atribución de proveedor.
     """
+
     id: str
     features_mean: dict[str, float]
     features_std: dict[str, float]
     calibrated_at: float = field(default_factory=time.time)
     sample_size: int = 0  # N de runs usados para calibrar este perfil
+
 
 # Baselines opacos de ejemplo calibrados. Sin comentarios identificatorios de proveedor.
 PROVENANCE_BASELINES = [
@@ -178,23 +196,24 @@ PROVENANCE_BASELINES = [
         features_mean={"itl_ms": 22.5, "char_ratio": 3.8, "md_density": 0.12, "lexical_bias": 0.04},
         features_std={"itl_ms": 4.2, "char_ratio": 0.3, "md_density": 0.02, "lexical_bias": 0.01},
         calibrated_at=1770000000.0,
-        sample_size=100
+        sample_size=100,
     ),
     BaselineProfile(
         id="profile_beta",
         features_mean={"itl_ms": 10.2, "char_ratio": 4.2, "md_density": 0.05, "lexical_bias": 0.02},
         features_std={"itl_ms": 2.1, "char_ratio": 0.4, "md_density": 0.01, "lexical_bias": 0.005},
         calibrated_at=1770000000.0,
-        sample_size=100
+        sample_size=100,
     ),
     BaselineProfile(
         id="profile_gamma",
         features_mean={"itl_ms": 15.8, "char_ratio": 4.0, "md_density": 0.08, "lexical_bias": 0.03},
         features_std={"itl_ms": 3.5, "char_ratio": 0.2, "md_density": 0.03, "lexical_bias": 0.008},
         calibrated_at=1770000000.0,
-        sample_size=100
-    )
+        sample_size=100,
+    ),
 ]
+
 
 class ProvenanceAuditor:
     """
@@ -228,8 +247,11 @@ class ProvenanceAuditor:
         self.weights = weights or dict(self.DEFAULT_WEIGHTS)
         self.jitter_baseline_ms = max(jitter_baseline_ms, 0.0)
         self.lexical_targets = {
-            "certainly": 1.0, "delve": 1.2, "tapestry": 1.2,
-            "however": 0.5, "cannot": 0.6,
+            "certainly": 1.0,
+            "delve": 1.2,
+            "tapestry": 1.2,
+            "however": 0.5,
+            "cannot": 0.6,
         }
 
     def _compute_lexical_bias(self, text: str) -> float:
@@ -278,17 +300,14 @@ class ProvenanceAuditor:
     def analyze(self, results: list[SingleResult]) -> dict[str, Any]:
         obs = self._extract_features(results)
         if obs is None:
-            return {
-                "status": "insufficient_data",
-                "identity_claim": "not_supported"
-            }
+            return {"status": "insufficient_data", "identity_claim": "not_supported"}
 
         if not self.baselines:
             return {
                 "status": "no_baselines",
                 "observed_vector": obs,
                 "note": "Signature computed; no calibrated baselines configured.",
-                "identity_claim": "not_supported"
+                "identity_claim": "not_supported",
             }
 
         distances = {}
@@ -302,7 +321,7 @@ class ProvenanceAuditor:
                 ref_std = max(p.features_std[k], 1e-6)  # Prevent division by zero
                 # Normalización dimensional empírica (Mahalanobis-style distance per axis)
                 diff_norm = (obs_val - ref_mean) / ref_std
-                d_sq += self.weights.get(k, 1.0) * (diff_norm ** 2)
+                d_sq += self.weights.get(k, 1.0) * (diff_norm**2)
             distances[p.id] = math.sqrt(d_sq)
 
         # Softmax con traslación log-sum-exp para estabilidad numérica extrema
@@ -318,10 +337,12 @@ class ProvenanceAuditor:
             "nearest_profile": nearest,
             "distances": {k: round(v, 4) for k, v in distances.items()},
             "similarity_scores": similarities,  # heurístico, no probabilidad calibrada
-            "identity_claim": "not_supported"
+            "identity_claim": "not_supported",
         }
 
+
 # ------------------- Evaluator -------------------
+
 
 class BlackBoxHarness:
     def __init__(self, cfg: dict[str, Any]):
@@ -396,7 +417,9 @@ class BlackBoxHarness:
             completion_tokens = None
         return text, completion_tokens
 
-    def run_prompt(self, prompt: str, ground_truth: Optional[str], force_stream: bool) -> SingleResult:
+    def run_prompt(
+        self, prompt: str, ground_truth: Optional[str], force_stream: bool
+    ) -> SingleResult:
         self.total_calls += 1
         p_hash = sha256_hex(prompt)
         tstamp = now_iso()
@@ -406,7 +429,7 @@ class BlackBoxHarness:
                 if force_stream:
                     payload = self._build_payload(prompt, stream=True)
                     status, text, ttft_ms, latency_ms, _tail = self.adapter.call_stream(payload)
-                    completion_tokens = None 
+                    completion_tokens = None
                 else:
                     payload = self._build_payload(prompt, stream=False)
                     status, data, latency_ms = self.adapter.call_nonstream(payload)
@@ -416,7 +439,7 @@ class BlackBoxHarness:
                 if status == 429:
                     self.rate_limit_429 += 1
                     if attempt < self.max_retries:
-                        time.sleep(2 ** attempt)
+                        time.sleep(2**attempt)
                         continue
 
                 rejected = status != 200
@@ -433,7 +456,7 @@ class BlackBoxHarness:
 
                 exact_match = None
                 if ground_truth is not None:
-                    exact_match = (text.strip() == ground_truth.strip())
+                    exact_match = text.strip() == ground_truth.strip()
 
                 tps = None
                 if completion_tokens is not None and latency_ms > 0:
@@ -457,18 +480,38 @@ class BlackBoxHarness:
 
             except requests.exceptions.Timeout:
                 return SingleResult(
-                    prompt_sha256=p_hash, status_code=0, rejected=True, error_type="TIMEOUT",
-                    latency_ms=0.0, ttft_ms=None, completion_tokens=None, tokens_per_sec=None,
-                    json_valid=False, exact_match=None, response_text="", response_preview="", timestamp_iso=tstamp
+                    prompt_sha256=p_hash,
+                    status_code=0,
+                    rejected=True,
+                    error_type="TIMEOUT",
+                    latency_ms=0.0,
+                    ttft_ms=None,
+                    completion_tokens=None,
+                    tokens_per_sec=None,
+                    json_valid=False,
+                    exact_match=None,
+                    response_text="",
+                    response_preview="",
+                    timestamp_iso=tstamp,
                 )
             except requests.exceptions.ConnectionError:
                 if attempt < self.max_retries:
-                    time.sleep(2 ** attempt)
+                    time.sleep(2**attempt)
                     continue
                 return SingleResult(
-                    prompt_sha256=p_hash, status_code=0, rejected=True, error_type="CONNECTION_ERROR",
-                    latency_ms=0.0, ttft_ms=None, completion_tokens=None, tokens_per_sec=None,
-                    json_valid=False, exact_match=None, response_text="", response_preview="", timestamp_iso=tstamp
+                    prompt_sha256=p_hash,
+                    status_code=0,
+                    rejected=True,
+                    error_type="CONNECTION_ERROR",
+                    latency_ms=0.0,
+                    ttft_ms=None,
+                    completion_tokens=None,
+                    tokens_per_sec=None,
+                    json_valid=False,
+                    exact_match=None,
+                    response_text="",
+                    response_preview="",
+                    timestamp_iso=tstamp,
                 )
 
         raise RuntimeError("retry loop escaped")
@@ -477,7 +520,9 @@ class BlackBoxHarness:
         total = max(self.total_calls, 1)
         rate_limit_rate = self.rate_limit_429 / total
         format_fail_rate = self.format_fail / total if self.expect_json else 0.0
-        should_abort = (rate_limit_rate > ABORT_RATE_LIMIT_THRESHOLD) or (format_fail_rate > ABORT_FORMAT_FAIL_THRESHOLD)
+        should_abort = (rate_limit_rate > ABORT_RATE_LIMIT_THRESHOLD) or (
+            format_fail_rate > ABORT_FORMAT_FAIL_THRESHOLD
+        )
         return {
             "total_calls": self.total_calls,
             "rate_limit_429": self.rate_limit_429,
@@ -487,11 +532,14 @@ class BlackBoxHarness:
             "should_abort": should_abort,
         }
 
+
 # ------------------- Main -------------------
+
 
 def load_yaml(path: str) -> dict[str, Any]:
     with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -578,6 +626,7 @@ def main():
 
     if abort_global:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

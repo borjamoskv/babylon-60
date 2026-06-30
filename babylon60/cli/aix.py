@@ -10,7 +10,7 @@ import math
 
 from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 
-logger = logging.getLogger("cortex.cli.aix")
+logger = logging.getLogger("babylon60.cli.aix")
 
 
 async def calculate_aix(conn) -> dict:

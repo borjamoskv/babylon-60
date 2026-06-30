@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.swarm.heartbeat")
+logger = logging.getLogger("babylon60_extensions.swarm.heartbeat")
 
 
 class NodeStatus(str, Enum):

@@ -21,7 +21,7 @@ __all__ = ["SQLiteAdapter"]
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("cortex.storage.sqlite_adapter")
+logger = logging.getLogger("babylon60.storage.sqlite_adapter")
 
 
 class CortexConnection:
@@ -43,7 +43,9 @@ class CortexConnection:
         self._causal_write_authorized = bool(causal_token)
 
     @classmethod
-    async def create(cls, conn: aiosqlite.Connection, causal_token: str | None = None) -> CortexConnection:
+    async def create(
+        cls, conn: aiosqlite.Connection, causal_token: str | None = None
+    ) -> CortexConnection:
         """Factory method enforcing R10 and MTK v2 rigid connection factors."""
         await conn.execute("PRAGMA busy_timeout = 5000")
         await conn.execute("PRAGMA journal_mode = WAL")
@@ -89,7 +91,9 @@ class CortexConnection:
     async def execute_insert(self, sql: str, params: tuple[Any, ...] = ()) -> int:
         """Execute an INSERT and return the last inserted row ID. (MTK v2 Protected)"""
         if not self._causal_write_authorized:
-            raise RuntimeError("[MTK v2] Physical rejection: Missing causal token for state mutation.")
+            raise RuntimeError(
+                "[MTK v2] Physical rejection: Missing causal token for state mutation."
+            )
         try:
             async with self._conn.execute(sql, params) as cursor:
                 return cursor.lastrowid or 0
@@ -104,7 +108,9 @@ class CortexConnection:
         interleaved writes and unbounded memory if params_list is large.
         """
         if not self._causal_write_authorized:
-            raise RuntimeError("[MTK v2] Physical rejection: Missing causal token for state mutation.")
+            raise RuntimeError(
+                "[MTK v2] Physical rejection: Missing causal token for state mutation."
+            )
         if not params_list:
             return
         try:
@@ -125,7 +131,9 @@ class CortexConnection:
         (no injection surface).
         """
         if not self._causal_write_authorized:
-            raise RuntimeError("[MTK v2] Physical rejection: Missing causal token for state mutation.")
+            raise RuntimeError(
+                "[MTK v2] Physical rejection: Missing causal token for state mutation."
+            )
         try:
             await self._conn.executescript(script)
         except (OSError, RuntimeError, ValueError):
@@ -165,6 +173,7 @@ class CortexConnection:
 
     def __repr__(self) -> str:
         return f"<CortexConnection causal={self._causal_write_authorized} conn={self._conn!r}>"
+
 
 # MTK v2 Alias for structural compatibility during transition
 SQLiteAdapter = CortexConnection

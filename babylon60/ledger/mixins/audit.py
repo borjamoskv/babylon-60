@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 from babylon60.ledger.merkle import MerkleTree
 from babylon60.utils.canonical import compute_tx_hash, compute_tx_hash_v1, now_iso
 
-logger = logging.getLogger("cortex.ledger")
+logger = logging.getLogger("babylon60.ledger")
 
 
 class LedgerAuditMixin:

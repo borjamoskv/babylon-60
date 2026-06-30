@@ -8,7 +8,7 @@ import tempfile
 import time
 from pathlib import Path
 
-logger = logging.getLogger("cortex_extensions.daemon.state")
+logger = logging.getLogger("babylon60_extensions.daemon.state")
 
 CORTEX_ROOT = Path.home() / "cortex"
 

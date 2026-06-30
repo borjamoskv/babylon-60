@@ -21,18 +21,19 @@ class OuroborosInvariant:
     rule: str
 
 
-
 @dataclass(frozen=True)
 class RtsPrimitive:
     id: str
     name: str
     execute: str
 
+
 @dataclass(frozen=True)
 class RtsInvariant:
     id: str
     name: str
     rule: str
+
 
 class ApexRegistry:
     """

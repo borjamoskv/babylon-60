@@ -11,7 +11,7 @@ from typing import Any
 
 from babylon60.verification.invariants import SOVEREIGN_INVARIANTS, SafetyInvariant
 
-logger = logging.getLogger("cortex.verification.verifier")
+logger = logging.getLogger("babylon60.verification.verifier")
 
 
 @dataclass(frozen=True)

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 from babylon60.database.core import causal_write
 
-logger = logging.getLogger("cortex.lock")
+logger = logging.getLogger("babylon60.lock")
 
 _REDUCE_LOCKS: dict[tuple[str, int], asyncio.Lock] = {}
 

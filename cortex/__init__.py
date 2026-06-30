@@ -13,18 +13,55 @@ import sys
 import types
 
 
+def _map_name(fullname: str) -> str:
+    if fullname.startswith("cortex_extensions"):
+        return "babylon60.extensions" + fullname[len("cortex_extensions"):]
+    elif fullname.startswith("cortex"):
+        return "babylon60" + fullname[len("cortex"):]
+    return fullname
+
+
+def _ensure_compat_aliases():
+    for name in list(sys.modules.keys()):
+        if name.startswith("babylon60.") or name == "babylon60":
+            if name.startswith("babylon60.extensions"):
+                alias1 = "cortex_extensions" + name[len("babylon60.extensions"):]
+            elif name.startswith("babylon60"):
+                alias1 = "cortex" + name[len("babylon60"):]
+            else:
+                alias1 = name
+
+            if alias1 not in sys.modules:
+                sys.modules[alias1] = _CortexCompat(alias1)
+
+            if name.startswith("babylon60"):
+                alias2 = "cortex" + name[len("babylon60"):]
+                if alias2 not in sys.modules:
+                    sys.modules[alias2] = _CortexCompat(alias2)
+
+
 class _CortexCompat(types.ModuleType):
     """Minimal proxy that redirects cortex.X attribute access to babylon60.X."""
 
     def __getattr__(self, name):
+        target_pkg = _map_name(self.__name__)
+        sub_target = f"{target_pkg}.{name}"
         try:
-            return importlib.import_module(f"babylon60.{name}")
+            sub_mod = importlib.import_module(sub_target)
+            proxy = _CortexCompat(f"{self.__name__}.{name}")
+            sys.modules[proxy.__name__] = proxy
+            setattr(self, name, proxy)
+            _ensure_compat_aliases()
+            return proxy
         except ImportError:
-            if hasattr(babylon60, name):
-                return getattr(babylon60, name)
+            mod = importlib.import_module(target_pkg)
+            if hasattr(mod, name):
+                val = getattr(mod, name)
+                _ensure_compat_aliases()
+                return val
             raise AttributeError(
-                f"module 'cortex' has no attribute '{name}' "
-                f"(babylon60.{name} not found)"
+                f"module '{self.__name__}' has no attribute '{name}' "
+                f"({target_pkg}.{name} not found)"
             )
 
     def __delattr__(self, name):
@@ -52,7 +89,7 @@ class _CortexFinder:
 
     def find_spec(self, fullname, path, target=None):
         if fullname in ("cortex", "cortex_extensions") or fullname.startswith(("cortex.", "cortex_extensions.")):
-            target_name = fullname.replace("cortex_extensions", "babylon60.extensions", 1).replace("cortex", "babylon60", 1)
+            target_name = _map_name(fullname)
             try:
                 # Only return a spec if it is actually a module or package, not an attribute
                 import importlib.util
@@ -64,8 +101,7 @@ class _CortexFinder:
         return None
 
     def create_module(self, spec):
-        target = spec.name.replace("cortex_extensions", "babylon60.extensions", 1).replace("cortex", "babylon60", 1)
-        return importlib.import_module(target)
+        return _CortexCompat(spec.name)
 
     def exec_module(self, module):
         pass
@@ -78,7 +114,7 @@ class _CortexFinder:
     def load_module(self, fullname):
         if fullname in sys.modules:
             return sys.modules[fullname]
-        target = fullname.replace("cortex_extensions", "babylon60.extensions", 1).replace("cortex", "babylon60", 1)
+        target = _map_name(fullname)
         mod = importlib.import_module(target)
         sys.modules[fullname] = mod
         return mod

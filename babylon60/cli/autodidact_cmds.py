@@ -78,8 +78,14 @@ def audit():
     engine = get_engine()
 
     async def _audit():
-        if not hasattr(engine, "_memory_manager") or not engine._memory_manager or not engine._memory_manager._l2:
-            raise click.ClickException("L2 vector memory subsystem is not initialized or unavailable.")
+        if (
+            not hasattr(engine, "_memory_manager")
+            or not engine._memory_manager
+            or not engine._memory_manager._l2
+        ):
+            raise click.ClickException(
+                "L2 vector memory subsystem is not initialized or unavailable."
+            )
         l2_store = engine._memory_manager._l2
         return await scan_all_crystals(l2_store, project="autodidact_knowledge")
 

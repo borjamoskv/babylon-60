@@ -18,7 +18,7 @@ except ImportError:
 from babylon60.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from babylon60.utils.result import Err, Ok, Result
 
-logger = logging.getLogger("cortex.composer.vision_qa")
+logger = logging.getLogger("babylon60.composer.vision_qa")
 
 
 class AestheticAuditor:

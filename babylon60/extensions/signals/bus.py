@@ -14,7 +14,7 @@ from babylon60.extensions.signals.models import Signal, signal_from_row
 
 __all__ = ["AsyncSignalBus", "SignalBus"]
 
-logger = logging.getLogger("cortex_extensions.signals.bus")
+logger = logging.getLogger("babylon60_extensions.signals.bus")
 
 _CREATE_TABLE = """\
 CREATE TABLE IF NOT EXISTS signals (

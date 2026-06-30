@@ -31,7 +31,7 @@ import httpx
 
 __all__ = ["PROVIDER_CONFIGS", "APIEmbedder", "get_provider_configs"]
 
-logger = logging.getLogger("cortex.embeddings.api")
+logger = logging.getLogger("babylon60.embeddings.api")
 
 # ─── Gemini Embedding 2 Model Constant ───────────────────────────────
 # Public preview name. Update when GA lands.

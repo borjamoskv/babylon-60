@@ -48,7 +48,7 @@ except ImportError:  # pragma: no cover - sqlite-vec is a base dependency in rel
     sqlite_vec = None
 
 # Python 3.12 deprecates the default datetime adapter. We register our own to prevent DeprecationWarning.
-logger = logging.getLogger("cortex.db")
+logger = logging.getLogger("babylon60.db")
 import datetime
 
 from babylon60.utils.errors import DBLockError

@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 
-logger = logging.getLogger("cortex.migrations.mig_temporal_kg")
+logger = logging.getLogger("babylon60.migrations.mig_temporal_kg")
 
 
 def _migration_027_temporal_kg(conn: sqlite3.Connection) -> None:

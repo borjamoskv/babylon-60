@@ -9,7 +9,7 @@ from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.database.core import connect as db_connect
 from babylon60.engine.evo.evolution_types import DomainMetrics, Mutation
 
-logger = logging.getLogger("cortex_extensions.evolution.metrics")
+logger = logging.getLogger("babylon60_extensions.evolution.metrics")
 
 
 class CortexMetrics:

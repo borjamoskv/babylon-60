@@ -31,7 +31,7 @@ from babylon60.extensions.thinking.fusion import FusionStrategy
 from babylon60.extensions.thinking.orchestra import ThoughtOrchestra
 from babylon60.extensions.thinking.presets import OrchestraConfig, ThinkingMode
 
-logger = logging.getLogger("cortex_extensions.mejoralo.swarm")
+logger = logging.getLogger("babylon60_extensions.mejoralo.swarm")
 
 # Sovereign Specialists (Level 130/100) - Aligned with kimi-swarm-1
 SPECIALISTS_PROMPTS = {

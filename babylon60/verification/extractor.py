@@ -9,7 +9,7 @@ import ast
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.verification.extractor")
+logger = logging.getLogger("babylon60.verification.extractor")
 
 
 class SMTModelExtractor(ast.NodeVisitor):

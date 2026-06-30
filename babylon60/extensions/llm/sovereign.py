@@ -52,7 +52,7 @@ from babylon60.extensions.llm.router import IntentProfile
 
 __all__ = ["Inquisitor", "SovereignLLM", "SovereignResult"]
 
-logger = logging.getLogger("cortex_extensions.llm.sovereign")
+logger = logging.getLogger("babylon60_extensions.llm.sovereign")
 
 # Default signature for template fallback - override via constructor
 _DEFAULT_SIGNATURE = (

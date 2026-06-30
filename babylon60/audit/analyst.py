@@ -12,7 +12,7 @@ from typing import Any
 
 from .ledger import EnterpriseAuditLedger
 
-logger = logging.getLogger("cortex.audit.analyst")
+logger = logging.getLogger("babylon60.audit.analyst")
 
 
 class AuditAnalystGrok:

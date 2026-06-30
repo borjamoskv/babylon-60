@@ -13,7 +13,7 @@ from babylon60.memory.temporal import now_iso
 
 __all__ = ["TransactionMixin"]
 
-logger = logging.getLogger("cortex.transactions")
+logger = logging.getLogger("babylon60.transactions")
 
 
 class TransactionMixin(EngineMixinBase):

@@ -32,7 +32,7 @@ from typing import Any, Final
 
 from babylon60.utils.void_vec import cosine_similarity
 
-logger = logging.getLogger("cortex.memory.dream")
+logger = logging.getLogger("babylon60.memory.dream")
 
 __all__ = ["AssociativeDreamEngine", "DreamResult"]
 

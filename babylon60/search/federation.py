@@ -34,7 +34,7 @@ __all__ = [
     "federated_search_sync",
 ]
 
-logger = logging.getLogger("cortex.search.federation")
+logger = logging.getLogger("babylon60.search.federation")
 
 # Alias map: scope name → (db_path, attach_alias)
 _FEDERATION_MAP: dict[str, tuple[Path, str]] = {

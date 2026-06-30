@@ -13,7 +13,7 @@ import logging
 from pathlib import Path
 from typing import Final
 
-logger = logging.getLogger("cortex_extensions.sovereign.infrastructure")
+logger = logging.getLogger("babylon60_extensions.sovereign.infrastructure")
 
 # Paths for the Sovereign Air-Gap simulation
 from babylon60.core.paths import CORTEX_DIR as _CORTEX_DIR

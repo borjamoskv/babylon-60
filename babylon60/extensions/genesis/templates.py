@@ -23,7 +23,7 @@ from babylon60.extensions.genesis.renderers import (
 
 __all__ = ["SystemTemplate", "TemplateRegistry"]
 
-logger = logging.getLogger("cortex_extensions.genesis.templates")
+logger = logging.getLogger("babylon60_extensions.genesis.templates")
 
 # Type alias: a renderer takes (spec_name, component) and returns file content
 Renderer = Callable[[str, ComponentSpec], str]

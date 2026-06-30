@@ -69,7 +69,7 @@ except ImportError:
 
 __all__ = ["CortexMemoryManager"]
 
-logger = logging.getLogger("cortex.memory.manager")
+logger = logging.getLogger("babylon60.memory.manager")
 
 
 class CortexMemoryManager:

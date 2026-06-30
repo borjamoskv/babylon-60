@@ -13,7 +13,7 @@ import re
 from collections import deque
 from typing import Any
 
-logger = logging.getLogger("cortex.guards.prompt_security")
+logger = logging.getLogger("babylon60.guards.prompt_security")
 
 HAS_TORCH = False
 HAS_SENTENCE_TRANSFORMERS = False

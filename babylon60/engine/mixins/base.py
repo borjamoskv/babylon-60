@@ -14,7 +14,7 @@ import aiosqlite
 
 __all__ = ["EngineMixinBase"]
 
-logger = logging.getLogger("cortex.engine")
+logger = logging.getLogger("babylon60.engine")
 
 # Canonical Fact query structure - includes rich fact fields used by retrieve()/CLI.
 FACT_COLUMNS = (

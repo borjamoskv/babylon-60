@@ -15,7 +15,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-logger = logging.getLogger("cortex_extensions.thinking")
+logger = logging.getLogger("babylon60_extensions.thinking")
 
 if TYPE_CHECKING:
     from babylon60.extensions.thinking.fusion import FusedThought

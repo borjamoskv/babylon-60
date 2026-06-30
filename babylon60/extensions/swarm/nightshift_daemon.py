@@ -27,7 +27,7 @@ from typing import Any
 from babylon60.extensions.swarm.knowledge_radar import discover
 from babylon60.extensions.swarm.nightshift_pipeline import NightShiftPipeline
 
-logger = logging.getLogger("cortex_extensions.swarm.nightshift_daemon")
+logger = logging.getLogger("babylon60_extensions.swarm.nightshift_daemon")
 
 ENTROPY_SURVIVAL_THRESHOLD = 3.5
 

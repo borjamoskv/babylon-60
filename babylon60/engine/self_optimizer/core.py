@@ -13,7 +13,7 @@ from babylon60.engine.core.performance_tracker import PerformanceSnapshot, Perfo
 from .tuners import OptimizationTuners
 from .types import OptimizationEvent, OptimizerConfig, TuningDecision
 
-logger = logging.getLogger("cortex.engine.self_optimizer")
+logger = logging.getLogger("babylon60.engine.self_optimizer")
 
 
 class SelfOptimizer:

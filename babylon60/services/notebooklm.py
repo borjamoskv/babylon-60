@@ -10,7 +10,7 @@ from typing import Any
 from babylon60.database.core import connect as db_connect
 from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.services.notebooklm")
+logger = logging.getLogger("babylon60.services.notebooklm")
 
 # Constants extracted from CLI
 NOTEBOOKLM_DIR = Path("notebooklm_sources")

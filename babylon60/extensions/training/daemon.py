@@ -17,7 +17,7 @@ from typing import Any
 from babylon60.extensions.training.ttt_engine import TTTEngine
 from babylon60.extensions.training.verifier import AdapterVerifier
 
-logger = logging.getLogger("cortex_extensions.training.daemon")
+logger = logging.getLogger("babylon60_extensions.training.daemon")
 
 
 class AutonomousTrainingDaemon:

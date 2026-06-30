@@ -11,7 +11,7 @@ from babylon60.engine.forensic.predictive_healer import Prediction
 
 from .types import AgentStatus
 
-logger = logging.getLogger("cortex.supervisor")
+logger = logging.getLogger("babylon60.supervisor")
 
 
 class SupervisorDaemon:

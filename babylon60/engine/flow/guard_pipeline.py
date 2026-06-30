@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 __all__ = ["GuardPipeline"]
 
-logger = logging.getLogger("cortex.engine")
+logger = logging.getLogger("babylon60.engine")
 
 
 class GuardPipeline:

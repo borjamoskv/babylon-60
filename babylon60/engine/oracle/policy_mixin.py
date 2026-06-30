@@ -15,7 +15,7 @@ from babylon60.engine.temporal.forgetting_models import (
     PolicyRecommendation,
 )
 
-logger = logging.getLogger("cortex.oracle.policy")
+logger = logging.getLogger("babylon60.oracle.policy")
 
 
 class PolicyMixin:

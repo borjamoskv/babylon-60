@@ -18,7 +18,7 @@ from babylon60.database.core import connect_async_ctx
 
 __all__ = ["AIDecisionReport", "HumanOversightGate"]
 
-logger = logging.getLogger("cortex.compliance.eu_ai_act")
+logger = logging.getLogger("babylon60.compliance.eu_ai_act")
 
 
 class AIDecisionReport:
@@ -98,7 +98,9 @@ class HumanOversightGate:
             await conn.commit()
         logger.warning(f"[HumanOversight] Decision {audit_id} escalated for human review: {reason}")
 
-    async def _set_status(self, audit_id: str, reviewer_id: str, status: str, comments: str = "") -> None:
+    async def _set_status(
+        self, audit_id: str, reviewer_id: str, status: str, comments: str = ""
+    ) -> None:
         logger.debug(f"Setting decision {audit_id} to {status}")
         timestamp = datetime.now(timezone.utc).isoformat()
         async with connect_async_ctx(self.db_path) as conn:

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 __all__ = ["ComplexityCompressor"]
 
-logger = logging.getLogger("cortex_extensions.hypervisor.compressor")
+logger = logging.getLogger("babylon60_extensions.hypervisor.compressor")
 
 
 class ComplexityCompressor:

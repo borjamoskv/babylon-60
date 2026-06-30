@@ -33,7 +33,7 @@ __all__ = [
     "TopologicalHealthMonitor",
 ]
 
-logger = logging.getLogger("cortex.memory.topological_health")
+logger = logging.getLogger("babylon60.memory.topological_health")
 
 ProxyType = Literal["spectral_gap", "intrinsic_dim", "hubness"]
 

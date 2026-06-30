@@ -15,7 +15,7 @@ import time
 from datetime import datetime
 from typing import Any
 
-logger = logging.getLogger("cortex.compliance.dual_mode")
+logger = logging.getLogger("babylon60.compliance.dual_mode")
 
 
 class DualComplianceAuditor:

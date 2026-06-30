@@ -19,7 +19,7 @@ from babylon60.audit.ledger import EnterpriseAuditLedger
 from babylon60.audit.smt import SparseMerkleTree
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.audit.ledger_compactor")
+logger = logging.getLogger("babylon60.audit.ledger_compactor")
 
 
 async def compact_ledger(

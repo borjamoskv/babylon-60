@@ -12,7 +12,7 @@ import asyncio
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.security.sync")
+logger = logging.getLogger("babylon60_extensions.security.sync")
 
 __all__ = ["SIGNAL", "SecurityVisualSync"]
 

@@ -171,7 +171,7 @@ class TensorGlialLegion:
 if __name__ == "__main__":
     # Boot sequence for local execution validation
     logging.basicConfig(level=logging.INFO)
-    _log = logging.getLogger("cortex.swarm.tensor_glial")
+    _log = logging.getLogger("babylon60.swarm.tensor_glial")
     _log.info("Legión TensorGlial init...")
     # Fast test with 100 agents, 1000 D for speed
     legion = TensorGlialLegion(num_agents=100, d_dim=1000, file_path="tmp_legion.vsa_mmap")

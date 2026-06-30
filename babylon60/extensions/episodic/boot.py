@@ -34,7 +34,7 @@ __all__ = [
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("cortex_extensions.episodic.boot")
+logger = logging.getLogger("babylon60_extensions.episodic.boot")
 
 # Boot payload target size (characters)
 MAX_BOOT_CHARS: Final[int] = 4000

@@ -15,7 +15,7 @@ from babylon60.compat.optional import np
 from babylon60.swarm.tensor_glial import TensorGlialLegion
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("cortex.gold_miner")
+logger = logging.getLogger("babylon60.gold_miner")
 
 MMAP_FILE = "market_wave.vsa_mmap"
 

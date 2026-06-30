@@ -14,7 +14,7 @@ from babylon60.engine import CortexEngine
 
 __all__ = ["DEFAULT_SWARM_PATH", "MissionOrchestrator"]
 
-logger = logging.getLogger("cortex_extensions.launchpad")
+logger = logging.getLogger("babylon60_extensions.launchpad")
 
 # Default path to the swarm engine relative to home
 DEFAULT_SWARM_PATH = "~/game/.agent/skills/autonomous-browser-swarm/scripts/swarm-v6-engine.js"

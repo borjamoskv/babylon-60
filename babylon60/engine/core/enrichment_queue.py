@@ -9,7 +9,7 @@ import logging
 
 import aiosqlite
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 async def enqueue_enrichment_job(

@@ -31,7 +31,7 @@ __all__ = [
     "audit_target",
 ]
 
-logger = logging.getLogger("cortex.routes.oracle")
+logger = logging.getLogger("babylon60.routes.oracle")
 
 router = APIRouter(tags=["oracle"])
 

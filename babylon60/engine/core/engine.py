@@ -6,7 +6,7 @@ from typing import Any
 from babylon60.engine.core.cost_scheduler import ExergyCostScheduler
 from babylon60.engine.flow import execution_ledger as ledger
 
-logger = logging.getLogger("cortex.engine.core.engine")
+logger = logging.getLogger("babylon60.engine.core.engine")
 
 cost_scheduler = ExergyCostScheduler()
 

@@ -28,7 +28,7 @@ from babylon60.extensions.fingerprint.scanner import FingerprintScanner
 
 __all__ = ["FingerprintExtractor"]
 
-logger = logging.getLogger("cortex_extensions.fingerprint")
+logger = logging.getLogger("babylon60_extensions.fingerprint")
 
 # Normalization caps
 _SESSION_DENSITY_CAP = 10.0  # 10 facts/day = maximum density

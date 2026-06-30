@@ -266,5 +266,10 @@ def _emit_status_json(payload: dict[str, Any], *, status_code: int) -> None:
         raise click.exceptions.Exit(status_code)
 
 
-if os.environ.get("MOSKV_ENABLE_EXPERIMENTAL_CLI", os.environ.get("CORTEX_ENABLE_EXPERIMENTAL_CLI")) == "1":
+if (
+    os.environ.get(
+        "MOSKV_ENABLE_EXPERIMENTAL_CLI", os.environ.get("CORTEX_ENABLE_EXPERIMENTAL_CLI")
+    )
+    == "1"
+):
     cli.add_command(forensics_cmds)

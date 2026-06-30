@@ -14,7 +14,7 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any
 
-logger = logging.getLogger("cortex.audit.moskv_videntia")
+logger = logging.getLogger("babylon60.audit.moskv_videntia")
 
 
 @dataclass

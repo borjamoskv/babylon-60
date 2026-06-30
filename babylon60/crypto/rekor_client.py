@@ -11,7 +11,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-logger = logging.getLogger("cortex.crypto.rekor")
+logger = logging.getLogger("babylon60.crypto.rekor")
 
 # Default public Rekor instance
 REKOR_URL = "https://rekor.sigstore.dev"

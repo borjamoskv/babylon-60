@@ -9,7 +9,7 @@ import aiosqlite
 
 from babylon60.engine.mixins.base import EngineMixinBase
 
-logger = logging.getLogger("cortex_extensions.agent")
+logger = logging.getLogger("babylon60_extensions.agent")
 
 __all__ = ["AgentMixin"]
 

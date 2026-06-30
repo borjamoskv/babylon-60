@@ -22,7 +22,7 @@ from babylon60.config import DB_PATH
 from babylon60.engine import CortexEngine
 from babylon60.mcp_server.utils import AsyncConnectionPool, MCPMetrics, SimpleAsyncCache
 
-logger = logging.getLogger("cortex.mcp_server.aether")
+logger = logging.getLogger("babylon60.mcp_server.aether")
 
 
 class AetherContext:

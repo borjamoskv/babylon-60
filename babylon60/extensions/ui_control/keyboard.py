@@ -20,7 +20,7 @@ from babylon60.extensions.ui_control.models import (
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.ui_control.keyboard")
+logger = logging.getLogger("babylon60_extensions.ui_control.keyboard")
 
 # Default inter-character delay (seconds) - human-like cadence
 DEFAULT_TYPING_DELAY = 0.03

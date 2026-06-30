@@ -14,7 +14,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Any, Final
 
-logger = logging.getLogger("cortex.memory.metamemory")
+logger = logging.getLogger("babylon60.memory.metamemory")
 
 # Re-export schema layer for backward compatibility (Ω₂: zero import breakage)
 from babylon60.memory.metamemory_schema import (

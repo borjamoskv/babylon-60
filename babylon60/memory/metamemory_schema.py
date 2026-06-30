@@ -22,7 +22,7 @@ from typing import Any, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-logger = logging.getLogger("cortex.memory.metamemory")
+logger = logging.getLogger("babylon60.memory.metamemory")
 
 # ─── Thresholds (Ω₃: explicit, not magic) ───────────────────────────
 DEFAULT_RESPOND_CONFIDENCE: Final[float] = 0.7

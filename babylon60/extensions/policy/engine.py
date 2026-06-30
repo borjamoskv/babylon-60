@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
     from babylon60.engine.cognitive.models import Fact
 
-logger = logging.getLogger("cortex_extensions.policy")
+logger = logging.getLogger("babylon60_extensions.policy")
 
 __all__ = ["PolicyEngine"]
 

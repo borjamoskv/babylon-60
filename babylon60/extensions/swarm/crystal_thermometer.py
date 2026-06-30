@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
-logger = logging.getLogger("cortex_extensions.swarm.crystal_thermometer")
+logger = logging.getLogger("babylon60_extensions.swarm.crystal_thermometer")
 
 Quadrant = Literal["ACTIVE", "FOUNDATIONAL", "NOISE", "DEAD_WEIGHT"]
 Recommendation = Literal["MAINTAIN", "PROTECT", "DECAY", "PURGE", "MERGE", "PROMOTE"]

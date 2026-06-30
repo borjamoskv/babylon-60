@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 # Import the existing router from the engine
 from babylon60.engine.causal.taint_engine import MHCAntigenRouter, canonicalize_content
 
-logger = logging.getLogger("cortex.daemon.t_cell_ihelp")
+logger = logging.getLogger("babylon60.daemon.t_cell_ihelp")
 
 
 class IHelpPurgeDaemon:

@@ -9,7 +9,7 @@ from typing import Any
 
 from babylon60.memory.engrams import CortexSemanticEngram
 
-logger = logging.getLogger("cortex.memory._manager_store")
+logger = logging.getLogger("babylon60.memory._manager_store")
 
 
 async def check_deduplication(l2: Any, tenant_id: str, project_id: str, content: str) -> str | None:

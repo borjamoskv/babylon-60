@@ -16,7 +16,7 @@ from babylon60.extensions.aether.queue import TaskQueue
 
 __all__ = ["GitHubIngestor"]
 
-logger = logging.getLogger("cortex_extensions.aether.github")
+logger = logging.getLogger("babylon60_extensions.aether.github")
 
 _GH_API = "https://api.github.com"
 _LABEL = "aether"

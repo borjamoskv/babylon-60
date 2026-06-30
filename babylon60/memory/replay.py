@@ -19,7 +19,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-logger = logging.getLogger("cortex.memory.replay")
+logger = logging.getLogger("babylon60.memory.replay")
 
 
 @dataclass()

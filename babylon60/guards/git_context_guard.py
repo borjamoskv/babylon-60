@@ -12,7 +12,7 @@ import logging
 import subprocess
 from pathlib import Path
 
-LOG = logging.getLogger("cortex.guards.git_context_guard")
+LOG = logging.getLogger("babylon60.guards.git_context_guard")
 
 
 class GitContextDriftError(Exception):

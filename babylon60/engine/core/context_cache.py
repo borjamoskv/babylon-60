@@ -33,7 +33,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-logger = logging.getLogger("cortex.context_cache")
+logger = logging.getLogger("babylon60.context_cache")
 
 __all__ = [
     "CacheEntry",
@@ -255,9 +255,7 @@ class ContextCacheManager:
 
             # Direct connection to SQLite Layer (MMAP Pointer Only)
             await vector_db.memorize(fact)
-            logger.info(
-                "⚡ KV Cache %s persisted to disk efficiently via zero-copy MMAP.", handle
-            )
+            logger.info("⚡ KV Cache %s persisted to disk efficiently via zero-copy MMAP.", handle)
 
         except ImportError as e:
             logger.error("Failed to map KV-Cache to Sovereign Store: %s", e)

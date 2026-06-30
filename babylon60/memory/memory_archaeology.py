@@ -22,7 +22,7 @@ try:
 except ImportError:
     SovereignLLM = None  # type: ignore[assignment, misc]
 
-logger = logging.getLogger("cortex.memory.archaeology")
+logger = logging.getLogger("babylon60.memory.archaeology")
 
 
 class MemoryArchaeologist:
@@ -309,7 +309,7 @@ class MemoryArchaeologist:
         except Exception as e:
             import logging
 
-            logging.getLogger("cortex.memory.archaeology").warning("L3 Archival failed: %s", e)
+            logging.getLogger("babylon60.memory.archaeology").warning("L3 Archival failed: %s", e)
 
         cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)  # nosec B608
         cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")

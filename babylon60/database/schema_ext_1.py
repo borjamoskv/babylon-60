@@ -199,4 +199,3 @@ CREATE_EVOLUTION_STATE_INDEX = """
 CREATE INDEX IF NOT EXISTS idx_evo_cycle ON evolution_state(cycle);
 CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
 """
-

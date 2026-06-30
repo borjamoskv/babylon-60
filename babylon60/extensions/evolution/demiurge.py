@@ -13,7 +13,7 @@ from typing import Any
 from babylon60.engine import CortexEngine
 from babylon60.extensions.llm.manager import LLMManager
 
-logger = logging.getLogger("cortex_extensions.evolution.demiurge")
+logger = logging.getLogger("babylon60_extensions.evolution.demiurge")
 
 
 class DemiurgeCompiler:

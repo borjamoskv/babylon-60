@@ -14,7 +14,7 @@ from typing import Any
 from babylon60.database.core import connect as db_connect
 from babylon60.memory.temporal import now_iso
 
-logger = logging.getLogger("cortex.chronos.compound")
+logger = logging.getLogger("babylon60.chronos.compound")
 
 __all__ = ["CompoundChain", "CompoundProjector", "CompoundReport", "CompoundYieldTracker"]
 

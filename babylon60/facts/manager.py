@@ -18,7 +18,7 @@ _FACT_FIELDS = {f.name for f in dataclasses.fields(Fact)}
 
 __all__ = ["FactManager"]
 
-logger = logging.getLogger("cortex.facts")
+logger = logging.getLogger("babylon60.facts")
 
 try:
     from babylon60.guards.landauer_guard import LandauerGuard
@@ -158,6 +158,7 @@ class FactManager:
                 fact_id = row[0]
                 logger.info("V8 Guardrail: Fact discarded - P0 Exact Duplicate of #%s", fact_id)
                 from babylon60.database.core import causal_write
+
                 with causal_write(conn):
                     await conn.execute(
                         "UPDATE facts SET updated_at = ? WHERE id = ?", (now_iso(), fact_id)
@@ -187,6 +188,7 @@ class FactManager:
                             )
                             # We update updated_at / last_accessed
                             from babylon60.database.core import causal_write
+
                             with causal_write(conn):
                                 await conn.execute(  # type: ignore[reportOptionalMemberAccess]
                                     "UPDATE facts SET updated_at = ? WHERE id = ?",
@@ -314,6 +316,7 @@ class FactManager:
 
         async with self.engine.session() as conn:
             import babylon60.graph
+
             return await babylon60.graph.get_graph(conn, *args, **kwargs)
 
     async def query_entity(self, *args, **kwargs) -> Any:
@@ -321,16 +324,19 @@ class FactManager:
 
         async with self.engine.session() as conn:
             import babylon60.graph
+
             return await babylon60.graph.query_entity(conn, *args, **kwargs)
 
     async def find_path(self, *args, **kwargs) -> Any:
 
         async with self.engine.session() as conn:
             import babylon60.graph
+
             return await babylon60.graph.find_path(conn, *args, **kwargs)
 
     async def get_context_subgraph(self, *args, **kwargs) -> Any:
 
         async with self.engine.session() as conn:
             import babylon60.graph
+
             return await babylon60.graph.get_context_subgraph(conn, *args, **kwargs)

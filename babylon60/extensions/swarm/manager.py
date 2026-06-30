@@ -22,7 +22,7 @@ from babylon60.extensions.swarm.protocols import SwarmIntent, SwarmSignalSchema,
 from babylon60.extensions.swarm.verification_gate import RiskLevel, VerificationGate
 from babylon60.extensions.swarm.worktree_isolation import isolated_worktree
 
-logger = logging.getLogger("cortex_extensions.swarm.manager")
+logger = logging.getLogger("babylon60_extensions.swarm.manager")
 
 _SESSION_TYPE_CACHE: dict[int, bool] = {}
 

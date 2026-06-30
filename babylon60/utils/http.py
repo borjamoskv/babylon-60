@@ -34,7 +34,7 @@ import json
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.http")
+logger = logging.getLogger("babylon60.http")
 
 # ─── Constants ───────────────────────────────────────────────────────────
 

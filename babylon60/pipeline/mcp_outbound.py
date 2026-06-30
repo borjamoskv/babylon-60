@@ -21,7 +21,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.sse import sse_client
 from mcp.client.stdio import stdio_client
 
-logger = logging.getLogger("cortex.pipeline.mcp_outbound")
+logger = logging.getLogger("babylon60.pipeline.mcp_outbound")
 
 
 @dataclass

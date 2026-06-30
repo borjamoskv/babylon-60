@@ -21,7 +21,7 @@ from typing import Any
 
 from babylon60.memory.memory_retrieval import _fetch_dense_results
 
-logger = logging.getLogger("cortex.memory.thalamus")
+logger = logging.getLogger("babylon60.memory.thalamus")
 
 
 class ThalamusGate:

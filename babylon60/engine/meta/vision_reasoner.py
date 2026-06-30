@@ -9,7 +9,7 @@ import logging
 from collections import deque
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.exergy.vision")
+logger = logging.getLogger("babylon60.exergy.vision")
 
 
 @dataclass

@@ -14,7 +14,7 @@ from typing import Any
 
 from babylon60.extensions.evolution.free_energy import FreeEnergyState
 
-logger = logging.getLogger("cortex.engine.meta.right_brain")
+logger = logging.getLogger("babylon60.engine.meta.right_brain")
 
 
 class HeuristicEngine:

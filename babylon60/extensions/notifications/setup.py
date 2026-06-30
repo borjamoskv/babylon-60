@@ -23,7 +23,7 @@ from babylon60.extensions.notifications.events import EventSeverity
 if TYPE_CHECKING:
     from babylon60.config import CortexConfig
 
-logger = logging.getLogger("cortex_extensions.notifications.setup")
+logger = logging.getLogger("babylon60_extensions.notifications.setup")
 
 
 def setup_notifications(cfg: CortexConfig) -> NotificationBus:

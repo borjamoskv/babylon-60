@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.daemon.frontier")
+logger = logging.getLogger("babylon60_extensions.daemon.frontier")
 
 
 class FrontierDaemon:

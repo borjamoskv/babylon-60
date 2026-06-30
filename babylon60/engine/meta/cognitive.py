@@ -9,7 +9,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.engine.meta.cognitive")
+logger = logging.getLogger("babylon60.engine.meta.cognitive")
 
 # Known web3 libraries that indicate crypto-related entropy.
 _WEB3_LIBS = frozenset(("web3", "eth_account", "solcx", "brownie", "ape", "moralis"))

@@ -26,7 +26,7 @@ from babylon60.memory.hdc.algebra import DEFAULT_DIM, HVType, random_bipolar
 
 __all__ = ["ItemMemory"]
 
-logger = logging.getLogger("cortex.memory.hdc.item_memory")
+logger = logging.getLogger("babylon60.memory.hdc.item_memory")
 
 # Sovereign fact types from CORTEX ontology
 CORTEX_ROLES: Final[tuple[str, ...]] = (

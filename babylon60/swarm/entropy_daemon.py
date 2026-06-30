@@ -57,9 +57,7 @@ class EntropyDaemon:
             immune = OuroborosImmuneSystem()
             quarantined = immune.scan_and_quarantine()
             if quarantined:
-                logger.warning(
-                    f"[EntropyDaemon] ISOLATED: {len(quarantined)} files by Ouroboros."
-                )
+                logger.warning(f"[EntropyDaemon] ISOLATED: {len(quarantined)} files by Ouroboros.")
         except Exception as e:
             logger.warning(f"[EntropyDaemon] Ouroboros Immune failure: {e}")
 

@@ -11,7 +11,7 @@ import logging
 import os
 import sys
 
-logger = logging.getLogger("cortex.extensions.registry")
+logger = logging.getLogger("babylon60.extensions.registry")
 
 # Extension classification mapping
 TIER_MAP = {
@@ -27,7 +27,6 @@ TIER_MAP = {
     "adk": "CORE",
     "daemon": "CORE",
     "nexus": "CORE",
-    
     # OPTIONAL: Allowed, but lazy-loaded and monitored
     "browser": "OPTIONAL",
     "audio": "OPTIONAL",
@@ -50,7 +49,6 @@ TIER_MAP = {
     "sync": "OPTIONAL",
     "skills": "OPTIONAL",
     "trust": "OPTIONAL",
-    
     # EXPERIMENTAL: Forbidden or strict warning unless CORTEX_EXPERIMENTAL_EXTENSIONS=1
     "dopamine_loop": "EXPERIMENTAL",
     "wealth": "EXPERIMENTAL",
@@ -74,28 +72,31 @@ TIER_MAP = {
     "genesis": "EXPERIMENTAL",
 }
 
+
 def get_tier(extension_name: str) -> str:
     """Get the tier of a specific extension name."""
     return TIER_MAP.get(extension_name, "EXPERIMENTAL")  # Default to experimental for safety
 
+
 _warned_extensions = set()
+
 
 def verify_extension_import(fullname: str) -> None:
     """Enforce import permissions and environmental flags for extensions."""
     parts = fullname.split(".")
     if len(parts) < 3 or parts[0] != "cortex" or parts[1] != "extensions":
         return
-    
+
     ext_name = parts[2]
     tier = get_tier(ext_name)
-    
+
     if tier == "EXPERIMENTAL":
         enabled = os.environ.get("CORTEX_EXPERIMENTAL_EXTENSIONS", "0") == "1"
         if not enabled:
             if ext_name in _warned_extensions:
                 return
             _warned_extensions.add(ext_name)
-            
+
             # Under strict C5-REAL, we warn clearly or raise depending on a strict flag
             strict = os.environ.get("CORTEX_STRICT_EXTENSIONS", "0") == "1"
             msg = (

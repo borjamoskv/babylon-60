@@ -10,7 +10,7 @@ from babylon60.engine.forensic.slashing import SlashingEngine
 
 __all__ = ["ConsensusManager"]
 
-logger = logging.getLogger("cortex.consensus")
+logger = logging.getLogger("babylon60.consensus")
 
 
 def _logit(p: float) -> float:

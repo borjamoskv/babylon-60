@@ -21,7 +21,7 @@ from typing import Any
 from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.database.core import connect as db_connect
 
-logger = logging.getLogger("cortex_extensions.llm.cache")
+logger = logging.getLogger("babylon60_extensions.llm.cache")
 
 # Default cache TTL: 24 hours
 _DEFAULT_TTL: int = 86400

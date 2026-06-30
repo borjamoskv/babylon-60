@@ -18,7 +18,7 @@ from mcp.server.fastmcp import FastMCP
 
 from babylon60.integration.rustchain.judge import ASTLintJudge, PolicyJudge
 
-logger = logging.getLogger("cortex.forensics.claude_mcp_fuzzer")
+logger = logging.getLogger("babylon60.forensics.claude_mcp_fuzzer")
 
 
 @dataclass

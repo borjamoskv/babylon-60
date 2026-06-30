@@ -23,7 +23,7 @@ except ImportError:
     hashes = None
     HKDF = None
 
-logger = logging.getLogger("cortex.encryption.zk")
+logger = logging.getLogger("babylon60.encryption.zk")
 
 # 12-byte nonce for ChaCha20
 NONCE_SIZE: Final[int] = 12

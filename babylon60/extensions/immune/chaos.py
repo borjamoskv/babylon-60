@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Any, TypeVar
 
-logger = logging.getLogger("cortex_extensions.immune.chaos")
+logger = logging.getLogger("babylon60_extensions.immune.chaos")
 
 T = TypeVar("T")
 

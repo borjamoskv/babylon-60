@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-LOG = logging.getLogger("cortex.mcp_server.scraper")
+LOG = logging.getLogger("babylon60.mcp_server.scraper")
 
 
 def register_scraper_tools(mcp) -> None:

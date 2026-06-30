@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.rollback")
+logger = logging.getLogger("babylon60.rollback")
 
 
 class CausalRollbackEngine:

@@ -6,7 +6,7 @@ import ast
 import logging
 import unicodedata
 
-logger = logging.getLogger("cortex.guards.homoglyph_guard")
+logger = logging.getLogger("babylon60.guards.homoglyph_guard")
 
 
 class SecurityViolation(Exception):

@@ -29,7 +29,7 @@ __all__ = [
     "OuroborosEntropyGuardAdapter",
 ]
 
-logger = logging.getLogger("cortex.engine")
+logger = logging.getLogger("babylon60.engine")
 
 
 # ─── Pre-Store Guards ─────────────────────────────────────────────

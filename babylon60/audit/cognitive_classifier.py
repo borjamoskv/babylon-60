@@ -10,7 +10,7 @@ import re
 import unicodedata
 from typing import Any
 
-logger = logging.getLogger("cortex.audit.cognitive_classifier")
+logger = logging.getLogger("babylon60.audit.cognitive_classifier")
 
 
 def cosine_similarity(v1: list[float], v2: list[float]) -> float:

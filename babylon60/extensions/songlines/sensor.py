@@ -10,7 +10,7 @@ from typing import TypedDict
 
 from babylon60.extensions.songlines.decay import DecayEngine
 
-logger = logging.getLogger("cortex_extensions.songlines.sensor")
+logger = logging.getLogger("babylon60_extensions.songlines.sensor")
 
 
 class GhostTrace(TypedDict):

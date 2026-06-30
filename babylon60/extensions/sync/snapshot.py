@@ -15,7 +15,7 @@ __all__ = ["export_snapshot"]
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.sync")
+logger = logging.getLogger("babylon60_extensions.sync")
 
 
 def _safe_parse_tags(raw: str | None) -> list[str]:

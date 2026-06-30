@@ -18,7 +18,7 @@ from pydantic import BaseModel
 from babylon60.extensions.llm.sovereign import SovereignLLM
 from babylon60.gateway.spoof import SpoofManager
 
-logger = logging.getLogger("cortex.gateway.openai")
+logger = logging.getLogger("babylon60.gateway.openai")
 
 router = APIRouter(prefix="/v1", tags=["gateway:openai"])
 

@@ -10,7 +10,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-logger = logging.getLogger("cortex.engine.smte.weismann")
+logger = logging.getLogger("babylon60.engine.smte.weismann")
 
 
 def enforce_weismann_barrier(target_kernel_file: str, mutator_callback) -> bool:

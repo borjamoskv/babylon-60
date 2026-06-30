@@ -13,7 +13,7 @@ from typing import Optional
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-logger = logging.getLogger("cortex.consensus.pki")
+logger = logging.getLogger("babylon60.consensus.pki")
 
 
 class TrustMatrix:

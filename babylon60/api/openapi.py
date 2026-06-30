@@ -14,7 +14,7 @@ from pathlib import Path
 
 __all__ = ["export_openapi_spec", "get_openapi_spec"]
 
-logger = logging.getLogger("cortex.openapi")
+logger = logging.getLogger("babylon60.openapi")
 
 
 def get_openapi_spec() -> dict:

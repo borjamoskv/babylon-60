@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Protocol, runtime_checkable
 
-logger = logging.getLogger("cortex.agents.tools")
+logger = logging.getLogger("babylon60.agents.tools")
 
 
 @runtime_checkable

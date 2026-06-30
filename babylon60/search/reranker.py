@@ -34,7 +34,7 @@ __all__ = [
     "rerank_search_results",
 ]
 
-logger = logging.getLogger("cortex.search.reranker")
+logger = logging.getLogger("babylon60.search.reranker")
 
 # Default model - small, fast, excellent for passage reranking
 _DEFAULT_MODEL = os.environ.get(

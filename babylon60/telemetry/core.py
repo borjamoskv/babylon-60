@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 
 __all__ = ["Span", "SpanContext", "TraceCollector", "collector", "traced"]
 
-logger = logging.getLogger("cortex.telemetry")
+logger = logging.getLogger("babylon60.telemetry")
 
 # ─── Context propagation ────────────────────────────────────────────
 

@@ -67,7 +67,7 @@ from babylon60.utils.result import Err, Ok, Result
 
 __all__ = ["SqliteWriteWorker"]
 
-logger = logging.getLogger("cortex.db.writer")
+logger = logging.getLogger("babylon60.db.writer")
 
 
 # ─── Write Worker ─────────────────────────────────────────────────────
@@ -387,20 +387,20 @@ class SqliteWriteWorker:
         wait_ms = (time.monotonic() - start_wait) * 1000
         try:
             start_exec = time.monotonic()
-            
+
             # Start transaction explicitly if not in one
             in_transaction = conn.in_transaction
             if not in_transaction:
                 conn.execute("BEGIN IMMEDIATE")
-                
+
             total_rows = 0
             for sql, params in op.operations:
                 cursor = conn.execute(sql, params)
                 total_rows += cursor.rowcount
-                
+
             if not in_transaction:
                 conn.commit()
-                
+
             exec_ms = (time.monotonic() - start_exec) * 1000
 
             # Update metrics
@@ -419,7 +419,11 @@ class SqliteWriteWorker:
                 self._maybe_checkpoint(conn, loop)
 
         except sqlite3.Error as e:
-            logger.warning("WriteMany failed: %s | First SQL: %s", e, op.operations[0][0][:100] if op.operations else "")
+            logger.warning(
+                "WriteMany failed: %s | First SQL: %s",
+                e,
+                op.operations[0][0][:100] if op.operations else "",
+            )
             try:
                 conn.rollback()
             except sqlite3.Error:

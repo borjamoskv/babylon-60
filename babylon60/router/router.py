@@ -14,7 +14,7 @@ from typing import Any
 
 from babylon60.pipeline import ContextPacket
 
-logger = logging.getLogger("cortex.router")
+logger = logging.getLogger("babylon60.router")
 
 
 @dataclass

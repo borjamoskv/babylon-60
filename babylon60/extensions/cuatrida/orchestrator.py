@@ -11,7 +11,7 @@ from babylon60.engine import CortexEngine as AsyncCortexEngine
 from babylon60.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
 from babylon60.extensions.mejoralo.engine import MejoraloEngine
 
-logger = logging.getLogger("cortex_extensions.cuatrida.orchestrator")
+logger = logging.getLogger("babylon60_extensions.cuatrida.orchestrator")
 
 
 class CuatridaOrchestrator:

@@ -11,7 +11,7 @@ from enum import Enum
 
 from babylon60.utils.errors import PermissionDeniedError
 
-logger = logging.getLogger("cortex.auth.rbac")
+logger = logging.getLogger("babylon60.auth.rbac")
 
 
 class Permission(str, Enum):

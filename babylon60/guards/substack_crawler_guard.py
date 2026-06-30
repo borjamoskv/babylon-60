@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.guards.substack_crawler")
+logger = logging.getLogger("babylon60.guards.substack_crawler")
 
 # Canonical Taint Tokens
 CRAWLER_BOT_PREFIXES = frozenset(

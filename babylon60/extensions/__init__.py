@@ -12,7 +12,7 @@ from babylon60.extensions.registry import verify_extension_import
 
 class ExtensionTierImportEnforcer(importlib.abc.MetaPathFinder):
     """Interceptors all imports under cortex.extensions to enforce safety and validation boundaries."""
-    
+
     def find_spec(self, fullname, path, target=None):
         if fullname.startswith("cortex.extensions."):
             verify_extension_import(fullname)

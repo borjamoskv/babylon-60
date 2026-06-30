@@ -34,7 +34,7 @@ __all__ = [
     "HealingEvent",
 ]
 
-logger = logging.getLogger("cortex.engine.autocurative")
+logger = logging.getLogger("babylon60.engine.autocurative")
 
 
 class AutoCurativeAgent:

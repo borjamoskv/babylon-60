@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.reaper")
+logger = logging.getLogger("babylon60.reaper")
 
 __all__ = ["GhostReaper"]
 

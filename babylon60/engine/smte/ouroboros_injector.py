@@ -14,7 +14,7 @@ import sys
 import time
 import uuid
 
-logger = logging.getLogger("cortex.engine.smte.ouroboros_injector")
+logger = logging.getLogger("babylon60.engine.smte.ouroboros_injector")
 
 Producer = None
 try:
@@ -77,9 +77,7 @@ def inject_synthetic_friction(broker="localhost:9092", num_events=500):
             threading.Event().wait(0.05)  # noqa: TID251
 
     producer.flush()
-    logger.info(
-        "✅ Injection completed. The Stream Kernel should have pruned the even agents."
-    )
+    logger.info("✅ Injection completed. The Stream Kernel should have pruned the even agents.")
 
 
 if __name__ == "__main__":

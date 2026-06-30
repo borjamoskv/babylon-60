@@ -6,7 +6,7 @@ import logging
 import os
 from typing import Any
 
-logger = logging.getLogger("cortex.engine.validation")
+logger = logging.getLogger("babylon60.engine.validation")
 
 
 async def _check_byzantine_auth(

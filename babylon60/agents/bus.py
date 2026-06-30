@@ -17,7 +17,7 @@ from typing import Any, Protocol
 from babylon60.agents.message_schema import AgentMessage
 from babylon60.database.core import causal_write, connect_async
 
-logger = logging.getLogger("cortex.agents.bus")
+logger = logging.getLogger("babylon60.agents.bus")
 
 
 class MessageBus(Protocol):

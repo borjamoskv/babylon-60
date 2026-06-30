@@ -13,6 +13,7 @@ from babylon60.engine.core.canonical import compute_object_hash
 @dataclass(frozen=True)
 class EpistemicObject:
     """Base primitive for all knowledge items. Immutable & Content-Addressed."""
+
     # Type tag used for hashing prefix (overridden by subclasses)
     TYPE_TAG: ClassVar[str] = "EpistemicObject"
 
@@ -27,6 +28,7 @@ class EpistemicObject:
 @dataclass(frozen=True)
 class Assertion(EpistemicObject):
     """A logical or factual claim about reality."""
+
     TYPE_TAG: ClassVar[str] = "Assertion"
     data: Any
 
@@ -34,6 +36,7 @@ class Assertion(EpistemicObject):
 @dataclass(frozen=True)
 class Evidence(EpistemicObject):
     """A raw fragment of observable data."""
+
     TYPE_TAG: ClassVar[str] = "Evidence"
     data: Any
 
@@ -41,6 +44,7 @@ class Evidence(EpistemicObject):
 @dataclass(frozen=True)
 class Constraint(EpistemicObject):
     """A rule of logical invariance."""
+
     TYPE_TAG: ClassVar[str] = "Constraint"
     rule_type: str
     parameters: dict[str, Any]
@@ -49,6 +53,7 @@ class Constraint(EpistemicObject):
 @dataclass(frozen=True)
 class SupportRelation(EpistemicObject):
     """The immutable causal link between two objects."""
+
     TYPE_TAG: ClassVar[str] = "SupportRelation"
     evidence_id: str
     assertion_id: str
@@ -58,6 +63,7 @@ class SupportRelation(EpistemicObject):
 @dataclass(frozen=True)
 class Annotation:
     """Metadata decoupled from the core semantic model."""
+
     key: str
     namespace: str
     value: str
@@ -69,4 +75,5 @@ class Annotation:
 @dataclass(frozen=True)
 class ProposedState:
     """A bundle of objects and relations submitted for validation."""
+
     objects: dict[str, dict[str, Any]] = field(default_factory=dict)

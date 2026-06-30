@@ -26,7 +26,7 @@ from pydantic import Field
 
 from babylon60.memory.engrams import CortexSemanticEngram
 
-logger = logging.getLogger("cortex.memory.consolidation")
+logger = logging.getLogger("babylon60.memory.consolidation")
 
 
 class EngramState(str, enum.Enum):

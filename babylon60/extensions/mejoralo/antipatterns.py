@@ -58,7 +58,7 @@ _BLOCKING_CALLS: dict[str, str] = {
 _MAGIC_WHITELIST = {0, 1, 2, -1, 100, 0.5}
 
 
-logger = logging.getLogger("cortex_extensions.mejoralo.antipatterns")
+logger = logging.getLogger("babylon60_extensions.mejoralo.antipatterns")
 
 
 # ── Scanner 3: Magic Literals ────────────────────────────────────────

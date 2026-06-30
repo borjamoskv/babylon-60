@@ -29,7 +29,7 @@ from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
-logger = logging.getLogger("cortex.sica.strategy")
+logger = logging.getLogger("babylon60.sica.strategy")
 
 
 class MutationType(str, Enum):

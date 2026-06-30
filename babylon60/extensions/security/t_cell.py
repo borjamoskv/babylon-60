@@ -6,7 +6,7 @@ import logging
 import re
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.security.t_cell")
+logger = logging.getLogger("babylon60_extensions.security.t_cell")
 
 
 class BabestuTCell:
@@ -96,9 +96,7 @@ class BabestuTCell:
                     "CONTAMINATED", 100, "AST_Static_Lethal_Vector", f"Block {idx}: {reason}"
                 )
 
-        return cls._verdict(
-            "CLEAN", 0, None, "Static AST and O(1) heuristics passed", raw_text
-        )
+        return cls._verdict("CLEAN", 0, None, "Static AST and O(1) heuristics passed", raw_text)
 
     @staticmethod
     def _verdict(

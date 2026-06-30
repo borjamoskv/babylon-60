@@ -37,7 +37,7 @@ from babylon60.engine.evo.autopoiesis import AutopoiesisEngine
 from babylon60.swarm.swarm_10k import SwarmCommander
 from babylon60.utils.errors import CortexError
 
-logger = logging.getLogger("cortex.engine.cognitive.synthesis")
+logger = logging.getLogger("babylon60.engine.cognitive.synthesis")
 
 # ---------------------------------------------------------------------------
 # Data contracts

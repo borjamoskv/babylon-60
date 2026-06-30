@@ -31,7 +31,7 @@ __all__ = [
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.handoff")
+logger = logging.getLogger("babylon60.handoff")
 
 HANDOFF_VERSION = "1.3"
 DEFAULT_HANDOFF_PATH = CORTEX_DIR / "handoff.json"

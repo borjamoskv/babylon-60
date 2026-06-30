@@ -11,7 +11,7 @@ from babylon60.engine.speculative.genesis import AgentBlueprint
 if TYPE_CHECKING:
     from babylon60.swarm.autopoietic_agent import AutopoieticAgent
 
-logger = logging.getLogger("cortex.swarm.autopoietic_agent")
+logger = logging.getLogger("babylon60.swarm.autopoietic_agent")
 
 
 async def evaluate_genome(agent: AutopoieticAgent, genome: StrategyGenome) -> float:

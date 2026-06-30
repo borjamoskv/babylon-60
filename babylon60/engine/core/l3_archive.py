@@ -24,7 +24,7 @@ try:
 except ImportError:
     PYARROW_AVAILABLE = False
 
-logger = logging.getLogger("cortex.engine.l3_archive")
+logger = logging.getLogger("babylon60.engine.l3_archive")
 
 
 class L3ArchiveEngine:

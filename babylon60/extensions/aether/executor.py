@@ -17,7 +17,7 @@ from babylon60.extensions.aether.tools import AgentToolkit
 
 __all__ = ["ExecutorAgent"]
 
-logger = logging.getLogger("cortex_extensions.aether.executor")
+logger = logging.getLogger("babylon60_extensions.aether.executor")
 
 _MAX_ITERATIONS = 30
 

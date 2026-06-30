@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from babylon60.engine import CortexEngine as AsyncCortexEngine
     from babylon60.memory.working import WorkingMemoryL1
 
-logger = logging.getLogger("cortex.oracle.analyzer")
+logger = logging.getLogger("babylon60.oracle.analyzer")
 
 
 class AnalyzerMixin:

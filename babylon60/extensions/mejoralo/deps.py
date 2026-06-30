@@ -8,7 +8,7 @@ import ast
 import logging
 from pathlib import Path
 
-logger = logging.getLogger("cortex_extensions.mejoralo.deps")
+logger = logging.getLogger("babylon60_extensions.mejoralo.deps")
 
 
 def sort_by_topological_order(

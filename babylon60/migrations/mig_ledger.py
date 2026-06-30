@@ -2,7 +2,7 @@
 import logging
 import sqlite3
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 def _migration_010_immutable_ledger(conn: sqlite3.Connection):

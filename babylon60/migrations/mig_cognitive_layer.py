@@ -2,7 +2,7 @@
 import logging
 import sqlite3
 
-logger = logging.getLogger("cortex.migrations")
+logger = logging.getLogger("babylon60.migrations")
 
 
 def _migration_022_cognitive_layer(conn: sqlite3.Connection) -> None:

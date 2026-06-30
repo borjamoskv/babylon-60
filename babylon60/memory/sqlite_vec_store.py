@@ -29,7 +29,7 @@ __all__ = ["SovereignVectorStoreL2"]
 # L2HybridSearch and PIISanitizer only needed at runtime
 _L2_HYBRID_SEARCH_AVAILABLE: bool | None = None  # None = not yet checked
 
-logger = logging.getLogger("cortex.memory.sqlite_vec_store")
+logger = logging.getLogger("babylon60.memory.sqlite_vec_store")
 
 
 from babylon60.memory.traits.read import ReadTrait

@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 
-logger = logging.getLogger("cortex.engine.causal.anomaly_bridge")
+logger = logging.getLogger("babylon60.engine.causal.anomaly_bridge")
 
 try:
     import sys

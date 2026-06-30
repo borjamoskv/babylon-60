@@ -18,7 +18,7 @@ from babylon60.extensions.genesis.models import SystemSpec
 
 __all__ = ["GenesisValidator"]
 
-logger = logging.getLogger("cortex_extensions.genesis.validator")
+logger = logging.getLogger("babylon60_extensions.genesis.validator")
 
 
 class GenesisValidator:

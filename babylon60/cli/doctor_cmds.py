@@ -75,8 +75,12 @@ def check_database(db_path: str) -> dict:
 def check_env() -> dict:
     return {
         "GEMINI_API_KEY": "set" if os.environ.get("GEMINI_API_KEY") else "missing",
-        "CORTEX_DB_PATH": os.environ.get("MOSKV_DB_PATH", os.environ.get("CORTEX_DB_PATH", "default")),
-        "CORTEX_LOG_LEVEL": os.environ.get("MOSKV_LOG_LEVEL", os.environ.get("CORTEX_LOG_LEVEL", "INFO")),
+        "CORTEX_DB_PATH": os.environ.get(
+            "MOSKV_DB_PATH", os.environ.get("CORTEX_DB_PATH", "default")
+        ),
+        "CORTEX_LOG_LEVEL": os.environ.get(
+            "MOSKV_LOG_LEVEL", os.environ.get("CORTEX_LOG_LEVEL", "INFO")
+        ),
     }
 
 

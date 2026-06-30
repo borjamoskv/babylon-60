@@ -15,7 +15,7 @@ import aiosqlite
 
 from babylon60.database.core import connect_async_ctx
 
-logger = logging.getLogger("cortex.ledger.execution_trace")
+logger = logging.getLogger("babylon60.ledger.execution_trace")
 
 
 class ExecutionTraceLedger:

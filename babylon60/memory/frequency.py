@@ -18,7 +18,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-logger = logging.getLogger("cortex.memory.frequency")
+logger = logging.getLogger("babylon60.memory.frequency")
 
 
 # ─── Strategy 1: Continuous Memory System (CMS) ─────────────────────

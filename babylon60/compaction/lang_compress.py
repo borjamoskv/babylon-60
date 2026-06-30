@@ -26,7 +26,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-logger = logging.getLogger("cortex.lang_compress")
+logger = logging.getLogger("babylon60.lang_compress")
 
 __all__ = [
     "CompressionResult",

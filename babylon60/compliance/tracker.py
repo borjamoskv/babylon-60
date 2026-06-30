@@ -22,7 +22,7 @@ from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 
 __all__ = ["ComplianceTracker"]
 
-logger = logging.getLogger("cortex.compliance")
+logger = logging.getLogger("babylon60.compliance")
 
 # EU AI Act Article 12 sub-requirements mapped to verifiable checks
 _ARTICLE_12_CHECKS = {

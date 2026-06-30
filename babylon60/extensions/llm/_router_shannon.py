@@ -2,7 +2,7 @@
 
 import logging
 
-logger = logging.getLogger("cortex_extensions.llm._router_shannon")
+logger = logging.getLogger("babylon60_extensions.llm._router_shannon")
 
 
 def compress_working_memory(

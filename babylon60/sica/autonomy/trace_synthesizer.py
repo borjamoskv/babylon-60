@@ -7,7 +7,7 @@ from collections import Counter
 from babylon60.sica.object_level import ExecutionTrace, StepOutcome
 from babylon60.sica.strategy import Heuristic
 
-logger = logging.getLogger("cortex.sica.autonomy.trace")
+logger = logging.getLogger("babylon60.sica.autonomy.trace")
 
 
 class TraceSynthesizer:

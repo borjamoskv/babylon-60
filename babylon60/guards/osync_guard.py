@@ -11,7 +11,7 @@ import os
 import subprocess
 from pathlib import Path
 
-logger = logging.getLogger("cortex.guards.osync")
+logger = logging.getLogger("babylon60.guards.osync")
 
 
 class OSYNCViolationError(Exception):

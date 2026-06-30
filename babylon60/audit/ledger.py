@@ -22,7 +22,7 @@ from babylon60.audit.smt import smt_engine
 from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.database.core import causal_write
 
-logger = logging.getLogger("cortex.audit.ledger")
+logger = logging.getLogger("babylon60.audit.ledger")
 
 _CREATE_AUDIT_SQL = """
 CREATE TABLE IF NOT EXISTS security_audit_log (

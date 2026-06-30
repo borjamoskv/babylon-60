@@ -23,7 +23,7 @@ __all__ = [
     "ThinkingRecord",
 ]
 
-logger = logging.getLogger("cortex_extensions.thinking.pool")
+logger = logging.getLogger("babylon60_extensions.thinking.pool")
 
 
 # ─── Provider Pool ───────────────────────────────────────────────────

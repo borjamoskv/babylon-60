@@ -17,7 +17,7 @@ from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.engine.smte.llm_mutator import call_qwen_mutator
 from babylon60.engine.smte.weismann_barrier import enforce_weismann_barrier
 
-logger = logging.getLogger("cortex.engine.smte.ouroboros_compiler")
+logger = logging.getLogger("babylon60.engine.smte.ouroboros_compiler")
 
 
 class OuroborosCompiler(EngineAwareMixin):

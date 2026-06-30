@@ -153,7 +153,7 @@ class TestNightShiftCrystalDaemon:
             if mock_run_cycle.call_count >= 1:
                 break
             await asyncio.sleep(0.1)
-        
+
         daemon.stop()
 
         await task

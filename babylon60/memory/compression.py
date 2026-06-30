@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.memory.compression")
+logger = logging.getLogger("babylon60.memory.compression")
 
 
 @dataclass()

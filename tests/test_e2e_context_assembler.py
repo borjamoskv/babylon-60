@@ -54,10 +54,13 @@ class TestContextAssembler:
 
         # Create non-matching file
         non_matching_file = ki_dir / "baking_bread.txt"
-        non_matching_file.write_text("To bake sourdough bread, you need flour, water, and salt.", encoding="utf-8")
+        non_matching_file.write_text(
+            "To bake sourdough bread, you need flour, water, and salt.", encoding="utf-8"
+        )
 
         # Monkeypatch KNOWLEDGE_DIR attribute
         import babylon60.context.assembler as assembler_mod
+
         monkeypatch.setattr(assembler_mod, "KNOWLEDGE_DIR", str(ki_dir))
 
         assembler = ContextAssembler()
@@ -79,7 +82,7 @@ class TestContextAssembler:
     def test_deduplication(self, tmp_path):
         assembler = ContextAssembler(knowledge_dir=tmp_path)
         ctx = ContextPacket()
-        
+
         # Test adding duplicate source
         added1 = assembler._add_knowledge_item(ctx, "file.md", "hello world", "hint", 3, 1.0)
         added2 = assembler._add_knowledge_item(ctx, "file.md", "different content", "hint", 4, 1.0)
@@ -104,5 +107,3 @@ class TestContextAssembler:
         assert ctx.knowledge_items[0]["source"] == "my_direct_info.md"
         assert ctx.knowledge_items[0]["content"] == "Sovereign execution details"
         assert ctx.relevance_scores["my_direct_info.md"] == 1.0
-
-

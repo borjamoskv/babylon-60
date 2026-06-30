@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-LOG = logging.getLogger("cortex.guards.path_guard")
+LOG = logging.getLogger("babylon60.guards.path_guard")
 
 
 def is_safe_path(path: str | Path, base_dir: Path | None = None) -> bool:

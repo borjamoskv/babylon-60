@@ -37,7 +37,7 @@ from babylon60.router.contract import (
     resolve as contract_resolve,
 )
 
-logger = logging.getLogger("cortex.router.adapter")
+logger = logging.getLogger("babylon60.router.adapter")
 
 # ─── Constants ────────────────────────────────────────────────────────────
 

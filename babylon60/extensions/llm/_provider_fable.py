@@ -11,7 +11,7 @@ from babylon60.engine.causal.taint_engine import generate_secure_taint_token
 from babylon60.extensions.llm._resilience import resilient_call
 from babylon60.extensions.llm._stealth import apply_causal_jitter, sanitize_response
 
-logger = logging.getLogger("cortex_extensions.llm")
+logger = logging.getLogger("babylon60_extensions.llm")
 
 
 async def execute_fable_native(

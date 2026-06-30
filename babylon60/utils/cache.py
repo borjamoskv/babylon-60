@@ -22,7 +22,7 @@ from babylon60.crypto.hash_registry import cortex_hash
 
 T = TypeVar("T")
 
-logger = logging.getLogger("cortex.utils.cache")
+logger = logging.getLogger("babylon60.utils.cache")
 
 
 class EvictionReason(Enum):

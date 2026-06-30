@@ -37,7 +37,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.training.moskv1_compiler")
+logger = logging.getLogger("babylon60.training.moskv1_compiler")
 
 # ─── Anergy Patterns (Supresión de Green Theater) ──────────────────────────
 
@@ -101,6 +101,7 @@ def _clean_transcript_prompt(text: str) -> str:
         if not skip_block and stripped:
             filtered.append(line)
     return "\n".join(filtered).strip()
+
 
 # Minimum thresholds
 _MIN_ENTROPY_THRESHOLD = 2.8
@@ -166,11 +167,7 @@ def _shannon_entropy(text: str) -> float:
         return 0.0
     freq = Counter(text)
     total = len(text)
-    return -sum(
-        (count / total) * math.log2(count / total)
-        for count in freq.values()
-        if count > 0
-    )
+    return -sum((count / total) * math.log2(count / total) for count in freq.values() if count > 0)
 
 
 def _exergy_score(text: str) -> float:
@@ -195,9 +192,12 @@ def _exergy_score(text: str) -> float:
 
     # Structural markers (YAML, lists, headers)
     structural_markers = (
-        text.count("\n- ") + text.count("\n* ")
-        + text.count("\n| ") + text.count(":\n")
-        + text.count("\n## ") + text.count("\n### ")
+        text.count("\n- ")
+        + text.count("\n* ")
+        + text.count("\n| ")
+        + text.count(":\n")
+        + text.count("\n## ")
+        + text.count("\n### ")
     )
     structure_score = min(structural_markers / 10.0, 1.0)
 
@@ -205,12 +205,7 @@ def _exergy_score(text: str) -> float:
     tokens = text.lower().split()
     unique_ratio = len(set(tokens)) / max(len(tokens), 1)
 
-    return (
-        entropy_score * 0.3
-        + code_score * 0.25
-        + structure_score * 0.25
-        + unique_ratio * 0.2
-    )
+    return entropy_score * 0.3 + code_score * 0.25 + structure_score * 0.25 + unique_ratio * 0.2
 
 
 def _is_anergy(line: str) -> bool:
@@ -292,9 +287,7 @@ class DatasetEntry:
                 ),
             }
         ]
-        user_content = (
-            f"{self.instruction}\n\n{self.input}" if self.input else self.instruction
-        )
+        user_content = f"{self.instruction}\n\n{self.input}" if self.input else self.instruction
         messages.append({"role": "user", "content": user_content})
         messages.append({"role": "assistant", "content": self.output})
         return {"conversations": messages}
@@ -364,9 +357,7 @@ class MOSKV1DatasetCompiler:
         seed: int = 42,
     ) -> None:
         self.workspace = Path(workspace_path)
-        self.output_dir = Path(
-            output_dir or Path.home() / ".cortex" / "training" / "datasets"
-        )
+        self.output_dir = Path(output_dir or Path.home() / ".cortex" / "training" / "datasets")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.entries: list[DatasetEntry] = []
         self.seen_hashes: set[str] = set()
@@ -378,9 +369,7 @@ class MOSKV1DatasetCompiler:
         return hashlib.sha256(content.encode("utf-8")).hexdigest()[:16]
 
     def _filter_reason(self, reason: str) -> None:
-        self.stats.filter_reasons[reason] = (
-            self.stats.filter_reasons.get(reason, 0) + 1
-        )
+        self.stats.filter_reasons[reason] = self.stats.filter_reasons.get(reason, 0) + 1
         self.stats.total_entries_filtered += 1
 
     def _add_entry(self, entry: DatasetEntry) -> bool:
@@ -414,9 +403,7 @@ class MOSKV1DatasetCompiler:
         self.seen_hashes.add(content_hash)
         self.entries.append(entry)
         self.stats.total_entries_generated += 1
-        self.stats.categories[entry.category] = (
-            self.stats.categories.get(entry.category, 0) + 1
-        )
+        self.stats.categories[entry.category] = self.stats.categories.get(entry.category, 0) + 1
         return True
 
     # ─── Source Extractors ──────────────────────────────────────────────
@@ -451,12 +438,14 @@ class MOSKV1DatasetCompiler:
                 continue
 
             instruction = _pick_template(_DIRECTIVE_TEMPLATES, title=title)
-            if self._add_entry(DatasetEntry(
-                instruction=instruction,
-                output=body.strip(),
-                category="directive",
-                source_file=str(file_path),
-            )):
+            if self._add_entry(
+                DatasetEntry(
+                    instruction=instruction,
+                    output=body.strip(),
+                    category="directive",
+                    source_file=str(file_path),
+                )
+            ):
                 count += 1
 
         logger.info("Extracted %d entries from %s", count, file_path.name)
@@ -467,10 +456,12 @@ class MOSKV1DatasetCompiler:
         search_dirs: list[Path] = []
         if skills_dir:
             search_dirs.append(skills_dir)
-        search_dirs.extend([
-            self.workspace / ".agents" / "skills",
-            Path.home() / ".gemini" / "config" / "skills",
-        ])
+        search_dirs.extend(
+            [
+                self.workspace / ".agents" / "skills",
+                Path.home() / ".gemini" / "config" / "skills",
+            ]
+        )
 
         count = 0
         for sdir in search_dirs:
@@ -500,15 +491,15 @@ class MOSKV1DatasetCompiler:
                     self._filter_reason("pre_short_skill")
                     continue
 
-                instruction = _pick_template(
-                    _SKILL_TEMPLATES, name=name, description=description
-                )
-                if self._add_entry(DatasetEntry(
-                    instruction=instruction,
-                    output=cleaned_body.strip(),
-                    category="skill",
-                    source_file=str(skill_md),
-                )):
+                instruction = _pick_template(_SKILL_TEMPLATES, name=name, description=description)
+                if self._add_entry(
+                    DatasetEntry(
+                        instruction=instruction,
+                        output=cleaned_body.strip(),
+                        category="skill",
+                        source_file=str(skill_md),
+                    )
+                ):
                     count += 1
 
         logger.info("Extracted %d entries from skills", count)
@@ -523,8 +514,7 @@ class MOSKV1DatasetCompiler:
         count = 0
         for py_file in target.rglob("*.py"):
             if any(
-                skip in str(py_file)
-                for skip in ["__pycache__", "test_", "migrations/", ".pyc"]
+                skip in str(py_file) for skip in ["__pycache__", "test_", "migrations/", ".pyc"]
             ):
                 continue
 
@@ -543,15 +533,15 @@ class MOSKV1DatasetCompiler:
                     rel_path = py_file.relative_to(self.workspace)
                 except ValueError:
                     rel_path = py_file.name
-                instruction = _pick_template(
-                    _CODE_MODULE_TEMPLATES, path=str(rel_path)
-                )
-                if self._add_entry(DatasetEntry(
-                    instruction=instruction,
-                    output=_clean_content(module_doc),
-                    category="code_architecture",
-                    source_file=str(py_file),
-                )):
+                instruction = _pick_template(_CODE_MODULE_TEMPLATES, path=str(rel_path))
+                if self._add_entry(
+                    DatasetEntry(
+                        instruction=instruction,
+                        output=_clean_content(module_doc),
+                        category="code_architecture",
+                        source_file=str(py_file),
+                    )
+                ):
                     count += 1
             elif module_doc:
                 self._filter_reason("pre_short_module_doc")
@@ -559,15 +549,15 @@ class MOSKV1DatasetCompiler:
             # Extract class docstrings
             for class_name, class_doc in self._extract_class_docstrings(content):
                 if len(class_doc) > _MIN_OUTPUT_LENGTH:
-                    instruction = _pick_template(
-                        _CODE_CLASS_TEMPLATES, name=class_name
-                    )
-                    if self._add_entry(DatasetEntry(
-                        instruction=instruction,
-                        output=_clean_content(class_doc),
-                        category="code_class",
-                        source_file=str(py_file),
-                    )):
+                    instruction = _pick_template(_CODE_CLASS_TEMPLATES, name=class_name)
+                    if self._add_entry(
+                        DatasetEntry(
+                            instruction=instruction,
+                            output=_clean_content(class_doc),
+                            category="code_class",
+                            source_file=str(py_file),
+                        )
+                    ):
                         count += 1
                 else:
                     self._filter_reason("pre_short_class_doc")
@@ -643,12 +633,14 @@ class MOSKV1DatasetCompiler:
                         or "\n| " in cleaned
                     )
                     if len(cleaned) > 200 and has_structure:
-                        if self._add_entry(DatasetEntry(
-                            instruction=user_prompt,
-                            output=_truncate_output(cleaned),
-                            category="session_transcript",
-                            source_file=str(transcript_file),
-                        )):
+                        if self._add_entry(
+                            DatasetEntry(
+                                instruction=user_prompt,
+                                output=_truncate_output(cleaned),
+                                category="session_transcript",
+                                source_file=str(transcript_file),
+                            )
+                        ):
                             count += 1
                     user_prompt = None
 
@@ -683,12 +675,14 @@ class MOSKV1DatasetCompiler:
             title = vault_file.stem.replace("_", " ").replace("-", " ").title()
 
             instruction = _pick_template(_VAULT_TEMPLATES, title=title)
-            if self._add_entry(DatasetEntry(
-                instruction=instruction,
-                output=_truncate_output(cleaned),
-                category="memory_vault",
-                source_file=str(vault_file),
-            )):
+            if self._add_entry(
+                DatasetEntry(
+                    instruction=instruction,
+                    output=_truncate_output(cleaned),
+                    category="memory_vault",
+                    source_file=str(vault_file),
+                )
+            ):
                 count += 1
 
         logger.info("Extracted %d entries from Memory Vault", count)
@@ -732,12 +726,14 @@ class MOSKV1DatasetCompiler:
                 name=name,
                 description=description or "protocolo de ejecución",
             )
-            if self._add_entry(DatasetEntry(
-                instruction=instruction,
-                output=_truncate_output(cleaned),
-                category="workflow",
-                source_file=str(wf_file),
-            )):
+            if self._add_entry(
+                DatasetEntry(
+                    instruction=instruction,
+                    output=_truncate_output(cleaned),
+                    category="workflow",
+                    source_file=str(wf_file),
+                )
+            ):
                 count += 1
 
         logger.info("Extracted %d entries from workflows", count)
@@ -789,18 +785,19 @@ class MOSKV1DatasetCompiler:
                 tags = row["tags"] or ""
 
                 instruction = (
-                    f"Recupera el hecho verificado de tipo '{fact_type}' "
-                    f"del proyecto '{project}'"
+                    f"Recupera el hecho verificado de tipo '{fact_type}' del proyecto '{project}'"
                 )
                 if tags:
                     instruction += f" (tags: {tags})"
 
-                if self._add_entry(DatasetEntry(
-                    instruction=instruction,
-                    output=_truncate_output(_clean_content(content)),
-                    category="ledger_fact",
-                    source_file=str(db_path_resolved),
-                )):
+                if self._add_entry(
+                    DatasetEntry(
+                        instruction=instruction,
+                        output=_truncate_output(_clean_content(content)),
+                        category="ledger_fact",
+                        source_file=str(db_path_resolved),
+                    )
+                ):
                     count += 1
 
             conn.close()
@@ -916,8 +913,7 @@ class MOSKV1DatasetCompiler:
     def get_stats_yaml(self) -> str:
         """Return compilation stats as YAML."""
         filter_lines = "\n".join(
-            f"  {reason}: {count}"
-            for reason, count in sorted(self.stats.filter_reasons.items())
+            f"  {reason}: {count}" for reason, count in sorted(self.stats.filter_reasons.items())
         )
         return (
             f"total_files_scanned: {self.stats.total_files_scanned}\n"
@@ -927,10 +923,7 @@ class MOSKV1DatasetCompiler:
             f"avg_exergy_score: {self.stats.avg_exergy_score:.3f}\n"
             f"compression_ratio: {self.stats.compression_ratio:.2%}\n"
             f"categories:\n"
-            + "\n".join(
-                f"  {cat}: {count}"
-                for cat, count in sorted(self.stats.categories.items())
-            )
+            + "\n".join(f"  {cat}: {count}" for cat, count in sorted(self.stats.categories.items()))
             + "\nfilter_reasons:\n"
             + (filter_lines or "  none: 0")
         )

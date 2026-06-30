@@ -29,7 +29,7 @@ import re
 import time
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.swarm.nightshift_pipeline")
+logger = logging.getLogger("babylon60_extensions.swarm.nightshift_pipeline")
 
 
 # ── Pipeline Nodes ───────────────────────────────────────────────────────

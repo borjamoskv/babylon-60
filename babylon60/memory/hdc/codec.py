@@ -26,7 +26,7 @@ from babylon60.memory.hdc.item_memory import ItemMemory
 
 __all__ = ["HDCEncoder"]
 
-logger = logging.getLogger("cortex.memory.hdc.codec")
+logger = logging.getLogger("babylon60.memory.hdc.codec")
 
 # Simple tokenizer for text (fallback from ML tokenizers)
 _TOKEN_PATTERN: Final[re.Pattern] = re.compile(r"\b\w+\b")

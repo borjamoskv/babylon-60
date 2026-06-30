@@ -12,7 +12,7 @@ from babylon60.engine.cognitive.manifestation import manifest_singularity
 if TYPE_CHECKING:
     pass
 
-logger = logging.getLogger("cortex.engine.speculative.apotheosis.audits")
+logger = logging.getLogger("babylon60.engine.speculative.apotheosis.audits")
 
 
 class ApotheosisAuditsMixin:

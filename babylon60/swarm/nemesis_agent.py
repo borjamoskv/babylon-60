@@ -7,7 +7,7 @@ from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from babylon60.engine.mixins.deterministic_induction_mixin import DeterministicInductionMixin
 from babylon60.swarm.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 
-logger = logging.getLogger("cortex.nemesis_agent")
+logger = logging.getLogger("babylon60.nemesis_agent")
 
 
 class NemesisL4Agent(DeterministicInductionMixin):

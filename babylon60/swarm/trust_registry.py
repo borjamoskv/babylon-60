@@ -14,7 +14,7 @@ import logging
 import time
 from collections.abc import Sequence
 
-logger = logging.getLogger("cortex.engine.trust")
+logger = logging.getLogger("babylon60.engine.trust")
 
 
 @dataclasses.dataclass()

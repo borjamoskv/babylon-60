@@ -30,7 +30,7 @@ from babylon60.ledger import SovereignLedger  # pyright: ignore
 
 random = secrets.SystemRandom()
 
-logger = logging.getLogger("cortex_extensions.evolution.engine")
+logger = logging.getLogger("babylon60_extensions.evolution.engine")
 
 
 class EvolutionEngine(EvolutionOpsMixin):

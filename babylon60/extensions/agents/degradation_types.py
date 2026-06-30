@@ -29,7 +29,7 @@ __all__ = [
     "DegradationReport",
 ]
 
-logger = logging.getLogger("cortex_extensions.agent.degradation")
+logger = logging.getLogger("babylon60_extensions.agent.degradation")
 
 _RECOVERY_DOCTOR = "Run `cortex doctor` to scan subsystem health"
 

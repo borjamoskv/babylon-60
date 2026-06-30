@@ -20,7 +20,7 @@ except ImportError:
     CortexPrompt = None  # type: ignore
     IntentProfile = None  # type: ignore
 
-logger = logging.getLogger("cortex.guards.omega")
+logger = logging.getLogger("babylon60.guards.omega")
 
 SNAPSHOT_PATH = Path.home() / ".cortex" / "context-snapshot.md"
 

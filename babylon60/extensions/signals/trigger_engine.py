@@ -35,7 +35,7 @@ __all__ = [
     "TriggerResult",
 ]
 
-logger = logging.getLogger("cortex_extensions.signals.trigger_engine")
+logger = logging.getLogger("babylon60_extensions.signals.trigger_engine")
 
 
 # ═════════════════════════════════════════════════════════════════════════

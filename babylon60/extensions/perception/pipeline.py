@@ -30,7 +30,7 @@ __all__ = ["PerceptionPipeline", "PerceptionRecorder"]
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("cortex_extensions.perception")
+logger = logging.getLogger("babylon60_extensions.perception")
 
 
 class PerceptionRecorder:

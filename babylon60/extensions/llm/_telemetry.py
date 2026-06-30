@@ -9,7 +9,7 @@ from typing import Any
 from babylon60.database.core import connect as db_connect
 from babylon60.extensions.llm._models import CascadeEvent, CascadeTier
 
-logger = logging.getLogger("cortex_extensions.llm.telemetry")
+logger = logging.getLogger("babylon60_extensions.llm.telemetry")
 
 
 class CascadeTelemetry:

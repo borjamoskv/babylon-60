@@ -34,7 +34,7 @@ class MemoryManagerProtocol(Protocol):
     def get_context_vector(self) -> Any: ...
 
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 async def embed_fact_async(
@@ -86,7 +86,7 @@ async def embed_fact_async(
             if context_hv is not None:
                 intent_hv = bind(fact_hv, context_hv)
                 _specular_bytes = np.array(intent_hv, dtype=np.float32).tobytes()
-                
+
                 logger.debug("Specular Memory generated for fact %d", fact_id)
 
                 if memory_manager._hdc:

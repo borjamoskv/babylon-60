@@ -7,7 +7,7 @@ Based on arXiv:2605.30343v1.
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.engine.rim")
+logger = logging.getLogger("babylon60.engine.rim")
 
 
 class LatentMemoryBlock:

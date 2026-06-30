@@ -25,7 +25,7 @@ from babylon60.agents.message_schema import AgentMessage, MessageKind, new_messa
 from babylon60.agents.planner import ExecutionPlan, ExergyPlanner, PlanStep
 from babylon60.agents.tools import ToolRegistry
 
-logger = logging.getLogger("cortex.agents.boltzmann_engine")
+logger = logging.getLogger("babylon60.agents.boltzmann_engine")
 
 
 class OODAState(str, Enum):
@@ -49,12 +49,14 @@ class ExergyGradient:
     patience_steps: int = 3
 
     def record(self, exergy: float, entropy: float) -> None:
-        self.history.append({
-            "timestamp": time.monotonic(),
-            "exergy": exergy,
-            "entropy": entropy,
-            "net": exergy - entropy
-        })
+        self.history.append(
+            {
+                "timestamp": time.monotonic(),
+                "exergy": exergy,
+                "entropy": entropy,
+                "net": exergy - entropy,
+            }
+        )
 
     @property
     def net_derivative(self) -> float:
@@ -70,12 +72,12 @@ class ExergyGradient:
         """Check if we are in a persistent downward thermodynamic spiral."""
         if len(self.history) < self.patience_steps:
             return False
-        
+
         # Check if the last N derivative steps are consistently negative
         degrading_count = 0
         for i in range(-1, -self.patience_steps, -1):
             curr = self.history[i]
-            prev = self.history[i-1]
+            prev = self.history[i - 1]
             dt = max(curr["timestamp"] - prev["timestamp"], 1.0)
             diff = curr["net"] - prev["net"]
             deriv = diff / dt
@@ -122,7 +124,11 @@ class BoltzmannEngineAgent(BaseAgent):
     async def _handle_task_request(self, message: AgentMessage) -> None:
         objective = message.payload.get("objective", "")
         if not objective:
-            await self.send_result(message.sender, {"error": "Missing objective"}, correlation_id=message.correlation_id)
+            await self.send_result(
+                message.sender,
+                {"error": "Missing objective"},
+                correlation_id=message.correlation_id,
+            )
             return
 
         # Accept the task
@@ -137,11 +143,15 @@ class BoltzmannEngineAgent(BaseAgent):
 
         # Run core L5 lifecycle
         result = await self.execute_objective(objective)
-        
+
         if result["status"] == "SUCCESS":
             await self.send_result(message.sender, result, correlation_id=message.correlation_id)
         else:
-            await self._report_failure(message.sender, result.get("error", "Demiurge execution failed"), correlation_id=message.correlation_id)
+            await self._report_failure(
+                message.sender,
+                result.get("error", "Demiurge execution failed"),
+                correlation_id=message.correlation_id,
+            )
 
     async def _handle_subtask_result(self, message: AgentMessage) -> None:
         """Processes responses from spawned Level 4 workers."""
@@ -149,12 +159,12 @@ class BoltzmannEngineAgent(BaseAgent):
         payload = message.payload or {}
         result = payload.get("result", {})
         task_id = result.get("objective", "")
-        
+
         logger.info("[%s] Received delegation result for task: %s", self.agent_id, task_id)
         if correlation_id in self.memory.scratchpad:
             self.memory.scratchpad[correlation_id]["status"] = "COMPLETED"
             self.memory.scratchpad[correlation_id]["result"] = result
-        
+
         if correlation_id in self._delegation_events:
             self._delegation_events[correlation_id].set()
 
@@ -177,12 +187,14 @@ class BoltzmannEngineAgent(BaseAgent):
             [
                 {
                     "tool_name": "exergy_audit",
-                    "arguments": {"plan_summary": {"net_exergy": 0.5, "entropy_paid": 0.05, "progress": "0%"}},
+                    "arguments": {
+                        "plan_summary": {"net_exergy": 0.5, "entropy_paid": 0.05, "progress": "0%"}
+                    },
                     "description": "Initial environment exergy scan",
                     "exergy_estimate": 0.5,
                     "entropy_cost": 0.05,
                 }
-            ]
+            ],
         )
 
         while self.ooda_state != OODAState.COMPLETE and self.ooda_state != OODAState.APOPTOSIS:
@@ -225,14 +237,17 @@ class BoltzmannEngineAgent(BaseAgent):
         if self.current_plan:
             self.gradient.record(
                 float(self.current_plan.total_exergy_produced),
-                float(self.current_plan.total_entropy_paid)
+                float(self.current_plan.total_entropy_paid),
             )
-            
+
             if self.gradient.is_degrading():
-                logger.error("[%s] Exergy gradient is severely degrading. Terminating current plan.", self.agent_id)
+                logger.error(
+                    "[%s] Exergy gradient is severely degrading. Terminating current plan.",
+                    self.agent_id,
+                )
                 self.ooda_state = OODAState.APOPTOSIS
                 return
-        
+
         self.ooda_state = OODAState.DECIDE
 
     async def _phase_decide(self) -> None:
@@ -257,21 +272,24 @@ class BoltzmannEngineAgent(BaseAgent):
             return
 
         # Determine delegation
-        should_delegate = self.manifest.can_delegate and len(self.active_subagents) < self.max_swarm_size
-        
+        should_delegate = (
+            self.manifest.can_delegate and len(self.active_subagents) < self.max_swarm_size
+        )
+
         step.mark_running()
         try:
             if should_delegate and step.exergy_estimate < Decimal("0.6"):
                 # Delegate low-criticality tasks to a Level 4 sub-agent
-                logger.info("[%s] Delegating step '%s' to L4 Sub-Agent", self.agent_id, step.step_id)
+                logger.info(
+                    "[%s] Delegating step '%s' to L4 Sub-Agent", self.agent_id, step.step_id
+                )
                 result = await self._delegate_to_subagent(step)
             else:
                 # Execute locally
                 result = await asyncio.wait_for(
-                    self.use_tool(step.tool_name, **step.arguments),
-                    timeout=self.step_timeout_s
+                    self.use_tool(step.tool_name, **step.arguments), timeout=self.step_timeout_s
                 )
-            
+
             step.mark_completed(result)
             self.current_plan.record_step_result(step)
             self.replan_count = 0  # Reset replan count on successful action execution
@@ -307,7 +325,10 @@ class BoltzmannEngineAgent(BaseAgent):
 
         self.replan_count += 1
         if self.replan_count > 3:
-            logger.error("[%s] Replan threshold exceeded (>3). Aborting to prevent infinite loop.", self.agent_id)
+            logger.error(
+                "[%s] Replan threshold exceeded (>3). Aborting to prevent infinite loop.",
+                self.agent_id,
+            )
             self.ooda_state = OODAState.APOPTOSIS
             return
 
@@ -315,7 +336,7 @@ class BoltzmannEngineAgent(BaseAgent):
             "last_state": self.current_plan.summary(),
             "entropy": float(self.current_plan.total_entropy_paid),
         }
-        
+
         replacement = [
             {
                 "tool_name": "noop",
@@ -329,7 +350,7 @@ class BoltzmannEngineAgent(BaseAgent):
         self.current_plan = ExergyPlanner.replan(
             original_plan=self.current_plan,
             observations=observations,
-            replacement_steps=replacement
+            replacement_steps=replacement,
         )
 
         # Resume execution
@@ -338,10 +359,7 @@ class BoltzmannEngineAgent(BaseAgent):
     async def _delegate_to_subagent(self, step: PlanStep) -> dict[str, Any]:
         """Spawns an ephemeral L4 sub-agent via standard bus protocol."""
         corr_id = f"delegation-{step.step_id}"
-        self.memory.scratchpad[corr_id] = {
-            "status": "PENDING",
-            "result": None
-        }
+        self.memory.scratchpad[corr_id] = {"status": "PENDING", "result": None}
 
         deleg_msg = new_message(
             sender=self.agent_id,
@@ -349,14 +367,16 @@ class BoltzmannEngineAgent(BaseAgent):
             kind=MessageKind.TASK_REQUEST,
             payload={
                 "objective": step.description,
-                "steps": [{
-                    "tool_name": step.tool_name,
-                    "arguments": step.arguments,
-                    "exergy_estimate": float(step.exergy_estimate),
-                    "entropy_cost": float(step.entropy_cost),
-                }]
+                "steps": [
+                    {
+                        "tool_name": step.tool_name,
+                        "arguments": step.arguments,
+                        "exergy_estimate": float(step.exergy_estimate),
+                        "entropy_cost": float(step.entropy_cost),
+                    }
+                ],
             },
-            correlation_id=corr_id
+            correlation_id=corr_id,
         )
         await self.bus.send(deleg_msg)
 
@@ -405,7 +425,7 @@ def create_boltzmann_engine(
         purpose=purpose,
         tools_allowed=tools_allowed or [],
         can_delegate=True,  # Level 5 allows delegation
-        daemon=True,        # Runs continuously
+        daemon=True,  # Runs continuously
         max_concurrency=max_swarm_size,
         budget_tokens=250_000,
         max_consecutive_errors=5,

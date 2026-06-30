@@ -11,7 +11,7 @@ import logging
 from collections.abc import Callable, Coroutine
 from typing import Any, TypedDict
 
-logger = logging.getLogger("cortex.engine.saga")
+logger = logging.getLogger("babylon60.engine.saga")
 
 
 class SagaContext(TypedDict, total=False):
@@ -72,17 +72,17 @@ class SagaOrchestrator:
                     logger.critical(
                         f"FATAL: Saga compensation failed for {step.name}. State corrupted. Error: {comp_e}"
                     )
-            
+
             # [C5-REAL] INV_SAGA_ROLLBACK Tombstone Injection
             if "ledger" in ctx and "tenant_id" in ctx:
                 try:
-                    await ctx["ledger"].log_action( # type: ignore
+                    await ctx["ledger"].log_action(  # type: ignore
                         tenant_id=ctx["tenant_id"],
                         actor_role="saga_orchestrator",
                         actor_id="system",
                         action="SAGA_REVERT",
                         resource=f"payload_hash:{ctx.get('ledger_hash', 'unknown')}",
-                        status="REVERTED"
+                        status="REVERTED",
                     )
                 except Exception as l_err:
                     logger.critical(f"FATAL: Failed to inject SAGA Tombstone into Ledger: {l_err}")
@@ -124,11 +124,11 @@ async def taint_exec(ctx: SagaContext):
     agent_id = ctx.get("agent_id", "SYS_ROOT")
     session_id = ctx.get("session_id", "default_session")
     payload_str = json.dumps(ctx.get("payload", {}))
-    
+
     canonical = canonicalize_content(payload_str)
     content_hash = _fast_sha3(canonical)
     timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    
+
     ctx["taint_token"] = f"taint:{agent_id}:{session_id}:{timestamp}:hash:{content_hash}"
 
 
@@ -170,7 +170,7 @@ async def ledger_exec(ctx: SagaContext):
     import json
 
     from babylon60.engine.causal.taint_engine import _fast_sha3, canonicalize_content
-    
+
     payload_str = json.dumps(ctx.get("payload", {}))
     canonical = canonicalize_content(payload_str)
     # Merkle stub replaced by structural sha3 hash

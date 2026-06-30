@@ -34,7 +34,7 @@ from babylon60.memory.void_detector import (
     EpistemicVoidDetector,
 )
 
-logger = logging.getLogger("cortex.memory.pipeline")
+logger = logging.getLogger("babylon60.memory.pipeline")
 
 
 @dataclass(frozen=True)

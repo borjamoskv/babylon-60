@@ -16,7 +16,7 @@ from babylon60.extensions.genesis.templates import TemplateRegistry
 
 __all__ = ["SystemAssembler"]
 
-logger = logging.getLogger("cortex_extensions.genesis.assembler")
+logger = logging.getLogger("babylon60_extensions.genesis.assembler")
 
 
 class SystemAssembler:

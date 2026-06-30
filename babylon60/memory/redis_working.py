@@ -31,7 +31,7 @@ except ImportError:
 
 __all__ = ["RedisWorkingMemoryL1"]
 
-logger = logging.getLogger("cortex.memory.working.redis")
+logger = logging.getLogger("babylon60.memory.working.redis")
 
 DEFAULT_MAX_TOKENS: Final[int] = 8192
 _ACCESS_LOG_MAXLEN: Final[int] = 2048

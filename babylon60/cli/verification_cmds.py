@@ -83,9 +83,7 @@ def verify_ledger_cmd(db_path: str | None) -> None:
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="bold")
 
-        table.add_row(
-            "Status", "[green]VALID[/]" if result.get("valid") else "[red]COMPROMISED[/]"
-        )
+        table.add_row("Status", "[green]VALID[/]" if result.get("valid") else "[red]COMPROMISED[/]")
         table.add_row("Transactions", str(result.get("tx_checked", 0)))
         table.add_row("Merkle Nodes", str(result.get("roots_checked", 0)))
 

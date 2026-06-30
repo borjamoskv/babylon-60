@@ -19,7 +19,7 @@ from babylon60.crypto.hash_registry import cortex_hash
 
 __all__ = ["GossipProtocol", "SemanticDigest", "StateRecord"]
 
-logger = logging.getLogger("cortex_extensions.ha.gossip")
+logger = logging.getLogger("babylon60_extensions.ha.gossip")
 
 
 @dataclass()

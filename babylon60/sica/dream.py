@@ -35,7 +35,7 @@ from typing import Any
 from babylon60.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
 from babylon60.sica.strategy import Heuristic, SearchStrategy
 
-logger = logging.getLogger("cortex.sica.dream")
+logger = logging.getLogger("babylon60.sica.dream")
 
 
 @dataclass

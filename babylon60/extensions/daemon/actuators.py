@@ -12,7 +12,7 @@ import asyncio
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.daemon.actuators")
+logger = logging.getLogger("babylon60_extensions.daemon.actuators")
 
 
 class PhysicalActuator:

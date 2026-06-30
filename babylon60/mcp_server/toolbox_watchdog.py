@@ -27,7 +27,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.mcp_server.toolbox_watchdog")
+logger = logging.getLogger("babylon60.mcp_server.toolbox_watchdog")
 
 # ── Configuration ─────────────────────────────────────────────────
 

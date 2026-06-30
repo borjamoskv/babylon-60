@@ -15,7 +15,7 @@ from babylon60.api.deps import get_async_engine
 from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.engine import CortexEngine as AsyncCortexEngine
 
-logger = logging.getLogger("cortex.api.telemetry")
+logger = logging.getLogger("babylon60.api.telemetry")
 router = APIRouter(tags=["telemetry"])
 
 

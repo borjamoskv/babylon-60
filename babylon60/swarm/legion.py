@@ -19,10 +19,10 @@ except ImportError:
     # Axiom Ω₃: Zero-Trust Logging - providing a stub if CLI is unavailable
     class BicameralStub:
         def log_limbic(self, msg: str, **kwargs) -> None:
-            logging.getLogger("cortex.limbic").info(msg)
+            logging.getLogger("babylon60.limbic").info(msg)
 
         def log_motor(self, msg: str, **kwargs) -> None:
-            logging.getLogger("cortex.motor").info(msg)
+            logging.getLogger("babylon60.motor").info(msg)
 
     bicameral = BicameralStub()
 from babylon60.swarm.legion_vectors import RED_TEAM_SWARM, AttackVector
@@ -80,7 +80,7 @@ class AsyncSignalBus:
             # If entropy is below the threshold, it means the payload contains repetitive
             # conversational slop (Anergia) instead of dense structural invariants.
             if entropy < LandauerGuard.MIN_ENTROPY:
-                logging.getLogger("cortex.swarm.legion").warning(
+                logging.getLogger("babylon60.swarm.legion").warning(
                     f"🛑 [Landauer Epistemic Filter] Payload rejected. Entropy ({entropy:.2f}) < {LandauerGuard.MIN_ENTROPY}. Anergy detected."
                 )
                 signal.status = "FAILURE"

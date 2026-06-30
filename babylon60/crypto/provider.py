@@ -27,8 +27,8 @@ class SignatureAlgorithm(Enum):
     - 2035+: SLH-DSA as hash-based fallback
     """
 
-    ED25519 = "ed25519"          # Current — vulnerable to Shor
-    ML_DSA_65 = "ml_dsa_65"      # FIPS 204 — post-quantum (future)
+    ED25519 = "ed25519"  # Current — vulnerable to Shor
+    ML_DSA_65 = "ml_dsa_65"  # FIPS 204 — post-quantum (future)
     SLH_DSA_256S = "slh_dsa_256s"  # FIPS 205 — hash-based fallback (future)
 
 
@@ -111,9 +111,7 @@ class SignatureProvider:
         return cortex_hmac(key, data)
 
     @staticmethod
-    def verify_hmac_sha256(
-        key: bytes | str, data: bytes | str, signature: str
-    ) -> bool:
+    def verify_hmac_sha256(key: bytes | str, data: bytes | str, signature: str) -> bool:
         """Constant-time verification of HMAC signature."""
         expected = SignatureProvider.sign_hmac_sha256(key, data)
         return hmac.compare_digest(expected, signature)
@@ -123,9 +121,7 @@ class KDFProvider:
     """Provides Key Derivation Functions (KDF)."""
 
     @staticmethod
-    def pbkdf2_hmac_sha256(
-        secret: bytes | str, salt: bytes, iterations: int = 100000
-    ) -> bytes:
+    def pbkdf2_hmac_sha256(secret: bytes | str, salt: bytes, iterations: int = 100000) -> bytes:
         """Derives a cryptographic key using PBKDF2 with HMAC-SHA256."""
         if isinstance(secret, str):
             secret = secret.encode("utf-8")

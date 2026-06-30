@@ -27,7 +27,7 @@ from babylon60.extensions.llm.router import IntentProfile
 
 __all__ = ["LLMManager"]
 
-logger = logging.getLogger("cortex_extensions.llm.manager")
+logger = logging.getLogger("babylon60_extensions.llm.manager")
 
 
 class LLMManager:

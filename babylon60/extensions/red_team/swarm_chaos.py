@@ -10,7 +10,7 @@ from babylon60.engine.meta.nemesis import NemesisProtocol
 from babylon60.extensions.immune.falsification import EvolutionaryFalsifier
 from babylon60.extensions.red_team.discovery import DiscoveryProvider
 
-logger = logging.getLogger("cortex_extensions.red_team.swarm_chaos")
+logger = logging.getLogger("babylon60_extensions.red_team.swarm_chaos")
 
 
 class RedTeamSwarm:

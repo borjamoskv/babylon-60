@@ -14,7 +14,7 @@ from typing import Any
 
 from babylon60.security.types import GuardViolation
 
-logger = logging.getLogger("cortex.guards.landauer")
+logger = logging.getLogger("babylon60.guards.landauer")
 
 
 class LandauerGuard:

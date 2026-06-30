@@ -12,7 +12,7 @@ from typing import Any
 
 from babylon60.engine.cognitive.capabilities import CapabilityRegistry
 
-logger = logging.getLogger("cortex.enrichment")
+logger = logging.getLogger("babylon60.enrichment")
 
 
 async def run_enrichment_worker(engine: Any, poll_interval: float = 1.0):

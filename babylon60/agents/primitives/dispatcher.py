@@ -62,7 +62,9 @@ class ApexDispatcher:
             prim = next((p for p in apex_registry.list_rts_primitives() if p.name == op_name), None)
 
         if not prim:
-            raise ValueError(f"[C5-REAL] FATAL: Primitive {op_name} not found in APEX_REGISTRY or RTS_REGISTRY.")
+            raise ValueError(
+                f"[C5-REAL] FATAL: Primitive {op_name} not found in APEX_REGISTRY or RTS_REGISTRY."
+            )
 
         handler = self._handlers.get(prim.id)
         if not handler:
@@ -81,7 +83,7 @@ class ApexDispatcher:
             TaintValidationError,
             check_anergy_and_green_theater,
         )
-        
+
         try:
             check_anergy_and_green_theater(commit_msg)
         except TaintValidationError as e:
@@ -185,7 +187,6 @@ class ApexDispatcher:
             p = count / length
             entropy -= p * math.log2(p)
         return entropy
-
 
     def _op_rts_spoof_taint(self, agent_id: str, session_id: str, payload: str) -> str:
         """OP_RTS_SPOOF_TAINT: False flag generation."""

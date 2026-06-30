@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 __all__ = ["FingerprintScanner"]
 
-logger = logging.getLogger("cortex_extensions.fingerprint")
+logger = logging.getLogger("babylon60_extensions.fingerprint")
 
 # Active facts WHERE clause (mirrors shannon/scanner.py convention)
 _ACTIVE = "valid_until IS NULL AND is_quarantined = 0"

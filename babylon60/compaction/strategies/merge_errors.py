@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from babylon60.compaction.compactor import CompactionResult
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.compaction.merge_errors")
+logger = logging.getLogger("babylon60.compaction.merge_errors")
 _LOG_FMT = "Compactor [%s] %s"
 
 

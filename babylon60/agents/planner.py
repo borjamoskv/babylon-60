@@ -29,7 +29,7 @@ from uuid import uuid4
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
-logger = logging.getLogger("cortex.agents.planner")
+logger = logging.getLogger("babylon60.agents.planner")
 
 
 class StepStatus(str, Enum):

@@ -15,7 +15,7 @@ import aiosqlite
 
 from babylon60.extensions.signals.bus import AsyncSignalBus
 
-logger = logging.getLogger("cortex_extensions.sap.oliver")
+logger = logging.getLogger("babylon60_extensions.sap.oliver")
 
 
 class OliverAgent:

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from babylon60.ledger.cost_field import CostField
     from babylon60.ledger.execution_trace import ExecutionTraceLedger
 
-logger = logging.getLogger("cortex.engine.core.rollback_engine")
+logger = logging.getLogger("babylon60.engine.core.rollback_engine")
 
 
 class CausalRollbackEngine:

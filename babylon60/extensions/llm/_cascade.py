@@ -15,7 +15,7 @@ from babylon60.extensions.llm._models import CascadeTier, IntentProfile
 if TYPE_CHECKING:
     from babylon60.extensions.llm._models import BaseProvider
 
-logger = logging.getLogger("cortex_extensions.llm.cascade")
+logger = logging.getLogger("babylon60_extensions.llm.cascade")
 
 
 def classify_tier(provider: BaseProvider, intent: IntentProfile) -> CascadeTier:

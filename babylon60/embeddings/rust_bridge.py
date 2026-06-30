@@ -28,7 +28,7 @@ try:
 except ImportError:
     Tokenizer = None
 
-logger = logging.getLogger("cortex.embeddings.rust_bridge")
+logger = logging.getLogger("babylon60.embeddings.rust_bridge")
 
 
 class RustNativeEmbeddings:

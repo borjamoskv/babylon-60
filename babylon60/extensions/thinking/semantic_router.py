@@ -40,7 +40,7 @@ from babylon60.extensions.thinking.presets import ThinkingMode
 
 __all__ = ["RouteDecision", "SemanticRouter"]
 
-logger = logging.getLogger("cortex_extensions.thinking.semantic_router")
+logger = logging.getLogger("babylon60_extensions.thinking.semantic_router")
 
 
 # ─── Signal Sets ────────────────────────────────────────────────────

@@ -19,7 +19,7 @@ from babylon60.engine.flow.causality_models import (
     _downgrade_confidence,
 )
 
-logger = logging.getLogger("cortex.engine.causal.taint_propagation")
+logger = logging.getLogger("babylon60.engine.causal.taint_propagation")
 
 
 class TaintPropagator:

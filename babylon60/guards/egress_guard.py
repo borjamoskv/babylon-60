@@ -9,7 +9,7 @@ import logging
 import re
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.guards.egress")
+logger = logging.getLogger("babylon60.guards.egress")
 
 # YARA-like patterns for immediate rejection
 _EXFIL_PATTERNS = [

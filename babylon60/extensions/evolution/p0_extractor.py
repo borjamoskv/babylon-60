@@ -41,7 +41,7 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.evolution.p0_extractor")
+logger = logging.getLogger("babylon60_extensions.evolution.p0_extractor")
 
 
 # ─── Types ──────────────────────────────────────────────────────────────

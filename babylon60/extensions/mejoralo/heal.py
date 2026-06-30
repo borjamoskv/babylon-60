@@ -37,7 +37,7 @@ from babylon60.extensions.mejoralo.models import ScanResult
 from babylon60.extensions.mejoralo.taint import is_file_tainted, mark_file_tainted
 
 __all__ = ["heal_proj", "heal_project"]
-logger = logging.getLogger("cortex_extensions.mejoralo.heal")
+logger = logging.getLogger("babylon60_extensions.mejoralo.heal")
 
 
 def _extract_issues_from_findings(scan_result: ScanResult) -> dict[str, list[str]]:
@@ -201,20 +201,23 @@ def _run_delta_testing(
     path_obj = Path(path).resolve()
     base_dir = path_obj.parent if path_obj.is_file() else path_obj
     pytest_cmd = [sys.executable, "-m", "pytest"]
-    
+
     # Deduce specific tests by searching tests/ for the file stem
     stem = Path(top_file_rel).stem
     tests_dir = base_dir / "tests"
     matched_tests = []
     if tests_dir.exists():
         import os
+
         for root_dir, _, files in os.walk(tests_dir):
             for f in files:
                 if f.endswith(".py") and f.startswith("test_") and stem in f:
                     matched_tests.append(os.path.join(root_dir, f))
-                    
+
     if matched_tests:
-        console.print(f"  [cyan]🎯 Delta-Testing: acotado a {len(matched_tests)} tests ({', '.join(Path(t).name for t in matched_tests)})[/]")
+        console.print(
+            f"  [cyan]🎯 Delta-Testing: acotado a {len(matched_tests)} tests ({', '.join(Path(t).name for t in matched_tests)})[/]"
+        )
         pytest_cmd.extend(matched_tests)
     else:
         console.print("  [dim]⚠️ No direct test found, running full suite...[/]")

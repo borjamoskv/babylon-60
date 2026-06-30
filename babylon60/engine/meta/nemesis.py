@@ -16,7 +16,7 @@ except ImportError:
     AsyncSignalBus = None  # type: ignore[assignment]
     SignalBus = None  # type: ignore[assignment]
 
-logger = logging.getLogger("cortex.nemesis")
+logger = logging.getLogger("babylon60.nemesis")
 
 
 class NemesisRejection(Exception):

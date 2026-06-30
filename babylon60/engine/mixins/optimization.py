@@ -20,7 +20,7 @@ from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.utils.canonical import canonical_json, compute_tx_hash, now_iso
 from babylon60.utils.result import Err, Ok, Result
 
-logger = logging.getLogger("cortex.engine.optimized")
+logger = logging.getLogger("babylon60.engine.optimized")
 
 
 class EvictionReason(Enum):

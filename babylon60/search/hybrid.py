@@ -28,7 +28,7 @@ from babylon60.search.vector import semantic_search, semantic_search_sync
 
 __all__ = ["hybrid_search", "hybrid_search_sync"]
 
-logger = logging.getLogger("cortex.search.hybrid")
+logger = logging.getLogger("babylon60.search.hybrid")
 
 # RRF_K constant governs the impact of low-rank results.
 # Industry standard (Corpus-Scale) is 60.

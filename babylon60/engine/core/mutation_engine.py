@@ -20,7 +20,7 @@ from babylon60.engine.evo._mutation_projectors import project
 from babylon60.extensions.axioms.topological_id import flake_gen
 
 __all__ = ["FactMutationEngine"]
-logger = logging.getLogger("cortex.mutation_engine")
+logger = logging.getLogger("babylon60.mutation_engine")
 
 _PAYLOAD_SCHEMA_VERSION = "1"
 _FACT_COLUMNS_CACHE: dict[int, set[str]] = {}

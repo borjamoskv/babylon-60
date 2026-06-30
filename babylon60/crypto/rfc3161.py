@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-logger = logging.getLogger("cortex.crypto.rfc3161")
+logger = logging.getLogger("babylon60.crypto.rfc3161")
 
 # Default public TSA URL
 DEFAULT_TSA_URL = os.environ.get("CORTEX_TSA_URL", "https://freetsa.org/tsr")

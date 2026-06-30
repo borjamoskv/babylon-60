@@ -28,7 +28,7 @@ except ImportError:
     yaml = None
     YAMLError = Exception
 
-logger = logging.getLogger("cortex_extensions.swarm.knowledge_radar")
+logger = logging.getLogger("babylon60_extensions.swarm.knowledge_radar")
 
 # ── Default Paths ─────────────────────────────────────────────────────────
 

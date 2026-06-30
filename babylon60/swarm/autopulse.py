@@ -12,7 +12,7 @@ from babylon60.swarm.gossip_bus import GossipBus
 from babylon60.swarm.tensor_glial import TensorGlialLegion
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("cortex.swarm.autopulse")
+logger = logging.getLogger("babylon60.swarm.autopulse")
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 STATE_FILE = "/tmp/cortex_state.json"
 _ENTROPY_THRESHOLD = float(os.environ.get("CORTEX_ENTROPY_THRESHOLD", "0.15"))

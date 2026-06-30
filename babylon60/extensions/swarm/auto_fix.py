@@ -10,7 +10,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Protocol
 
-logger = logging.getLogger("cortex_extensions.swarm.auto_fix")
+logger = logging.getLogger("babylon60_extensions.swarm.auto_fix")
 
 
 # ── Classification ────────────────────────────────────────────────────

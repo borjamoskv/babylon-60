@@ -19,7 +19,7 @@ from babylon60.memory.temporal import now_iso
 
 __all__ = ["TimingTracker"]
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 class TimingTracker:

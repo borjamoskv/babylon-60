@@ -4,6 +4,7 @@ from typing import Any
 from babylon60.memory.engrams import CortexSemanticEngram
 from babylon60.memory.resonance import AdaptiveResonanceGate
 
+
 class DummyVectorStore:
     def __init__(self):
         self.store = {}
@@ -29,7 +30,7 @@ async def test_adaptive_resonance_gate_collision_blocks_candidate():
         embedding=[0.0, 0.0],
         timestamp=1000.0,
         metadata={"confidence_score": 0.9},
-        cognitive_layer="semantic"
+        cognitive_layer="semantic",
     )
     await vs.upsert(vecino)
 
@@ -42,7 +43,7 @@ async def test_adaptive_resonance_gate_collision_blocks_candidate():
         embedding=[0.1, 0.1],
         timestamp=1001.0,
         metadata={"confidence_score": 0.2, "contradicts": "strong_neighbor"},
-        cognitive_layer="semantic"
+        cognitive_layer="semantic",
     )
 
     # Evaluar en el gate
@@ -68,7 +69,7 @@ async def test_adaptive_resonance_gate_collision_collapses_neighbor():
         embedding=[0.0, 0.0],
         timestamp=1000.0,
         metadata={"confidence_score": 0.2},
-        cognitive_layer="semantic"
+        cognitive_layer="semantic",
     )
     await vs.upsert(vecino)
 
@@ -81,7 +82,7 @@ async def test_adaptive_resonance_gate_collision_collapses_neighbor():
         embedding=[0.1, 0.1],
         timestamp=1001.0,
         metadata={"confidence_score": 0.9, "contradicts": "weak_neighbor"},
-        cognitive_layer="semantic"
+        cognitive_layer="semantic",
     )
 
     # Evaluar en el gate

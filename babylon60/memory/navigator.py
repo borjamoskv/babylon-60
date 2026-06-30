@@ -29,7 +29,7 @@ from typing import Any, Final
 
 from babylon60.utils.void_vec import cosine_similarity
 
-logger = logging.getLogger("cortex.memory.navigator")
+logger = logging.getLogger("babylon60.memory.navigator")
 
 __all__ = [
     "ClusterInfo",

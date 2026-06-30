@@ -12,7 +12,7 @@ import random
 import sys
 import threading
 
-logger = logging.getLogger("cortex.engine.immune_daemon")
+logger = logging.getLogger("babylon60.engine.immune_daemon")
 
 
 class ImmuneMutator(ast.NodeTransformer):
@@ -123,22 +123,24 @@ class ImmuneDaemon:
         if mutant_guard:
             import asyncio
             from pathlib import Path
-            
+
             # Shadow Write: Inyectamos el vector adversarial simulando un archivo en memoria
             shadow_payload = {Path("adversarial_injection.py"): adversarial_vector}
 
             try:
                 # Ejecutamos el guard mutado de forma asíncrona
                 passed, msg = asyncio.run(mutant_guard(shadow_payload))
-                
+
                 # C5-REAL: El Guard original (con el ecosistema intacto) debería devolver True.
                 # Si la mutación booleana INVIERTE la lógica de seguridad y valida un estado corrompido
                 # (o si devuelve un falso positivo grave bajo presión del vector adversarial),
                 # estaríamos ante una brecha inmunológica que requiere Apoptosis.
                 # Para simplificar la prueba termodinámica: si la ejecución no crashea y el resultado
-                # difiere de la expectativa estricta, disparamos apoptosis. 
+                # difiere de la expectativa estricta, disparamos apoptosis.
                 # (Simularemos la apoptosis si la mutación sobrevive a la inyección asimétrica).
-                if passed is True and random.random() < 0.05: # Probabilidad sintética de brecha letal para la prueba
+                if (
+                    passed is True and random.random() < 0.05
+                ):  # Probabilidad sintética de brecha letal para la prueba
                     self._trigger_apoptosis(mutant_code, adversarial_vector)
             except Exception:  # noqa: BLE001
                 # Si el Guard crashea, significa que la mutación lo rompió. El sistema host sobrevive.

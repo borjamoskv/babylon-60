@@ -11,7 +11,7 @@ from babylon60.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBas
 from babylon60.extensions.security.tenant import get_tenant_id
 from babylon60.memory.temporal import time_travel_filter
 
-logger = logging.getLogger("cortex.engine.temporal.history")
+logger = logging.getLogger("babylon60.engine.temporal.history")
 
 
 class HistoryMixin(EngineMixinBase):

@@ -49,7 +49,7 @@ from babylon60.compat.optional import np  # lazy: pip install cortex-persist[com
 
 __all__ = ["L2HybridSearch", "L2SearchResult"]
 
-logger = logging.getLogger("cortex.memory.l2_hybrid_search")
+logger = logging.getLogger("babylon60.memory.l2_hybrid_search")
 
 # ─── Constants ────────────────────────────────────────────────────────────────
 RRF_K: Final[int] = 60

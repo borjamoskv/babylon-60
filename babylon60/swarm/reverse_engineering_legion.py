@@ -13,7 +13,7 @@ from babylon60.compat.optional import np
 from babylon60.swarm.tensor_glial import TensorGlialLegion
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("cortex.swarm.reverse_engineering")
+logger = logging.getLogger("babylon60.swarm.reverse_engineering")
 
 
 def execute_reverse_engineering(target: str, nodes: int = 100000):

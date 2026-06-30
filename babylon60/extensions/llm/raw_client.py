@@ -5,7 +5,7 @@ import urllib.error
 import urllib.request
 from typing import Optional
 
-logger = logging.getLogger("cortex.llm.raw_client")
+logger = logging.getLogger("babylon60.llm.raw_client")
 
 
 class RawLLMClient:

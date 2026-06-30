@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from babylon60.compaction.compactor import CompactionResult
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.compactor.drift")
+logger = logging.getLogger("babylon60.compactor.drift")
 _LOG_FMT = "Compactor Drift [%s] %s"
 
 

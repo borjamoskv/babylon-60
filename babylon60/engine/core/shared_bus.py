@@ -15,7 +15,7 @@ import weakref
 from multiprocessing.shared_memory import SharedMemory
 from typing import Any
 
-logger = logging.getLogger("cortex.engine.core.shared_bus")
+logger = logging.getLogger("babylon60.engine.core.shared_bus")
 
 HEADER_SIZE = 32
 DEFAULT_CAPACITY = 8192

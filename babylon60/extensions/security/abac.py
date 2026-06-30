@@ -22,7 +22,7 @@ __all__ = [
     "PolicyViolationError",
 ]
 
-logger = logging.getLogger("cortex_extensions.security.abac")
+logger = logging.getLogger("babylon60_extensions.security.abac")
 
 # Attribute constants for policy conditions
 ATTR_SUBJECT_ROLE = "subject.role"

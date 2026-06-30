@@ -64,7 +64,7 @@ except ImportError:
 
     _WATCHDOG_AVAILABLE = False
 
-logger = logging.getLogger("cortex.daemon.watchers")
+logger = logging.getLogger("babylon60.daemon.watchers")
 
 __all__ = ["WatchdogHub"]
 

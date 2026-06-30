@@ -17,7 +17,7 @@ from babylon60.extensions.ui_control.maestro import MaestroUI
 if TYPE_CHECKING:
     from babylon60.engine.core.cortex_engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.agents.mac_maestro")
+logger = logging.getLogger("babylon60_extensions.agents.mac_maestro")
 
 SYSTEM_PROMPT = """
 You are Mac Maestro, a sovereign macOS automation agent.

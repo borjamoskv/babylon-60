@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 """schema_extensions - Extended SQLite tables for CORTEX v5."""
+
 from .schema_ext_1 import (
     CREATE_AGENTS,
     CREATE_CONTEXT_SNAPSHOTS,

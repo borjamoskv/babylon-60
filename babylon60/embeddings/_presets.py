@@ -12,7 +12,7 @@ import logging
 from pathlib import Path
 from typing import Any, Final
 
-logger = logging.getLogger("cortex.embeddings.presets")
+logger = logging.getLogger("babylon60.embeddings.presets")
 
 _ASSET_PATH: Final[str] = str(
     Path(__file__).parent.parent.parent / "config" / "embedding_presets.json"

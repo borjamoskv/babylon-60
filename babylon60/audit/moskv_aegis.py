@@ -22,7 +22,7 @@ from babylon60.audit.ledger import EnterpriseAuditLedger
 from babylon60.audit.moskv_videntia import MoskvVidentiaChainBuilder, MoskvVidentiaOracle
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.audit.moskv_aegis")
+logger = logging.getLogger("babylon60.audit.moskv_aegis")
 
 _CREATE_ADVERSARIAL_LOG_SQL = """
 CREATE TABLE IF NOT EXISTS moskv_aegis_log (

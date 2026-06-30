@@ -26,7 +26,7 @@ from babylon60.pipeline import (
 )
 from babylon60.pipeline.orchestrator import CortexOrchestrator
 
-logger = logging.getLogger("cortex.pipeline.bridge")
+logger = logging.getLogger("babylon60.pipeline.bridge")
 
 
 class CortexPipelineBridge:

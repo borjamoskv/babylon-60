@@ -17,7 +17,7 @@ from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.ledger")
+logger = logging.getLogger("babylon60.ledger")
 
 
 class ImmutableVoteLedger:

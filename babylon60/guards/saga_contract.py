@@ -25,7 +25,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-logger = logging.getLogger("cortex.guards.saga_contract")
+logger = logging.getLogger("babylon60.guards.saga_contract")
 
 # Canonical taint token keys — order matters for resolution priority
 _TAINT_KEYS = ("CORTEX-TAINT", "cortex_taint", "cortex-taint", "CORTEX_TAINT")

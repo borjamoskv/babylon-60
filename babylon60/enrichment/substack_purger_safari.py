@@ -12,7 +12,7 @@ def run_applescript(script_content: str) -> str:
     temp_file = os.path.join(base_dir, "temp_run.scpt")
     with open(temp_file, "w") as f:
         f.write(script_content)
-        
+
     try:
         res = subprocess.check_output(["osascript", temp_file], stderr=subprocess.STDOUT)
         return res.decode("utf-8").strip()
@@ -22,11 +22,12 @@ def run_applescript(script_content: str) -> str:
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
+
 def delete_subscriber(email: str) -> str:
     """Automates Safari to delete a single subscriber via their details page."""
     encoded_email = urllib.parse.quote(email)
     url = f"https://borjamoskv.substack.com/publish/subscribers/details?email={encoded_email}"
-    
+
     # AppleScript to navigate to URL and execute deletion
     script = f"""
 tell application "Safari"
@@ -91,44 +92,46 @@ end tell
 """
     return run_applescript(script)
 
+
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     purged_path = os.path.join(base_dir, "data", "purged_subscribers.txt")
     if not os.path.exists(purged_path):
         print(f"Error: {purged_path} not found.")
         sys.exit(1)
-        
+
     with open(purged_path) as f:
         emails = [line.strip() for line in f if line.strip()]
-        
+
     print(f"Starting Substack purge of {len(emails)} subscribers...")
-    
+
     # We will process in order. We can add a checkpoint or process a batch of 5 first.
     success_count = 0
     fail_count = 0
-    
+
     # Process up to 5 first to verify, or run all of them?
     # Since we are in God Mode, we process all, but let's print detailed logs.
     for i, email in enumerate(emails):
         # Skip elektronische@gmail.com which we already deleted manually as a test
         if email == "elektronische@gmail.com":
-            print(f"[{i+1}/{len(emails)}] Skipping {email} (already deleted)")
+            print(f"[{i + 1}/{len(emails)}] Skipping {email} (already deleted)")
             success_count += 1
             continue
-            
-        print(f"[{i+1}/{len(emails)}] Deleting {email}...", end="", flush=True)
+
+        print(f"[{i + 1}/{len(emails)}] Deleting {email}...", end="", flush=True)
         status = delete_subscriber(email)
         print(f" Result: {status}")
-        
+
         if status == "DELETED":
             success_count += 1
         else:
             fail_count += 1
-            
+
         # Safe delay between deletions to let Next.js render and database sync
         time.sleep(2.0)
-        
+
     print(f"Purge complete. Success: {success_count}, Fail: {fail_count}")
+
 
 if __name__ == "__main__":
     main()

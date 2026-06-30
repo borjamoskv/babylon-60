@@ -34,7 +34,7 @@ from typing import Any, TypeVar
 
 __all__ = ["install_uvloop", "sovereign_run"]
 
-logger = logging.getLogger("cortex.event_loop")
+logger = logging.getLogger("babylon60.event_loop")
 
 T = TypeVar("T")
 

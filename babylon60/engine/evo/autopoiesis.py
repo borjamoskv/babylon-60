@@ -23,7 +23,7 @@ class MutationHistory(TypedDict):
     failures: int
 
 
-logger = logging.getLogger("cortex.autopoiesis")
+logger = logging.getLogger("babylon60.autopoiesis")
 
 
 class AutopoiesisEngine:

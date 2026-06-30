@@ -17,7 +17,7 @@ from babylon60.ledger.store import LedgerStore
 if TYPE_CHECKING:
     pass
 
-logger = logging.getLogger("cortex.ledger")
+logger = logging.getLogger("babylon60.ledger")
 
 
 class LedgerVerifier:

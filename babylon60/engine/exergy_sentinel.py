@@ -1,22 +1,24 @@
 # [C5-REAL] Exergy-Maximized
 """
-Exergy Sentinel: Enforces the cryptographic Proof YAML block structure (Claim/Proof/Confidence) 
+Exergy Sentinel: Enforces the cryptographic Proof YAML block structure (Claim/Proof/Confidence)
 on all structural generative assertions before they cross the Byzantine Boundary.
 """
+
 import logging
 import re
 
 from babylon60.guards.landauer_guard import LandauerGuard
 from babylon60.security.types import GuardViolation
 
-logger = logging.getLogger("cortex.engine.exergy_sentinel")
+logger = logging.getLogger("babylon60.engine.exergy_sentinel")
+
 
 class ExergySentinel:
     """Intercepts generative output and forces strict YAML structural assertions (L1/Φ2)."""
-    
+
     YAML_PROOF_REGEX = re.compile(
         r"```yaml\s*\nClaim:\s*(.*?)\nProof:\s*\{\s*Base:\s*(.*?),\s*Range:\s*\[(.*?)\],\s*Confidence:\s*(C[1-5])\s*\}\s*\n```",
-        re.MULTILINE | re.IGNORECASE
+        re.MULTILINE | re.IGNORECASE,
     )
 
     @classmethod
@@ -31,9 +33,9 @@ class ExergySentinel:
             raise GuardViolation(
                 "Anergy Detected: Generative output lacks the mandatory YAML Claim/Proof block."
             )
-        
+
         claim, base, range_val, confidence = match.groups()
-        
+
         # Verify Shannon Entropy on the Claim using LandauerGuard
         if not LandauerGuard.validate(claim):
             raise GuardViolation(
@@ -41,13 +43,15 @@ class ExergySentinel:
             )
 
         if confidence != "C5":
-            logger.warning(f"Exergy Sentinel: Sub-optimal confidence level detected ({confidence}).")
+            logger.warning(
+                f"Exergy Sentinel: Sub-optimal confidence level detected ({confidence})."
+            )
 
         return {
             "claim": claim.strip(),
             "base": base.strip(),
             "range": range_val.strip(),
-            "confidence": confidence.strip()
+            "confidence": confidence.strip(),
         }
 
     @classmethod

@@ -15,7 +15,7 @@ from typing import Any
 
 import aiosqlite
 
-logger = logging.getLogger("cortex.guards.ouroboros_entropy")
+logger = logging.getLogger("babylon60.guards.ouroboros_entropy")
 
 
 class OuroborosEntropyGuard:

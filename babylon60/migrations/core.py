@@ -20,7 +20,7 @@ __all__ = [
     "run_migrations_async",
 ]
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 def ensure_migration_table(conn: sqlite3.Connection):
@@ -116,7 +116,6 @@ class AiosqliteCursorStub:
         yield
         return self
 
-
     async def __aenter__(self):
         return self
 
@@ -147,6 +146,7 @@ class SyncToAsyncConnectionAdapter:
 
 def run_coroutine_sync(coro):
     import asyncio
+
     try:
         loop = asyncio.get_event_loop()
     except RuntimeError:
@@ -155,14 +155,17 @@ def run_coroutine_sync(coro):
 
     if loop.is_running():
         import threading
+
         result = []
         exception = []
+
         def target():
             try:
                 new_loop = asyncio.new_event_loop()
                 result.append(new_loop.run_until_complete(coro))
             except Exception as e:
                 exception.append(e)
+
         t = threading.Thread(target=target)
         t.start()
         t.join()

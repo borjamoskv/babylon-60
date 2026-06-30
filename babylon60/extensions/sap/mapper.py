@@ -14,7 +14,7 @@ from typing import Any
 
 __all__ = ["SAPMapper", "SyncDiff"]
 
-logger = logging.getLogger("cortex_extensions.sap.mapper")
+logger = logging.getLogger("babylon60_extensions.sap.mapper")
 
 # SAP OData metadata keys to strip from entity payloads
 _SAP_META_KEYS = frozenset({"__metadata", "__deferred", "__count", "results"})

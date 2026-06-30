@@ -9,7 +9,7 @@ from babylon60.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 
 __all__ = ["get_history", "get_scars", "record_scar", "record_session"]
 
-logger = logging.getLogger("cortex_extensions.mejoralo")
+logger = logging.getLogger("babylon60_extensions.mejoralo")
 
 _VERSION = "9.0"
 

@@ -22,7 +22,7 @@ from babylon60.engine.meta.meta_arbiter_types import (
     Resolution,
 )
 
-logger = logging.getLogger("cortex.engine.meta.cognitive_arbiter")
+logger = logging.getLogger("babylon60.engine.meta.cognitive_arbiter")
 
 # ─── Constants for Cognitive Arbitration ─────────────────────────────
 

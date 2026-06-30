@@ -16,7 +16,7 @@ import aiosqlite
 
 from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 
-logger = logging.getLogger("cortex.engine.evo.decalcifier")
+logger = logging.getLogger("babylon60.engine.evo.decalcifier")
 
 
 class SovereignDecalcifier:

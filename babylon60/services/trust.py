@@ -17,7 +17,7 @@ from typing import Any
 from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.database.core import connect as db_connect
 
-logger = logging.getLogger("cortex.services.trust")
+logger = logging.getLogger("babylon60.services.trust")
 
 # ---------------------------------------------------------------------------
 # Data Structures

@@ -8,7 +8,7 @@ import logging
 import time
 from pathlib import Path
 
-logger = logging.getLogger("cortex_extensions.daemon.loops.evolution")
+logger = logging.getLogger("babylon60_extensions.daemon.loops.evolution")
 
 _MAX_RESONANCES = 100
 

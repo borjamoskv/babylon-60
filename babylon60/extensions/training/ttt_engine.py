@@ -25,7 +25,7 @@ from typing import Any
 from babylon60.extensions.training.collector import Trajectory, TrajectoryCollector
 from babylon60.extensions.training.reward_engine import RewardEngine
 
-logger = logging.getLogger("cortex_extensions.training.ttt")
+logger = logging.getLogger("babylon60_extensions.training.ttt")
 
 
 class TTTEngine:

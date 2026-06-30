@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 
 from .models import CausalEpisode, SourceMetadata
 
-logger = logging.getLogger("cortex.memory.episodic")
+logger = logging.getLogger("babylon60.memory.episodic")
 
 
 @dataclass()

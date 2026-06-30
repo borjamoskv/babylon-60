@@ -26,7 +26,7 @@ from typing import Any
 from babylon60.compat.optional import np  # lazy: pip install cortex-persist[compute]
 from babylon60.extensions.swarm.crystal_thermometer import CrystalVitals
 
-logger = logging.getLogger("cortex_extensions.swarm.crystal_consolidator")
+logger = logging.getLogger("babylon60_extensions.swarm.crystal_consolidator")
 
 # ── Thresholds ────────────────────────────────────────────────────────────
 

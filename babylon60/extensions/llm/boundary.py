@@ -21,7 +21,7 @@ from pydantic import BaseModel, ValidationError
 
 from babylon60.utils.errors import CortexError
 
-logger = logging.getLogger("cortex_extensions.llm.boundary")
+logger = logging.getLogger("babylon60_extensions.llm.boundary")
 
 T = TypeVar("T", bound=BaseModel)
 

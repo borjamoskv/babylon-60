@@ -25,7 +25,7 @@ except ImportError:
     import logging
 
 
-logger = logging.getLogger("cortex_extensions.swarm.deep_think")
+logger = logging.getLogger("babylon60_extensions.swarm.deep_think")
 
 
 class DeepThinkOrchestrator:
@@ -156,7 +156,6 @@ class DeepThinkOrchestrator:
             collapsed_hv = hvs[0]
         else:
             collapsed_hv = self.encoder.encode_text("void")
-
 
         hv_signature = cortex_hash_truncated(collapsed_hv.tobytes(), length=16)
 

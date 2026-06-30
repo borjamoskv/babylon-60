@@ -16,7 +16,7 @@ from babylon60.integration.rustchain.client import RustChainClient
 from babylon60.integration.rustchain.staking import stake_and_acquire
 from babylon60.integration.rustchain.wallet import RustChainWallet
 
-logger = logging.getLogger("cortex.integration.rustchain.mcp_tool")
+logger = logging.getLogger("babylon60.integration.rustchain.mcp_tool")
 
 
 def register_rustchain_tools(

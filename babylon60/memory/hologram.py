@@ -22,7 +22,7 @@ from babylon60.memory.models import CortexFactModel
 if TYPE_CHECKING:
     from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-logger = logging.getLogger("cortex.memory.hologram")
+logger = logging.getLogger("babylon60.memory.hologram")
 
 
 class HolographicMemory:

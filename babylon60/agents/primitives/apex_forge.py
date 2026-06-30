@@ -27,41 +27,46 @@ from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 # ── Data Models ──────────────────────────────────────────────────────
 
+
 @dataclass
 class Primitive:
-    id: str           # APEX-NNN
-    opcode: str       # OP_XXX
-    signature: str    # function signature
-    complexity: str   # O(...)
-    mutation: str     # physical mutation description
-    execute: str      # execution semantics
+    id: str  # APEX-NNN
+    opcode: str  # OP_XXX
+    signature: str  # function signature
+    complexity: str  # O(...)
+    mutation: str  # physical mutation description
+    execute: str  # execution semantics
     source: str = "parsed"  # parsed | synthesized
+
 
 @dataclass
 class Invariant:
-    id: str           # OUROBOROS-NNN
-    name: str         # INV_XXX
-    logic: str        # causal logic
-    risk: str         # P0 | P1 | P2
+    id: str  # OUROBOROS-NNN
+    name: str  # INV_XXX
+    logic: str  # causal logic
+    risk: str  # P0 | P1 | P2
     source: str = "parsed"
+
 
 @dataclass
 class AntiPattern:
-    id: str           # AP-NN
+    id: str  # AP-NN
     name: str
     trigger: str
     penalty: str
     resolution: str
     source: str = "parsed"
 
+
 @dataclass
 class Redundancy:
-    id: str           # RA-NN
+    id: str  # RA-NN
     name: str
     mechanism: str
     overhead: str
     resilience: str
     source: str = "parsed"
+
 
 @dataclass
 class ForgeReport:
@@ -135,54 +140,63 @@ def parse_apex_core(path: Path) -> ForgeReport:
             pid = _strip_bold(cells[0])
             if not pid.startswith("APEX-"):
                 continue
-            report.primitives.append(Primitive(
-                id=pid,
-                opcode=_strip_backtick(cells[1]),
-                signature=_strip_backtick(cells[2]),
-                complexity=_strip_backtick(cells[3]),
-                mutation=cells[4],
-                execute=cells[5],
-            ))
+            report.primitives.append(
+                Primitive(
+                    id=pid,
+                    opcode=_strip_backtick(cells[1]),
+                    signature=_strip_backtick(cells[2]),
+                    complexity=_strip_backtick(cells[3]),
+                    mutation=cells[4],
+                    execute=cells[5],
+                )
+            )
 
         elif section == "invariants" and len(cells) >= 4:
             iid = _strip_bold(cells[0])
             if not iid.startswith("OUROBOROS-"):
                 continue
-            report.invariants.append(Invariant(
-                id=iid,
-                name=_strip_backtick(cells[1]).strip('*').strip(),
-                logic=_strip_backtick(cells[2]),
-                risk=cells[3].strip(),
-            ))
+            report.invariants.append(
+                Invariant(
+                    id=iid,
+                    name=_strip_backtick(cells[1]).strip("*").strip(),
+                    logic=_strip_backtick(cells[2]),
+                    risk=cells[3].strip(),
+                )
+            )
 
         elif section == "antipatterns" and len(cells) >= 5:
             aid = _strip_bold(cells[0])
             if not aid.startswith("AP-"):
                 continue
-            report.antipatterns.append(AntiPattern(
-                id=aid,
-                name=_strip_bold(cells[1]),
-                trigger=_strip_backtick(cells[2]),
-                penalty=_strip_backtick(cells[3]),
-                resolution=cells[4],
-            ))
+            report.antipatterns.append(
+                AntiPattern(
+                    id=aid,
+                    name=_strip_bold(cells[1]),
+                    trigger=_strip_backtick(cells[2]),
+                    penalty=_strip_backtick(cells[3]),
+                    resolution=cells[4],
+                )
+            )
 
         elif section == "redundancies" and len(cells) >= 5:
             rid = _strip_bold(cells[0])
             if not rid.startswith("RA-"):
                 continue
-            report.redundancies.append(Redundancy(
-                id=rid,
-                name=_strip_bold(cells[1]),
-                mechanism=cells[2],
-                overhead=_strip_backtick(cells[3]),
-                resilience=cells[4],
-            ))
+            report.redundancies.append(
+                Redundancy(
+                    id=rid,
+                    name=_strip_bold(cells[1]),
+                    mechanism=cells[2],
+                    overhead=_strip_backtick(cells[3]),
+                    resilience=cells[4],
+                )
+            )
 
     return report
 
 
 # ── Gap Analysis ─────────────────────────────────────────────────────
+
 
 def _extract_num(id_str: str, prefix: str) -> int:
     """Extract numeric part from ID like APEX-042 -> 42."""
@@ -190,13 +204,9 @@ def _extract_num(id_str: str, prefix: str) -> int:
     return int(s)
 
 
-def find_gaps(
-    items: list, prefix: str, target: int, start: int = 1
-) -> dict:
+def find_gaps(items: list, prefix: str, target: int, start: int = 1) -> dict:
     """Find missing IDs and excess entries."""
-    present_nums = sorted(
-        _extract_num(item.id, prefix) for item in items
-    )
+    present_nums = sorted(_extract_num(item.id, prefix) for item in items)
     present_set = set(present_nums)
 
     # Core range: 1..target
@@ -321,39 +331,51 @@ def synthesize_missing(report: ForgeReport) -> ForgeReport:
     for mid in prim_gaps["missing_ids"]:
         if mid in _SYNTH_PRIMITIVES:
             t = _SYNTH_PRIMITIVES[mid]
-            report.primitives.append(Primitive(
-                id=mid, source="synthesized", **t,
-            ))
+            report.primitives.append(
+                Primitive(
+                    id=mid,
+                    source="synthesized",
+                    **t,
+                )
+            )
         else:
             # Generic synthesis for unknown gaps
             num = _extract_num(mid, "APEX-")
-            report.primitives.append(Primitive(
-                id=mid,
-                opcode=f"OP_SYNTH_{num:03d}",
-                signature=f"synth_{num}(state)",
-                complexity="O(1)",
-                mutation=f"CPU. Primitiva sintetizada #{num}.",
-                execute=f"Operación atómica de colapso #{num}.",
-                source="synthesized",
-            ))
+            report.primitives.append(
+                Primitive(
+                    id=mid,
+                    opcode=f"OP_SYNTH_{num:03d}",
+                    signature=f"synth_{num}(state)",
+                    complexity="O(1)",
+                    mutation=f"CPU. Primitiva sintetizada #{num}.",
+                    execute=f"Operación atómica de colapso #{num}.",
+                    source="synthesized",
+                )
+            )
 
     # Invariants
     inv_gaps = find_gaps(report.invariants, "OUROBOROS-", 100)
     for mid in inv_gaps["missing_ids"]:
         if mid in _SYNTH_INVARIANTS:
             t = _SYNTH_INVARIANTS[mid]
-            report.invariants.append(Invariant(
-                id=mid, source="synthesized", **t,
-            ))
+            report.invariants.append(
+                Invariant(
+                    id=mid,
+                    source="synthesized",
+                    **t,
+                )
+            )
         else:
             num = _extract_num(mid, "OUROBOROS-")
-            report.invariants.append(Invariant(
-                id=mid,
-                name=f"INV_SYNTH_{num:03d}",
-                logic=f"ASSERT structural_invariant_{num} == TRUE",
-                risk="P1",
-                source="synthesized",
-            ))
+            report.invariants.append(
+                Invariant(
+                    id=mid,
+                    name=f"INV_SYNTH_{num:03d}",
+                    logic=f"ASSERT structural_invariant_{num} == TRUE",
+                    risk="P1",
+                    source="synthesized",
+                )
+            )
 
     # Antipatterns: keep core AP-01..AP-20, discard MCTS overflow
     # Redundancies: keep core RA-01..RA-10, discard MCTS overflow
@@ -363,6 +385,7 @@ def synthesize_missing(report: ForgeReport) -> ForgeReport:
 
 
 # ── Filter & Select ──────────────────────────────────────────────────
+
 
 def select_canonical(report: ForgeReport) -> ForgeReport:
     """Select exactly 100P + 100I + 23AP + 11RA.
@@ -393,22 +416,19 @@ def select_canonical(report: ForgeReport) -> ForgeReport:
     for ap in report.antipatterns:
         if not ap.id.startswith("AP-MCTS"):
             canonical.antipatterns.append(ap)
-    canonical.antipatterns.sort(
-        key=lambda x: int(x.id.replace("AP-", "").lstrip("0") or "0")
-    )
+    canonical.antipatterns.sort(key=lambda x: int(x.id.replace("AP-", "").lstrip("0") or "0"))
 
     # Redundancies: core only
     for ra in report.redundancies:
         if not ra.id.startswith("RA-MCTS"):
             canonical.redundancies.append(ra)
-    canonical.redundancies.sort(
-        key=lambda x: int(x.id.replace("RA-", "").lstrip("0") or "0")
-    )
+    canonical.redundancies.sort(key=lambda x: int(x.id.replace("RA-", "").lstrip("0") or "0"))
 
     return canonical
 
 
 # ── Emitters ─────────────────────────────────────────────────────────
+
 
 def emit_json(canonical: ForgeReport, out_dir: Path) -> Path:
     """Emit apex_registry_100.json."""
@@ -441,10 +461,12 @@ def emit_markdown(canonical: ForgeReport, out_dir: Path) -> Path:
     lines.append("")
     lines.append('> **"Cero Anergía es la Muerte."**')
     lines.append("> Documento canónico forjado por `apex_forge.py`.")
-    lines.append(f"> **Counts:** {len(canonical.primitives)}P"
-                 f" + {len(canonical.invariants)}I"
-                 f" + {len(canonical.antipatterns)}AP"
-                 f" + {len(canonical.redundancies)}RA")
+    lines.append(
+        f"> **Counts:** {len(canonical.primitives)}P"
+        f" + {len(canonical.invariants)}I"
+        f" + {len(canonical.antipatterns)}AP"
+        f" + {len(canonical.redundancies)}RA"
+    )
     lines.append("")
 
     # Primitives
@@ -467,10 +489,7 @@ def emit_markdown(canonical: ForgeReport, out_dir: Path) -> Path:
     lines.append("|:---|:---|:---|:---:|")
     for inv in canonical.invariants:
         src = " 🔧" if inv.source == "synthesized" else ""
-        lines.append(
-            f"| **{inv.id}**{src} | **{inv.name}** "
-            f"| `{inv.logic}` | {inv.risk} |"
-        )
+        lines.append(f"| **{inv.id}**{src} | **{inv.name}** | `{inv.logic}` | {inv.risk} |")
     lines.append("")
 
     # Antipatterns
@@ -480,8 +499,7 @@ def emit_markdown(canonical: ForgeReport, out_dir: Path) -> Path:
     lines.append("|:---|:---|:---|:---|:---|")
     for ap in canonical.antipatterns:
         lines.append(
-            f"| **{ap.id}** | **{ap.name}** "
-            f"| `{ap.trigger}` | `{ap.penalty}` | {ap.resolution} |"
+            f"| **{ap.id}** | **{ap.name}** | `{ap.trigger}` | `{ap.penalty}` | {ap.resolution} |"
         )
     lines.append("")
 
@@ -492,8 +510,7 @@ def emit_markdown(canonical: ForgeReport, out_dir: Path) -> Path:
     lines.append("|:---|:---|:---|:---|:---|")
     for ra in canonical.redundancies:
         lines.append(
-            f"| **{ra.id}** | **{ra.name}** "
-            f"| {ra.mechanism} | `{ra.overhead}` | {ra.resilience} |"
+            f"| **{ra.id}** | **{ra.name}** | {ra.mechanism} | `{ra.overhead}` | {ra.resilience} |"
         )
     lines.append("")
 
@@ -504,10 +521,9 @@ def emit_markdown(canonical: ForgeReport, out_dir: Path) -> Path:
 
 # ── Main ─────────────────────────────────────────────────────────────
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="APEX Forge — Ontology Synthesizer & Normalizer"
-    )
+    parser = argparse.ArgumentParser(description="APEX Forge — Ontology Synthesizer & Normalizer")
     parser.add_argument(
         "--source",
         type=Path,
@@ -583,7 +599,7 @@ def main() -> None:
 
     inv_names = []
     for inv in canonical.invariants:
-        base = inv.name.split(':')[0].strip() if ':' in inv.name else inv.name
+        base = inv.name.split(":")[0].strip() if ":" in inv.name else inv.name
         inv_names.append(base)
     inv_dupes = [n for n in set(inv_names) if inv_names.count(n) > 1]
     assert not inv_dupes, f"Duplicate invariant names: {inv_dupes}"
@@ -602,11 +618,13 @@ def main() -> None:
     synth_p = sum(1 for p in canonical.primitives if p.source == "synthesized")
     synth_i = sum(1 for i in canonical.invariants if i.source == "synthesized")
     print(f"\n[DONE] Synthesized: {synth_p}P + {synth_i}I")
-    print(f"       Discarded overflow: "
-          f"{gaps['primitives']['overflow_count']}P "
-          f"+ {gaps['invariants']['overflow_count']}I "
-          f"+ {gaps['antipatterns']['mcts_count']}AP "
-          f"+ {gaps['redundancies']['mcts_count']}RA")
+    print(
+        f"       Discarded overflow: "
+        f"{gaps['primitives']['overflow_count']}P "
+        f"+ {gaps['invariants']['overflow_count']}I "
+        f"+ {gaps['antipatterns']['mcts_count']}AP "
+        f"+ {gaps['redundancies']['mcts_count']}RA"
+    )
 
 
 if __name__ == "__main__":

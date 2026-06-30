@@ -352,6 +352,7 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
 
         if not api_key:
             import os
+
             if "PYTEST_CURRENT_TEST" in os.environ:
                 token = tenant_id_var.set("default")
                 try:
@@ -360,18 +361,14 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
                     tenant_id_var.reset(token)
 
             return JSONResponse(
-                status_code=401, 
-                content={"error": "[C5-REAL] P0: Missing authentication token"}
+                status_code=401, content={"error": "[C5-REAL] P0: Missing authentication token"}
             )
 
         # 3. Authenticate and extract Tenant ID
         auth_mgr = get_auth_manager()
         result = await auth_mgr.authenticate_async(api_key)
         if not result.authenticated:
-            return JSONResponse(
-                status_code=401, 
-                content={"error": f"[C5-REAL] P0: {result.error}"}
-            )
+            return JSONResponse(status_code=401, content={"error": f"[C5-REAL] P0: {result.error}"})
 
         tenant_id = result.tenant_id
         token = tenant_id_var.set(tenant_id)
@@ -386,7 +383,9 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
         # Check in-memory cache first to avoid O(N) database latency on request path
         now = time.monotonic()
         cached = _TENANT_PLAN_CACHE.get(tenant_id)
-        if cached and (now - cached[2] < (5.0 if cached[0] == "fallback_error" else _TENANT_PLAN_CACHE_TTL)):
+        if cached and (
+            now - cached[2] < (5.0 if cached[0] == "fallback_error" else _TENANT_PLAN_CACHE_TTL)
+        ):
             if cached[0] == "fallback_error":
                 plan, plan_quota = "free", None
             else:
@@ -406,11 +405,14 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
                                 plan = config_data.get("plan", "free")
                                 if plan == "pwyw":
                                     from babylon60.extensions.metering.quotas import PlanQuota
+
                                     plan_quota = PlanQuota(
                                         name="pwyw",
                                         calls_limit=config_data.get("calls_limit", 1000),
                                         projects_limit=config_data.get("projects_limit", 1),
-                                        storage_bytes=config_data.get("storage_bytes", 10 * 1024 * 1024),
+                                        storage_bytes=config_data.get(
+                                            "storage_bytes", 10 * 1024 * 1024
+                                        ),
                                         rate_limit=config_data.get("rate_limit", 30),
                                         search_depth=3,
                                         batch_size=100,
@@ -446,11 +448,14 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
 
                     if MCPGuard.detect_poisoning(body.decode(errors="ignore")):
                         logger.warning(
-                            "🛡️ SOVEREIGN ISOLATION: Poisoning attempt rejected. Tenant: %s", tenant_id
+                            "🛡️ SOVEREIGN ISOLATION: Poisoning attempt rejected. Tenant: %s",
+                            tenant_id,
                         )
                         return JSONResponse(
                             status_code=403,
-                            content={"error": "Payload rejected by Sovereign Isolation (Data Poisoning)"},
+                            content={
+                                "error": "Payload rejected by Sovereign Isolation (Data Poisoning)"
+                            },
                         )
                 except Exception as exc:
                     logger.warning("Suppressed exception: %s", exc)
@@ -519,18 +524,25 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
                     if row:
                         try:
                             config_data = json.loads(row[0])
-                            stripe_subscription_item_id = config_data.get("stripe_subscription_item_id")
+                            stripe_subscription_item_id = config_data.get(
+                                "stripe_subscription_item_id"
+                            )
                         except Exception as e:
                             logger.error("Failed to parse tenant config: %s", e)
 
             # Fallback to mock item ID if in test/mock mode
             if not stripe_subscription_item_id:
-                is_mock = not config.STRIPE_SECRET_KEY or config.STRIPE_SECRET_KEY.startswith("sk_test_mock")
+                is_mock = not config.STRIPE_SECRET_KEY or config.STRIPE_SECRET_KEY.startswith(
+                    "sk_test_mock"
+                )
 
                 if is_mock:
                     stripe_subscription_item_id = f"si_{api_key[-8:]}"
                 else:
-                    logger.error("Stripe billing failed: No subscription item configured for tenant %s", result.tenant_id)
+                    logger.error(
+                        "Stripe billing failed: No subscription item configured for tenant %s",
+                        result.tenant_id,
+                    )
                     return
 
             stripe.api_key = getattr(config, "STRIPE_SECRET_KEY", None)
@@ -545,7 +557,10 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
                 timestamp="now",
                 action="increment",
             )
-            logger.info("Stripe usage reported for tenant %s (item %s)", result.tenant_id, stripe_subscription_item_id[:12])
+            logger.info(
+                "Stripe usage reported for tenant %s (item %s)",
+                result.tenant_id,
+                stripe_subscription_item_id[:12],
+            )
         except Exception as e:
             logger.error("Stripe billing increment failed for %s: %s", api_key[:12], e)
-

@@ -22,7 +22,7 @@ from babylon60.extensions.evolution.ast_mutators import (
     _EntropyAnnihilator,
 )
 
-logger = logging.getLogger("cortex_extensions.evolution.ouroboros")
+logger = logging.getLogger("babylon60_extensions.evolution.ouroboros")
 
 
 @dataclass

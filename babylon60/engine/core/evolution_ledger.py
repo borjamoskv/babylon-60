@@ -36,7 +36,7 @@ from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.evolution_ledger")
+logger = logging.getLogger("babylon60.evolution_ledger")
 
 __all__ = [
     "EvolutionLedger",

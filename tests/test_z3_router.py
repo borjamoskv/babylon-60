@@ -7,7 +7,12 @@ import os
 os.environ.setdefault("CORTEX_TESTING", "1")
 
 import pytest
-from babylon60.extensions.llm._models import BaseProvider, IntentProfile, ReasoningMode, CortexPrompt
+from babylon60.extensions.llm._models import (
+    BaseProvider,
+    IntentProfile,
+    ReasoningMode,
+    CortexPrompt,
+)
 from babylon60.extensions.llm.router import CortexLLMRouter
 from babylon60.config import LLM_LOCAL_FIRST
 

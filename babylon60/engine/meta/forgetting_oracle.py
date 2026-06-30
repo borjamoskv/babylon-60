@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 __all__ = ["ForgettingOracle"]
 
-logger = logging.getLogger("cortex.oracle.forgetting")
+logger = logging.getLogger("babylon60.oracle.forgetting")
 
 
 # ─── The Oracle ───────────────────────────────────────────────────────────────

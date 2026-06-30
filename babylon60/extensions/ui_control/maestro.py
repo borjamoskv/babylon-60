@@ -29,7 +29,7 @@ from babylon60.extensions.ui_control.window import WindowEngine
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.ui_control.maestro")
+logger = logging.getLogger("babylon60_extensions.ui_control.maestro")
 
 # Constantes de reintentos
 MAX_RETRIES = 3

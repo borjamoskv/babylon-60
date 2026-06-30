@@ -19,7 +19,7 @@ from pathlib import Path
 
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.swarm.auth")
+logger = logging.getLogger("babylon60.swarm.auth")
 
 AUTH_DIR = Path.home() / ".cortex" / "auth_queue"
 AUTH_DIR.mkdir(parents=True, exist_ok=True)

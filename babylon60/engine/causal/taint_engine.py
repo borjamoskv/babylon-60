@@ -5,7 +5,7 @@ import logging
 import time
 from datetime import datetime, timezone
 
-logger = logging.getLogger("cortex.engine.causal.taint_engine")
+logger = logging.getLogger("babylon60.engine.causal.taint_engine")
 
 
 class TaintValidationError(ValueError):
@@ -183,7 +183,9 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
 
     prefix = parts[0]
     if prefix not in ("taint", "moskv-taint"):
-        logger.error("[TaintEngine] SAGA-1: Token prefix must be 'taint' or 'moskv-taint': %s", prefix)
+        logger.error(
+            "[TaintEngine] SAGA-1: Token prefix must be 'taint' or 'moskv-taint': %s", prefix
+        )
         return False
 
     if parts[1] in ("secp256k1", "ed25519"):
@@ -270,18 +272,28 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
 
 
 # Pre-computed case-sensitive Base64 chunks for "borja", "fernandez", "angulo" at all offsets (0, 1, 2)
-PII_BASE64_CHUNKS: frozenset[str] = frozenset([
-    "Ym9yamE", "GJvcmph", "b3JqYQ",            # borja
-    "ZmVybmFuZGV6", "Zlcm5hbmRleg", "fZXJuYW5kZXo",  # fernandez
-    "YW5ndWxv", "GFuZ3Vsbw", "hbmd1bG8"        # angulo
-])
+PII_BASE64_CHUNKS: frozenset[str] = frozenset(
+    [
+        "Ym9yamE",
+        "GJvcmph",
+        "b3JqYQ",  # borja
+        "ZmVybmFuZGV6",
+        "Zlcm5hbmRleg",
+        "fZXJuYW5kZXo",  # fernandez
+        "YW5ndWxv",
+        "GFuZ3Vsbw",
+        "hbmd1bG8",  # angulo
+    ]
+)
 
 # Pre-computed lowercased hex chunks for "borja", "fernandez", "angulo"
-PII_HEX_CHUNKS: frozenset[str] = frozenset([
-    "626f726a61",          # borja
-    "6665726e616e64657a",  # fernandez
-    "616e67756c6f"         # angulo
-])
+PII_HEX_CHUNKS: frozenset[str] = frozenset(
+    [
+        "626f726a61",  # borja
+        "6665726e616e64657a",  # fernandez
+        "616e67756c6f",  # angulo
+    ]
+)
 
 import re
 
@@ -324,6 +336,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
 
         # -- OWASP Memory Firewall (SAGA-1.5) --
         from babylon60.security.memory_firewall import MemoryFirewall
+
         try:
             _, risk_level, _ = MemoryFirewall.screen_content(content)
         except ValueError as fw_err:
@@ -334,6 +347,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
             data = json.loads(content)
             if isinstance(data, dict) and "Email" in data and "Emails opened (6mo)" in data:
                 from babylon60.guards.substack_crawler_guard import SubstackCrawlerGuard
+
                 try:
                     SubstackCrawlerGuard().enforce_saga_contract(data)
                 except ValueError as guard_err:
@@ -352,13 +366,55 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
     # Homoglyphs mapping to standard Latin base characters
     homoglyph_map = {
         # Cyrillic lowercase lookalikes
-        '\u0430': 'a', '\u0435': 'e', '\u043e': 'o', '\u0440': 'p', '\u0441': 'c', '\u0443': 'y', '\u0445': 'x', '\u0456': 'i',
+        "\u0430": "a",
+        "\u0435": "e",
+        "\u043e": "o",
+        "\u0440": "p",
+        "\u0441": "c",
+        "\u0443": "y",
+        "\u0445": "x",
+        "\u0456": "i",
         # Cyrillic uppercase lookalikes
-        '\u0410': 'a', '\u0412': 'b', '\u0415': 'e', '\u041a': 'k', '\u041c': 'm', '\u041d': 'h', '\u041e': 'o', '\u0420': 'p', '\u0421': 'c', '\u0422': 't', '\u0425': 'x',
+        "\u0410": "a",
+        "\u0412": "b",
+        "\u0415": "e",
+        "\u041a": "k",
+        "\u041c": "m",
+        "\u041d": "h",
+        "\u041e": "o",
+        "\u0420": "p",
+        "\u0421": "c",
+        "\u0422": "t",
+        "\u0425": "x",
         # Greek lowercase lookalikes
-        '\u03b1': 'a', '\u03b2': 'b', '\u03b3': 'g', '\u03b5': 'e', '\u03b9': 'i', '\u03ba': 'k', '\u03bd': 'v', '\u03bf': 'o', '\u03c1': 'p', '\u03c4': 't', '\u03c5': 'u', '\u03c7': 'x', '\u03c9': 'w',
+        "\u03b1": "a",
+        "\u03b2": "b",
+        "\u03b3": "g",
+        "\u03b5": "e",
+        "\u03b9": "i",
+        "\u03ba": "k",
+        "\u03bd": "v",
+        "\u03bf": "o",
+        "\u03c1": "p",
+        "\u03c4": "t",
+        "\u03c5": "u",
+        "\u03c7": "x",
+        "\u03c9": "w",
         # Greek uppercase lookalikes
-        '\u0391': 'a', '\u0392': 'b', '\u0395': 'e', '\u0397': 'h', '\u0399': 'i', '\u039a': 'k', '\u039c': 'm', '\u039d': 'n', '\u039f': 'o', '\u03a1': 'p', '\u03a4': 't', '\u03a5': 'y', '\u03a6': 'f', '\u03a7': 'x'
+        "\u0391": "a",
+        "\u0392": "b",
+        "\u0395": "e",
+        "\u0397": "h",
+        "\u0399": "i",
+        "\u039a": "k",
+        "\u039c": "m",
+        "\u039d": "n",
+        "\u039f": "o",
+        "\u03a1": "p",
+        "\u03a4": "t",
+        "\u03a5": "y",
+        "\u03a6": "f",
+        "\u03a7": "x",
     }
 
     def _translate_homoglyphs(text: str) -> str:
@@ -384,26 +440,26 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
                 logger.debug("Failed URL layer extraction: %s", e)
 
         # Hex / Binary peel (optimizado longitud minima >= 10)
-        hex_pattern = re.compile(r'(?:0x)?([0-9a-fA-F]{10,})')
+        hex_pattern = re.compile(r"(?:0x)?([0-9a-fA-F]{10,})")
         for match in hex_pattern.finditer(raw_text):
             hex_str = match.group(1)
             if len(hex_str) % 2 == 0:
                 try:
-                    decoded_hex = bytes.fromhex(hex_str).decode('utf-8', errors='ignore')
+                    decoded_hex = bytes.fromhex(hex_str).decode("utf-8", errors="ignore")
                     if decoded_hex and any(c.isalnum() for c in decoded_hex):
                         layers.update(_extract_text_layers(decoded_hex, depth + 1))
                 except Exception as e:
                     logger.debug("Failed HEX layer extraction: %s", e)
 
         # Base64 peel
-        b64_pattern = re.compile(r'\b[a-zA-Z0-9+/]{8,}=*\b')
+        b64_pattern = re.compile(r"\b[a-zA-Z0-9+/]{8,}=*\b")
         for match in b64_pattern.finditer(raw_text):
             b64_str = match.group(0)
             try:
                 missing_padding = len(b64_str) % 4
                 if missing_padding:
-                    b64_str += '=' * (4 - missing_padding)
-                decoded_b64 = base64.b64decode(b64_str).decode('utf-8', errors='ignore')
+                    b64_str += "=" * (4 - missing_padding)
+                decoded_b64 = base64.b64decode(b64_str).decode("utf-8", errors="ignore")
                 if decoded_b64 and any(c.isalnum() for c in decoded_b64):
                     layers.update(_extract_text_layers(decoded_b64, depth + 1))
             except Exception as e:
@@ -437,9 +493,11 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
                 break
             else:
                 # Check for co-occurrence in proximity
-                if re.search(rf"\b{p_b}\b.*?\b{p_f}\b", normalized_content) or \
-                   re.search(rf"\b{p_f}\b.*?\b{p_a}\b", normalized_content) or \
-                   re.search(rf"\b{p_b}\b.*?\b{p_a}\b", normalized_content):
+                if (
+                    re.search(rf"\b{p_b}\b.*?\b{p_f}\b", normalized_content)
+                    or re.search(rf"\b{p_f}\b.*?\b{p_a}\b", normalized_content)
+                    or re.search(rf"\b{p_b}\b.*?\b{p_a}\b", normalized_content)
+                ):
                     pii_leak = True
                     break
 
@@ -458,6 +516,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
 
     # -- OWASP Memory Firewall (SAGA-1.5) --
     from babylon60.security.memory_firewall import MemoryFirewall
+
     try:
         _, risk_level, _ = MemoryFirewall.screen_content(content)
     except ValueError as fw_err:
@@ -468,6 +527,7 @@ async def enforce_taint_check(conn, token: str | None, content: str) -> None:
         data = json.loads(content)
         if isinstance(data, dict) and "Email" in data and "Emails opened (6mo)" in data:
             from babylon60.guards.substack_crawler_guard import SubstackCrawlerGuard
+
             try:
                 SubstackCrawlerGuard().enforce_saga_contract(data)
             except ValueError as guard_err:
@@ -486,18 +546,18 @@ def check_anergy_and_green_theater(content: str) -> None:
     """[LEA-OMEGA] Validates content against Axiom Ω₁₃ (Exergy) and Ω₄ (Landauer).
     Rejects stochastic promises and Green Theater."""
     import os
+
     if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
         return
 
     from babylon60.guards.exergy_guard import ExergyGuard, LandauerGuard
+
     try:
         is_sacred = "axiom" in content.lower() or "sacred" in content.lower()
         ExergyGuard().check_thermodynamic_yield(content, project="SYS_ROOT", fact_type="thought")
         LandauerGuard().check_landauer_limit(content, is_sacred=is_sacred)
     except ValueError as exergy_err:
         raise TaintValidationError(f"SAGA-1 Rejection by Thermodynamic Guard: {exergy_err}")
-
-
 
 
 # =====================================================================

@@ -14,7 +14,7 @@ from babylon60.extensions.ui_control.models import InteractionResult, Point
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.ui_control.mouse")
+logger = logging.getLogger("babylon60_extensions.ui_control.mouse")
 
 # ─── Constantes ──────────────────────────────────────────────────
 HUMAN_CLICK_DELAY = 0.1  # Segundos entre down/up

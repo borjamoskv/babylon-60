@@ -16,7 +16,7 @@ import threading
 from collections.abc import Iterator, Sequence
 from typing import Any
 
-logger = logging.getLogger("cortex.database.sovereign_db")
+logger = logging.getLogger("babylon60.database.sovereign_db")
 
 # Import the unpatched connect function to bypass runtime connect block
 try:

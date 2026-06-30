@@ -19,7 +19,7 @@ from babylon60.storage.classifier import (
 
 __all__ = ["PrivacyMixin"]
 
-logger = logging.getLogger("cortex.privacy")
+logger = logging.getLogger("babylon60.privacy")
 
 
 class PrivacyMixin(EngineMixinBase):

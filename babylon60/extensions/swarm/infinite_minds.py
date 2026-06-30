@@ -29,7 +29,7 @@ class ConvergenceDiagnostics(TypedDict, total=False):
 
 __all__ = ["AgentMind", "InfiniteMindsManager"]
 
-logger = logging.getLogger("cortex_extensions.swarm.infinite_minds")
+logger = logging.getLogger("babylon60_extensions.swarm.infinite_minds")
 
 
 class AgentMind:

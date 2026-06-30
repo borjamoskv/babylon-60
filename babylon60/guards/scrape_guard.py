@@ -17,7 +17,7 @@ import logging
 import re
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.guards.scrape_guard")
+logger = logging.getLogger("babylon60.guards.scrape_guard")
 
 # O(1) Exergy limits
 MAX_RAW_PAGE_SIZE = 150_000  # Chars limit to prevent Memory DoS

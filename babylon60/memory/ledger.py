@@ -35,7 +35,7 @@ except ImportError:
 
 __all__ = ["EventLedgerL3"]
 
-logger = logging.getLogger("cortex.memory.ledger")
+logger = logging.getLogger("babylon60.memory.ledger")
 
 _CREATE_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS memory_events (

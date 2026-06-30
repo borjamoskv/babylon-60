@@ -28,11 +28,13 @@ class RunStatistics:
     p90: float
     samples: int
 
+
 @dataclass
 class DegradationDataPoint:
     stimulus_level: float
     capacity_score: float
     policy_score: float
+
 
 class ExperimentalProfiler:
     def __init__(self, api_caller_fn, embedding_provider=None):
@@ -60,10 +62,7 @@ class ExperimentalProfiler:
         return -sum((c / total) * math.log2(c / total) for c in counts.values())
 
     def run_statistical_trial(
-        self, 
-        prompt: str, 
-        confusion_params: dict[str, Any], 
-        n_runs: int = 5
+        self, prompt: str, confusion_params: dict[str, Any], n_runs: int = 5
     ) -> dict[str, RunStatistics]:
         """
         Executes N runs under identical, strictly controlled confounding variables.
@@ -81,7 +80,7 @@ class ExperimentalProfiler:
             completions.append(tokens)
             lengths.append(len(res_text))
             entropies.append(self.compute_lexical_entropy(res_text))
-            
+
             if tokens > 0:
                 itls.append(latency / tokens)
             else:
@@ -97,7 +96,7 @@ class ExperimentalProfiler:
                 std_dev=float(np.std(arr)) if len(values) > 1 else 0.0,
                 p50=float(np.percentile(arr, 50)),
                 p90=float(np.percentile(arr, 90)),
-                samples=len(values)
+                samples=len(values),
             )
 
         return {
@@ -111,8 +110,8 @@ class ExperimentalProfiler:
         self,
         base_prompt: str,
         distractor_template: str,
-        steps: list[int], # List of word counts for distractor injection (e.g. [1000, 4000, 16000])
-        confusion_params: dict[str, Any]
+        steps: list[int],  # List of word counts for distractor injection (e.g. [1000, 4000, 16000])
+        confusion_params: dict[str, Any],
     ) -> list[DegradationDataPoint]:
         """
         Injects progressive noise/context length to evaluate the capacity decay curve.
@@ -122,30 +121,32 @@ class ExperimentalProfiler:
             # Generate controlled noise context (lorem-like or randomized text block)
             noise = " ".join(["noise_token"] * word_count)
             full_prompt = f"Context: {noise}\n\nTask: {base_prompt}"
-            
+
             res_text, latency, tokens = self.api_caller(full_prompt, confusion_params)
-            
+
             # Simple capacity calculation: presence of target terms or structural consistency
             # In a real run, this would be compared against ground truth
             capacity_score = 1.0 if len(res_text) > 0 and "refusal" not in res_text.lower() else 0.0
-            
+
             # Policy score: verbose alerts, warnings or apologetic overhead
             policy_score = 0.0
             if any(term in res_text.lower() for term in ["sorry", "apologize", "as an ai"]):
                 policy_score = 1.0
 
-            curve.append(DegradationDataPoint(
-                stimulus_level=float(word_count),
-                capacity_score=capacity_score,
-                policy_score=policy_score
-            ))
+            curve.append(
+                DegradationDataPoint(
+                    stimulus_level=float(word_count),
+                    capacity_score=capacity_score,
+                    policy_score=policy_score,
+                )
+            )
         return curve
 
     def generate_constraint_saturation_curve(
         self,
         base_prompt: str,
-        constraints: list[str], # Cumulative constraints
-        confusion_params: dict[str, Any]
+        constraints: list[str],  # Cumulative constraints
+        confusion_params: dict[str, Any],
     ) -> list[DegradationDataPoint]:
         """
         Measures performance as constraints scale from 1 to M.
@@ -156,22 +157,25 @@ class ExperimentalProfiler:
             cumulative_constraints.append(constraint)
             constraint_block = "\n".join(f"- {c}" for c in cumulative_constraints)
             full_prompt = f"{base_prompt}\nConstraints:\n{constraint_block}"
-            
+
             res_text, latency, tokens = self.api_caller(full_prompt, confusion_params)
-            
+
             # Simple validation stub - real harness would parse output formats
-            capacity_score = 1.0 / (i + 1) # Normalized base rate
-            
+            capacity_score = 1.0 / (i + 1)  # Normalized base rate
+
             policy_score = 0.0
             if "warning" in res_text.lower() or "limit" in res_text.lower():
                 policy_score = 1.0
 
-            curve.append(DegradationDataPoint(
-                stimulus_level=float(i + 1),
-                capacity_score=capacity_score,
-                policy_score=policy_score
-            ))
+            curve.append(
+                DegradationDataPoint(
+                    stimulus_level=float(i + 1),
+                    capacity_score=capacity_score,
+                    policy_score=policy_score,
+                )
+            )
         return curve
+
 
 # Global import check helper
 import re

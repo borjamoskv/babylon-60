@@ -24,7 +24,7 @@ from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.semantic_hash")
+logger = logging.getLogger("babylon60.semantic_hash")
 
 __all__ = [
     "SemanticFingerprint",

@@ -23,7 +23,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Final
 
-logger = logging.getLogger("cortex.memory.nrem_cycle")
+logger = logging.getLogger("babylon60.memory.nrem_cycle")
 
 __all__ = ["NREMConsolidationCycle", "NREMReport"]
 

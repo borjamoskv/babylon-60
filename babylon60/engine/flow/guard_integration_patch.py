@@ -2,7 +2,7 @@
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.engine.guards")
+logger = logging.getLogger("babylon60.engine.guards")
 
 
 async def enforce_store_guards(

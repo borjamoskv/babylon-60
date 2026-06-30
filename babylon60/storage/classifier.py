@@ -23,7 +23,7 @@ __all__ = [
     "detect_correlation_signals",
 ]
 
-logger = logging.getLogger("cortex.storage.classifier")
+logger = logging.getLogger("babylon60.storage.classifier")
 
 # ── Correlation Patterns ──────────────────────────────────────────────
 CORRELATION_PATTERNS: Final[dict[str, str]] = {

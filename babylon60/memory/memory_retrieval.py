@@ -22,7 +22,7 @@ __all__ = [
     "retrieve_episodic_context",
 ]
 
-logger = logging.getLogger("cortex.memory.retrieval")
+logger = logging.getLogger("babylon60.memory.retrieval")
 
 
 class KnowledgeGapException(Exception):

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 from babylon60.extensions.langbase.client import LangbaseError
 
-logger = logging.getLogger("cortex_extensions.langbase.sync")
+logger = logging.getLogger("babylon60_extensions.langbase.sync")
 
 
 def _fact_to_markdown(fact: dict) -> str:

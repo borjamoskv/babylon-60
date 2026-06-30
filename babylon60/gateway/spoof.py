@@ -18,7 +18,7 @@ from typing import Any
 from babylon60.extensions.llm.router import CortexPrompt, IntentProfile
 from babylon60.gateway.shield import APIShield
 
-logger = logging.getLogger("cortex.gateway.spoof")
+logger = logging.getLogger("babylon60.gateway.spoof")
 
 _RULES_PATH = Path(__file__).parent.parent.parent / "config" / "spoof_rules.json"
 

@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from babylon60.extensions.llm._telemetry import CascadeTelemetry
     from babylon60.utils.result import Result
 
-logger = logging.getLogger("cortex_extensions.llm._router_hedging")
+logger = logging.getLogger("babylon60_extensions.llm._router_hedging")
 
 
 async def execute_hedged(

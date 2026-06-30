@@ -7,7 +7,7 @@ from typing import Any
 
 import aiosqlite
 
-logger = logging.getLogger("cortex.guards.archaeology")
+logger = logging.getLogger("babylon60.guards.archaeology")
 
 
 class ArchaeologyGuard:

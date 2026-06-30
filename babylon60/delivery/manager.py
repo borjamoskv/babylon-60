@@ -14,7 +14,7 @@ from typing import Any
 
 from babylon60.pipeline import DeliveryTarget, DeliveryType
 
-logger = logging.getLogger("cortex.delivery")
+logger = logging.getLogger("babylon60.delivery")
 
 
 class DeliveryManager:

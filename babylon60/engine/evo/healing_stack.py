@@ -35,7 +35,7 @@ from babylon60.engine.self_optimizer import OptimizerConfig, SelfOptimizer
 
 __all__ = ["HealingStack", "HealingStackConfig"]
 
-logger = logging.getLogger("cortex.engine.evo.healing_stack")
+logger = logging.getLogger("babylon60.engine.evo.healing_stack")
 
 
 class HealingStackConfig:

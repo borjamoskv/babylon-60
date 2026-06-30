@@ -29,7 +29,7 @@ from babylon60.sica.strategy import (
     StrategyMutation,
 )
 
-logger = logging.getLogger("cortex.sica.meta_level")
+logger = logging.getLogger("babylon60.sica.meta_level")
 
 
 class FailureClass(str, Enum):

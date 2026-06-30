@@ -47,9 +47,7 @@ class SunoV5Adapter(AudioAdapter):
         )
 
     async def generate(self, prompt_matrix: dict[str, Any]) -> str:
-        logger.info(
-            "Sending parametric matrix to Suno v5 API... BPM: %s", prompt_matrix.get("bpm")
-        )
+        logger.info("Sending parametric matrix to Suno v5 API... BPM: %s", prompt_matrix.get("bpm"))
         # Inject sonic vectors for premium texture
         sonic_v = prompt_matrix.get("sonic_vectors", {})
         enhanced_prompt = prompt_matrix.get("prompt_injection", "")

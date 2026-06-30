@@ -35,7 +35,7 @@ from babylon60.guards.path_guard import is_safe_path
 
 __all__ = ["scan"]
 
-logger = logging.getLogger("cortex_extensions.mejoralo")
+logger = logging.getLogger("babylon60_extensions.mejoralo")
 
 _WEIGHT_MAP = {"critical": 40, "high": 35, "medium": 15, "low": 10}
 

@@ -10,7 +10,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.darknet.ingestor")
+logger = logging.getLogger("babylon60.darknet.ingestor")
 
 
 @dataclass
@@ -63,7 +63,5 @@ class DarknetIngestor:
             ),
         ]
 
-        logger.info(
-            "💎 [OMNISCIENCE] %d reality blocks assimilated and purified.", len(raw_data)
-        )
+        logger.info("💎 [OMNISCIENCE] %d reality blocks assimilated and purified.", len(raw_data))
         return raw_data

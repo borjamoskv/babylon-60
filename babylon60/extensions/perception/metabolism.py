@@ -18,7 +18,7 @@ import time
 # except ImportError:
 PERCEPTION_INTENSITY = 0.5
 
-logger = logging.getLogger("cortex_extensions.perception.metabolism")
+logger = logging.getLogger("babylon60_extensions.perception.metabolism")
 
 
 class MetabolicObserver:

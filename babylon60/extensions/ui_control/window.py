@@ -17,7 +17,7 @@ from babylon60.extensions.ui_control.models import AppTarget, InteractionResult,
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.ui_control.window")
+logger = logging.getLogger("babylon60_extensions.ui_control.window")
 
 
 class WindowEngine:

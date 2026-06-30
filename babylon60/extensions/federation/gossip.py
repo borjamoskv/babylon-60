@@ -18,7 +18,7 @@ from typing import Any
 
 from babylon60.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
 
-logger = logging.getLogger("cortex.federation.gossip")
+logger = logging.getLogger("babylon60.federation.gossip")
 
 
 class GossipProtocol(asyncio.DatagramProtocol):

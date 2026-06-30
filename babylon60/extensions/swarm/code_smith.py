@@ -18,7 +18,7 @@ from typing import Any, Protocol
 
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex_extensions.swarm.code_smith")
+logger = logging.getLogger("babylon60_extensions.swarm.code_smith")
 
 
 # ── Constants ──────────────────────────────────────────────────────────────

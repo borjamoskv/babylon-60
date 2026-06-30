@@ -15,7 +15,7 @@ from babylon60.database.core import connect_async_ctx
 
 __all__ = ["SnapshotManager", "SnapshotRecord"]
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 def _write_snapshot_meta(meta_path: Path, record: dict) -> None:

@@ -33,7 +33,7 @@ from babylon60.extensions.llm.quota import SovereignQuotaManager
 
 __all__ = ["LLMProvider"]
 
-logger = logging.getLogger("cortex_extensions.llm")
+logger = logging.getLogger("babylon60_extensions.llm")
 
 _QUOTA_MANAGER: SovereignQuotaManager | None = None
 _RESULT_CACHE: ResultCache | None = None
@@ -42,11 +42,16 @@ _HUD: Console | None = None
 
 def _get_provider_color(provider: str) -> str:
     p = provider.lower()
-    if "gemini" in p: return "#1A73E8"
-    if "claude" in p or "anthropic" in p: return "#D97757"
-    if "ollama" in p or "mlx" in p: return "#FF3333"
-    if "openai" in p or "o1" in p or "o3" in p: return "#10A37F"
-    if "minimax" in p: return "#9C27B0"
+    if "gemini" in p:
+        return "#1A73E8"
+    if "claude" in p or "anthropic" in p:
+        return "#D97757"
+    if "ollama" in p or "mlx" in p:
+        return "#FF3333"
+    if "openai" in p or "o1" in p or "o3" in p:
+        return "#10A37F"
+    if "minimax" in p:
+        return "#9C27B0"
     return "#FFFFFF"
 
 
@@ -105,7 +110,9 @@ class LLMProvider(BaseProvider):
         )
 
         is_hybrid_bft = os.environ.get("CORTEX_HYBRID_BFT") == "1"
-        is_subagent = os.environ.get("CORTEX_SUBAGENT") == "1" or os.environ.get("CORTEX_DAEMON") == "1"
+        is_subagent = (
+            os.environ.get("CORTEX_SUBAGENT") == "1" or os.environ.get("CORTEX_DAEMON") == "1"
+        )
 
         if is_external and "localhost" not in prov_url and "127.0.0.1" not in prov_url:
             if is_hybrid_bft and prov_name == "gemini" and not is_subagent:
@@ -218,7 +225,9 @@ class LLMProvider(BaseProvider):
             return cached
 
         if os.environ.get("CORTEX_LIVE_ROUTING") == "1":
-            _get_hud().print(f"[bold magenta]⚡ COGNITIVE ROUTING[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{intent.value}[/green]")
+            _get_hud().print(
+                f"[bold magenta]⚡ COGNITIVE ROUTING[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{intent.value}[/green]"
+            )
 
         await self._acquire_quota()
         url, headers = self._prepare_request()
@@ -317,6 +326,7 @@ class LLMProvider(BaseProvider):
         color = _get_provider_color(self._provider)
         try:
             from babylon60.routes.notch_ws import notify_notch_halo
+
             asyncio.create_task(notify_notch_halo(color, True))
         except Exception:
             pass
@@ -339,6 +349,7 @@ class LLMProvider(BaseProvider):
         finally:
             try:
                 from babylon60.routes.notch_ws import notify_notch_halo
+
                 asyncio.create_task(notify_notch_halo(color, False))
             except Exception:
                 pass
@@ -368,7 +379,9 @@ class LLMProvider(BaseProvider):
         model_name = self._resolve_model(intent)
 
         if os.environ.get("CORTEX_LIVE_ROUTING") == "1":
-            _get_hud().print(f"[bold magenta]⚡ COGNITIVE STREAM[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{intent.value}[/green]")
+            _get_hud().print(
+                f"[bold magenta]⚡ COGNITIVE STREAM[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{intent.value}[/green]"
+            )
 
         payload = {
             "model": model_name,
@@ -388,6 +401,7 @@ class LLMProvider(BaseProvider):
         color = _get_provider_color(self._provider)
         try:
             from babylon60.routes.notch_ws import notify_notch_halo
+
             asyncio.create_task(notify_notch_halo(color, True))
         except Exception:
             pass
@@ -406,6 +420,7 @@ class LLMProvider(BaseProvider):
         finally:
             try:
                 from babylon60.routes.notch_ws import notify_notch_halo
+
                 asyncio.create_task(notify_notch_halo(color, False))
             except Exception:
                 pass
@@ -497,7 +512,9 @@ class LLMProvider(BaseProvider):
             return cached
 
         if os.environ.get("CORTEX_LIVE_ROUTING") == "1":
-            _get_hud().print(f"[bold magenta]⚡ COGNITIVE ROUTING[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{prompt.intent.value}[/green]")
+            _get_hud().print(
+                f"[bold magenta]⚡ COGNITIVE ROUTING[/bold magenta] [dim]➜[/dim] Provider: [bold cyan]{self._provider.upper()}[/bold cyan] | Weights: [bold yellow]{model_name}[/bold yellow] | Intent: [green]{prompt.intent.value}[/green]"
+            )
 
         await self._acquire_quota()
         url, headers = self._prepare_request()

@@ -28,7 +28,7 @@ from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 __all__ = ["DriftMonitor", "DriftSignature"]
 
-logger = logging.getLogger("cortex.memory.drift")
+logger = logging.getLogger("babylon60.memory.drift")
 
 
 # ─── Stability Strata ────────────────────────────────────────────────

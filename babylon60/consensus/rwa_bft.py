@@ -37,7 +37,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
 
-logger = logging.getLogger("cortex.consensus.rwa_bft")
+logger = logging.getLogger("babylon60.consensus.rwa_bft")
 
 __all__ = [
     "AgentVote",

@@ -29,7 +29,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Final
 
-logger = logging.getLogger("cortex.memory.stdp")
+logger = logging.getLogger("babylon60.memory.stdp")
 
 __all__ = ["STDPEngine", "SynapticEdge"]
 

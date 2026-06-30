@@ -25,9 +25,31 @@ PUBLIC_EXPORT_MANIFEST_VERSION = "cortex-forensic-export-manifest-v1"
 KEY_REGISTRY_VERSION = "cortex-key-registry-v1"
 EVENT_SCHEMA_VERSION = "cortex-ledger-event-schema-v1"
 VERIFICATION_PROFILE_VERSION = "cortex-verification-profile-v1"
-LEGACY_LIMITATIONS = ("legacy_v0_integrity_only", "origin_authenticity_not_verified", "manifest_completeness_not_available")
-PUBLIC_EXPORT_FILES = frozenset({"events.jsonl", "key-events.jsonl", "manifest.json", "public-keys.json", "schema.json", "verification-profile.json", "verification-report.json", "checkpoints.jsonl"})
-FORBIDDEN_EXPORT_TOKENS = ("private_key", "seed_hex", "begin private key", "api_key", "secret_key", "password")
+LEGACY_LIMITATIONS = (
+    "legacy_v0_integrity_only",
+    "origin_authenticity_not_verified",
+    "manifest_completeness_not_available",
+)
+PUBLIC_EXPORT_FILES = frozenset(
+    {
+        "events.jsonl",
+        "key-events.jsonl",
+        "manifest.json",
+        "public-keys.json",
+        "schema.json",
+        "verification-profile.json",
+        "verification-report.json",
+        "checkpoints.jsonl",
+    }
+)
+FORBIDDEN_EXPORT_TOKENS = (
+    "private_key",
+    "seed_hex",
+    "begin private key",
+    "api_key",
+    "secret_key",
+    "password",
+)
 EXECUTABLE_SUFFIXES = (".bat", ".cmd", ".exe", ".js", ".mjs", ".py", ".sh")
 
 

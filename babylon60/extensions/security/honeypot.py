@@ -20,7 +20,7 @@ from typing import Any
 
 from babylon60.utils.canonical import compute_fact_hash
 
-logger = logging.getLogger("cortex_extensions.security.honeypot")
+logger = logging.getLogger("babylon60_extensions.security.honeypot")
 
 __all__ = ["DecoyFact", "HoneypotManager"]
 

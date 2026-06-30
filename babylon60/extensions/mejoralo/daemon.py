@@ -26,7 +26,7 @@ from babylon60.extensions.mejoralo.engine import MejoraloEngine
 from babylon60.extensions.thinking.fusion import ContextFusion
 from babylon60.telemetry.metrics import MetricsRegistry
 
-logger = logging.getLogger("cortex_extensions.mejoralo.daemon")
+logger = logging.getLogger("babylon60_extensions.mejoralo.daemon")
 
 STAGNATION_ESCALATION_THRESHOLD = 3
 

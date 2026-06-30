@@ -19,7 +19,9 @@ class _DummyEngine:
         return None
 
     async def store(self, **_: object) -> int:
-        self.no_embed_during_store.append(os.environ.get("MOSKV_NO_EMBED") or os.environ.get("CORTEX_NO_EMBED"))
+        self.no_embed_during_store.append(
+            os.environ.get("MOSKV_NO_EMBED") or os.environ.get("CORTEX_NO_EMBED")
+        )
         return 1
 
     async def close(self) -> None:

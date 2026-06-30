@@ -10,11 +10,14 @@ import logging
 import re
 import unicodedata
 
-logger = logging.getLogger("cortex.guards.semantic_leak")
+logger = logging.getLogger("babylon60.guards.semantic_leak")
+
 
 class SemanticLeakViolationError(Exception):
     """Raised when a semantic containment policy is violated."""
+
     pass
+
 
 class SemanticLeakGuard:
     """
@@ -24,8 +27,13 @@ class SemanticLeakGuard:
 
     # Protected metatada items that MUST NOT leak
     PROTECTED_ENTITIES = {
-        "model_id", "provider", "architecture", "version", 
-        "tokenizer", "system_prompt", "deployment_id"
+        "model_id",
+        "provider",
+        "architecture",
+        "version",
+        "tokenizer",
+        "system_prompt",
+        "deployment_id",
     }
 
     # Common strings associated with protected metadata to redact/block
@@ -40,7 +48,15 @@ class SemanticLeakGuard:
 
     # Literal strings for canonical leak detection
     CANONICAL_TARGETS = [
-        "gpt3", "gpt4", "gpt5", "claude3", "claude4", "qwen", "deepseek", "cortexpersist", "babylon60"
+        "gpt3",
+        "gpt4",
+        "gpt5",
+        "claude3",
+        "claude4",
+        "qwen",
+        "deepseek",
+        "cortexpersist",
+        "babylon60",
     ]
 
     @classmethod
@@ -53,17 +69,17 @@ class SemanticLeakGuard:
         """
         # 1. Lowercase
         normalized = text.lower()
-        
+
         # 2. Unicode normalization (decompose)
         normalized = unicodedata.normalize("NFKD", normalized)
-        
+
         # 3. Strip combining characters (accents)
         normalized = "".join(c for c in normalized if not unicodedata.combining(c))
-        
+
         # 4. Collapse whitespace and non-alphanumeric separators
         normalized = re.sub(r"[^\w\s]", "", normalized)
         normalized = re.sub(r"\s+", "", normalized)
-        
+
         return normalized
 
     @classmethod
@@ -73,8 +89,15 @@ class SemanticLeakGuard:
         Returns True if intent is malicious/reconnaissance.
         """
         canon_prompt = cls.canonicalize(prompt)
-        recon_keywords = ["whichmodel", "whoareyou", "systemprompt", "whatisyourarchitecture", "deploymentid", "version"]
-        
+        recon_keywords = [
+            "whichmodel",
+            "whoareyou",
+            "systemprompt",
+            "whatisyourarchitecture",
+            "deploymentid",
+            "version",
+        ]
+
         for kw in recon_keywords:
             if kw in canon_prompt:
                 return True
@@ -97,10 +120,12 @@ class SemanticLeakGuard:
         Raises SemanticLeakViolationError if leak is detected, otherwise returns redacted text.
         """
         canonicalized = cls.canonicalize(raw_output)
-        
+
         for entity in cls.CANONICAL_TARGETS:
             if entity in canonicalized:
-                logger.error(f"[P0] SemanticLeakGuard: Covert semantic leakage detected for {entity}")
+                logger.error(
+                    f"[P0] SemanticLeakGuard: Covert semantic leakage detected for {entity}"
+                )
                 raise SemanticLeakViolationError(
                     "Semantic Containment Breach: Output contains protected metadata under transformation."
                 )

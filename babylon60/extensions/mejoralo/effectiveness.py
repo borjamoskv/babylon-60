@@ -18,7 +18,7 @@ from babylon60.extensions.mejoralo.ledger import get_history
 
 __all__ = ["EffectivenessTracker", "TrendReport"]
 
-logger = logging.getLogger("cortex_extensions.mejoralo.effectiveness")
+logger = logging.getLogger("babylon60_extensions.mejoralo.effectiveness")
 
 _MIN_SESSIONS_FOR_TREND = 3
 _STAGNATION_WINDOW = 5

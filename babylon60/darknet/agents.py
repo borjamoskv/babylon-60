@@ -14,7 +14,7 @@ from babylon60.darknet.ingestor import RawWorldData
 from babylon60.darknet.social_ledger import DarknetPost
 from babylon60.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 
-logger = logging.getLogger("cortex.darknet.agents")
+logger = logging.getLogger("babylon60.darknet.agents")
 
 
 class DarknetAgent:

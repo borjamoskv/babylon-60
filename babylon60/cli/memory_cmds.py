@@ -41,7 +41,9 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
             pass
 
     if not priv_b64:
-        priv_b64 = os.environ.get("MOSKV_ED25519_PRIVATE_KEY", os.environ.get("CORTEX_ED25519_PRIVATE_KEY"))
+        priv_b64 = os.environ.get(
+            "MOSKV_ED25519_PRIVATE_KEY", os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
+        )
 
     if priv_b64:
         from babylon60.engine.causal.taint_engine import generate_secure_taint_token
@@ -193,6 +195,7 @@ def store_batch(file_path, db) -> None:
 
     engine = get_engine(db)
     import os
+
     actor_id = os.environ.get("MOSKV_ACTOR_ID", os.environ.get("CORTEX_ACTOR_ID", "borjamoskv"))
 
     async def _run_batch() -> int:
@@ -201,7 +204,9 @@ def store_batch(file_path, db) -> None:
             project = fact.get("project")
             content = fact.get("content")
             if not project or not content:
-                console.print(f"[yellow]Skipping fact at index {idx}: missing project or content[/]")
+                console.print(
+                    f"[yellow]Skipping fact at index {idx}: missing project or content[/]"
+                )
                 continue
 
             fact_type = fact.get("fact_type", fact.get("type", "knowledge"))
@@ -228,7 +233,9 @@ def store_batch(file_path, db) -> None:
                 actor_id=actor_id,
             )
             stored += 1
-            console.print(f"[[noir.cyber]✓[/]] Stored fact [[noir.gold]#{fact_id}[/]] in [[noir.yinmn]{project}[/]]")
+            console.print(
+                f"[[noir.cyber]✓[/]] Stored fact [[noir.gold]#{fact_id}[/]] in [[noir.yinmn]{project}[/]]"
+            )
         return stored
 
     try:

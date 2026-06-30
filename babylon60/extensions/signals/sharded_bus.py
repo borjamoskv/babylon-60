@@ -21,7 +21,7 @@ from babylon60.extensions.signals.bus import _CREATE_INDEXES, _CREATE_TABLE, _bu
 from babylon60.extensions.signals.models import Signal, signal_from_row
 from babylon60.guards.url_guard import SafeTransport
 
-logger = logging.getLogger("cortex_extensions.signals.sharded_bus")
+logger = logging.getLogger("babylon60_extensions.signals.sharded_bus")
 
 NUM_SHARDS = getattr(config, "SWARM_SHARD_COUNT", 16)
 

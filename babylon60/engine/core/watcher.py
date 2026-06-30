@@ -16,7 +16,7 @@ from babylon60.extensions.nexus.types import DomainOrigin, IntentType, WorldMuta
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine as AsyncCortexEngine
 
-logger = logging.getLogger("cortex.watcher")
+logger = logging.getLogger("babylon60.watcher")
 
 
 class GhostWatcher:

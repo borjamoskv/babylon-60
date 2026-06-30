@@ -35,7 +35,7 @@ from fastapi.responses import JSONResponse
 
 from babylon60.gateway import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
 
-logger = logging.getLogger("cortex.gateway.telegram")
+logger = logging.getLogger("babylon60.gateway.telegram")
 
 router = APIRouter(prefix="/gateway/telegram", tags=["gateway:telegram"])
 

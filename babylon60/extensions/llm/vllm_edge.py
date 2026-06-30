@@ -22,7 +22,7 @@ from babylon60.engine.core.context_cache import ContextCacheManager
 from babylon60.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from babylon60.extensions.llm._result_cache import ResultCache
 
-logger = logging.getLogger("cortex_extensions.llm.vllm_edge")
+logger = logging.getLogger("babylon60_extensions.llm.vllm_edge")
 
 _RESULT_CACHE: ResultCache | None = None
 
@@ -234,9 +234,7 @@ class NativeVLLMProvider(BaseProvider):
         """Stream output natively directly from vLLM AsyncEngine."""
         from vllm import SamplingParams  # pyright: ignore[reportMissingImports]
 
-        request_id = cortex_hash(f"str_{time.monotonic()}_{prompt[:20]}".encode())[
-            :16
-        ]
+        request_id = cortex_hash(f"str_{time.monotonic()}_{prompt[:20]}".encode())[:16]
 
         sp = SamplingParams(
             temperature=temperature,

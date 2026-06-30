@@ -55,7 +55,7 @@ from io import StringIO
 
 __all__ = ["ASTSandbox", "ExecResult", "SandboxVerdict"]
 
-logger = logging.getLogger("cortex.sandbox")
+logger = logging.getLogger("babylon60.sandbox")
 
 
 # ─── AST Whitelist ───────────────────────────────────────────────────

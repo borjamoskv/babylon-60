@@ -14,7 +14,7 @@ import logging
 from collections.abc import Callable, Coroutine
 from typing import Any
 
-logger = logging.getLogger("cortex.events.bus")
+logger = logging.getLogger("babylon60.events.bus")
 
 
 class DistributedEventBus:

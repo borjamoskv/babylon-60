@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 import aiohttp
 
-logger = logging.getLogger("cortex.evm.topography")
+logger = logging.getLogger("babylon60.evm.topography")
 
 
 @dataclass

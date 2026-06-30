@@ -16,7 +16,7 @@ from babylon60.engine import CortexEngine
 from babylon60.extensions.llm.router import IntentProfile  # type: ignore
 from babylon60.extensions.llm.sovereign import SovereignLLM
 
-logger = logging.getLogger("cortex.audit.frontier")
+logger = logging.getLogger("babylon60.audit.frontier")
 
 _TOM_PROMPT = """Eres TOM (El Cuchillo) - CORTEX AUDIT.
 Tu único objetivo es diseccionar el código y arquitectura provistos buscando vulnerabilidades críticas,

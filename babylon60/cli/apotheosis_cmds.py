@@ -181,8 +181,7 @@ def nirvana_cmd(target_path: str) -> None:
 
     console.print(
         Panel(
-            f"[bold #f72585]APOTHEOSIS-NIRVANA[/]\n"
-            f"Opening event horizon at: {path_resolved.name}",
+            f"[bold #f72585]APOTHEOSIS-NIRVANA[/]\nOpening event horizon at: {path_resolved.name}",
             border_style="#f72585",
         )
     )
@@ -192,7 +191,9 @@ def nirvana_cmd(target_path: str) -> None:
         TextColumn(PROGRESS_DESC_FMT),
         transient=False,
     ) as progress:
-        t_id = progress.add_task("[bold #f72585]Executing aggressive ruff autofix...[/]", total=None)
+        t_id = progress.add_task(
+            "[bold #f72585]Executing aggressive ruff autofix...[/]", total=None
+        )
 
         # Real: Aggressive ruff fix
         subprocess.run(

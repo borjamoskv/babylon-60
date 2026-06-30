@@ -21,7 +21,7 @@ from babylon60.storage.qdrant import VectorBackend
 
 __all__ = ["TurbopufferVectorBackend"]
 
-logger = logging.getLogger("cortex.storage.turbopuffer")
+logger = logging.getLogger("babylon60.storage.turbopuffer")
 
 VECTOR_DIM: Final[int] = 384
 COLLECTION_PREFIX: Final[str] = "cortex_"

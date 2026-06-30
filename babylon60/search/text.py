@@ -21,7 +21,7 @@ from babylon60.storage import StorageMode, get_storage_mode
 
 __all__ = ["text_search", "text_search_sync"]
 
-logger = logging.getLogger("cortex.search.text")
+logger = logging.getLogger("babylon60.search.text")
 
 _PROJECT_FILTER = " AND f.project = ?"
 

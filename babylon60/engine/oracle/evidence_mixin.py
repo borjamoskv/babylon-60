@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from babylon60.services.trust import TrustService
 
-logger = logging.getLogger("cortex.oracle.evidence")
+logger = logging.getLogger("babylon60.oracle.evidence")
 
 
 class EvidenceMixin:

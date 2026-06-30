@@ -28,7 +28,7 @@ class QuotaRejectedError(Exception):
     """Raised when PULMONES fast-rejects or times out."""
 
 
-logger = logging.getLogger("cortex_extensions.llm.quota")
+logger = logging.getLogger("babylon60_extensions.llm.quota")
 
 # Module-level CSPRNG - avoid recreating per-iteration (~0.5ms saved/call)
 _RNG = secrets.SystemRandom()

@@ -22,7 +22,7 @@ from .models import ActionLevel, ActionStatus, GatePolicy, PendingAction
 
 __all__ = ["SovereignGate", "get_gate", "reset_gate"]
 
-logger = logging.getLogger("cortex_extensions.gate")
+logger = logging.getLogger("babylon60_extensions.gate")
 _gate_instance: Optional["SovereignGate"] = None
 _gate_lock = threading.Lock()
 

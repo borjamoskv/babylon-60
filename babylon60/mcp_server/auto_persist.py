@@ -16,7 +16,7 @@ from typing import Any
 
 __all__ = ["AutoPersistHook", "SessionFact"]
 
-logger = logging.getLogger("cortex.mcp_server.auto_persist")
+logger = logging.getLogger("babylon60.mcp_server.auto_persist")
 
 
 class SessionFact:

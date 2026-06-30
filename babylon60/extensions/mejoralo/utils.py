@@ -15,7 +15,7 @@ __all__ = [
     "run_quiet",
 ]
 
-logger = logging.getLogger("cortex_extensions.mejoralo.utils")
+logger = logging.getLogger("babylon60_extensions.mejoralo.utils")
 
 
 def detect_stack(path: str | Path) -> str:

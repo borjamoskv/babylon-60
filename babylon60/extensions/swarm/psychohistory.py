@@ -6,7 +6,7 @@ from typing import Any
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 from babylon60.extensions.llm._models import CortexPrompt, IntentProfile
 
-logger = logging.getLogger("cortex_extensions.swarm.psychohistory")
+logger = logging.getLogger("babylon60_extensions.swarm.psychohistory")
 
 DOMAINS = [
     "Economics",

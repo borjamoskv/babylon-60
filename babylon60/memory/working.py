@@ -33,7 +33,7 @@ except ImportError:
 
 __all__ = ["WorkingMemoryL1"]
 
-logger = logging.getLogger("cortex.memory.working")
+logger = logging.getLogger("babylon60.memory.working")
 
 DEFAULT_MAX_TOKENS: Final[int] = 8192
 # Rolling access history: max 2 048 entries to keep memory footprint bounded (≈48 KB worst-case)

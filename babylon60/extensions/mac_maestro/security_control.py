@@ -10,7 +10,7 @@ import plistlib
 from dataclasses import dataclass
 from pathlib import Path
 
-logger = logging.getLogger("cortex_extensions.mac_maestro.security_control")
+logger = logging.getLogger("babylon60_extensions.mac_maestro.security_control")
 
 __all__ = ["SecurityControl", "SecurityState"]
 

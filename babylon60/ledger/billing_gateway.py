@@ -109,6 +109,7 @@ class BillingIntegrityGateway:
             plan = session.get("metadata", {}).get("plan", "pro")
 
             from decimal import Decimal
+
             amount_usd = Decimal("0.0")
             if plan == "pwyw":
                 try:
@@ -124,6 +125,7 @@ class BillingIntegrityGateway:
                 permissions = ["read", "write"]
             else:
                 from babylon60.routes.stripe import PLAN_CONFIG
+
                 plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])
                 calls_limit = plan_cfg.get("calls_limit", 50000)
                 rate_limit = plan_cfg.get("rate_limit", 300)
@@ -149,10 +151,13 @@ class BillingIntegrityGateway:
                 "rate_limit": rate_limit,
                 "projects_limit": projects_limit,
                 "storage_bytes": storage_bytes,
-                "stripe_subscription_item_id": f"si_{customer_email[-8:]}" if not config.STRIPE_SECRET_KEY else ""
+                "stripe_subscription_item_id": f"si_{customer_email[-8:]}"
+                if not config.STRIPE_SECRET_KEY
+                else "",
             }
 
             from babylon60.database.core import causal_write
+
             async with connect_async_ctx(self.db_path) as conn:
                 with causal_write(conn):
                     await conn.execute(

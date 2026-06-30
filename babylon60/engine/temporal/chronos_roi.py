@@ -19,7 +19,7 @@ import subprocess
 from dataclasses import dataclass
 from typing import Any
 
-logger = logging.getLogger("cortex.chronos")
+logger = logging.getLogger("babylon60.chronos")
 
 __all__ = ["CHRONOS", "ChronosROI", "ChronosReport"]
 

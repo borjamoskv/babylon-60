@@ -12,7 +12,7 @@ import logging
 from dataclasses import dataclass
 from typing import Literal
 
-logger = logging.getLogger("cortex.router.arbitrator")
+logger = logging.getLogger("babylon60.router.arbitrator")
 
 ModelType = Literal["gemini-3.5-flash", "gemini-3.1-pro"]
 

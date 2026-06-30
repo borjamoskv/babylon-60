@@ -17,7 +17,7 @@ from uuid import uuid4
 
 from babylon60.agents.copilot_contracts import CopilotContextPayload
 
-logger = logging.getLogger("cortex.agents.copilot.debounce")
+logger = logging.getLogger("babylon60.agents.copilot.debounce")
 
 
 class DebounceController:

@@ -22,7 +22,7 @@ from babylon60.engine.core.ultrathink_physics import UltrathinkPhysicsEngine
 from babylon60.engine.forensic.slashing import SlashingPenalty
 from babylon60.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
-logger = logging.getLogger("cortex.swarm.swarm_10k")
+logger = logging.getLogger("babylon60.swarm.swarm_10k")
 
 
 @dataclass

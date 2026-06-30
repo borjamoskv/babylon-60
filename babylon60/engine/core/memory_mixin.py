@@ -11,7 +11,7 @@ from babylon60.engine.mixins.base import EngineMixinBase
 
 __all__ = ["MemoryMixin"]
 
-logger = logging.getLogger("cortex.memory")
+logger = logging.getLogger("babylon60.memory")
 
 
 class MemoryMixin(EngineMixinBase):

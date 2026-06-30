@@ -13,7 +13,7 @@ import math
 from dataclasses import dataclass
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.evolution.psi_sap")
+logger = logging.getLogger("babylon60_extensions.evolution.psi_sap")
 
 
 @dataclass

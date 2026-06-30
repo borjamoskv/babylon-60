@@ -20,7 +20,7 @@ from babylon60.extensions.vex.models import PlannedStep, TaskPlan
 
 __all__ = ["Planner", "default_planner"]
 
-logger = logging.getLogger("cortex_extensions.vex")
+logger = logging.getLogger("babylon60_extensions.vex")
 
 
 class PlannerBackend(Protocol):

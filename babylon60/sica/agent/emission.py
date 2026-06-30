@@ -7,7 +7,7 @@ from babylon60.agents.message_schema import AgentMessage, MessageKind, new_messa
 from babylon60.sica.agent.stats import _LifetimeStats
 from babylon60.sica.meta_level import MetaJudgment
 
-logger = logging.getLogger("cortex.sica.agent.emission")
+logger = logging.getLogger("babylon60.sica.agent.emission")
 
 
 class AgentEmitter:

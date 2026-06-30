@@ -28,7 +28,7 @@ __all__ = [
     "summarize_events",
 ]
 
-logger = logging.getLogger("cortex.memory.compression")
+logger = logging.getLogger("babylon60.memory.compression")
 
 
 def raw_concat(events: list[MemoryEvent]) -> str:

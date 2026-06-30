@@ -21,7 +21,7 @@ from babylon60.extensions.aether.tools import AgentToolkit
 
 __all__ = ["RedTeamAgent"]
 
-logger = logging.getLogger("cortex_extensions.aether.redteam")
+logger = logging.getLogger("babylon60_extensions.aether.redteam")
 
 _SYSTEM_PROMPT = """You are Immunitas-Omega Red Team. Your goal is to forge Characterization Tests (Golden Master/Siege tests).
 You are given the CURRENT SOURCE CODE of a Python target before a refactor occurs.

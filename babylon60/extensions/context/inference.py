@@ -22,7 +22,7 @@ __all__ = ["ContextInference"]
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("cortex_extensions.context")
+logger = logging.getLogger("babylon60_extensions.context")
 
 # Confidence thresholds (ratio of top project score to second)
 _CONFIDENCE_MAP = [

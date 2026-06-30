@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.compactor")
+logger = logging.getLogger("babylon60.compactor")
 
 
 _LOG_FMT = "Compactor [%s] %s"

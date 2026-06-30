@@ -10,7 +10,7 @@ import aiosqlite
 from babylon60.database.core import connect
 from babylon60.extensions.signals.bus import AsyncSignalBus, SignalBus
 
-logger = logging.getLogger("cortex.engine.causal.oracle")
+logger = logging.getLogger("babylon60.engine.causal.oracle")
 
 
 class AsyncCausalOracle:

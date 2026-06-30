@@ -18,7 +18,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 
-logger = logging.getLogger("cortex.memory.crdt")
+logger = logging.getLogger("babylon60.memory.crdt")
 
 
 @dataclass

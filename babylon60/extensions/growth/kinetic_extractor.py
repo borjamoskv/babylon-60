@@ -8,7 +8,7 @@ newsletters to extract high-exergy pills (Notes) for organic exposure.
 import logging
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.extensions.growth.kinetic_extractor")
+logger = logging.getLogger("babylon60.extensions.growth.kinetic_extractor")
 
 
 @dataclass

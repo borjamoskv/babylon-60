@@ -10,7 +10,7 @@ import ast
 import logging
 from pathlib import Path
 
-logger = logging.getLogger("cortex.engine.meta.sovereign_arbiter")
+logger = logging.getLogger("babylon60.engine.meta.sovereign_arbiter")
 
 
 class ImportPolicyVisitor(ast.NodeVisitor):

@@ -14,7 +14,7 @@ except ImportError:
     StateGraph = None
     LANGGRAPH_AVAILABLE = False
 
-logger = logging.getLogger("cortex_extensions.swarm.supervisor")
+logger = logging.getLogger("babylon60_extensions.swarm.supervisor")
 
 
 class NightShiftState(BaseModel):

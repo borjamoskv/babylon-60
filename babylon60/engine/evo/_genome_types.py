@@ -22,7 +22,7 @@ from babylon60.isa.builder import (
     noop,
 )
 
-logger = logging.getLogger("cortex.engine.evo.genome")
+logger = logging.getLogger("babylon60.engine.evo.genome")
 
 
 @dataclass

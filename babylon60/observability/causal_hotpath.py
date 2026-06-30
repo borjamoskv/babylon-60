@@ -5,7 +5,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.hotpath")
+logger = logging.getLogger("babylon60.hotpath")
 
 
 @dataclass

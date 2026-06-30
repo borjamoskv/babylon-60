@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any, Final
 
-logger = logging.getLogger("cortex_extensions.llm.presets")
+logger = logging.getLogger("babylon60_extensions.llm.presets")
 
 # Default location for presets
 _ASSET_PATH: Final[str] = str(

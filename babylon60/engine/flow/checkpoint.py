@@ -19,7 +19,7 @@ from typing import Any
 from babylon60.engine.core.evolution_ledger import EvolutionLedger, ReplayMode
 from babylon60.ledger.merkle import MerkleTree
 
-logger = logging.getLogger("cortex.checkpoint")
+logger = logging.getLogger("babylon60.checkpoint")
 
 
 @dataclass

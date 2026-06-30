@@ -12,7 +12,7 @@ from babylon60.sica.strategy import SearchStrategy
 from .meta_meta_controller import MetaMetaController
 from .trace_synthesizer import TraceSynthesizer
 
-logger = logging.getLogger("cortex.sica.autonomy.tick")
+logger = logging.getLogger("babylon60.sica.autonomy.tick")
 
 
 class AutonomousTick:

@@ -7,7 +7,7 @@ Calculates the semantic evaporation of ghost traces.
 import logging
 import time
 
-logger = logging.getLogger("cortex_extensions.songlines.decay")
+logger = logging.getLogger("babylon60_extensions.songlines.decay")
 
 
 class DecayEngine:

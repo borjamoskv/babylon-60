@@ -89,9 +89,7 @@ class L0L6SchemaValidator:
                     schema["additionalProperties"] = False
                 self._schemas[schema_path.stem] = schema
             except (json.JSONDecodeError, OSError) as e:
-                raise RuntimeError(
-                    f"C5-REAL Schema Load Failed for {schema_path.name}: {e}"
-                ) from e
+                raise RuntimeError(f"C5-REAL Schema Load Failed for {schema_path.name}: {e}") from e
         logger.info(
             "Loaded %d structural schemas for L0-L6 pipeline from %s.",
             len(self._schemas),

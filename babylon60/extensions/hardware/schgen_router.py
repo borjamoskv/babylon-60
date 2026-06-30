@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.exergy.hardware")
+logger = logging.getLogger("babylon60.exergy.hardware")
 
 
 @dataclass

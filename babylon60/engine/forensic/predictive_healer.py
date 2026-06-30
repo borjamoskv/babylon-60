@@ -31,7 +31,7 @@ __all__ = [
     "PredictiveHealer",
 ]
 
-logger = logging.getLogger("cortex.engine.predictive")
+logger = logging.getLogger("babylon60.engine.predictive")
 
 
 # ─── Types ────────────────────────────────────────────────────────

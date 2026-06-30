@@ -1,7 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 
-from babylon60.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile, ReasoningMode
+from babylon60.extensions.llm._models import (
+    BaseProvider,
+    CortexPrompt,
+    IntentProfile,
+    ReasoningMode,
+)
 from babylon60.extensions.llm.router import CortexLLMRouter
 
 

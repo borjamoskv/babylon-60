@@ -14,7 +14,7 @@ from babylon60.extensions.aether.tools import AgentToolkit
 
 __all__ = ["TesterAgent"]
 
-logger = logging.getLogger("cortex_extensions.aether.tester")
+logger = logging.getLogger("babylon60_extensions.aether.tester")
 
 
 def _detect_test_command(repo_path: Path) -> str:

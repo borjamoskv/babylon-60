@@ -12,7 +12,7 @@ import httpx
 
 from babylon60.extensions.llm._resilience import CircuitBreakerError, is_retryable
 
-logger = logging.getLogger("cortex_extensions.llm")
+logger = logging.getLogger("babylon60_extensions.llm")
 
 
 async def process_stream_lines(response: httpx.Response) -> AsyncGenerator[str, None]:

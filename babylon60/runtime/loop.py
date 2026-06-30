@@ -10,7 +10,7 @@ from .homeostasis import HomeostaticController
 from .snapshot import SnapshotManager
 from .state import RuntimeState
 
-logger = logging.getLogger("cortex.runtime")
+logger = logging.getLogger("babylon60.runtime")
 
 
 class RuntimeLoop:

@@ -22,7 +22,7 @@ from babylon60.cli.loop_models import LoopSession, PersistenceType, TaskResult, 
 
 __all__ = ["PERSIST_INTERVAL", "ExecutionLoop", "PersistSupervisor"]
 
-logger = logging.getLogger("cortex.loop.engine")
+logger = logging.getLogger("babylon60.loop.engine")
 
 # Industrial Noir palette - used in render methods
 CYBER_LIME = "#CCFF00"

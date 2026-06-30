@@ -16,7 +16,7 @@ except ImportError:
     librosa = None
     np = None
 
-logger = logging.getLogger("cortex.audio.altozano")
+logger = logging.getLogger("babylon60.audio.altozano")
 
 
 class AltozanoAnalyzer:

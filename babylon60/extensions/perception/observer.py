@@ -33,7 +33,7 @@ from babylon60.extensions.perception.base import (
 
 __all__ = ["FileActivityObserver"]
 
-logger = logging.getLogger("cortex_extensions.perception")
+logger = logging.getLogger("babylon60_extensions.perception")
 
 
 class _DebouncedHandler(FileSystemEventHandler):  # type: ignore[reportGeneralTypeIssues]

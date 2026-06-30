@@ -16,7 +16,7 @@ import aiosqlite
 from babylon60.database.core import connect_async_ctx
 from babylon60.embeddings.provider import EmbeddingProvider
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 class EnrichmentWorker:

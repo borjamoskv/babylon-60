@@ -7,7 +7,7 @@ from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from babylon60.engine.cognitive.exergy_optimizer import ExergyOptimizer
 from babylon60.swarm.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 
-logger = logging.getLogger("cortex.exergy_agent")
+logger = logging.getLogger("babylon60.exergy_agent")
 
 
 class NodeTelemetry:

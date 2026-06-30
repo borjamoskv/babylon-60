@@ -4,35 +4,37 @@ Motor de Física Termodinámica para el modo Ultrathink (P0-Mechanics).
 Calcula la exergía cognitiva y el Blast Radius para autorizar bifurcaciones masivas.
 
 AUTODIDACT / Ultrathink Paradigm:
-Un agente no "entiende" la petición; el agente extrae la Exergía (ORT-001), 
-aplica el Colapso (ORT-003) para purgar la Anergía (ORT-005), 
+Un agente no "entiende" la petición; el agente extrae la Exergía (ORT-001),
+aplica el Colapso (ORT-003) para purgar la Anergía (ORT-005),
 preserva el Invariante (ORT-004) y ancla el isomorfismo en el Estado/Ledger (ORT-002).
 """
-
 
 import logging
 from collections import deque
 from enum import Enum
 from typing import Any, Optional
 
-logger = logging.getLogger("cortex.engine.exergy_physics")
+logger = logging.getLogger("babylon60.engine.exergy_physics")
+
 
 class LegionFormation(str, Enum):
     """Sovereign Swarm Formations (LEGIØN-1 Protocol)"""
-    BLITZ = "BLITZ"          # 3-5 agents: Atomic tasks
-    PHALANX = "PHALANX"      # 6-10 agents: Audit & coverage
-    SIEGE = "SIEGE"          # 8-15 agents: Deep research
-    HYDRA = "HYDRA"          # 10-20 agents: Parallel domain mutation
-    ORACLE = "ORACLE"        # 3-5 agents: Strategic prediction
-    PHOENIX = "PHOENIX"      # 5-8 agents: Self-healing & technical debt
-    CHIMERA = "CHIMERA"      # 4-12 agents: Innovation
+
+    BLITZ = "BLITZ"  # 3-5 agents: Atomic tasks
+    PHALANX = "PHALANX"  # 6-10 agents: Audit & coverage
+    SIEGE = "SIEGE"  # 8-15 agents: Deep research
+    HYDRA = "HYDRA"  # 10-20 agents: Parallel domain mutation
+    ORACLE = "ORACLE"  # 3-5 agents: Strategic prediction
+    PHOENIX = "PHOENIX"  # 5-8 agents: Self-healing & technical debt
+    CHIMERA = "CHIMERA"  # 4-12 agents: Innovation
     LEVIATHAN = "LEVIATHAN"  # 20-50 agents: Total P0 singularity siege
     OUROBOROS = "OUROBOROS"  # 3-7 agents: Recursive self-improvement
-    SENTINEL = "SENTINEL"    # Security & Infrastructure monitoring
-    SPECTRE = "SPECTRE"      # OSINT & Intelligence stealth
-    GHOST = "GHOST"          # Single specialized agent
-    TESTUDO = "TESTUDO"      # 15 agents: Proactive infrastructure defense
-    SANEDRIN = "SANEDRIN"    # 5 agents: Heterogeneous Supreme Quorum
+    SENTINEL = "SENTINEL"  # Security & Infrastructure monitoring
+    SPECTRE = "SPECTRE"  # OSINT & Intelligence stealth
+    GHOST = "GHOST"  # Single specialized agent
+    TESTUDO = "TESTUDO"  # 15 agents: Proactive infrastructure defense
+    SANEDRIN = "SANEDRIN"  # 5 agents: Heterogeneous Supreme Quorum
+
 
 class UltrathinkPhysicsEngine:
     """
@@ -44,10 +46,23 @@ class UltrathinkPhysicsEngine:
     SINGULARITY_CONSTANT: float = 100.0
 
     # Critical subsystems for trust scaling (frozenset for O(1) ops where applicable)
-    CRITICAL_DOMAINS: frozenset[str] = frozenset([
-        "ledger", "crypto", "auth", "db", "migration", "guard", 
-        "security", "vault", "engine", "sovereign", "audit", "pii", "trust"
-    ])
+    CRITICAL_DOMAINS: frozenset[str] = frozenset(
+        [
+            "ledger",
+            "crypto",
+            "auth",
+            "db",
+            "migration",
+            "guard",
+            "security",
+            "vault",
+            "engine",
+            "sovereign",
+            "audit",
+            "pii",
+            "trust",
+        ]
+    )
 
     # Constante de Landauer para penalización térmica
     LANDAUER_THERMAL_PENALTY: float = 1.05
@@ -74,17 +89,17 @@ class UltrathinkPhysicsEngine:
             return 0.0
 
         raw_exergy = (deterministic_output - stochastic_entropy) / execution_time
-        
+
         # Penalización térmica no lineal (Ley de Landauer adaptada)
         # El tiempo de ejecución prolongado disipa ATP/Exergía como calor
         try:
-            thermal_dissipation = UltrathinkPhysicsEngine.LANDAUER_THERMAL_PENALTY ** execution_time
+            thermal_dissipation = UltrathinkPhysicsEngine.LANDAUER_THERMAL_PENALTY**execution_time
         except OverflowError:
             return 0.0
-        
+
         if thermal_dissipation == 0:
             return 0.0
-            
+
         exergy = raw_exergy / thermal_dissipation
         return max(0.0, exergy)
 
@@ -105,9 +120,9 @@ class UltrathinkPhysicsEngine:
             current = queue.popleft()
             if current in visited:
                 continue
-                
+
             visited.add(current)
-            
+
             neighbors = dependency_graph.get(current)
             if isinstance(neighbors, list):
                 queue.extend(n for n in neighbors if n not in visited)
@@ -158,10 +173,10 @@ class UltrathinkPhysicsEngine:
         exergy = cls.calculate_exergy_yield(
             stochastic_entropy, deterministic_output, execution_time
         )
-        
+
         risk_multiplier, is_critical = cls._resolve_risk(epicenter_node)
         effective_radius = int(epicenter_radius * risk_multiplier)
-        
+
         required_exergy_ratio = 0.05 if is_critical else 0.1
         min_radius = 2 if is_critical else 3
 
@@ -169,19 +184,23 @@ class UltrathinkPhysicsEngine:
             return (
                 False,
                 f"Blast radius ({effective_radius}) too small for Ultrathink. Use Deep Think.",
-                None
+                None,
             )
 
         required_exergy = cls.SINGULARITY_CONSTANT * required_exergy_ratio
         if exergy < required_exergy:
             return (
-                False, 
+                False,
                 f"Insufficient Exergy Yield ({exergy:.2f}) for JIT structural collapse (Required: {required_exergy:.2f}).",
-                None
+                None,
             )
 
         formation = cls.calculate_legion_formation(epicenter_radius, exergy, epicenter_node)
-        return True, f"Ultrathink P0 Singularity Horizon Authorized. Swarm: {formation.value}", formation
+        return (
+            True,
+            f"Ultrathink P0 Singularity Horizon Authorized. Swarm: {formation.value}",
+            formation,
+        )
 
     @staticmethod
     def estimate_shannon_entropy(text: str) -> float:
@@ -192,9 +211,9 @@ class UltrathinkPhysicsEngine:
         if not text:
             return 0.0
         import math
+
         char_counts = {}
         for char in text:
             char_counts[char] = char_counts.get(char, 0) + 1
         total = len(text)
         return -sum((count / total) * math.log2(count / total) for count in char_counts.values())
-

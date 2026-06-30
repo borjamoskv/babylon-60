@@ -14,7 +14,7 @@ import random
 from dataclasses import dataclass
 from typing import Literal
 
-logger = logging.getLogger("cortex.router.policy")
+logger = logging.getLogger("babylon60.router.policy")
 
 ModelType = Literal["gemini-3.5-flash", "gemini-3.1-pro"]
 

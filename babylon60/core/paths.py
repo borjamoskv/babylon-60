@@ -43,16 +43,22 @@ __all__ = [
 
 # ─── Core Directories ───────────────────────────────────────────────
 
-CORTEX_DIR: Path = Path(os.environ.get("MOSKV_DIR", os.environ.get("CORTEX_DIR", Path.home() / ".cortex")))
+CORTEX_DIR: Path = Path(
+    os.environ.get("MOSKV_DIR", os.environ.get("CORTEX_DIR", Path.home() / ".cortex"))
+)
 """Root CORTEX data directory. Override: MOSKV_DIR env var."""
 
-AGENT_DIR: Path = Path(os.environ.get("MOSKV_AGENT_DIR", os.environ.get("CORTEX_AGENT_DIR", Path.home() / ".agent")))
+AGENT_DIR: Path = Path(
+    os.environ.get("MOSKV_AGENT_DIR", os.environ.get("CORTEX_AGENT_DIR", Path.home() / ".agent"))
+)
 """Agent configuration and memory directory. Override: MOSKV_AGENT_DIR env var."""
 
 # ─── Database ────────────────────────────────────────────────────────
 
 _DEFAULT_DB_NAME = "runtime.db"
-_db_name_override = os.environ.get("MOSKV_DB_NAME", os.environ.get("CORTEX_DB_NAME", _DEFAULT_DB_NAME))
+_db_name_override = os.environ.get(
+    "MOSKV_DB_NAME", os.environ.get("CORTEX_DB_NAME", _DEFAULT_DB_NAME)
+)
 CORTEX_DB: Path = CORTEX_DIR / _db_name_override
 """Path to the main CORTEX SQLite database."""
 
@@ -60,11 +66,14 @@ CORTEX_DB: Path = CORTEX_DIR / _db_name_override
 _legacy_db = CORTEX_DIR / "cortex.db"
 if _db_name_override == _DEFAULT_DB_NAME and not CORTEX_DB.exists() and _legacy_db.exists():
     import logging
+
     logging.getLogger("babylon60.paths").info("Migrating legacy cortex.db to runtime.db (ADR-0006)")
     try:
         _legacy_db.rename(CORTEX_DB)
     except Exception as e:
-        logging.getLogger("babylon60.paths").error(f"Failed to migrate cortex.db to runtime.db: {e}")
+        logging.getLogger("babylon60.paths").error(
+            f"Failed to migrate cortex.db to runtime.db: {e}"
+        )
 
 PERSONAL_DB: Path = CORTEX_DIR / "personal_memories.db"
 """Repatriated personal/side-project memories (NAROA, LIVENOTCH, etc.)."""
@@ -86,7 +95,11 @@ DAEMON_STATUS_FILE: Path = MEMORY_DIR / "daemon_status.json"
 SYNC_STATE_FILE: Path = CORTEX_DIR / "sync_state.json"
 """Sync engine state tracking file."""
 
-MODELS_DIR: Path = Path(os.environ.get("MOSKV_MODELS_DIR", os.environ.get("CORTEX_MODELS_DIR", str(CORTEX_DIR / "models"))))
+MODELS_DIR: Path = Path(
+    os.environ.get(
+        "MOSKV_MODELS_DIR", os.environ.get("CORTEX_MODELS_DIR", str(CORTEX_DIR / "models"))
+    )
+)
 """Embedding model cache directory. Override: MOSKV_MODELS_DIR env var."""
 
 SKILLS_DIR: Path = Path(
@@ -95,7 +108,7 @@ SKILLS_DIR: Path = Path(
         os.environ.get(
             "CORTEX_SKILLS_DIR",
             str(Path.home() / ".gemini" / "antigravity" / "skills"),
-        )
+        ),
     )
 )
 """Skills base directory. Override: MOSKV_SKILLS_DIR env var."""

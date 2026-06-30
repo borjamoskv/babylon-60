@@ -2,7 +2,7 @@
 import logging
 from dataclasses import dataclass, field
 
-logger = logging.getLogger("cortex_extensions.ui_control")
+logger = logging.getLogger("babylon60_extensions.ui_control")
 
 
 # ─── Exceptions ──────────────────────────────────────────────────

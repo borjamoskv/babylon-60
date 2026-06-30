@@ -15,7 +15,7 @@ __all__ = ["approve_interactive"]
 if TYPE_CHECKING:
     from babylon60.extensions.gate import SovereignGate
 
-logger = logging.getLogger("cortex_extensions.gate.interact")
+logger = logging.getLogger("babylon60_extensions.gate.interact")
 
 
 def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:

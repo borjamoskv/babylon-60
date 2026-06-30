@@ -20,7 +20,7 @@ from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.extensions.immune.chaos import ChaosScenario, async_interceptor
 from babylon60.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 
-logger = logging.getLogger("cortex_extensions.red_team.hydra_chaos")
+logger = logging.getLogger("babylon60_extensions.red_team.hydra_chaos")
 
 
 @dataclass

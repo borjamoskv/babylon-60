@@ -17,7 +17,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-logger = logging.getLogger("cortex_extensions.swarm.worktree")
+logger = logging.getLogger("babylon60_extensions.swarm.worktree")
 
 
 class WorktreeIsolationError(Exception):

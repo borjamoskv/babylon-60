@@ -16,7 +16,7 @@ from babylon60.swarm.autocurative_agent import AutoCurativeAgent
 from .daemon import SupervisorDaemon
 from .types import AgentInfo, AgentStatus, SupervisorConfig
 
-logger = logging.getLogger("cortex.supervisor")
+logger = logging.getLogger("babylon60.supervisor")
 
 
 class CortexSupervisor:

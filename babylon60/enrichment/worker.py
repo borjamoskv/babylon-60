@@ -11,7 +11,7 @@ from typing import Any
 from babylon60.ledger.queue import EnrichmentQueue
 from babylon60.ledger.store import LedgerStore
 
-logger = logging.getLogger("cortex.enrichment")
+logger = logging.getLogger("babylon60.enrichment")
 
 
 class EnrichmentWorker:

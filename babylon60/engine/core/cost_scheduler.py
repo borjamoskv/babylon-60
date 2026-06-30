@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.engine.core.cost_scheduler")
+logger = logging.getLogger("babylon60.engine.core.cost_scheduler")
 
 DEFAULT_POLICY_PATH = Path(
     "~/.gemini/antigravity/scratch/exergy_engine/antigravity_routing_policy.yaml"

@@ -40,7 +40,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.training.moskv1_core")
+logger = logging.getLogger("babylon60.training.moskv1_core")
 
 # ─── Configuration ─────────────────────────────────────────────────────────
 
@@ -136,9 +136,7 @@ class MOSKV1Core:
         max_history: int = MAX_HISTORY_TURNS,
     ) -> None:
         self.model_name = model_name
-        self.ollama_host = ollama_host or os.getenv(
-            "OLLAMA_HOST", "http://localhost:11434"
-        )
+        self.ollama_host = ollama_host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
         self.max_context_facts = max_context_facts
         self.context_score_threshold = context_score_threshold
         self._adapter_path = Path.home() / ".cortex" / "training" / "adapters"
@@ -151,9 +149,7 @@ class MOSKV1Core:
 
     def add_to_history(self, role: str, content: str) -> None:
         """Add a turn to conversation history."""
-        self._history.append(
-            ConversationTurn(role=role, content=content, timestamp=time.time())
-        )
+        self._history.append(ConversationTurn(role=role, content=content, timestamp=time.time()))
 
     # ─── Context Retrieval ──────────────────────────────────────────────
 
@@ -191,13 +187,15 @@ class MOSKV1Core:
 
             for r in results:
                 if r.score >= self.context_score_threshold:
-                    facts.append({
-                        "content": r.content,
-                        "project": r.project,
-                        "confidence": r.confidence,
-                        "score": round(r.score, 4),
-                        "source": r.source,
-                    })
+                    facts.append(
+                        {
+                            "content": r.content,
+                            "project": r.project,
+                            "confidence": r.confidence,
+                            "score": round(r.score, 4),
+                            "source": r.source,
+                        }
+                    )
 
         except Exception as e:
             logger.warning("Hybrid search failed, trying ContextAssembler: %s", e)
@@ -213,13 +211,15 @@ class MOSKV1Core:
                 )
                 if ctx_packet and hasattr(ctx_packet, "facts"):
                     for fact in ctx_packet.facts:
-                        facts.append({
-                            "content": getattr(fact, "content", str(fact)),
-                            "project": getattr(fact, "project", ""),
-                            "confidence": getattr(fact, "confidence", "unknown"),
-                            "score": 0.8,
-                            "source": "context_assembler",
-                        })
+                        facts.append(
+                            {
+                                "content": getattr(fact, "content", str(fact)),
+                                "project": getattr(fact, "project", ""),
+                                "confidence": getattr(fact, "confidence", "unknown"),
+                                "score": 0.8,
+                                "source": "context_assembler",
+                            }
+                        )
             except Exception as e2:
                 logger.warning("ContextAssembler also failed: %s", e2)
 
@@ -297,8 +297,7 @@ class MOSKV1Core:
             context_parts.append("[CORTEX MEMORY — HECHOS VERIFICADOS C5-REAL]\n")
             for i, fact in enumerate(context.facts, 1):
                 context_parts.append(
-                    f"[{i}] (score={fact['score']}, conf={fact['confidence']})\n"
-                    f"{fact['content']}\n"
+                    f"[{i}] (score={fact['score']}, conf={fact['confidence']})\n{fact['content']}\n"
                 )
 
         if context.vault_entries:
@@ -309,10 +308,12 @@ class MOSKV1Core:
         if context_parts:
             context_block = "\n".join(context_parts)
             messages.append({"role": "user", "content": context_block})
-            messages.append({
-                "role": "assistant",
-                "content": "Contexto asimilado. Procedo con la mutación.",
-            })
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": "Contexto asimilado. Procedo con la mutación.",
+                }
+            )
 
         # Inject conversation history
         if include_history and self._history:
@@ -468,7 +469,9 @@ class MOSKV1Core:
                         error_text = await resp.text()
                         logger.error(
                             "Ollama API error %d (%s): %s",
-                            resp.status, model, error_text[:200],
+                            resp.status,
+                            model,
+                            error_text[:200],
                         )
                         return f"[ERROR] Ollama returned {resp.status}"
 
@@ -654,16 +657,10 @@ TEMPLATE \"\"\"{{{{ if .System }}}}<|im_start|>system
                     if resp.status == 200:
                         result["ollama_reachable"] = True
                         data = await resp.json()
-                        models = [
-                            m.get("name", "") for m in data.get("models", [])
-                        ]
+                        models = [m.get("name", "") for m in data.get("models", [])]
                         result["models"] = models
-                        result["moskv1_available"] = any(
-                            self.model_name in m for m in models
-                        )
-                        result["fallback_available"] = any(
-                            "qwen2.5-coder" in m for m in models
-                        )
+                        result["moskv1_available"] = any(self.model_name in m for m in models)
+                        result["fallback_available"] = any("qwen2.5-coder" in m for m in models)
         except Exception:
             pass
 

@@ -18,7 +18,7 @@ from babylon60.extensions.sap.mapper import SAPMapper
 
 __all__ = ["SAPSync", "SAPSyncResult"]
 
-logger = logging.getLogger("cortex_extensions.sap.sync")
+logger = logging.getLogger("babylon60_extensions.sap.sync")
 
 
 @dataclass

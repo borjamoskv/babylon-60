@@ -20,11 +20,13 @@ import logging
 # [C5-REAL] Global PII Scrubbing
 _original_get_message = logging.LogRecord.getMessage
 
+
 def _scrubbed_get_message(self):
     msg = _original_get_message(self)
     if "[REDACTED_PII]" in msg:
         msg = msg.replace("~", "~").replace("[REDACTED_PII]", "[REDACTED]")
     return msg
+
 
 logging.LogRecord.getMessage = _scrubbed_get_message
 
@@ -47,9 +49,11 @@ _EXPERIMENTAL_MODULES = (
     "zero_prompting",
 )
 
+
 def __getattr__(name: str):
     if name in _LAZY_IMPORTS:
         import importlib
+
         mod = importlib.import_module(_LAZY_IMPORTS[name])
         if _LAZY_IMPORTS[name] == f"babylon60.{name}":
             globals()[name] = mod
@@ -60,11 +64,13 @@ def __getattr__(name: str):
     if name in _EXPERIMENTAL_MODULES:
         try:
             import importlib
+
             mod = importlib.import_module(f"babylon60.experimental.{name}")
             globals()[name] = mod
             return mod
         except ImportError as err:
             raise AttributeError(f"module 'babylon60' has no attribute {name!r}") from err
     raise AttributeError(f"module 'babylon60' has no attribute {name!r}")
+
 
 __all__ = ["CortexEngine", "__version__", "api", "routes"]  # pyright: ignore[reportUnsupportedDunderAll]

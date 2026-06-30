@@ -23,7 +23,7 @@ from babylon60.extensions.revenue.models import (
     VectorType,
 )
 
-logger = logging.getLogger("cortex_extensions.revenue.engine")
+logger = logging.getLogger("babylon60_extensions.revenue.engine")
 
 
 class RevenueEngine:

@@ -21,7 +21,7 @@ from typing import Any
 
 __all__ = ["MetricsMiddleware", "MetricsRegistry"]
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 _HISTOGRAM_MAX_OBSERVATIONS = 1000
 _CRITICAL_DEBOUNCE_SECONDS = 60

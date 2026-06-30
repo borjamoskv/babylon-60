@@ -9,7 +9,7 @@ import re
 
 from ._constants import _BROWSER_PROFILES, _GHOST_SIGNATURES
 
-logger = logging.getLogger("cortex_extensions.llm.stealth")
+logger = logging.getLogger("babylon60_extensions.llm.stealth")
 
 
 def prepare_stealth_headers(extra_headers: dict[str, str]) -> dict[str, str]:

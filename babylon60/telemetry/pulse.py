@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from babylon60.extensions.signals.bus import SignalBus
 
-logger = logging.getLogger("cortex.telemetry.pulse")
+logger = logging.getLogger("babylon60.telemetry.pulse")
 
 
 @dataclass()

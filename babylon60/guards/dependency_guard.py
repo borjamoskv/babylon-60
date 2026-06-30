@@ -23,7 +23,7 @@ from babylon60.guards.models import DependencyViolation
 
 __all__ = ["DependencyViolation", "scan_directory", "scan_file"]
 
-logger = logging.getLogger("cortex.guards.dependency_guard")
+logger = logging.getLogger("babylon60.guards.dependency_guard")
 
 
 def scan_file(filepath: str | Path) -> list[DependencyViolation]:

@@ -46,7 +46,7 @@ from babylon60.database.core import connect as db_connect
 
 __all__ = ["emit_fact_stored"]
 
-logger = logging.getLogger("cortex_extensions.signals.fact_hook")
+logger = logging.getLogger("babylon60_extensions.signals.fact_hook")
 
 # ── Tuneable constants ────────────────────────────────────────────────────────
 # Number of un-consumed fact:stored signals before a compact:needed is emitted.

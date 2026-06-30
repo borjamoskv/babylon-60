@@ -14,7 +14,7 @@ from babylon60.engine import CortexEngine
 if TYPE_CHECKING:
     from babylon60.mcp_server.server import _MCPContext
 
-logger = logging.getLogger("cortex.mcp_server.server")
+logger = logging.getLogger("babylon60.mcp_server.server")
 
 
 def _register_trace_episode_tool(mcp, ctx: _MCPContext) -> None:

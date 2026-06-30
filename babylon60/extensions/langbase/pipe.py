@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from babylon60.engine import CortexEngine as AsyncCortexEngine
     from babylon60.extensions.langbase.client import LangbaseClient
 
-logger = logging.getLogger("cortex_extensions.langbase.pipe")
+logger = logging.getLogger("babylon60_extensions.langbase.pipe")
 
 # Template for injecting CORTEX facts into the pipe's context
 CORTEX_CONTEXT_TEMPLATE = """## CORTEX Memory Context

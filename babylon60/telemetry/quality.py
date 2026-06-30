@@ -14,7 +14,7 @@ from typing import Any
 
 from babylon60.telemetry.metrics import metrics
 
-logger = logging.getLogger("cortex.telemetry.quality")
+logger = logging.getLogger("babylon60.telemetry.quality")
 
 
 class MemoryQualityEvaluator:

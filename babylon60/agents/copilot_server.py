@@ -31,7 +31,7 @@ from babylon60.agents.copilot_contracts import (
 from babylon60.agents.message_schema import MessageKind, new_message
 from babylon60.guards import AntiLimerenceGuard
 
-logger = logging.getLogger("cortex.agents.copilot.server")
+logger = logging.getLogger("babylon60.agents.copilot.server")
 
 try:
     import websockets  # noqa: F401

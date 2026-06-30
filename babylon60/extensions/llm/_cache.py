@@ -22,7 +22,7 @@ from babylon60.database.tlru_cache import TLRUCache
 
 __all__ = ["NegativeCache", "PositiveCache"]
 
-logger = logging.getLogger("cortex_extensions.llm.cache")
+logger = logging.getLogger("babylon60_extensions.llm.cache")
 
 _DEFAULT_NEG_CAPACITY: Final[int] = 1000
 _DEFAULT_POS_CAPACITY: Final[int] = 5000

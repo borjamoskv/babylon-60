@@ -21,7 +21,7 @@ from typing import Any
 
 __all__ = ["TuningStore"]
 
-logger = logging.getLogger("cortex.engine.core.tuning_store")
+logger = logging.getLogger("babylon60.engine.core.tuning_store")
 
 _DEFAULT_DB = ".cortex/tunings.db"
 

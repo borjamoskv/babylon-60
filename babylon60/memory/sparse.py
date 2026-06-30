@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 import math
 
-logger = logging.getLogger("cortex.memory.sparse")
+logger = logging.getLogger("babylon60.memory.sparse")
 
 
 class MushroomBodyEncoder:

@@ -146,9 +146,15 @@ async def test_process_interaction_with_overflow(manager, mock_l1):
 async def test_process_interaction_with_overflow_clean():
     """Test interaction with overflow cleanly, using a fresh manager."""
     mgr = CortexMemoryManager(
-        l1=MagicMock(add_event=MagicMock(return_value=[
-            MemoryEvent(role="system", content="overflowed_item", token_count=50, session_id="sess")
-        ])),
+        l1=MagicMock(
+            add_event=MagicMock(
+                return_value=[
+                    MemoryEvent(
+                        role="system", content="overflowed_item", token_count=50, session_id="sess"
+                    )
+                ]
+            )
+        ),
         l2=MagicMock(),
         l3=AsyncMock(),
         encoder=AsyncMock(),

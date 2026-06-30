@@ -15,7 +15,7 @@ import httpx
 if TYPE_CHECKING:
     from .provider import LLMProvider
 
-logger = logging.getLogger("cortex_extensions.llm.backoff")
+logger = logging.getLogger("babylon60_extensions.llm.backoff")
 
 
 def extract_retry_delay(text: str) -> float | None:

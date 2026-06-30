@@ -21,7 +21,7 @@ from babylon60.extensions.aether.tools import AgentToolkit
 
 __all__ = ["AetherAgent"]
 
-logger = logging.getLogger("cortex_extensions.aether.runner")
+logger = logging.getLogger("babylon60_extensions.aether.runner")
 
 _MAX_EXECUTOR_RETRIES = 1  # Critic can send back once for fixes
 

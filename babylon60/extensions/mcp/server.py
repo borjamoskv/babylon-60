@@ -23,7 +23,7 @@ from babylon60.extensions.mcp.claude_tool import run_claude_query
 from babylon60.extensions.policy.jis_auditor import JISAuditor
 from babylon60.memory.vsa import VSAPipelineBridge
 
-logger = logging.getLogger("cortex.mcp_server.server")
+logger = logging.getLogger("babylon60.mcp_server.server")
 
 if MCP_AVAILABLE:
     app = Server("cortex-persist-mcp")

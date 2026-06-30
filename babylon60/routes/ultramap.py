@@ -10,7 +10,7 @@ from fastapi import APIRouter, Request
 
 from babylon60.database.pool import CortexConnectionPool
 
-logger = logging.getLogger("cortex.routes.ultramap")
+logger = logging.getLogger("babylon60.routes.ultramap")
 
 router = APIRouter(prefix="/v1/ultramap", tags=["ultramap"])
 

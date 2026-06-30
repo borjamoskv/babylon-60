@@ -39,7 +39,7 @@ from babylon60.swarm import start_swarm_daemon
 
 __all__ = ["create_mcp_server", "run_server"]
 
-logger = logging.getLogger("cortex.mcp_server.server")
+logger = logging.getLogger("babylon60.mcp_server.server")
 
 _MCP_AVAILABLE = False
 try:

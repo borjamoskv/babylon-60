@@ -10,7 +10,7 @@ import asyncio
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.bci.osc_bridge")
+logger = logging.getLogger("babylon60.bci.osc_bridge")
 
 try:
     from pythonosc.dispatcher import Dispatcher

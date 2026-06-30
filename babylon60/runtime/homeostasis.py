@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from .divergence import DivergenceEngine, ExecutionDiff, Trace
 
-logger = logging.getLogger("cortex.runtime.homeostasis")
+logger = logging.getLogger("babylon60.runtime.homeostasis")
 
 
 @dataclass

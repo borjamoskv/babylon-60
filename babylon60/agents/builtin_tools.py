@@ -24,7 +24,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.agents.builtin_tools")
+logger = logging.getLogger("babylon60.agents.builtin_tools")
 
 
 class ShellTool:

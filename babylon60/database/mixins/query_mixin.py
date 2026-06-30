@@ -17,7 +17,7 @@ from babylon60.memory.temporal import build_temporal_filter_params, time_travel_
 if TYPE_CHECKING:
     from babylon60.search import SearchResult
 __all__ = ["QueryMixin"]
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 class QueryMixin(EngineMixinBase):

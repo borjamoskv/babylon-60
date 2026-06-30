@@ -38,7 +38,7 @@ __all__ = [
     "langbase_sync",
 ]
 
-logger = logging.getLogger("cortex.routes.langbase")
+logger = logging.getLogger("babylon60.routes.langbase")
 
 router = APIRouter(prefix="/v1/langbase", tags=["langbase"])
 

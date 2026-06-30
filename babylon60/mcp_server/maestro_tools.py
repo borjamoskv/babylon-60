@@ -7,7 +7,7 @@ from babylon60.extensions.ui_control.maestro import MaestroUI
 from babylon60.extensions.ui_control.models import AppTarget
 from babylon60.mcp_server.utils import get_engine  # type: ignore[reportAttributeAccessIssue]
 
-logger = logging.getLogger("cortex.mcp_server.maestro")
+logger = logging.getLogger("babylon60.mcp_server.maestro")
 
 
 def register_maestro_tools(mcp: FastMCP):

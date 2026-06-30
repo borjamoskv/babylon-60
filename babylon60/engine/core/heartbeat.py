@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from babylon60.engine import CortexEngine as AsyncCortexEngine
     from babylon60.memory.sleep import SleepOrchestrator
 
-logger = logging.getLogger("cortex.heartbeat")
+logger = logging.getLogger("babylon60.heartbeat")
 
 # ─── Defaults ──────────────────────────────────────────────────────────
 

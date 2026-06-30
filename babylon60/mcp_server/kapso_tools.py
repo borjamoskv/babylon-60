@@ -12,7 +12,7 @@ import logging
 import subprocess
 from typing import Any
 
-logger = logging.getLogger("cortex.mcp_server.kapso")
+logger = logging.getLogger("babylon60.mcp_server.kapso")
 
 
 def register_kapso_tools(mcp: Any, ctx: Any) -> None:
@@ -50,10 +50,10 @@ def register_kapso_tools(mcp: Any, ctx: Any) -> None:
                 "--output",
                 "json",
             ]
-            
+
             logger.debug(f"Executing kapso command: {' '.join(cmd)}")
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            
+
             try:
                 # Try parsing as JSON since we requested --output=json
                 return {"status": "success", "data": json.loads(result.stdout)}
@@ -85,10 +85,10 @@ def register_kapso_tools(mcp: Any, ctx: Any) -> None:
                 "--output",
                 "json",
             ]
-            
+
             logger.debug("Executing kapso list command")
             result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-            
+
             try:
                 return {"status": "success", "data": json.loads(result.stdout)}
             except json.JSONDecodeError:

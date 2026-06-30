@@ -15,7 +15,7 @@ from pathlib import Path
 
 from babylon60.database.core import connect as db_connect
 
-logger = logging.getLogger("cortex_extensions.swarm.budget")
+logger = logging.getLogger("babylon60_extensions.swarm.budget")
 
 # 2026 Sovereign Pricing (Exergy-Optimized)
 COST_PRICING = {

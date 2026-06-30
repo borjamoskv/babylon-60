@@ -19,7 +19,7 @@ from babylon60.extensions.vex.models import ExecutionReceipt, VEXStatus, _sha256
 
 __all__ = ["export_receipt", "load_receipt", "verify_receipt"]
 
-logger = logging.getLogger("cortex_extensions.vex")
+logger = logging.getLogger("babylon60_extensions.vex")
 
 
 def verify_receipt(receipt: ExecutionReceipt) -> dict[str, Any]:

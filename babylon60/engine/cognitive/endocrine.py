@@ -11,7 +11,7 @@ import logging
 import time
 from enum import Enum, auto
 
-logger = logging.getLogger("cortex.endocrine")
+logger = logging.getLogger("babylon60.endocrine")
 
 
 class HormoneType(Enum):

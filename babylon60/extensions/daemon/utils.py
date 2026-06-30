@@ -7,7 +7,7 @@ import logging
 import subprocess
 from pathlib import Path
 
-logger = logging.getLogger("cortex_extensions.daemon.utils")
+logger = logging.getLogger("babylon60_extensions.daemon.utils")
 
 MAILTV_DIR = Path.home() / ".cortex" / "mailtv"
 TOKEN_PATH = MAILTV_DIR / "token.json"

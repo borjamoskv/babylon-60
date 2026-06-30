@@ -25,7 +25,7 @@ from typing import Any
 
 from babylon60.extensions.sync.hlc import HLCTimestamp
 
-logger = logging.getLogger("cortex_extensions.sync.crdt")
+logger = logging.getLogger("babylon60_extensions.sync.crdt")
 
 __all__ = [
     "ConflictRecord",

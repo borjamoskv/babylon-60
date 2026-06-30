@@ -44,7 +44,7 @@ __all__ = [
     "SpawnedAgent",
 ]
 
-logger = logging.getLogger("cortex.engine.speculative.genesis")
+logger = logging.getLogger("babylon60.engine.speculative.genesis")
 
 
 # ─── Agent Blueprint ─────────────────────────────────────────────

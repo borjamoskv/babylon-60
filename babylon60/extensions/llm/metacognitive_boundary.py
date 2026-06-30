@@ -39,7 +39,7 @@ from typing import Any
 
 from babylon60.memory.metamemory import MemoryCard, MetaJudgment, Verdict
 
-logger = logging.getLogger("cortex_extensions.llm.metacognitive_boundary")
+logger = logging.getLogger("babylon60_extensions.llm.metacognitive_boundary")
 
 # ─── Constants ────────────────────────────────────────────────────────
 

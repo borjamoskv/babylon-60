@@ -26,7 +26,7 @@ from babylon60.extensions.genesis.validator import GenesisValidator
 
 __all__ = ["GenesisEngine"]
 
-logger = logging.getLogger("cortex_extensions.genesis.engine")
+logger = logging.getLogger("babylon60_extensions.genesis.engine")
 
 
 class GenesisEngine:

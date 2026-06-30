@@ -33,7 +33,7 @@ from babylon60.extensions.zkortex.merkle import ZKMembershipProof
 from babylon60.extensions.zkortex.prover import ZKOrtexProver
 from babylon60.extensions.zkortex.range_proof import ZKRangeProof
 
-logger = logging.getLogger("cortex_extensions.zkortex.opacity")
+logger = logging.getLogger("babylon60_extensions.zkortex.opacity")
 
 
 class SovereignOpacityLayer:

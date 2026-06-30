@@ -3,7 +3,7 @@ import logging
 
 from babylon60.guards.capabilities import AgentCredentials, Capability, RiskTier
 
-logger = logging.getLogger("cortex.guards.capability_guard")
+logger = logging.getLogger("babylon60.guards.capability_guard")
 
 
 class CapabilityGuard:

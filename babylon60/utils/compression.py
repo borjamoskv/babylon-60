@@ -16,7 +16,7 @@ import struct
 
 __all__ = ["compression_ratio", "dequantize_int8", "quantize_int8"]
 
-logger = logging.getLogger("cortex.embeddings.compression")
+logger = logging.getLogger("babylon60.embeddings.compression")
 
 try:
     import numpy as np

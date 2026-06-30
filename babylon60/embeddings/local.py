@@ -15,7 +15,7 @@ EMBEDDING_DIM = 384
 DEFAULT_EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 _DEVICE = os.environ.get("CORTEX_DEVICE", "auto")
 
-logger = logging.getLogger("cortex.embeddings.local")
+logger = logging.getLogger("babylon60.embeddings.local")
 
 
 def _normalize(vector: list[float]) -> list[float]:

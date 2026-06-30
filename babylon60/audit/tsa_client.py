@@ -16,7 +16,7 @@ try:
 except ImportError:
     rfc3161ng = None
 
-logger = logging.getLogger("cortex.audit.tsa")
+logger = logging.getLogger("babylon60.audit.tsa")
 
 DEFAULT_TSA_URL = "http://timestamp.digicert.com"
 

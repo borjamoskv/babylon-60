@@ -17,7 +17,7 @@ import httpx
 
 from babylon60.agents.mixins import EngineAwareMixin
 
-logger = logging.getLogger("cortex_extensions.agents.apis_omega")
+logger = logging.getLogger("babylon60_extensions.agents.apis_omega")
 
 SIGNUP_URLS = {
     "openai": "https://platform.openai.com/api-keys",

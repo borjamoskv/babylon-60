@@ -25,7 +25,7 @@ __all__ = [
     "query_entity_sync",
 ]
 
-logger = logging.getLogger("cortex.graph")
+logger = logging.getLogger("babylon60.graph")
 
 
 def get_backend(conn=None) -> GraphBackend:

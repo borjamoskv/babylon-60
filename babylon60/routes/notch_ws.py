@@ -23,7 +23,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 __all__ = ["notch_hub", "router", "HUB"]
 
 router = APIRouter(tags=["notch"])
-logger = logging.getLogger("cortex.notch_ws")
+logger = logging.getLogger("babylon60.notch_ws")
 
 
 class NotchHub:
@@ -160,4 +160,3 @@ async def notify_notch_pruning() -> None:
 async def notify_notch_halo(color_hex: str, active: bool) -> None:
     """Shortcut: tell the notch to display a colored halo during inference."""
     await notch_hub.broadcast(f"halo:{'on' if active else 'off'}:{color_hex}")
-

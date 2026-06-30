@@ -23,7 +23,7 @@ from babylon60.config import (
 
 __all__ = ["MCPGuard"]
 
-logger = logging.getLogger("cortex.mcp_server.guard")
+logger = logging.getLogger("babylon60.mcp_server.guard")
 
 # ─── Poisoning Detection Patterns ─────────────────────────────────
 # Patterns are defined and evaluated in Rust core (`cortex_rs.detect_poisoning`)

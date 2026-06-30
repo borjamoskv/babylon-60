@@ -21,7 +21,7 @@ from pydantic import BaseModel
 
 from babylon60.agents.copilot_contracts import SuggestionBatch
 
-logger = logging.getLogger("cortex.agents.copilot.cache")
+logger = logging.getLogger("babylon60.agents.copilot.cache")
 
 
 # ── Models ────────────────────────────────────────────────────────

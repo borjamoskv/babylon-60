@@ -12,7 +12,7 @@ import click
 
 from babylon60.cli.common import cli, console
 
-logger = logging.getLogger("cortex.cli.mcp")
+logger = logging.getLogger("babylon60.cli.mcp")
 
 
 @cli.group("mcp")

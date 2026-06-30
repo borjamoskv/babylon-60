@@ -16,7 +16,7 @@ from typing import Literal
 from babylon60.router.causal import CausalPolicyGradientRouter
 from babylon60.router.policy import SignalVector
 
-logger = logging.getLogger("cortex.router.nash")
+logger = logging.getLogger("babylon60.router.nash")
 
 ModelType = Literal["gemini-3.5-flash", "gemini-3.1-pro"]
 

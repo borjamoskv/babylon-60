@@ -10,12 +10,15 @@ router = APIRouter(prefix="/krgs", tags=["memory", "krgs"])
 # Global singleton or injected dependency for the KRGS Index
 krgs_index = KeyedRetrievalIndex()
 
+
 class RegisterNodeRequest(BaseModel):
     keys: list[str]
     node: dict[str, Any]
 
+
 class ResolveContextRequest(BaseModel):
     required_keys: list[str]
+
 
 @router.post("/register")
 async def register_keyed_node(request: RegisterNodeRequest):
@@ -31,10 +34,11 @@ async def register_keyed_node(request: RegisterNodeRequest):
         # noqa: BLE001 - Deliberate fault-isolation boundary
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.post("/resolve")
 async def resolve_keyed_context(request: ResolveContextRequest):
     """
-    Extrae un subgrafo de contexto determinista pre-ordenado topológicamente 
+    Extrae un subgrafo de contexto determinista pre-ordenado topológicamente
     basado en las claves solicitadas. Bypasses dense vector similarity searches.
     """
     try:
@@ -43,6 +47,7 @@ async def resolve_keyed_context(request: ResolveContextRequest):
     except Exception as e:
         # noqa: BLE001
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/flush")
 async def flush_krgs_to_disk():

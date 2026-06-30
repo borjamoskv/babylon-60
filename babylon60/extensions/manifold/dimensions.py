@@ -20,7 +20,7 @@ from babylon60.extensions.aether.tester import TesterAgent
 from babylon60.extensions.aether.tools import AgentToolkit
 from babylon60.extensions.manifold.models import DimensionalState
 
-logger = logging.getLogger("cortex_extensions.manifold.dimensions")
+logger = logging.getLogger("babylon60_extensions.manifold.dimensions")
 
 
 class PerceptionDimension:

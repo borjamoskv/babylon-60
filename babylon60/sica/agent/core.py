@@ -52,7 +52,7 @@ from babylon60.sica.object_level import ExecutionTrace, ObjectLevel, StepOutcome
 from babylon60.sica.persistence import load_or_default, save_genome
 from babylon60.sica.strategy import SearchStrategy
 
-logger = logging.getLogger("cortex.sica.agent")
+logger = logging.getLogger("babylon60.sica.agent")
 
 
 class SICAAgent(BaseAgent):

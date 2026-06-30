@@ -10,7 +10,7 @@ from typing import Any
 
 from babylon60.extensions.episodic.base import Episode
 
-logger = logging.getLogger("cortex_extensions.training")
+logger = logging.getLogger("babylon60_extensions.training")
 
 
 @dataclass

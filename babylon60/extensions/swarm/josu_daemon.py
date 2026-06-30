@@ -33,7 +33,7 @@ from typing import Any
 from babylon60.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
 from babylon60.extensions.swarm.worktree_isolation import isolated_worktree
 
-logger = logging.getLogger("cortex_extensions.swarm.josu_daemon")
+logger = logging.getLogger("babylon60_extensions.swarm.josu_daemon")
 
 
 # ── Configuration ─────────────────────────────────────────────────────────

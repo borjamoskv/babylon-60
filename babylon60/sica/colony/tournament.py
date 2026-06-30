@@ -7,7 +7,7 @@ from babylon60.sica.strategy import SearchStrategy
 
 from .types import TournamentResult
 
-logger = logging.getLogger("cortex.sica.colony.tournament")
+logger = logging.getLogger("babylon60.sica.colony.tournament")
 
 
 class Tournament:

@@ -25,7 +25,7 @@ from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.swarm.tensor_glial import TensorGlialLegion
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("cortex.swarm.staged_legion")
+logger = logging.getLogger("babylon60.swarm.staged_legion")
 
 MMAP_FILE = "staged_wave.vsa_mmap"
 

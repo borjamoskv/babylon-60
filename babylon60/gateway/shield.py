@@ -8,7 +8,7 @@ import logging
 import re
 from typing import Any
 
-logger = logging.getLogger("cortex.gateway.shield")
+logger = logging.getLogger("babylon60.gateway.shield")
 
 # Patterns of data we want to "radiopactize"
 SENSITIVE_PATTERNS = [

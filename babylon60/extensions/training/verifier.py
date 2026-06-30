@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.training.verifier")
+logger = logging.getLogger("babylon60_extensions.training.verifier")
 
 
 class AdapterVerifier:

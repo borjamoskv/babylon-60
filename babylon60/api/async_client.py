@@ -42,7 +42,9 @@ class AsyncCortexClient:
         timeout: float = 30.0,
     ):
         self.base_url = base_url.rstrip("/")
-        self.api_key = api_key or os.environ.get("MOSKV_API_KEY") or os.environ.get("CORTEX_API_KEY", "")
+        self.api_key = (
+            api_key or os.environ.get("MOSKV_API_KEY") or os.environ.get("CORTEX_API_KEY", "")
+        )
         self._client = httpx.AsyncClient(
             base_url=self.base_url,
             timeout=timeout,

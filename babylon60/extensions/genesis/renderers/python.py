@@ -82,7 +82,7 @@ def _render_mixin(system_name: str, comp: ComponentSpec) -> str:
 
     parts.extend(
         [
-            f'logger = logging.getLogger("cortex.{system_name}.{comp.name}")\n\n',
+            f'logger = logging.getLogger("babylon60.{system_name}.{comp.name}")\n\n',
             f"class {class_name}:",
             f'    """{comp.name} mixin for CortexEngine."""',
             "",

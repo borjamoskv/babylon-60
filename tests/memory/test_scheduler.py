@@ -123,6 +123,7 @@ def test_confidence_resolution() -> None:
 def test_recency_exponential_decay() -> None:
     """Test exponential decay on timestamps."""
     from unittest.mock import patch
+
     # Decay rate: 0.1 per second
     config = SchedulerConfig(recency_decay_rate=0.1)
     scheduler = MemoryScheduler(config)

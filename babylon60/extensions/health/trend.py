@@ -18,7 +18,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
-logger = logging.getLogger("cortex_extensions.health.trend")
+logger = logging.getLogger("babylon60_extensions.health.trend")
 
 
 @dataclass

@@ -12,7 +12,7 @@ from babylon60.consensus.vote_ledger import ImmutableVoteLedger
 from babylon60.engine.forensic.slashing import SlashingEngine
 from babylon60.engine.mixins.base import EngineMixinBase
 
-logger = logging.getLogger("cortex.engine.flow.consensus")
+logger = logging.getLogger("babylon60.engine.flow.consensus")
 
 
 class ConsensusMixin(EngineMixinBase):

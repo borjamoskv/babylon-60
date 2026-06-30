@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
-logger = logging.getLogger("cortex.exergy.surgeon")
+logger = logging.getLogger("babylon60.exergy.surgeon")
 
 
 @dataclass

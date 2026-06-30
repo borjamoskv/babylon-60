@@ -5,7 +5,7 @@ from mcp.server.fastmcp import FastMCP
 
 from babylon60.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext
 
-logger = logging.getLogger("cortex.mcp_server.music")
+logger = logging.getLogger("babylon60.mcp_server.music")
 
 
 def register_music_tools(mcp: FastMCP):

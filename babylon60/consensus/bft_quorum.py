@@ -10,7 +10,7 @@ import logging
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-logger = logging.getLogger("cortex.consensus.bft_quorum")
+logger = logging.getLogger("babylon60.consensus.bft_quorum")
 
 
 class BFTQuorumGuard:

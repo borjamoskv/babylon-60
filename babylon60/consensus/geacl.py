@@ -23,7 +23,7 @@ from babylon60.extensions.thinking.fusion_models import ModelResponse, ThinkingH
 
 __all__ = ["GEACLCoordinator", "GeaclCommitResult"]
 
-logger = logging.getLogger("cortex.consensus.geacl")
+logger = logging.getLogger("babylon60.consensus.geacl")
 
 
 @dataclass()

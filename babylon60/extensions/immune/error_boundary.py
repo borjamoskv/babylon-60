@@ -27,7 +27,7 @@ import inspect
 import logging
 from typing import Any, TypeVar
 
-logger = logging.getLogger("cortex_extensions.immune.error_boundary")
+logger = logging.getLogger("babylon60_extensions.immune.error_boundary")
 F = TypeVar("F")
 _PASSTHROUGH = (KeyboardInterrupt, SystemExit, GeneratorExit, asyncio.CancelledError)
 

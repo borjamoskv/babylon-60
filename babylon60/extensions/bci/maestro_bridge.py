@@ -8,7 +8,7 @@ from typing import Any
 from babylon60.extensions.ui_control.maestro import MaestroUI
 from babylon60.extensions.ui_control.models import AppTarget, Point
 
-logger = logging.getLogger("cortex.bci.maestro_bridge")
+logger = logging.getLogger("babylon60.bci.maestro_bridge")
 
 
 class BCIMaestroBridge:

@@ -15,7 +15,7 @@ from pathlib import Path
 from babylon60.extensions.llm.router import CortexLLMRouter
 from babylon60.mcts.git_env import MCTSGitEnvironment
 
-logger = logging.getLogger("cortex.mcts.tree")
+logger = logging.getLogger("babylon60.mcts.tree")
 
 
 @dataclass
@@ -87,7 +87,7 @@ class MCTSEngine:
                 strategies = [
                     f"{node.mutation_prompt} -> [Vector Alpha: Enforce O(1) time complexity and strict type boundaries]",
                     f"{node.mutation_prompt} -> [Vector Beta: Optimize thermodynamic Exergy, purge redundant logic]",
-                    f"{node.mutation_prompt} -> [Vector Gamma: Maximize async resilience and fail-fast invariants]"
+                    f"{node.mutation_prompt} -> [Vector Gamma: Maximize async resilience and fail-fast invariants]",
                 ]
                 for idx, strategy in enumerate(strategies):
                     node.add_child(f"{node.state_id}-{idx}", strategy)
@@ -104,14 +104,14 @@ class MCTSEngine:
                 virtual_loss = 1.0
                 child.visits += 1
                 child.value -= virtual_loss
-                
+
                 parent_branch = base_branch
                 if child.parent and child.parent != root:
                     parent_branch = f"chronos/node-{child.parent.state_id}"
-                
+
                 # OP_GIT_MULTIVERSE (creates Git Worktree)
                 await self.env.branch_out(parent_branch, child.state_id)
-                
+
                 # OP_DETERMINISTIC_SIM
                 mutated = await self.env.mutate(child.state_id, child.mutation_prompt)
                 if mutated:
@@ -121,13 +121,13 @@ class MCTSEngine:
                 else:
                     reward = 0.0
                     child.is_terminal = True
-                    
+
                 # OP_BACKPROPAGATE
                 # Remove virtual loss and add actual reward
                 curr = child
                 while curr is not None:
                     if curr == child:
-                        curr.value += (reward + virtual_loss)
+                        curr.value += reward + virtual_loss
                     else:
                         curr.visits += 1
                         curr.value += reward
@@ -136,7 +136,10 @@ class MCTSEngine:
                 # OP_LOCAL_EXTINCTION (removes Git Worktree)
                 await self.env.secure_checkout(child.state_id)
 
-            logger.info("⚡ [CHRONOS] Initiating parallel evaluation for %d nodes...", len(unvisited_children))
+            logger.info(
+                "⚡ [CHRONOS] Initiating parallel evaluation for %d nodes...",
+                len(unvisited_children),
+            )
             await asyncio.gather(*(evaluate_child(c) for c in unvisited_children))
 
         # Select the optimal branch based on exploitation (average value)
@@ -154,7 +157,5 @@ class MCTSEngine:
                 best_node.value / best_node.visits,
             )
             return best_branch
-        logger.warning(
-            "💀 [CHRONOS] No timelines passed the tests. Local extinction declared."
-        )
+        logger.warning("💀 [CHRONOS] No timelines passed the tests. Local extinction declared.")
         return base_branch

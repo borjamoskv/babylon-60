@@ -12,7 +12,7 @@ from dataclasses import dataclass
 
 from babylon60.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT, NodeStatus
 
-logger = logging.getLogger("cortex.monitors.swarm_heartbeat")
+logger = logging.getLogger("babylon60.monitors.swarm_heartbeat")
 
 
 @dataclass

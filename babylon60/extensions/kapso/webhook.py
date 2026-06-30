@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/kapso", tags=["kapso", "whatsapp"])
 
+
 @router.get("/webhook")
 async def verify_webhook(request: Request):
     """
@@ -34,7 +35,9 @@ async def verify_webhook(request: Request):
         expected_token = os.environ.get("CORTEX_KAPSO_VERIFY_TOKEN")
 
     if not expected_token:
-        logger.warning("CORTEX_KAPSO_VERIFY_TOKEN no esta configurado en Keyring o variables de entorno. Usando fallback por defecto.")
+        logger.warning(
+            "CORTEX_KAPSO_VERIFY_TOKEN no esta configurado en Keyring o variables de entorno. Usando fallback por defecto."
+        )
         expected_token = "CORTEX_KAPSO_VERIFY_TOKEN"
 
     if mode and token:
@@ -54,10 +57,10 @@ async def receive_webhook(request: Request):
     try:
         payload = await request.json()
         logger.info(f"Received Kapso Webhook: {payload}")
-        
+
         # Enforce CORTEX-TAINT and route to Sovereign Swarm or event bus
         # TBD based on specific use case
-        
+
         return {"status": "received"}
     except Exception as e:
         logger.error(f"Error processing Kapso Webhook: {e}")

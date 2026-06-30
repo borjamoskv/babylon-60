@@ -20,7 +20,7 @@ from typing import Optional
 
 from babylon60.audit.ledger import EnterpriseAuditLedger
 
-logger = logging.getLogger("cortex.benchmark.agentic_eval")
+logger = logging.getLogger("babylon60.benchmark.agentic_eval")
 if not logger.handlers:
     ch = logging.StreamHandler()
     ch.setLevel(logging.INFO)
@@ -79,9 +79,14 @@ class AsyncAgenticEvaluator:
 
     def _process_user_input(self, content: str, local_state: dict) -> None:
         local_state["user_msgs"] += 1
-        if any(p in content for p in ["looks good", "perfect", "thanks", "great", "awesome", "funciona"]):
+        if any(
+            p in content
+            for p in ["looks good", "perfect", "thanks", "great", "awesome", "funciona"]
+        ):
             local_state["praise_found"] = True
-        if any(c in content for c in ["no", "instead", "change this", "wrong", "fail", "error", "bad"]):
+        if any(
+            c in content for c in ["no", "instead", "change this", "wrong", "fail", "error", "bad"]
+        ):
             local_state["complaint_found"] = True
             self.metrics.corrections += 1
 
@@ -102,7 +107,9 @@ class AsyncAgenticEvaluator:
             self.metrics.bash_errors += 1
             local_state["local_bash_errors"] += 1
             local_state["last_bash_error"] = True
-        elif local_state["last_bash_error"] and ("exit code 0" in output or "success" in output.lower()):
+        elif local_state["last_bash_error"] and (
+            "exit code 0" in output or "success" in output.lower()
+        ):
             self.metrics.bash_recoveries += 1
             local_state["local_recoveries"] += 1
             local_state["last_bash_error"] = False
@@ -138,7 +145,9 @@ class AsyncAgenticEvaluator:
                 try:
                     session_events.append(json.loads(line))
                 except json.JSONDecodeError as e:
-                    logger.warning(f"Skipping malformed JSON line in {transcript_path}:{line_idx} -> {e}")
+                    logger.warning(
+                        f"Skipping malformed JSON line in {transcript_path}:{line_idx} -> {e}"
+                    )
 
         local_state = {
             "user_msgs": 0,

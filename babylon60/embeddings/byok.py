@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.embeddings.byok")
+logger = logging.getLogger("babylon60.embeddings.byok")
 
 try:
     from openai import AsyncOpenAI

@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from babylon60.ledger.execution_trace import ExecutionTraceLedger
 
-logger = logging.getLogger("cortex.ledger.cost_field")
+logger = logging.getLogger("babylon60.ledger.cost_field")
 
 
 class CostField:

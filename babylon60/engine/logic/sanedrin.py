@@ -13,7 +13,7 @@ from typing import Any
 from babylon60.agents.primitives.dispatcher import apex_dispatcher
 from babylon60.swarm.trust_registry import global_trust_registry
 
-logger = logging.getLogger("cortex.engine.logic.sanedrin")
+logger = logging.getLogger("babylon60.engine.logic.sanedrin")
 
 
 import json

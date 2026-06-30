@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
-logger = logging.getLogger("cortex.swarm.protocols")
+logger = logging.getLogger("babylon60.swarm.protocols")
 
 
 class SwarmIntent(str, Enum):

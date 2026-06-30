@@ -15,7 +15,7 @@ from typing import Any
 
 from babylon60.extensions.songlines.sensor import TopographicSensor
 
-logger = logging.getLogger("cortex_extensions.daemon.entropic_wake")
+logger = logging.getLogger("babylon60_extensions.daemon.entropic_wake")
 
 
 class EntropicWakeDaemon:

@@ -11,7 +11,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-logger = logging.getLogger("cortex.policy.jis")
+logger = logging.getLogger("babylon60.policy.jis")
 
 
 @dataclass

@@ -7,7 +7,7 @@ import click
 from babylon60.cli.common import DEFAULT_DB, console, get_engine
 from babylon60.extensions.swarm.josu_daemon import JosuProactiveDaemon
 
-logger = logging.getLogger("cortex.cli.josu")
+logger = logging.getLogger("babylon60.cli.josu")
 
 
 @click.group("josu")

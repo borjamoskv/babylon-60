@@ -2,7 +2,7 @@
 import logging
 import sqlite3
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 def _migration_015_tenant_unification(conn: sqlite3.Connection):

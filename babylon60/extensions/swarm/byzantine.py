@@ -38,6 +38,7 @@ class ByzantineConsensus:
     def _normalize_proposal(proposal: Any) -> str:
         """Normalize proposal content using AST unparsing for code structures to achieve semantic consensus."""
         import ast
+
         if isinstance(proposal, str):
             try:
                 tree = ast.parse(proposal)

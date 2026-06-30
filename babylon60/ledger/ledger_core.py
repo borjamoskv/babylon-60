@@ -30,7 +30,7 @@ from babylon60.utils.canonical import (
     now_iso,
 )
 
-logger = logging.getLogger("cortex.ledger")
+logger = logging.getLogger("babylon60.ledger")
 
 
 from .merkle import MerkleTree
@@ -134,7 +134,9 @@ class SovereignLedger(LedgerAuditMixin):
                 "tenant_id",
                 "TEXT NOT NULL DEFAULT '__global__'",
             )
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_tx_tenant_id ON transactions(tenant_id, id)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_tx_tenant_id ON transactions(tenant_id, id)"
+            )
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_merkle_tenant_range "
                 "ON merkle_roots(tenant_id, tx_start_id, tx_end_id)"

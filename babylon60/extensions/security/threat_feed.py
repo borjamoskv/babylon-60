@@ -19,7 +19,7 @@ from typing import Any
 
 from babylon60.extensions.security.threat_signatures import BUILT_IN_SIGNATURES
 
-logger = logging.getLogger("cortex_extensions.security.threat_feed")
+logger = logging.getLogger("babylon60_extensions.security.threat_feed")
 __all__ = ["BUILT_IN_SIGNATURES", "ThreatFeedEngine", "ThreatFeedReport", "ThreatMatch"]
 _COMPILED_SIGNATURES: list[tuple[dict[str, Any], re.Pattern[str]]] = []
 for _sig in BUILT_IN_SIGNATURES:

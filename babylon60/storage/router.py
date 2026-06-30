@@ -17,7 +17,7 @@ from babylon60.storage import StorageMode, get_storage_mode
 
 __all__ = ["TenantRouter", "get_router"]
 
-logger = logging.getLogger("cortex.storage.router")
+logger = logging.getLogger("babylon60.storage.router")
 
 _MAX_BACKENDS: Final[int] = 500
 

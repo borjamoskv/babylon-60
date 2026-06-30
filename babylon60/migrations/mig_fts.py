@@ -4,7 +4,7 @@ import sqlite3
 
 from babylon60.crypto import get_default_encrypter
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 def _migration_017_fts_decouple(conn: sqlite3.Connection):

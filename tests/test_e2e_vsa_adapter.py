@@ -49,7 +49,7 @@ class TestVSAAdapter:
         # Persist and clean up
         hash_val = bridge.persist()
         assert len(hash_val) > 0
-        
+
         # Clean up files created
         if bridge._memory._persistence_path.exists():
             bridge._memory._persistence_path.unlink()

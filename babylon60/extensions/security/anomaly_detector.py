@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.security.anomaly_detector")
+logger = logging.getLogger("babylon60_extensions.security.anomaly_detector")
 
 __all__ = [
     "AnomalyDetector",

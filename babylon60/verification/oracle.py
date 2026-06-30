@@ -11,7 +11,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-logger = logging.getLogger("cortex.verification")
+logger = logging.getLogger("babylon60.verification")
 
 
 @dataclass(frozen=True)

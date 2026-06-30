@@ -31,7 +31,7 @@ __all__ = ["EpisodicMemory"]
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("cortex_extensions.episodic")
+logger = logging.getLogger("babylon60_extensions.episodic")
 
 # ─── Configuration ────────────────────────────────────────────────────
 

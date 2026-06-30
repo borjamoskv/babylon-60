@@ -15,7 +15,7 @@ from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
-logger = logging.getLogger("cortex_extensions.swarm.conflict_resolution")
+logger = logging.getLogger("babylon60_extensions.swarm.conflict_resolution")
 
 
 class ConflictType(str, Enum):

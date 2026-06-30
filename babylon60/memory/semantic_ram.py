@@ -34,7 +34,7 @@ from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
 
 __all__ = ["DynamicSemanticSpace", "SemanticMutator"]
 
-logger = logging.getLogger("cortex.memory.semantic_ram")
+logger = logging.getLogger("babylon60.memory.semantic_ram")
 
 # Import topological health types (lazy to avoid circular imports)
 if TYPE_CHECKING:

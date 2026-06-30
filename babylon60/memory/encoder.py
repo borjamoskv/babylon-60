@@ -18,7 +18,7 @@ from babylon60.embeddings.local import LocalEmbedder
 
 __all__ = ["AsyncEncoder"]
 
-logger = logging.getLogger("cortex.memory.encoder")
+logger = logging.getLogger("babylon60.memory.encoder")
 
 
 class AsyncEncoder:

@@ -13,7 +13,7 @@ from typing import Any
 from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.extensions.daemon.models import SiteStatus
 
-logger = logging.getLogger("cortex.monitors.heartbeat")
+logger = logging.getLogger("babylon60.monitors.heartbeat")
 
 
 class TrueHeartbeatMonitor:

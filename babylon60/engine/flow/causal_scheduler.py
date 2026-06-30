@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from babylon60.ledger.causal_graph import CausalGraph
     from babylon60.ledger.execution_trace import ExecutionTraceLedger
 
-logger = logging.getLogger("cortex.engine.flow.causal_scheduler")
+logger = logging.getLogger("babylon60.engine.flow.causal_scheduler")
 
 
 class CausalScheduler:
@@ -176,8 +176,6 @@ class CausalScheduler:
 
         elif mode == "pressure":
             # Micro-repair / Logging / Allow Ley2Loop to handle it via future bias
-            logger.info(
-                "[Causal Scheduler] Pressure state. Relying on Ley2Loop for drift shaping."
-            )
+            logger.info("[Causal Scheduler] Pressure state. Relying on Ley2Loop for drift shaping.")
 
         return {"tick_state": tick_state, "actions": actions_taken}

@@ -21,7 +21,7 @@ from babylon60.extensions.llm._models import BaseProvider
 
 __all__ = ["ProviderMetrics", "WeightedProviderPool"]
 
-logger = logging.getLogger("cortex_extensions.llm.pool")
+logger = logging.getLogger("babylon60_extensions.llm.pool")
 
 
 @dataclass()

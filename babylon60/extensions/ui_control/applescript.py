@@ -10,7 +10,7 @@ from babylon60.extensions.ui_control.models import (
     UIElementNotFoundError,
 )
 
-logger = logging.getLogger("cortex_extensions.ui_control")
+logger = logging.getLogger("babylon60_extensions.ui_control")
 
 
 async def run_applescript(

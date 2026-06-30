@@ -12,7 +12,7 @@ import logging
 import re
 from collections import deque
 
-logger = logging.getLogger("cortex.guards.anti_limerence")
+logger = logging.getLogger("babylon60.guards.anti_limerence")
 
 
 def _jaccard_similarity(text1: str, text2: str) -> float:

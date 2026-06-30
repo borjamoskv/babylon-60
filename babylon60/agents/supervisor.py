@@ -23,7 +23,7 @@ from typing import Any
 from babylon60.agents.base import BaseAgent
 from babylon60.agents.state import AgentStatus
 
-logger = logging.getLogger("cortex.agents.supervisor")
+logger = logging.getLogger("babylon60.agents.supervisor")
 
 DEFAULT_HEARTBEAT_TIMEOUT_S = 30.0
 DEFAULT_MAX_RESTARTS = 3

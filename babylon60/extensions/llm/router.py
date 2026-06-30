@@ -30,7 +30,7 @@ from babylon60.extensions.llm._router_shannon import compress_working_memory
 from babylon60.extensions.llm._telemetry import CascadeTelemetry
 from babylon60.utils.result import Err, Ok, Result
 
-logger = logging.getLogger("cortex_extensions.llm.router")
+logger = logging.getLogger("babylon60_extensions.llm.router")
 
 __all__ = [
     "BaseProvider",

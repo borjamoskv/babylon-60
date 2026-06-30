@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from babylon60.compaction.compactor import CompactionResult
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.compactor.ttl")
+logger = logging.getLogger("babylon60.compactor.ttl")
 _LOG_FMT = "Compactor TTL [%s] %s"
 
 

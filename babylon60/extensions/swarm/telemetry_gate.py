@@ -41,7 +41,7 @@ except ImportError:  # pragma: no cover
     _HAS_LANGSMITH = False
     RunTree = None  # type: ignore[assignment,misc]
 
-logger = logging.getLogger("cortex_extensions.swarm.telemetry_gate")
+logger = logging.getLogger("babylon60_extensions.swarm.telemetry_gate")
 
 T = TypeVar("T")
 

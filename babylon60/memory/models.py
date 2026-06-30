@@ -301,7 +301,7 @@ class CortexFactModel(BaseModel):
                     except Exception as e:
                         import logging
 
-                        logging.getLogger("cortex.memory.models").warning(
+                        logging.getLogger("babylon60.memory.models").warning(
                             f"HDC auto-encode failed: {e}"
                         )
         return data

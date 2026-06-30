@@ -15,7 +15,7 @@ from typing import Any
 
 from babylon60.crypto.keys import ZKSwarmIdentity
 
-logger = logging.getLogger("cortex.guards.memory_firewall")
+logger = logging.getLogger("babylon60.guards.memory_firewall")
 
 
 class MemoryFirewallGuard:
@@ -30,8 +30,16 @@ class MemoryFirewallGuard:
 
         # C1 to C5 ranking for threshold comparison
         self._confidence_rank = {
-            "C1": 1, "C2": 2, "C3": 3, "C4": 4, "C5": 5,
-            "STATED": 3, "COMPUTED": 3, "VERIFIED": 4, "OBSERVED": 3, "NONE": 1
+            "C1": 1,
+            "C2": 2,
+            "C3": 3,
+            "C4": 4,
+            "C5": 5,
+            "STATED": 3,
+            "COMPUTED": 3,
+            "VERIFIED": 4,
+            "OBSERVED": 3,
+            "NONE": 1,
         }
 
     def validate_fact(

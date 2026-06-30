@@ -34,7 +34,7 @@ from babylon60.guards.thermodynamic import AgentMode, ThermodynamicCounters
 
 __all__ = ["StoreMixin"]
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):

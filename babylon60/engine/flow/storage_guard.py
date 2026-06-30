@@ -21,7 +21,7 @@ from typing import Any
 
 __all__ = ["GuardViolation", "StorageGuard"]
 
-logger = logging.getLogger("cortex.guard.storage")
+logger = logging.getLogger("babylon60.guard.storage")
 
 
 class GuardViolation(Exception):

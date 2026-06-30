@@ -434,7 +434,7 @@ class CognitiveHandoff:
                 "provider": self._infra,
                 "temperature": 0.0,
                 "reasoning_mode": None,
-                "description": "DRM-v1: Preservación Estructural (0% Varianza)"
+                "description": "DRM-v1: Preservación Estructural (0% Varianza)",
             }
         elif tolerance_variance <= 0.15:
             # 15% Tolerance -> Gemini 3.1 Pro (or high-fidelity economic tier), LOW Temp
@@ -442,7 +442,7 @@ class CognitiveHandoff:
                 "provider": self._auditor_economic,
                 "temperature": 0.0,
                 "reasoning_mode": None,
-                "description": "DRM-v1: Ingeniería Sistémica (15% Varianza)"
+                "description": "DRM-v1: Ingeniería Sistémica (15% Varianza)",
             }
         else:
             # >90% Tolerance -> Premium Tier with reasoning (ULTRATHINK / o-series / GPT-5.5)
@@ -450,9 +450,9 @@ class CognitiveHandoff:
                 "provider": self._auditor_premium,
                 "temperature": 0.5,
                 "reasoning_mode": ReasoningMode.ULTRA_THINK,
-                "description": "DRM-v1: Singularidad / Resolución P0 (>90% Varianza)"
+                "description": "DRM-v1: Singularidad / Resolución P0 (>90% Varianza)",
             }
-            
+
         logger.info(
             "⚡ [DRM-v1 ROUTING] %s | Provider: %s | Temp: %s | Mode: %s",
             route["description"],

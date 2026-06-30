@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-logger = logging.getLogger("cortex.sica.constitution")
+logger = logging.getLogger("babylon60.sica.constitution")
 
 
 class Severity(str, Enum):

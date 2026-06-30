@@ -31,7 +31,7 @@ from babylon60.extensions.notifications.events import CortexEvent, EventSeverity
 if TYPE_CHECKING:
     from babylon60.extensions.notifications.adapters.base import BaseAdapter
 
-logger = logging.getLogger("cortex_extensions.notifications.bus")
+logger = logging.getLogger("babylon60_extensions.notifications.bus")
 
 _SEVERITY_ORDER = [s.value for s in EventSeverity]
 

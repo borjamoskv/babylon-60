@@ -16,7 +16,7 @@ from typing import Optional
 
 from babylon60.audit.ledger import EnterpriseAuditLedger
 
-logger = logging.getLogger("cortex.engine.causal.apoptosis")
+logger = logging.getLogger("babylon60.engine.causal.apoptosis")
 if not logger.handlers:
     ch = logging.StreamHandler()
     ch.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))

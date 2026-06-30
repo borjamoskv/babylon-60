@@ -17,7 +17,7 @@ import subprocess
 from collections.abc import Sequence
 from pathlib import Path
 
-logger = logging.getLogger("cortex.sys")
+logger = logging.getLogger("babylon60.sys")
 
 
 class SovereignSys:

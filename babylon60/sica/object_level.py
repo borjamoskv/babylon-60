@@ -21,7 +21,7 @@ from typing import Any
 
 from babylon60.sica.strategy import SearchStrategy
 
-logger = logging.getLogger("cortex.sica.object_level")
+logger = logging.getLogger("babylon60.sica.object_level")
 
 
 class StepOutcome(str, Enum):

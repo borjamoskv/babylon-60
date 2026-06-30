@@ -43,7 +43,7 @@ __all__ = [
     "cosine_similarity",
 ]
 
-logger = logging.getLogger("cortex.audit.cognitive_router")
+logger = logging.getLogger("babylon60.audit.cognitive_router")
 
 
 @dataclass

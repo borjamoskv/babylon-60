@@ -11,7 +11,7 @@ import click
 
 from babylon60.cli.common import DEFAULT_DB, _run_async, console
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 @click.group(name="worker")

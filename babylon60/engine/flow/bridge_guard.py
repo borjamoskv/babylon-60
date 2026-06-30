@@ -18,7 +18,7 @@ import aiosqlite
 
 __all__ = ["BridgeGuard"]
 
-logger = logging.getLogger("cortex.bridge_guard")
+logger = logging.getLogger("babylon60.bridge_guard")
 
 # Maximum quarantine ratio before bridge is auto-blocked
 _QUARANTINE_THRESHOLD = 0.15  # 15% of facts quarantined = contaminated project

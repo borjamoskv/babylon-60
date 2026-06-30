@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from babylon60.memory.metamemory import MetamemoryMonitor
     from babylon60.memory.replay import HippocampalReplay
 
-logger = logging.getLogger("cortex.memory.sleep")
+logger = logging.getLogger("babylon60.memory.sleep")
 
 __all__ = [
     "SleepCycleReport",

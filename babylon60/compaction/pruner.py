@@ -11,7 +11,7 @@ from typing import TypedDict
 
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.compaction.pruner")
+logger = logging.getLogger("babylon60.compaction.pruner")
 
 
 class FactRecord(TypedDict):

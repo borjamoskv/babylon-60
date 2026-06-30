@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 __all__ = ["GitHubCortexBridge", "SyncResult"]
 
-logger = logging.getLogger("cortex_extensions.sync.github")
+logger = logging.getLogger("babylon60_extensions.sync.github")
 
 _GH_API = "https://api.github.com"
 _PROJECT = "github-sync"

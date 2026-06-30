@@ -12,7 +12,7 @@ from babylon60.extensions.mejoralo.constants import TAINT_TAG
 if TYPE_CHECKING:
     from babylon60.extensions.mejoralo.engine import MejoraloEngine
 
-logger = logging.getLogger("cortex_extensions.mejoralo.taint")
+logger = logging.getLogger("babylon60_extensions.mejoralo.taint")
 
 
 def mark_file_tainted(

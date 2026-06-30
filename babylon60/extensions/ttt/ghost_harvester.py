@@ -6,7 +6,7 @@ import sqlite3
 import time
 from datetime import datetime, timedelta, timezone
 
-logger = logging.getLogger("cortex_extensions.ttt.ghost_harvester")
+logger = logging.getLogger("babylon60_extensions.ttt.ghost_harvester")
 
 # CORTEX DB Hardcoded Path for local daemon
 DB_PATH = os.path.expanduser("~/.cortex/cortex.db")

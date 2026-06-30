@@ -25,7 +25,7 @@ __all__ = [
     "LangbaseError",
 ]
 
-logger = logging.getLogger("cortex_extensions.langbase.client")
+logger = logging.getLogger("babylon60_extensions.langbase.client")
 
 # Langbase API base
 DEFAULT_BASE_URL = "https://api.langbase.com/v1"

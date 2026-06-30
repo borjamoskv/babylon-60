@@ -20,7 +20,7 @@ from babylon60.extensions.health.models import (
 from babylon60.extensions.health.scorer import HealthScorer
 from babylon60.extensions.health.trend import TrendDetector
 
-logger = logging.getLogger("cortex_extensions.health")
+logger = logging.getLogger("babylon60_extensions.health")
 
 
 class HealthMixin:

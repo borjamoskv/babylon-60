@@ -158,6 +158,7 @@ async def lifespan(app: FastAPI):
         await auth_manager.close()
         timing_conn.close()
         import babylon60.auth
+
         babylon60.auth.manager._auth_manager = None  # type: ignore[reportAttributeAccessIssue]
         api_state.engine = None
         api_state.auth_manager = None

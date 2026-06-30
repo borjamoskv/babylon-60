@@ -13,7 +13,7 @@ from typing import Any
 
 from babylon60.router.router import AgentRouter
 
-logger = logging.getLogger("cortex.router.cascade")
+logger = logging.getLogger("babylon60.router.cascade")
 
 
 class AsyncCascadeRouter:

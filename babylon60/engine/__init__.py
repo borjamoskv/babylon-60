@@ -29,15 +29,19 @@ _DEFERRED_ATTRIBUTES = {
     "CortexEngine": ".core.cortex_engine",
 }
 
+
 def __getattr__(name: str):
     if name in _SWARM_MODULES:
         import importlib
+
         return importlib.import_module(f"cortex.swarm.{name}")
     if name in _DEFERRED_ATTRIBUTES:
         import importlib
+
         mod = importlib.import_module(_DEFERRED_ATTRIBUTES[name], __name__)
         return getattr(mod, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 def __dir__():
     return sorted(list(globals().keys()) + list(_SWARM_MODULES) + list(_DEFERRED_ATTRIBUTES.keys()))

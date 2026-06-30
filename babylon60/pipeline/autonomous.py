@@ -16,7 +16,7 @@ from babylon60.pipeline import DeliveryTarget, PipelineRequest, PipelineResult
 from babylon60.pipeline.executor import AgentExecutor
 from babylon60.pipeline.orchestrator import CortexOrchestrator
 
-logger = logging.getLogger("cortex.pipeline.autonomous")
+logger = logging.getLogger("babylon60.pipeline.autonomous")
 
 
 async def execute_autonomous_mission(

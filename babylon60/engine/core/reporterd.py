@@ -18,7 +18,7 @@ from aiohttp.web_response import StreamResponse
 
 from babylon60.engine.core.reporter import SovereignReporter
 
-logger = logging.getLogger("cortex.reporterd")
+logger = logging.getLogger("babylon60.reporterd")
 
 
 class ManifoldDaemon:

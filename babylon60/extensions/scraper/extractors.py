@@ -11,7 +11,7 @@ from html.parser import HTMLParser
 
 import httpx
 
-LOG = logging.getLogger("cortex_extensions.scraper.extractors")
+LOG = logging.getLogger("babylon60_extensions.scraper.extractors")
 _BLOCK_TAGS = frozenset(
     {
         "p",

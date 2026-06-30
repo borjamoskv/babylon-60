@@ -40,7 +40,7 @@ __all__ = [
     "ReflexionOutcome",
 ]
 
-logger = logging.getLogger("cortex.engine.cognitive.reflexion")
+logger = logging.getLogger("babylon60.engine.cognitive.reflexion")
 
 
 # ─── Types ────────────────────────────────────────────────────────

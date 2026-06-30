@@ -13,7 +13,7 @@ from typing import Any
 
 import turbopuffer as tpuf
 
-logger = logging.getLogger("cortex.memory.turbopuffer")
+logger = logging.getLogger("babylon60.memory.turbopuffer")
 
 
 class TurbopufferSink:
@@ -23,7 +23,7 @@ class TurbopufferSink:
         self.namespace_name = namespace
         self._client = None
         self._ns = None
-        
+
         # We don't initialize immediately to allow dynamic environment loading
         self._initialized = False
 
@@ -31,7 +31,7 @@ class TurbopufferSink:
         """Lazy initialization of the tpuf client."""
         if self._initialized:
             return
-            
+
         api_key = os.environ.get("TURBOPUFFER_API_KEY")
         if not api_key:
             logger.warning(

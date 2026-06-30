@@ -10,6 +10,7 @@ class APEXDirective:
     operation: str = "Auditoría topológica y extracción masiva de exergía"
     tolerance: int = 3  # N=3 BFT Consensus
 
+
 ULTRATHINK_ARSENAL: list[APEXDirective] = [
     APEXDirective(target="Issue #467"),
     APEXDirective(target="Issue #470"),
@@ -113,6 +114,7 @@ ULTRATHINK_ARSENAL: list[APEXDirective] = [
     APEXDirective(target="CORTEX-CORE"),
 ]
 
+
 def get_ultrathink_arsenal() -> list[APEXDirective]:
     """Retorna las 100 primitivas cristalizadas para ejecución de Swarm con resolución de paths."""
     resolved_arsenal = []
@@ -121,9 +123,9 @@ def get_ultrathink_arsenal() -> list[APEXDirective]:
         target = directive.target
         if "SYS_OPERATOR" in target:
             target = target.replace("SYS_OPERATOR", current_user)
-        resolved_arsenal.append(APEXDirective(
-            target=target,
-            operation=directive.operation,
-            tolerance=directive.tolerance
-        ))
+        resolved_arsenal.append(
+            APEXDirective(
+                target=target, operation=directive.operation, tolerance=directive.tolerance
+            )
+        )
     return resolved_arsenal

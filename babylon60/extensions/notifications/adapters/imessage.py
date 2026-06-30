@@ -14,7 +14,7 @@ import sys
 from babylon60.extensions.notifications.adapters.base import BaseAdapter
 from babylon60.extensions.notifications.events import CortexEvent
 
-logger = logging.getLogger("cortex_extensions.notifications.imessage")
+logger = logging.getLogger("babylon60_extensions.notifications.imessage")
 
 
 class IMessageAdapter(BaseAdapter):

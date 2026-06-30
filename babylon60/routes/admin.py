@@ -60,7 +60,7 @@ router = APIRouter(
     tags=["governance"],
     dependencies=[Depends(_rate_limiter), Depends(_audit_logger)],
 )
-logger = logging.getLogger("cortex.admin")
+logger = logging.getLogger("babylon60.admin")
 
 # Maximum facts to export in a single operation
 _MAX_EXPORT_FACTS = 100_000

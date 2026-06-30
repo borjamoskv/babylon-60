@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
     from babylon60.mcp_server.server import _MCPContext
 
-logger = logging.getLogger("cortex.mcp_server.trust")
+logger = logging.getLogger("babylon60.mcp_server.trust")
 
 
 def register_trust_tools(mcp: FastMCP, ctx: _MCPContext) -> None:

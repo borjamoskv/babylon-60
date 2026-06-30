@@ -20,7 +20,7 @@ from typing import Any
 
 __all__ = ["DependencyAlert", "DependencyHealthMonitor"]
 
-logger = logging.getLogger("cortex_extensions.daemon.dependency_health")
+logger = logging.getLogger("babylon60_extensions.daemon.dependency_health")
 
 
 @dataclass

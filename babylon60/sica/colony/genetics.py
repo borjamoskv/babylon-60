@@ -11,7 +11,7 @@ from babylon60.sica.strategy import Heuristic, SearchStrategy, StrategyGenome
 
 from .types import GeneFragment
 
-logger = logging.getLogger("cortex.sica.colony.genetics")
+logger = logging.getLogger("babylon60.sica.colony.genetics")
 
 
 def _interleave(a: list[str], b: list[str]) -> list[str]:

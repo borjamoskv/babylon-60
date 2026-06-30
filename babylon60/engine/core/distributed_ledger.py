@@ -25,7 +25,7 @@ from babylon60.engine.core.evolution_ledger import (
     _canonical_json,
 )
 
-logger = logging.getLogger("cortex.distributed_ledger")
+logger = logging.getLogger("babylon60.distributed_ledger")
 
 
 class DistributedEvolutionLedger(EvolutionLedger):

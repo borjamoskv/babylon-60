@@ -2,7 +2,7 @@
 import logging
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.guards.models")
+logger = logging.getLogger("babylon60.guards.models")
 
 # Binary names that indicate external oracle dependency
 ORACLE_BINARIES: frozenset[str] = frozenset(

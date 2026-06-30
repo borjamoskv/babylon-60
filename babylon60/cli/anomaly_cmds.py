@@ -81,15 +81,11 @@ def contradiction_scan_cmd(entity: str, db: str) -> None:
             anomalies = _run_async(_run())
 
         if not anomalies:
-            msg = (
-                f"[bold green]✓ Scan completed. "
-                f"No contradictions for '{entity}'.[/bold green]"
-            )
+            msg = f"[bold green]✓ Scan completed. No contradictions for '{entity}'.[/bold green]"
             console.print(msg)
         else:
             console.print(
-                f"[bold red]⚠ Found {len(anomalies)} contradictions "
-                f"for '{entity}':[/bold red]"
+                f"[bold red]⚠ Found {len(anomalies)} contradictions for '{entity}':[/bold red]"
             )
             for a in anomalies:
                 console.print(f"  - {a.description}")
@@ -122,10 +118,7 @@ def memory_clean_cmd(db: str) -> None:
             msg = "[bold green]✓ Memory clean. No resurrections detected.[/bold green]"
             console.print(msg)
         else:
-            msg = (
-                f"[bold yellow]⚰ Purge completed: {len(ghosts)} "
-                f"ghosts buried.[/bold yellow]"
-            )
+            msg = f"[bold yellow]⚰ Purge completed: {len(ghosts)} ghosts buried.[/bold yellow]"
             console.print(msg)
     finally:
         close_engine_sync(engine)

@@ -14,7 +14,7 @@ from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.pipeline import ContextPacket, PipelineRequest
 from babylon60.pipeline._orchestrator_exceptions import BudgetExhaustedError
 
-logger = logging.getLogger("cortex.pipeline.orchestrator")
+logger = logging.getLogger("babylon60.pipeline.orchestrator")
 
 
 class StagesMixin:

@@ -35,7 +35,7 @@ __all__ = [
     "SAPEntityError",
 ]
 
-logger = logging.getLogger("cortex_extensions.sap.client")
+logger = logging.getLogger("babylon60_extensions.sap.client")
 
 
 # ─── Exceptions ──────────────────────────────────────────────────────

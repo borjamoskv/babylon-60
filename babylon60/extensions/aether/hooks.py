@@ -13,7 +13,7 @@ import logging
 from collections.abc import Callable, Coroutine
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.aether.hooks")
+logger = logging.getLogger("babylon60_extensions.aether.hooks")
 
 
 def hooked_tool_execution(

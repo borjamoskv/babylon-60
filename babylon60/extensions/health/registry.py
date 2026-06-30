@@ -9,7 +9,7 @@ from typing import Any
 from babylon60.extensions.health.health_protocol import MetricCollectorProtocol
 from babylon60.extensions.health.models import MetricSnapshot
 
-logger = logging.getLogger("cortex_extensions.health.registry")
+logger = logging.getLogger("babylon60_extensions.health.registry")
 
 
 class CollectorRegistry:

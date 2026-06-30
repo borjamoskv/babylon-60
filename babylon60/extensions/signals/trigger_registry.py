@@ -28,7 +28,7 @@ from babylon60.extensions.signals.trigger_engine import (
 
 __all__ = ["register_defaults"]
 
-logger = logging.getLogger("cortex_extensions.signals.trigger_registry")
+logger = logging.getLogger("babylon60_extensions.signals.trigger_registry")
 
 
 def register_defaults(engine: TriggerEngine) -> None:

@@ -25,7 +25,7 @@ from pydantic import BaseModel, Field
 
 from babylon60.gateway import GatewayIntent, GatewayRequest, GatewayRouter
 
-logger = logging.getLogger("cortex.gateway.rest")
+logger = logging.getLogger("babylon60.gateway.rest")
 
 router = APIRouter(prefix="/gateway/v1", tags=["gateway:v1"])
 

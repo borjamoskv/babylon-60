@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from babylon60.gateway import GatewayRequest
 
-logger = logging.getLogger("cortex.gateway.gidatu")
+logger = logging.getLogger("babylon60.gateway.gidatu")
 
 
 class GidatuHandler:

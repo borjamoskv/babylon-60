@@ -35,7 +35,7 @@ __all__ = [
     "get_default_signer",
 ]
 
-logger = logging.getLogger("cortex_extensions.security.signatures")
+logger = logging.getLogger("babylon60_extensions.security.signatures")
 
 _KEYRING_SERVICE = "cortex_v6"
 _KEYRING_PRIVKEY = "ed25519_private_key"

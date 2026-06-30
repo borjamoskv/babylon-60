@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from babylon60.compaction.compactor import CompactionResult
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.compaction.lateral")
+logger = logging.getLogger("babylon60.compaction.lateral")
 _LOG_FMT = "Compactor [%s] %s"
 
 

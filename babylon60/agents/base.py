@@ -24,7 +24,7 @@ from babylon60.agents.message_schema import AgentMessage, MessageKind, new_messa
 from babylon60.agents.state import AgentState, AgentStatus, WorkingMemory
 from babylon60.agents.tools import ToolRegistry
 
-logger = logging.getLogger("cortex.agents.base")
+logger = logging.getLogger("babylon60.agents.base")
 
 
 class BaseAgent:

@@ -25,7 +25,7 @@ from babylon60.extensions.zkortex.commitment import KnowledgeCommitment, commit
 from babylon60.extensions.zkortex.merkle import MerkleTree, ZKMembershipProof
 from babylon60.extensions.zkortex.range_proof import ZKRangeProof, prove_range
 
-logger = logging.getLogger("cortex_extensions.zkortex.prover")
+logger = logging.getLogger("babylon60_extensions.zkortex.prover")
 
 
 @dataclass

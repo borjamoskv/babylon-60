@@ -13,7 +13,7 @@ import logging
 import time
 from typing import Any
 
-logger = logging.getLogger("cortex.pipeline.executor")
+logger = logging.getLogger("babylon60.pipeline.executor")
 
 
 class AgentExecutor:

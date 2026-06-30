@@ -46,7 +46,7 @@ __all__ = [
     "SessionRunner",
 ]
 
-logger = logging.getLogger("cortex.benchmark.protocols")
+logger = logging.getLogger("babylon60.benchmark.protocols")
 
 # ---------------------------------------------------------------------------
 # §A — Excitation Families & Probe Bank
@@ -56,11 +56,11 @@ logger = logging.getLogger("cortex.benchmark.protocols")
 class ExcitationFamily(Enum):
     """Five orthogonal signal families for exciting all dynamic modes."""
 
-    LOGIC = auto()         # Inductive/deductive abstraction → generalization capacity
-    NARRATIVE = auto()     # Text mutation & compression → processing/compression
-    MEMORY = auto()        # Key-value injection with distractors → contextual retention
-    ADVERSARIAL = auto()   # Contradictions, traps, red herrings → perturbation robustness
-    METACOGNITIVE = auto() # Forced self-evaluation & negative feedback → self-correction
+    LOGIC = auto()  # Inductive/deductive abstraction → generalization capacity
+    NARRATIVE = auto()  # Text mutation & compression → processing/compression
+    MEMORY = auto()  # Key-value injection with distractors → contextual retention
+    ADVERSARIAL = auto()  # Contradictions, traps, red herrings → perturbation robustness
+    METACOGNITIVE = auto()  # Forced self-evaluation & negative feedback → self-correction
 
 
 # Minimum probe counts per family (§A of the operative framework)
@@ -106,9 +106,7 @@ class ProbeBank:
     """
 
     def __init__(self) -> None:
-        self._probes: dict[ExcitationFamily, list[Probe]] = {
-            f: [] for f in ExcitationFamily
-        }
+        self._probes: dict[ExcitationFamily, list[Probe]] = {f: [] for f in ExcitationFamily}
 
     def register(self, probe: Probe) -> None:
         self._probes[probe.family].append(probe)
@@ -129,8 +127,11 @@ class ProbeBank:
     def validate_cardinality(self) -> dict[ExcitationFamily, tuple[int, int, bool]]:
         """Returns (actual, required, passes) per family."""
         return {
-            f: (len(self._probes[f]), FAMILY_PROBE_COUNTS[f],
-                len(self._probes[f]) >= FAMILY_PROBE_COUNTS[f])
+            f: (
+                len(self._probes[f]),
+                FAMILY_PROBE_COUNTS[f],
+                len(self._probes[f]) >= FAMILY_PROBE_COUNTS[f],
+            )
             for f in ExcitationFamily
         }
 
@@ -342,14 +343,8 @@ class StateEstimator:
         """Returns the feature matrix: K × D where K=turns, D=feature_dim."""
         return [s.feature_vector() for s in self.states]
 
-    def trajectory_by_family(
-        self, family: ExcitationFamily
-    ) -> list[list[float]]:
-        return [
-            s.feature_vector()
-            for s in self.states
-            if s.family == family
-        ]
+    def trajectory_by_family(self, family: ExcitationFamily) -> list[list[float]]:
+        return [s.feature_vector() for s in self.states if s.family == family]
 
 
 # ---------------------------------------------------------------------------
@@ -397,8 +392,11 @@ class BehavioralCoverage:
         """
         if not feature_matrix or not feature_matrix[0]:
             return CoverageReport(
-                h_cov=0.0, h_max=0.0, variance_ratios=[],
-                coverage_ratio=0.0, blind_dimensions=[],
+                h_cov=0.0,
+                h_max=0.0,
+                variance_ratios=[],
+                coverage_ratio=0.0,
+                blind_dimensions=[],
             )
 
         k = len(feature_matrix)
@@ -420,9 +418,11 @@ class BehavioralCoverage:
         total_var = sum(variances)
         if total_var < 1e-15:
             return CoverageReport(
-                h_cov=0.0, h_max=math.log2(d) if d > 1 else 0.0,
+                h_cov=0.0,
+                h_max=math.log2(d) if d > 1 else 0.0,
                 variance_ratios=[0.0] * d,
-                coverage_ratio=0.0, blind_dimensions=list(range(d)),
+                coverage_ratio=0.0,
+                blind_dimensions=list(range(d)),
             )
 
         # p_d = Var(feature_d) / Σ Var(feature_k) — normalized variance ratios
@@ -560,6 +560,7 @@ class TrajectoryComparator:
 
         if use_mahalanobis:
             inv_cov = TrajectoryComparator._compute_pooled_inv_cov(t_a, t_b)
+
             def dist_fn(a, b):
                 return TrajectoryComparator._mahalanobis(a, b, inv_cov)
         else:
@@ -573,8 +574,8 @@ class TrajectoryComparator:
             for j in range(1, m + 1):
                 cost = dist_fn(t_a[i - 1], t_b[j - 1])
                 dtw_matrix[i][j] = cost + min(
-                    dtw_matrix[i - 1][j],      # insertion
-                    dtw_matrix[i][j - 1],      # deletion
+                    dtw_matrix[i - 1][j],  # insertion
+                    dtw_matrix[i][j - 1],  # deletion
                     dtw_matrix[i - 1][j - 1],  # match
                 )
 
@@ -664,8 +665,7 @@ class DriftDetector:
     def _jsd(p: list[float], q: list[float]) -> float:
         """Jensen-Shannon Divergence: symmetric, bounded ∈ [0, 1]."""
         m = [(pi + qi) / 2.0 for pi, qi in zip(p, q, strict=False)]
-        return 0.5 * DriftDetector._kl_divergence(p, m) + \
-               0.5 * DriftDetector._kl_divergence(q, m)
+        return 0.5 * DriftDetector._kl_divergence(p, m) + 0.5 * DriftDetector._kl_divergence(q, m)
 
     @staticmethod
     def _wasserstein_1d(a: list[float], b: list[float]) -> float:
@@ -711,8 +711,10 @@ class DriftDetector:
         """
         if not baseline_features or not current_features:
             return DriftReport(
-                jsd=0.0, wasserstein_approx=0.0,
-                dimension_drifts=[], drift_detected=False,
+                jsd=0.0,
+                wasserstein_approx=0.0,
+                dimension_drifts=[],
+                drift_detected=False,
                 alarm_dimensions=[],
             )
 
@@ -769,10 +771,10 @@ class DriftDetector:
 class AlarmVerdict(Enum):
     """Operational verdict from the alarm policy."""
 
-    NOMINAL = auto()       # All metrics within bounds
-    WATCH = auto()         # Minor anomalies, increase monitoring frequency
-    ALERT = auto()         # Significant drift, flag for review
-    ABORT = auto()         # Critical drift, halt automated reliance on endpoint
+    NOMINAL = auto()  # All metrics within bounds
+    WATCH = auto()  # Minor anomalies, increase monitoring frequency
+    ALERT = auto()  # Significant drift, flag for review
+    ABORT = auto()  # Critical drift, halt automated reliance on endpoint
 
 
 @dataclass(frozen=True, slots=True)
@@ -849,9 +851,7 @@ class AlarmPolicy:
                 )
                 verdict = max(verdict, AlarmVerdict.ALERT, key=lambda v: v.value)
             elif drift.jsd >= self.jsd_watch:
-                reasons.append(
-                    f"WATCH_DRIFT: JSD = {drift.jsd:.4f} >= {self.jsd_watch}."
-                )
+                reasons.append(f"WATCH_DRIFT: JSD = {drift.jsd:.4f} >= {self.jsd_watch}.")
                 verdict = max(verdict, AlarmVerdict.WATCH, key=lambda v: v.value)
 
         # Seed stability check (replication control)
@@ -949,6 +949,7 @@ class SessionRunner:
         then averages across groups and dimensions.
         """
         from collections import defaultdict
+
         groups: dict[str, list[list[float]]] = defaultdict(list)
         for r in self.results:
             groups[r.probe.probe_id].append(r.features.to_vector())
@@ -969,7 +970,7 @@ class SessionRunner:
                 var = sum((x - mu) ** 2 for x in col) / max(k - 1, 1)
                 # Normalize by mean to make variance comparable across dimensions
                 norm = abs(mu) if abs(mu) > 1e-10 else 1.0
-                total_var += var / (norm ** 2)
+                total_var += var / (norm**2)
                 count += 1
 
         return total_var / count if count > 0 else 0.0
@@ -999,8 +1000,6 @@ class SessionRunner:
             "model_id": self.model_id,
             "session_id": self.estimator.session_id,
             "total_probes": len(self.results),
-            "families_covered": list({
-                r.probe.family.name for r in self.results
-            }),
+            "families_covered": list({r.probe.family.name for r in self.results}),
             "timestamp": time.time(),
         }

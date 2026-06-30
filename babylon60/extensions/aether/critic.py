@@ -14,7 +14,7 @@ from babylon60.extensions.aether.tools import AgentToolkit
 
 __all__ = ["CriticAgent"]
 
-logger = logging.getLogger("cortex_extensions.aether.critic")
+logger = logging.getLogger("babylon60_extensions.aether.critic")
 
 _SYSTEM = """You are a Sovereign Code Critic AI. Review the git diff below and
 assess whether it correctly implements the task.

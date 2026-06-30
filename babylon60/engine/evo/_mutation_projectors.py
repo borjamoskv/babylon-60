@@ -14,7 +14,7 @@ from babylon60.engine.flow.causality import AsyncCausalGraph
 if TYPE_CHECKING:
     from babylon60.engine.core.mutation_engine import FactMutationEngine
 
-logger = logging.getLogger("cortex.mutation_engine")
+logger = logging.getLogger("babylon60.mutation_engine")
 
 
 async def project(

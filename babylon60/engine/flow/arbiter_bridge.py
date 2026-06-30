@@ -45,7 +45,7 @@ from babylon60.router.contract import (
 )
 from babylon60.router.policy import SignalVector
 
-logger = logging.getLogger("cortex.engine.flow.arbiter_bridge")
+logger = logging.getLogger("babylon60.engine.flow.arbiter_bridge")
 
 
 # ─── Score → Severity Mapping ────────────────────────────────────────────

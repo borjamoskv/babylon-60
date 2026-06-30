@@ -46,7 +46,9 @@ def test_changelog_has_entry_for_current_version() -> None:
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     # Keep-a-Changelog format: ## [x.y.z] — date
     pattern = re.compile(rf"^## \[{re.escape(babylon60.__version__)}\]", re.MULTILINE)
-    assert pattern.search(changelog), f"CHANGELOG.md has no entry for version {babylon60.__version__}"
+    assert pattern.search(changelog), (
+        f"CHANGELOG.md has no entry for version {babylon60.__version__}"
+    )
 
 
 def test_fastapi_app_uses_module_version() -> None:

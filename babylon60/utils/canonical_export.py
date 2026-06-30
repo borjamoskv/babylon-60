@@ -220,7 +220,9 @@ class CanonicalExporter:
 
         return "\n".join(lines) + "\n"
 
-    def export_to_file(self, filepath: str, db_path: str = "", cortex_version: str = "1.0.0") -> str:
+    def export_to_file(
+        self, filepath: str, db_path: str = "", cortex_version: str = "1.0.0"
+    ) -> str:
         """Export and write to a file. Returns the integrity hash."""
         content = self.export(db_path=db_path, cortex_version=cortex_version)
         with open(filepath, "w", encoding="utf-8") as f:

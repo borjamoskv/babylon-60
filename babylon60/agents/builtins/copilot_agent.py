@@ -46,7 +46,7 @@ from babylon60.agents.message_schema import AgentMessage, MessageKind, new_messa
 from babylon60.agents.tools import ToolRegistry
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
-logger = logging.getLogger("cortex.agents.copilot")
+logger = logging.getLogger("babylon60.agents.copilot")
 
 
 # ── Suggestion Generation Strategies ─────────────────────────────

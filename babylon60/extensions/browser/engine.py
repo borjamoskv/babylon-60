@@ -11,7 +11,7 @@ from playwright.async_api import (  # pyright: ignore[reportMissingImports]
     async_playwright,
 )
 
-LOG = logging.getLogger("cortex_extensions.browser")
+LOG = logging.getLogger("babylon60_extensions.browser")
 
 
 class BrowserEngine:

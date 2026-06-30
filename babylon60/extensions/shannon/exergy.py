@@ -21,7 +21,7 @@ __all__ = [
     "compute_exergy_report",
 ]
 
-logger = logging.getLogger("cortex_extensions.shannon.exergy")
+logger = logging.getLogger("babylon60_extensions.shannon.exergy")
 
 # ── Formula weights ──────────────────────────────────────────────────
 # downstream_utility dominates - if decisions can't use it, it's waste.

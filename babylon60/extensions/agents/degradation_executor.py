@@ -25,7 +25,7 @@ from babylon60.extensions.agents.degradation_types import (
 
 __all__ = ["_persist_to_cortex", "_upgrade_to_l3", "sovereign_execute"]
 
-logger = logging.getLogger("cortex_extensions.agent.degradation")
+logger = logging.getLogger("babylon60_extensions.agent.degradation")
 
 _P = ParamSpec("_P")
 _R = TypeVar("_R")

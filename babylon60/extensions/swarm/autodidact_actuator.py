@@ -3,7 +3,7 @@ import logging
 
 from babylon60.extensions.swarm.sortu_jit_executor import run_jit_sandbox
 
-logger = logging.getLogger("cortex.autodidact.actuator")
+logger = logging.getLogger("babylon60.autodidact.actuator")
 logging.basicConfig(level=logging.INFO)
 
 

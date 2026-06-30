@@ -12,7 +12,7 @@ Collapses non-essential columns into the `metadata` JSON field to reduce DB entr
 import logging
 import sqlite3
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 def migrate_simplify_facts(conn: sqlite3.Connection) -> None:

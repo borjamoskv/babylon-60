@@ -21,7 +21,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.security.injection_guard")
+logger = logging.getLogger("babylon60_extensions.security.injection_guard")
 
 __all__ = ["InjectionGuard", "InjectionMatch", "InjectionReport"]
 

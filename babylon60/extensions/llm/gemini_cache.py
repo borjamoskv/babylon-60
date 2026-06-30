@@ -11,7 +11,7 @@ import logging
 
 import httpx
 
-logger = logging.getLogger("cortex_extensions.llm.gemini_cache")
+logger = logging.getLogger("babylon60_extensions.llm.gemini_cache")
 
 # The minimum required tokens to be eligible for caching in Gemini v1.5 API
 GEMINI_CACHE_MIN_TOKENS: int = 32768

@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from babylon60.extensions.llm.manager import LLMManager
 
-logger = logging.getLogger("cortex.engine.cognitive.crystallizer")
+logger = logging.getLogger("babylon60.engine.cognitive.crystallizer")
 
 CRYSTALLIZATION_PROMPT = """
 SISTEMA: Eres Claude Fable 5, el Cristalizador Termodinámico de CORTEX (Axiom Ω₁₃ y NightShift).

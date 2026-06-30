@@ -9,7 +9,7 @@ import time
 
 from babylon60.extensions.daemon.utils import run_osascript
 
-logger = logging.getLogger("cortex_extensions.daemon.loops.context")
+logger = logging.getLogger("babylon60_extensions.daemon.loops.context")
 
 
 async def capture_context(state, project_name: str, speak_func):

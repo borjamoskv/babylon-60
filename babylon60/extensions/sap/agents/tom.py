@@ -16,7 +16,7 @@ import aiosqlite
 
 from babylon60.extensions.signals.bus import AsyncSignalBus
 
-logger = logging.getLogger("cortex_extensions.sap.tom")
+logger = logging.getLogger("babylon60_extensions.sap.tom")
 
 
 class TomAgent:

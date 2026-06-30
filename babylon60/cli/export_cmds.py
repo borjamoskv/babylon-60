@@ -14,7 +14,7 @@ from rich.console import Console
 from babylon60.cli.main import cli
 
 console = Console()
-logger = logging.getLogger("cortex.cli.export")
+logger = logging.getLogger("babylon60.cli.export")
 
 
 @cli.group()

@@ -8,7 +8,7 @@ import httpx
 from babylon60.extensions.llm._resilience import resilient_call
 from babylon60.extensions.llm._stealth import apply_causal_jitter, sanitize_response
 
-logger = logging.getLogger("cortex_extensions.llm")
+logger = logging.getLogger("babylon60_extensions.llm")
 
 
 async def execute_gemini_native(

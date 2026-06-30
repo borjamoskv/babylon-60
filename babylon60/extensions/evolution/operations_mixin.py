@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from babylon60.extensions.sovereign.endocrine import DigitalEndocrine
     from babylon60.ledger import SovereignLedger
 
-logger = logging.getLogger("cortex_extensions.evolution.engine.ops")
+logger = logging.getLogger("babylon60_extensions.evolution.engine.ops")
 
 
 class EvolutionOpsMixin:

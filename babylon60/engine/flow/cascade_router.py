@@ -14,7 +14,7 @@ from pathlib import Path
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
-logger = logging.getLogger("cortex_cascade.router")
+logger = logging.getLogger("babylon60_cascade.router")
 
 
 class CascadeRouter:
@@ -151,7 +151,9 @@ class CascadeRouter:
                         ).expanduser()
                         if db_path.exists():
                             conn = sqlite3.connect(db_path)
-                            digest = cortex_hash_truncated(output_content.encode("utf-8"), length=16)
+                            digest = cortex_hash_truncated(
+                                output_content.encode("utf-8"), length=16
+                            )
                             # Escribir en la tabla de episodios/BM25
                             conn.execute(
                                 "INSERT INTO episodes (session_id, event_type, project, content) VALUES (?, ?, ?, ?)",
@@ -173,9 +175,7 @@ class CascadeRouter:
                             conn.commit()
                             conn.close()
                     except (ValueError, TypeError, KeyError, OSError, RuntimeError) as db_e:
-                        logger.error(
-                            f"⚠️ [ROUTER] DB persistence failed for indexing: {db_e}"
-                        )
+                        logger.error(f"⚠️ [ROUTER] DB persistence failed for indexing: {db_e}")
 
                 if process.returncode != 0:
                     return f"Error ({engine}): {stderr}"

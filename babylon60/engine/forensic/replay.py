@@ -63,6 +63,7 @@ class ReplayEngine:
 
         # Crytographic verification of the extracted trajectory chain (AX-I)
         import hashlib
+
         for i, node in enumerate(trajectory):
             # 1. Row-level verification
             hashlib.sha256(
@@ -71,10 +72,10 @@ class ReplayEngine:
             hashlib.sha256(
                 f"{node['timestamp']}{tenant_id}PERSIST-EXECUTOR{actor_id}{node['action']}{node['resource']}{node['status']}".encode()
             ).hexdigest()
-            
+
             # If the database role differs or fields are dynamically structured, we can inspect expected hashes
             # In mock or test environments, we allow either version or verify the chain structure
-            
+
             # 2. Hash-Chain continuity check
             if i > 0:
                 trajectory[i - 1]

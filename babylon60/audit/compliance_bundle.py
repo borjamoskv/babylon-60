@@ -12,7 +12,7 @@ import sqlite3
 import zipfile
 from pathlib import Path
 
-logger = logging.getLogger("cortex.audit.bundler")
+logger = logging.getLogger("babylon60.audit.bundler")
 
 
 class ComplianceBundler:

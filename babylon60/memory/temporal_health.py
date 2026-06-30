@@ -52,7 +52,7 @@ from babylon60.memory.temporal_health_models import (
     SchedulerConfig,
 )
 
-logger = logging.getLogger("cortex.memory.temporal_health")
+logger = logging.getLogger("babylon60.memory.temporal_health")
 
 # ─── Temporal Health Scheduler ───────────────────────────────────────
 

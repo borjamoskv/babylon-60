@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_raw
 
-logger = logging.getLogger("cortex.exergy.video")
+logger = logging.getLogger("babylon60.exergy.video")
 
 
 @dataclass

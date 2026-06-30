@@ -11,7 +11,7 @@ from babylon60.extensions.aether.runner import AetherAgent
 
 __all__ = ["AetherDaemon", "AetherMonitor"]
 
-logger = logging.getLogger("cortex_extensions.aether.daemon")
+logger = logging.getLogger("babylon60_extensions.aether.daemon")
 
 _DEFAULT_POLL = 60  # seconds between queue polls
 _DEFAULT_MAX_CONCURRENT = 2

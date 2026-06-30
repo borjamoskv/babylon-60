@@ -14,7 +14,7 @@ from babylon60.composer.vision_qa import AestheticAuditor
 from babylon60.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from babylon60.utils.result import Err, Ok, Result
 
-logger = logging.getLogger("cortex.composer.engine")
+logger = logging.getLogger("babylon60.composer.engine")
 
 
 class ComposerEngine:

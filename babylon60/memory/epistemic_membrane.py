@@ -40,7 +40,7 @@ class MerkleLedger:
             "llm_source": source_llm_hash,
         }
         self.leaves.append(leaf)
-        
+
         # O(1) Incremental Hash Chain Update:
         # H_n = SHA256(H_{n-1} + Leaf_hash)
         hasher = hashlib.sha256()
@@ -70,14 +70,18 @@ class EpistemicMembrane:
         threshold_consistency: float = 0.68,
         threshold_novelty: float = 0.88,
         noise_tolerance: float = 0.25,
-        device: str | None = None
+        device: str | None = None,
     ):
         self.dim = dim
         self.max_history = max_history
         self.history = []  # List of past approved tensors
 
         # Set stable device for execution
-        self.device = device if device is not None else torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = (
+            device
+            if device is not None
+            else torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        )
 
         # Base roles for structural and semantic binding
         self.roles = {

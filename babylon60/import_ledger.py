@@ -24,19 +24,20 @@ from babylon60.crypto.hash_registry import cortex_hash
 class ImportResolutionLedger:
     """
     Process-safe, cryptographically signed ledger for recording import resolutions.
-    Maintains a tamper-evident global hash chain across concurrent processes, 
+    Maintains a tamper-evident global hash chain across concurrent processes,
     and cryptographically seals each session via a Merkle Tree Root (SMT-inspired).
     """
+
     def __init__(self, filepath: str = None):
         if filepath:
             self.filepath = Path(filepath)
         else:
             project_root = Path(__file__).resolve().parent.parent
             self.filepath = project_root / "import_resolution_ledger.jsonl"
-            
+
         self.session_id = str(uuid.uuid4())
         self.pid = os.getpid()
-        
+
         # Identity and Epistemic Containment
         self.tenant_id = os.environ.get("CORTEX_TENANT_ID", "default_tenant")
         self.agent_id = os.environ.get("CORTEX_AGENT_ID", "borjamoskv")
@@ -46,7 +47,7 @@ class ImportResolutionLedger:
         self._public_key = self._private_key.public_key()
         self.public_key_pem = self._public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
         ).decode("utf-8")
 
     @classmethod
@@ -54,7 +55,7 @@ class ImportResolutionLedger:
         """Computes a deterministic Merkle Root from a list of leaf hashes."""
         if not leaves:
             return cortex_hash(b"EMPTY_TREE")
-        
+
         current_level = leaves
         while len(current_level) > 1:
             next_level = []
@@ -69,7 +70,7 @@ class ImportResolutionLedger:
     def _write_entry(self, entry: dict):
         """Appends an entry to the JSONL ledger file using process-exclusive locking and hash chaining."""
         self.filepath.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Enforce agent and tenant at structural level
         entry["tenant_id"] = self.tenant_id
         entry["agent_id"] = self.agent_id
@@ -79,12 +80,12 @@ class ImportResolutionLedger:
             with open(self.filepath, "a+", encoding="utf-8") as f:
                 try:
                     fcntl.flock(f, fcntl.LOCK_EX)
-                    
+
                     # Read the last line to link the cryptographic chain
                     f.seek(0)
                     lines = f.readlines()
                     non_empty = [line.strip() for line in lines if line.strip()]
-                    
+
                     if non_empty:
                         try:
                             last_entry = json.loads(non_empty[-1])
@@ -96,15 +97,15 @@ class ImportResolutionLedger:
 
                     # Populate chain references
                     entry["prev_hash"] = prev_hash
-                    
+
                     # Compute entry hash based on content and prev_hash
                     payload = f"{entry['timestamp']}|{entry['event']}|{entry['session_id']}|{entry['pid']}|{self.tenant_id}|{self.agent_id}|{prev_hash}"
-                    
+
                     if entry["event"] == "RESOLUTION":
                         payload += f"|{entry.get('caller')}|{entry.get('source')}|{entry.get('type')}|{entry.get('target')}"
                     elif entry["event"] == "SESSION_START":
                         payload += f"|{entry.get('public_key_pem')}"
-                    
+
                     entry_hash = cortex_hash(payload.encode("utf-8"))
                     entry["entry_hash"] = entry_hash
 
@@ -118,15 +119,15 @@ class ImportResolutionLedger:
                                     session_hashes.append(e["entry_hash"])
                             except Exception:
                                 pass
-                        
+
                         # Add the end event's own payload hash to the merkle leaves
                         session_hashes.append(entry_hash)
-                        
+
                         m_root = self._compute_merkle_root(session_hashes)
                         entry["merkle_root"] = m_root
                         signature = self._private_key.sign(m_root.encode("utf-8")).hex()
                         entry["signature"] = signature
-                        
+
                         # Recalculate hash with merkle_root and signature for absolute integrity
                         payload_end = f"{payload}|{m_root}|{signature}"
                         entry["entry_hash"] = cortex_hash(payload_end.encode("utf-8"))
@@ -153,11 +154,7 @@ class ImportResolutionLedger:
             "session_id": self.session_id,
             "pid": self.pid,
             "public_key_pem": self.public_key_pem,
-            "metadata": {
-                "python_version": sys.version,
-                "os": sys.platform,
-                "cwd": os.getcwd()
-            }
+            "metadata": {"python_version": sys.version, "os": sys.platform, "cwd": os.getcwd()},
         }
         self._write_entry(entry)
 
@@ -171,7 +168,7 @@ class ImportResolutionLedger:
             "caller": caller,
             "source": source,
             "type": resolution_type,
-            "target": target
+            "target": target,
         }
         self._write_entry(entry)
 
@@ -181,7 +178,7 @@ class ImportResolutionLedger:
             "timestamp": self._timestamp(),
             "event": "SESSION_END",
             "session_id": self.session_id,
-            "pid": self.pid
+            "pid": self.pid,
         }
         self._write_entry(entry)
 
@@ -189,7 +186,7 @@ class ImportResolutionLedger:
     def verify_ledger(cls, filepath: str) -> dict:
         """
         Verifies the integrity of the import resolution ledger file.
-        Ensures all hashes match their payloads, Merkle roots are correctly calculated 
+        Ensures all hashes match their payloads, Merkle roots are correctly calculated
         from session leaves, and session signatures are valid against the Merkle root.
         """
         path = Path(filepath)
@@ -207,7 +204,7 @@ class ImportResolutionLedger:
                     line_num += 1
                     if not line.strip():
                         continue
-                    
+
                     entry = json.loads(line)
                     event = entry.get("event")
                     session_id = entry.get("session_id")
@@ -225,55 +222,79 @@ class ImportResolutionLedger:
                         return {
                             "status": "failed",
                             "line": line_num,
-                            "reason": f"hash_chain_broken: expected {expected_prev_hash}, got {prev_hash}"
+                            "reason": f"hash_chain_broken: expected {expected_prev_hash}, got {prev_hash}",
                         }
 
                     # Reconstruct expected hash
-                    payload = f"{timestamp}|{event}|{session_id}|{pid}|{tenant_id}|{agent_id}|{prev_hash}"
-                    
+                    payload = (
+                        f"{timestamp}|{event}|{session_id}|{pid}|{tenant_id}|{agent_id}|{prev_hash}"
+                    )
+
                     if event == "SESSION_START":
                         pub_pem = entry.get("public_key_pem")
-                        session_keys[session_id] = serialization.load_pem_public_key(pub_pem.encode("utf-8"))
+                        session_keys[session_id] = serialization.load_pem_public_key(
+                            pub_pem.encode("utf-8")
+                        )
                         payload += f"|{pub_pem}"
                         recomputed_payload_hash = cortex_hash(payload.encode("utf-8"))
                         recomputed = recomputed_payload_hash
                         session_leaves[session_id].append(recomputed_payload_hash)
-                        
+
                     elif event == "RESOLUTION":
                         payload += f"|{entry.get('caller')}|{entry.get('source')}|{entry.get('type')}|{entry.get('target')}"
                         recomputed_payload_hash = cortex_hash(payload.encode("utf-8"))
                         recomputed = recomputed_payload_hash
                         session_leaves[session_id].append(recomputed_payload_hash)
-                        
+
                     elif event == "SESSION_END":
                         m_root = entry.get("merkle_root")
                         signature = entry.get("signature")
-                        
+
                         # Recompute payload hash for this event
                         recomputed_payload_hash = cortex_hash(payload.encode("utf-8"))
                         session_leaves[session_id].append(recomputed_payload_hash)
-                        
+
                         # Verify Merkle Root
                         computed_root = cls._compute_merkle_root(session_leaves[session_id])
                         if computed_root != m_root:
-                            return {"status": "failed", "line": line_num, "reason": "merkle_root_mismatch"}
+                            return {
+                                "status": "failed",
+                                "line": line_num,
+                                "reason": "merkle_root_mismatch",
+                            }
 
                         pub_key = session_keys.get(session_id)
                         if not pub_key:
-                            return {"status": "failed", "line": line_num, "reason": "session_key_not_found"}
-                        
+                            return {
+                                "status": "failed",
+                                "line": line_num,
+                                "reason": "session_key_not_found",
+                            }
+
                         try:
                             pub_key.verify(bytes.fromhex(signature), m_root.encode("utf-8"))
                         except InvalidSignature:
-                            return {"status": "failed", "line": line_num, "reason": "invalid_session_signature"}
-                        
+                            return {
+                                "status": "failed",
+                                "line": line_num,
+                                "reason": "invalid_session_signature",
+                            }
+
                         payload_end = f"{payload}|{m_root}|{signature}"
                         recomputed = cortex_hash(payload_end.encode("utf-8"))
                     else:
-                        return {"status": "failed", "line": line_num, "reason": f"unknown_event: {event}"}
+                        return {
+                            "status": "failed",
+                            "line": line_num,
+                            "reason": f"unknown_event: {event}",
+                        }
 
                     if recomputed != entry_hash:
-                        return {"status": "failed", "line": line_num, "reason": "entry_hash_mismatch"}
+                        return {
+                            "status": "failed",
+                            "line": line_num,
+                            "reason": "entry_hash_mismatch",
+                        }
 
                     expected_prev_hash = entry_hash
         except Exception as e:

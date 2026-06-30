@@ -29,7 +29,7 @@ __all__ = [
     "derive_facts",
 ]
 
-logger = logging.getLogger("cortex.engine.cognitive.inference")
+logger = logging.getLogger("babylon60.engine.cognitive.inference")
 
 # Maximum derivations per cycle to bound compute cost
 MAX_DERIVATIONS_PER_CYCLE = 50

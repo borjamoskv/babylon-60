@@ -10,7 +10,7 @@ from .genetics import GenePool, GenomeCrossover
 from .specialization import SpecializationDetector
 from .tournament import Tournament
 
-logger = logging.getLogger("cortex.sica.colony.core")
+logger = logging.getLogger("babylon60.sica.colony.core")
 
 
 class Colony:

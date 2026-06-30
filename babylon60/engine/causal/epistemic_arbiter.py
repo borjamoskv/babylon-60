@@ -11,7 +11,7 @@ from babylon60.engine.flow.causality_models import (
     UtilityScore,
 )
 
-logger = logging.getLogger("cortex.engine.causal.epistemic_arbiter")
+logger = logging.getLogger("babylon60.engine.causal.epistemic_arbiter")
 
 
 class Constraint:
@@ -54,8 +54,8 @@ class EpistemicCompiler:
             Constraint(
                 name="contradiction_false",
                 # Dummy implementation: look for 'contradicts' flag in evidence metadata
-                evaluator=lambda c: not any(
-                    e.metadata.get("contradicts", False) for e in c.evidence_list
+                evaluator=lambda c: (
+                    not any(e.metadata.get("contradicts", False) for e in c.evidence_list)
                 ),
                 fail_message="Contradicting evidence detected.",
             )
@@ -74,7 +74,7 @@ class EpistemicCompiler:
     def evaluate_claim(self, claim: Claim) -> DecisionTrace:
         trace_steps = []
         trace_steps.append(f"INIT: Evaluating claim {claim.id}")
-        
+
         # 1. Evaluate Constraints
         for constraint_name in claim.constraints:
             if constraint_name not in self.constraints:
@@ -86,10 +86,7 @@ class EpistemicCompiler:
             if not constraint.evaluate(claim):
                 trace_steps.append(f"FAIL: {constraint.fail_message}")
                 return self._finalize_trace(
-                    verdict=EpistemicStatus.BLOCKED,
-                    trace_steps=trace_steps,
-                    truth=0.0,
-                    utility=0.0
+                    verdict=EpistemicStatus.BLOCKED, trace_steps=trace_steps, truth=0.0, utility=0.0
                 )
             trace_steps.append(f"PASS: {constraint_name}")
 
@@ -123,27 +120,20 @@ class EpistemicCompiler:
         trace_steps.append(f"DECISION: Verdict mapped to {verdict.value}")
 
         return self._finalize_trace(
-            verdict=verdict,
-            trace_steps=trace_steps,
-            truth=truth,
-            utility=utility
+            verdict=verdict, trace_steps=trace_steps, truth=truth, utility=utility
         )
 
     def _finalize_trace(
-        self, 
-        verdict: EpistemicStatus, 
-        trace_steps: list[str], 
-        truth: float, 
-        utility: float
+        self, verdict: EpistemicStatus, trace_steps: list[str], truth: float, utility: float
     ) -> DecisionTrace:
         # Cryptographic Hash of the decision path
         raw_trace = "\n".join(trace_steps)
         trace_hash = cortex_hash(raw_trace.encode("utf-8"))
-        
+
         return DecisionTrace(
             verdict=verdict,
             trace_steps=trace_steps,
             trace_hash=trace_hash,
             truth_score=TruthScore(value=truth),
-            utility_score=UtilityScore(value=utility)
+            utility_score=UtilityScore(value=utility),
         )

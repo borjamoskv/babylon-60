@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
 
-logger = logging.getLogger("cortex_extensions.daemon.sync")
+logger = logging.getLogger("babylon60_extensions.daemon.sync")
 
 
 class CortexSyncManager:

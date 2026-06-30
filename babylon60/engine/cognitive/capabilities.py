@@ -6,7 +6,7 @@ import logging
 import os
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.engine.cognitive.capabilities")
+logger = logging.getLogger("babylon60.engine.cognitive.capabilities")
 
 
 @dataclass(frozen=True)

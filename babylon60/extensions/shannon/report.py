@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 __all__ = ["EntropyReport"]
 
-logger = logging.getLogger("cortex_extensions.shannon")
+logger = logging.getLogger("babylon60_extensions.shannon")
 
 # Diagnosis thresholds (normalized entropy)
 _THRESHOLD_CONCENTRATED = 0.3

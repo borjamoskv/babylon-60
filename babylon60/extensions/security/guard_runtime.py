@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.security.runtime")
+logger = logging.getLogger("babylon60.security.runtime")
 
 
 class GuardOutcome:

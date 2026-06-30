@@ -66,9 +66,7 @@ class ExergyBifurcationEngine:
             )
             await conn.commit()
 
-        logger.info(
-            f"[Bifurcation] New timeline '{new_tenant}' forged from '{base_tenant}'."
-        )
+        logger.info(f"[Bifurcation] New timeline '{new_tenant}' forged from '{base_tenant}'.")
         return new_tenant
 
     async def evaluate_multiverse(self, window_seconds: int = 3600) -> list[dict[str, Any]]:

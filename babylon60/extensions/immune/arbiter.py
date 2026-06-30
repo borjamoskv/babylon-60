@@ -22,7 +22,7 @@ from typing import Any
 from babylon60.extensions.immune.falsification import EvolutionaryFalsifier
 from babylon60.verification.verifier import SovereignVerifier
 
-logger = logging.getLogger("cortex_extensions.immune.arbiter")
+logger = logging.getLogger("babylon60_extensions.immune.arbiter")
 
 
 class Verdict(Enum):

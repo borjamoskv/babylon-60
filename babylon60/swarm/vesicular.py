@@ -13,7 +13,7 @@ import shutil
 import tempfile
 import uuid
 
-logger = logging.getLogger("cortex.swarm.vesicular")
+logger = logging.getLogger("babylon60.swarm.vesicular")
 
 
 class VesicularRuntime:
@@ -81,15 +81,18 @@ class VesicularRuntime:
         try:
             # OP_SWARM_ISOLATE: Execute as subprocess in the membrane CWD
             process = await asyncio.create_subprocess_exec(
-                sys.executable, script_path,
+                sys.executable,
+                script_path,
                 cwd=membrane_path,
                 env=safe_env,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            
+
             try:
-                out, err = await asyncio.wait_for(process.communicate(), timeout=self.timeout_seconds)
+                out, err = await asyncio.wait_for(
+                    process.communicate(), timeout=self.timeout_seconds
+                )
                 success = process.returncode == 0
                 stdout = out.decode("utf-8") if out else ""
                 stderr = err.decode("utf-8") if err else ""

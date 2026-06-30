@@ -14,7 +14,7 @@ from typing import Any
 
 from babylon60.security.types import GuardViolation
 
-logger = logging.getLogger("cortex.guards.duress")
+logger = logging.getLogger("babylon60.guards.duress")
 
 
 class DuressGuard:
@@ -52,7 +52,6 @@ class DuressGuard:
             db_path = os.environ.get("CORTEX_DB_PATH", "cortex_ledger.db")
             if os.path.exists(db_path):
                 with connect(db_path, timeout=5) as conn:
-
                     timestamp = datetime.now(timezone.utc).isoformat()
                     conn.execute(
                         "INSERT INTO security_audit_log "

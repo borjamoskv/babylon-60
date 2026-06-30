@@ -19,7 +19,7 @@ from babylon60.extensions.llm._models import CortexPrompt, IntentProfile
 from babylon60.extensions.llm.provider import LLMProvider
 from babylon60.extensions.llm.router import CortexLLMRouter
 
-logger = logging.getLogger("cortex_extensions.swarm.crystal_synthesis")
+logger = logging.getLogger("babylon60_extensions.swarm.crystal_synthesis")
 
 _SYNTHESIS_PROVIDERS: tuple[str, ...] = (
     "qwen",

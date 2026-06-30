@@ -11,7 +11,7 @@ import logging
 import os
 import shutil
 
-logger = logging.getLogger("cortex.nexus.symlink_engine")
+logger = logging.getLogger("babylon60.nexus.symlink_engine")
 
 
 class SymlinkEngine:

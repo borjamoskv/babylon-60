@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 from babylon60.guards.structural_certifier import StructuralCertifier, StructuralGrade
 
-logger = logging.getLogger("cortex.guards.causal_closure")
+logger = logging.getLogger("babylon60.guards.causal_closure")
 
 
 @dataclass

@@ -29,7 +29,7 @@ from babylon60.agents.copilot_contracts import (
     SuggestionProposal,
 )
 
-logger = logging.getLogger("cortex.agents.copilot.llm_strategy")
+logger = logging.getLogger("babylon60.agents.copilot.llm_strategy")
 
 
 # ── LLM Client Protocol ──────────────────────────────────────────

@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 __all__ = ["AgentHandle"]
 
-logger = logging.getLogger("cortex_extensions.hypervisor.handle")
+logger = logging.getLogger("babylon60_extensions.hypervisor.handle")
 
 
 class AgentHandle:

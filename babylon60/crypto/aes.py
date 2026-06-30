@@ -21,7 +21,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 from babylon60.utils.errors import DecryptionPolicyError
 
-logger = logging.getLogger("cortex.crypto")
+logger = logging.getLogger("babylon60.crypto")
 
 _NONCE_LENGTH = 12  # 96-bit nonce for GCM
 _KEY_LENGTH = 32  # 256-bit AES key

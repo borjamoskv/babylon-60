@@ -20,7 +20,7 @@ try:
 except ImportError:
     AtmsAdapter = None  # type: ignore
 
-logger = logging.getLogger("cortex.engine.causal.graph")
+logger = logging.getLogger("babylon60.engine.causal.graph")
 
 
 class KnowledgeGraph:
@@ -29,6 +29,7 @@ class KnowledgeGraph:
     Replaces CausalGraph as the primary epistemic tracker, moving language generation
     down to Layer 4 (Rendering).
     """
+
     def __init__(self) -> None:
         self._events: dict[str, LedgerEvent] = {}
         self._claims: dict[str, Any] = {}  # Claim ID -> Claim

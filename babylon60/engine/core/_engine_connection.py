@@ -22,7 +22,7 @@ from babylon60.database.schema import get_init_meta
 from babylon60.migrations.core import run_migrations_async
 from babylon60.telemetry.metrics import metrics
 
-logger = logging.getLogger("cortex.engine.guards")
+logger = logging.getLogger("babylon60.engine.guards")
 
 
 class ConnectionMixin:

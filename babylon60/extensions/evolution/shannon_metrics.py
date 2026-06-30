@@ -14,7 +14,7 @@ from babylon60.extensions.evolution.cortex_metrics import (
     DomainMetrics,
 )
 
-logger = logging.getLogger("cortex_extensions.evolution.shannon")
+logger = logging.getLogger("babylon60_extensions.evolution.shannon")
 
 
 class CortexMetrics:

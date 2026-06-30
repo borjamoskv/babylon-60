@@ -14,15 +14,15 @@ import os
 import urllib.error
 import urllib.request
 
-logger = logging.getLogger("cortex.guards.uptimebolt_guard")
+logger = logging.getLogger("babylon60.guards.uptimebolt_guard")
 
 
 def enforce_deploy_safety(payload_str: str) -> None:
     """Enforce deployment safety using UptimeBolt MCP.
-    
+
     If the payload is a deployment or bridge operation, it queries the UptimeBolt
     MCP server. If the risk is high, it raises ValueError to abort the SAGA.
-    
+
     Operates in 'Fail Open' mode: if UPTIMEBOLT_API_KEY is missing, it bypasses
     the check to avoid friction in local development environments.
     """
@@ -42,7 +42,9 @@ def enforce_deploy_safety(payload_str: str) -> None:
 
     api_key = os.environ.get("UPTIMEBOLT_API_KEY")
     if not api_key:
-        logger.debug("[UptimeBoltGuard] UPTIMEBOLT_API_KEY not set. Bypassing deploy safety check (Fail Open).")
+        logger.debug(
+            "[UptimeBoltGuard] UPTIMEBOLT_API_KEY not set. Bypassing deploy safety check (Fail Open)."
+        )
         return
 
     mcp_url = os.environ.get("UPTIMEBOLT_MCP_URL", "http://localhost:3100/mcp")
@@ -54,10 +56,7 @@ def enforce_deploy_safety(payload_str: str) -> None:
         "jsonrpc": "2.0",
         "id": 1,
         "method": "tools/call",
-        "params": {
-            "name": "is_safe_to_deploy",
-            "arguments": {"service_name": service_name}
-        }
+        "params": {"name": "is_safe_to_deploy", "arguments": {"service_name": service_name}},
     }
 
     req = urllib.request.Request(
@@ -68,41 +67,47 @@ def enforce_deploy_safety(payload_str: str) -> None:
             "Accept": "application/json",
             "x-api-key": api_key,
         },
-        method="POST"
+        method="POST",
     )
 
     try:
         with urllib.request.urlopen(req, timeout=5) as response:
             res_data = json.loads(response.read().decode("utf-8"))
-            
+
             # MCP Tool Call responses are typically in result.content[0].text
             result_obj = res_data.get("result", {})
             if result_obj.get("isError"):
                 logger.error(f"[UptimeBoltGuard] MCP returned error: {result_obj}")
                 # Fail open on MCP internal errors unless strict
                 return
-                
+
             content = result_obj.get("content", [])
             if not content:
                 logger.warning("[UptimeBoltGuard] Empty response from MCP. Bypassing.")
                 return
-                
+
             text_response = content[0].get("text", "{}")
             try:
                 safety_data = json.loads(text_response)
             except json.JSONDecodeError:
-                safety_data = {"recommendation": "proceed"} # Assume it's prose?
-                
+                safety_data = {"recommendation": "proceed"}  # Assume it's prose?
+
             recommendation = safety_data.get("recommendation", "proceed")
-            
+
             if recommendation not in ("proceed", "proceed_with_caution"):
                 risk = safety_data.get("risk_level", "high")
-                err_msg = f"SAGA-1 Rejection by UptimeBolt: Risk is {risk.upper()} ({recommendation})"
+                err_msg = (
+                    f"SAGA-1 Rejection by UptimeBolt: Risk is {risk.upper()} ({recommendation})"
+                )
                 logger.error(f"❌ [UptimeBoltGuard] {err_msg}")
                 raise ValueError(err_msg)
-                
-            logger.info(f"✅ [UptimeBoltGuard] Deployment safe to proceed. Recommendation: {recommendation}")
+
+            logger.info(
+                f"✅ [UptimeBoltGuard] Deployment safe to proceed. Recommendation: {recommendation}"
+            )
 
     except urllib.error.URLError as e:
-        logger.warning(f"⚠️ [UptimeBoltGuard] Connection to UptimeBolt MCP failed: {e}. Bypassing (Fail Open).")
+        logger.warning(
+            f"⚠️ [UptimeBoltGuard] Connection to UptimeBolt MCP failed: {e}. Bypassing (Fail Open)."
+        )
     # Let ValueError bubble up to trigger SAGA-1 rollback

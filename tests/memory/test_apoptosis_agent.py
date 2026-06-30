@@ -27,12 +27,12 @@ async def temp_db(tmp_path):
 async def test_apoptosis_agent_shannon_calculation():
     # Verify math is correct for Shannon calculation
     agent = ApoptosisAgent(db_path="mock.db")
-    
+
     # Repetitive slop has low entropy
     low_entropy = agent.calculate_shannon_entropy("aaaaa")
     # Structured string has higher entropy
     high_entropy = agent.calculate_shannon_entropy("abcde")
-    
+
     assert low_entropy < high_entropy
     assert agent.calculate_shannon_entropy("") == 0.0
 
@@ -47,17 +47,22 @@ async def test_apoptosis_agent_prunes_low_energy_and_slop(temp_db):
             # 1. High exergy useful fact (should keep)
             await conn.execute(
                 "INSERT INTO facts (project, content, tenant_id, exergy_score, is_tombstoned) VALUES (?, ?, ?, ?, 0)",
-                ("proj", "This is a very high quality structured fact for execution.", "free-tenant", 1.0)
+                (
+                    "proj",
+                    "This is a very high quality structured fact for execution.",
+                    "free-tenant",
+                    1.0,
+                ),
             )
             # 2. Borderline energy fact (0.5), but it has conversational noise (under 15 chars) -> decayed to 0.25 (should prune)
             await conn.execute(
                 "INSERT INTO facts (project, content, tenant_id, exergy_score, is_tombstoned) VALUES (?, ?, ?, ?, 0)",
-                ("proj", "thanks!", "free-tenant", 0.5)
+                ("proj", "thanks!", "free-tenant", 0.5),
             )
             # 3. Already low energy fact (0.3) -> should prune
             await conn.execute(
                 "INSERT INTO facts (project, content, tenant_id, exergy_score, is_tombstoned) VALUES (?, ?, ?, ?, 0)",
-                ("proj", "Random fact content with low energy.", "free-tenant", 0.3)
+                ("proj", "Random fact content with low energy.", "free-tenant", 0.3),
             )
             await conn.commit()
 
@@ -67,7 +72,9 @@ async def test_apoptosis_agent_prunes_low_energy_and_slop(temp_db):
 
     # Verify rows in DB
     async with connect_async_ctx(temp_db) as conn:
-        async with conn.execute("SELECT content, is_tombstoned FROM facts WHERE tenant_id = 'free-tenant'") as cursor:
+        async with conn.execute(
+            "SELECT content, is_tombstoned FROM facts WHERE tenant_id = 'free-tenant'"
+        ) as cursor:
             rows = await cursor.fetchall()
             results = {r[0]: r[1] for r in rows}
             assert results["This is a very high quality structured fact for execution."] == 0
@@ -86,7 +93,7 @@ async def test_apoptosis_agent_enforces_capacity_limit(temp_db):
             for i in range(5):
                 await conn.execute(
                     "INSERT INTO facts (project, content, tenant_id, exergy_score, is_tombstoned) VALUES (?, ?, ?, ?, 0)",
-                    ("proj", f"Fact number {i} content text", "free-tenant", float(i + 1) / 10.0)
+                    ("proj", f"Fact number {i} content text", "free-tenant", float(i + 1) / 10.0),
                 )
             await conn.commit()
 
@@ -97,7 +104,9 @@ async def test_apoptosis_agent_enforces_capacity_limit(temp_db):
 
     # Verify that the two facts with the lowest exergy scores (Fact 0: 0.1, Fact 1: 0.2) were tombstoned
     async with connect_async_ctx(temp_db) as conn:
-        async with conn.execute("SELECT content, is_tombstoned FROM facts WHERE tenant_id = 'free-tenant' ORDER BY exergy_score ASC") as cursor:
+        async with conn.execute(
+            "SELECT content, is_tombstoned FROM facts WHERE tenant_id = 'free-tenant' ORDER BY exergy_score ASC"
+        ) as cursor:
             rows = await cursor.fetchall()
             assert rows[0][1] == 1  # lowest (Fact 0) -> tombstoned
             assert rows[1][1] == 1  # second lowest (Fact 1) -> tombstoned

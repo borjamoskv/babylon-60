@@ -7,7 +7,7 @@ from babylon60.sica.strategy import SearchStrategy, StrategyGenome
 
 from .types import AgentSpecialization
 
-logger = logging.getLogger("cortex.sica.colony.specialization")
+logger = logging.getLogger("babylon60.sica.colony.specialization")
 
 
 class SpecializationDetector:

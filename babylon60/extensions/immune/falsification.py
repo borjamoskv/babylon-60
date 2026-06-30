@@ -11,7 +11,7 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.immune.falsification")
+logger = logging.getLogger("babylon60_extensions.immune.falsification")
 
 
 class EvolutionaryFalsifier:

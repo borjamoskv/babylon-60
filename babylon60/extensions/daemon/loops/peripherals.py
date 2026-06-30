@@ -8,7 +8,7 @@ import logging
 import re
 import subprocess
 
-logger = logging.getLogger("cortex_extensions.daemon.loops.peripherals")
+logger = logging.getLogger("babylon60_extensions.daemon.loops.peripherals")
 
 
 async def peripheral_loop(state):

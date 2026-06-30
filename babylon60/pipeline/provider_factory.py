@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     pass
 
-logger = logging.getLogger("cortex.pipeline.provider_factory")
+logger = logging.getLogger("babylon60.pipeline.provider_factory")
 
 # Provider priority order: frontier-first, cost-optimized
 _PROVIDER_PRIORITY: list[str] = [

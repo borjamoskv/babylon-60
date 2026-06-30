@@ -24,6 +24,15 @@ from babylon60.core.paths import (
     CORTEX_DIR,
 )
 
+
+def _moskv_env(key: str, default: str = "") -> str:
+    """Helper to fetch env vars with MOSKV_ prefix and CORTEX_ fallback (ADR-0005 L4)."""
+    val = os.environ.get(f"MOSKV_{key}")
+    if val is not None:
+        return val
+    return os.environ.get(f"CORTEX_{key}", default)
+
+
 # ─── Configuration Dataclass ─────────────────────────────────────────
 
 
@@ -139,68 +148,72 @@ class CortexConfig:
 
     @classmethod
     def from_env(cls) -> CortexConfig:
-        """Build configuration from environment variables."""
-        storage_mode = os.environ.get("CORTEX_STORAGE", "local")
+        """Build configuration from environment variables.
+
+        ADR-0005 L4: MOSKV_* takes priority, CORTEX_* is deprecated fallback.
+        Third-party vars (TURSO_*, STRIPE_*, LANGBASE_*, TURBOPUFFER_*) are
+        NOT namespaced and remain unchanged.
+        """
+        storage_mode = _moskv_env("STORAGE", "local")
+        deploy_mode = _moskv_env("DEPLOY", "local")
         return cls(
-            DB_PATH=os.environ.get("CORTEX_DB", str(DEFAULT_DB_PATH)),
-            PG_URL=os.environ.get("CORTEX_PG_URL", ""),
-            STRICT_CRYPTO_MODE=os.environ.get("CORTEX_STRICT_CRYPTO", "0") == "1",
-            HKDF_SALT=os.environ.get("CORTEX_HKDF_SALT", "cortex_v6_tenant_isolation_salt"),
-            AUTH_PEPPER=os.environ.get("CORTEX_AUTH_PEPPER", ""),
-            RUNBOOT_MODE=os.environ.get("CORTEX_RUNBOOT", "local"),
+            DB_PATH=_moskv_env("DB", str(DEFAULT_DB_PATH)),
+            PG_URL=_moskv_env("PG_URL", ""),
+            STRICT_CRYPTO_MODE=_moskv_env("STRICT_CRYPTO", "0") == "1",
+            HKDF_SALT=_moskv_env("HKDF_SALT", "cortex_v6_tenant_isolation_salt"),
+            AUTH_PEPPER=_moskv_env("AUTH_PEPPER", ""),
+            RUNBOOT_MODE=_moskv_env("RUNBOOT", "local"),
             ALLOWED_ORIGINS=[
                 o.strip()
-                for o in os.environ.get(
-                    "CORTEX_ALLOWED_ORIGINS",
+                for o in _moskv_env(
+                    "ALLOWED_ORIGINS",
                     "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:4321,http://127.0.0.1:4321",
                 ).split(",")
-                if o.strip() != "*" or os.environ.get("CORTEX_DEPLOY", "local") != "cloud"
+                if o.strip() != "*" or deploy_mode != "cloud"
             ],
-            RATE_LIMIT=int(os.environ.get("CORTEX_RATE_LIMIT", "300")),
-            RATE_WINDOW=int(os.environ.get("CORTEX_RATE_WINDOW", "60")),
-            CHECKPOINT_BATCH_SIZE=int(os.environ.get("CORTEX_CHECKPOINT_BATCH", "1000")),
-            CHECKPOINT_MIN=int(os.environ.get("CORTEX_CHECKPOINT_MIN", "100")),
-            CHECKPOINT_MAX=int(os.environ.get("CORTEX_CHECKPOINT_MAX", "1000")),
-            CONNECTION_POOL_SIZE=int(os.environ.get("CORTEX_POOL_SIZE", "5")),
-            FEDERATION_MODE=os.environ.get("CORTEX_FEDERATION_MODE", "single"),
-            SHARD_DIR=Path(os.environ.get("CORTEX_SHARD_DIR", str(CORTEX_DIR / "shards"))),
-            MCP_MAX_CONTENT_LENGTH=int(os.environ.get("CORTEX_MCP_MAX_CONTENT", "50000")),
-            MCP_MAX_TAGS=int(os.environ.get("CORTEX_MCP_MAX_TAGS", "50")),
-            MCP_MAX_QUERY_LENGTH=int(os.environ.get("CORTEX_MCP_MAX_QUERY", "2000")),
+            RATE_LIMIT=int(_moskv_env("RATE_LIMIT", "300")),
+            RATE_WINDOW=int(_moskv_env("RATE_WINDOW", "60")),
+            CHECKPOINT_BATCH_SIZE=int(_moskv_env("CHECKPOINT_BATCH", "1000")),
+            CHECKPOINT_MIN=int(_moskv_env("CHECKPOINT_MIN", "100")),
+            CHECKPOINT_MAX=int(_moskv_env("CHECKPOINT_MAX", "1000")),
+            CONNECTION_POOL_SIZE=int(_moskv_env("POOL_SIZE", "5")),
+            FEDERATION_MODE=_moskv_env("FEDERATION_MODE", "single"),
+            SHARD_DIR=Path(_moskv_env("SHARD_DIR", str(CORTEX_DIR / "shards"))),
+            MCP_MAX_CONTENT_LENGTH=int(_moskv_env("MCP_MAX_CONTENT", "50000")),
+            MCP_MAX_TAGS=int(_moskv_env("MCP_MAX_TAGS", "50")),
+            MCP_MAX_QUERY_LENGTH=int(_moskv_env("MCP_MAX_QUERY", "2000")),
             STORAGE_MODE=storage_mode,
+            # Third-party: no MOSKV_ prefix (not our namespace)
             TURSO_DATABASE_URL=os.environ.get("TURSO_DATABASE_URL", ""),
             TURSO_AUTH_TOKEN=os.environ.get("TURSO_AUTH_TOKEN", ""),
             TURBOPUFFER_API_KEY=os.environ.get("TURBOPUFFER_API_KEY", ""),
-            EMBEDDINGS_MODE=os.environ.get("CORTEX_EMBEDDINGS", "local"),
-            EMBEDDINGS_PROVIDER=os.environ.get("CORTEX_EMBEDDINGS_PROVIDER", "gemini"),
-            EMBEDDINGS_DIMENSION=int(os.environ.get("CORTEX_EMBEDDINGS_DIM", "768")),
-            EMBEDDINGS_MODEL=os.environ.get("CORTEX_EMBEDDINGS_MODEL", ""),
-            EMBEDDINGS_TASK_TYPE=os.environ.get(
-                "CORTEX_EMBEDDINGS_TASK_TYPE", "RETRIEVAL_DOCUMENT"
-            ),
-            VECTOR_STORE_PATH=os.environ.get(
-                "CORTEX_VECTOR_STORE_PATH", str(CORTEX_DIR / "vectors")
-            ),
-            VECTOR_STORE_MODE=os.environ.get("CORTEX_VECTOR_STORE_MODE", "local"),
-            LLM_PROVIDER=os.environ.get("CORTEX_LLM_PROVIDER", "deepseek"),
-            LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", "deepseek-v4"),
-            LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),
-            LLM_API_KEY=os.environ.get("CORTEX_LLM_API_KEY", ""),
-            LLM_LOCAL_FIRST=os.environ.get("CORTEX_LLM_LOCAL_FIRST", "0") == "1",
-            LLM_STEALTH_MODE=os.environ.get("CORTEX_LLM_STEALTH", "1") == "1",
+            EMBEDDINGS_MODE=_moskv_env("EMBEDDINGS", "local"),
+            EMBEDDINGS_PROVIDER=_moskv_env("EMBEDDINGS_PROVIDER", "gemini"),
+            EMBEDDINGS_DIMENSION=int(_moskv_env("EMBEDDINGS_DIM", "768")),
+            EMBEDDINGS_MODEL=_moskv_env("EMBEDDINGS_MODEL", ""),
+            EMBEDDINGS_TASK_TYPE=_moskv_env("EMBEDDINGS_TASK_TYPE", "RETRIEVAL_DOCUMENT"),
+            VECTOR_STORE_PATH=_moskv_env("VECTOR_STORE_PATH", str(CORTEX_DIR / "vectors")),
+            VECTOR_STORE_MODE=_moskv_env("VECTOR_STORE_MODE", "local"),
+            LLM_PROVIDER=_moskv_env("LLM_PROVIDER", "deepseek"),
+            LLM_MODEL=_moskv_env("LLM_MODEL", "deepseek-v4"),
+            LLM_BASE_URL=_moskv_env("LLM_BASE_URL", ""),
+            LLM_API_KEY=_moskv_env("LLM_API_KEY", ""),
+            LLM_LOCAL_FIRST=_moskv_env("LLM_LOCAL_FIRST", "0") == "1",
+            LLM_STEALTH_MODE=_moskv_env("LLM_STEALTH", "1") == "1",
+            # Third-party: no MOSKV_ prefix
             LANGBASE_API_KEY=os.environ.get("LANGBASE_API_KEY", ""),
             LANGBASE_BASE_URL=os.environ.get("LANGBASE_BASE_URL", "https://api.langbase.com/v1"),
             STRIPE_PUBLISHABLE_KEY=os.environ.get("STRIPE_PUBLISHABLE_KEY", ""),
             STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
             STRIPE_WEBHOOK_SECRET=os.environ.get("STRIPE_WEBHOOK_SECRET", ""),
             _STRIPE_PRICE_TABLE_RAW=os.environ.get("STRIPE_PRICE_TABLE", ""),
-            DEPLOY_MODE=os.environ.get("CORTEX_DEPLOY", "local"),
-            CONTEXT_MAX_SIGNALS=int(os.environ.get("CORTEX_CONTEXT_MAX_SIGNALS", "20")),
-            CONTEXT_WORKSPACE_DIR=os.environ.get("CORTEX_CONTEXT_WORKSPACE", str(Path.home())),
-            CONTEXT_GIT_ENABLED=os.environ.get("CORTEX_CONTEXT_GIT", "1") == "1",
-            TELEGRAM_TOKEN=os.environ.get("CORTEX_TELEGRAM_TOKEN", ""),
-            TELEGRAM_CHAT_ID=os.environ.get("CORTEX_TELEGRAM_CHAT_ID", ""),
-            NOTIFICATIONS_MIN_SEVERITY=os.environ.get("CORTEX_NOTIFY_MIN_SEVERITY", "warning"),
+            DEPLOY_MODE=deploy_mode,
+            CONTEXT_MAX_SIGNALS=int(_moskv_env("CONTEXT_MAX_SIGNALS", "20")),
+            CONTEXT_WORKSPACE_DIR=_moskv_env("CONTEXT_WORKSPACE", str(Path.home())),
+            CONTEXT_GIT_ENABLED=_moskv_env("CONTEXT_GIT", "1") == "1",
+            TELEGRAM_TOKEN=_moskv_env("TELEGRAM_TOKEN", ""),
+            TELEGRAM_CHAT_ID=_moskv_env("TELEGRAM_CHAT_ID", ""),
+            NOTIFICATIONS_MIN_SEVERITY=_moskv_env("NOTIFY_MIN_SEVERITY", "warning"),
         )
 
 

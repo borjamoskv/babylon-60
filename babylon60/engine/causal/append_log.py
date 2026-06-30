@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.engine.causal.aol")
+logger = logging.getLogger("babylon60.engine.causal.aol")
 
 AOL_FILE = Path("/tmp/cortex_ledger.aol")
 

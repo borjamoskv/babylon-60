@@ -44,7 +44,7 @@ except ImportError:
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine as AsyncCortexEngine
 
-logger = logging.getLogger("cortex.sidecar.telemetry")
+logger = logging.getLogger("babylon60.sidecar.telemetry")
 
 _SKIP_DIRS = frozenset(("venv", ".venv", ".git", "__pycache__", "node_modules"))
 

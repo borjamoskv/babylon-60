@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class SwarmSyncEngine:
     """Sovereign Agentic P2P Sync Engine.
-    
+
     Implements O(log N) Merkle DAG synchronization protocol for state stores.
     """
 
@@ -45,7 +45,9 @@ class SwarmSyncEngine:
         finally:
             await db.close()
 
-    async def calculate_delta(self, remote_hashes: set[str], tenant_id: str = "default") -> list[dict[str, Any]]:
+    async def calculate_delta(
+        self, remote_hashes: set[str], tenant_id: str = "default"
+    ) -> list[dict[str, Any]]:
         """Calculates the missing transaction nodes compared to the remote set, preserving causal order."""
         local_hashes = await self.get_all_indexed_hashes(tenant_id)
         missing_in_remote = local_hashes - remote_hashes
@@ -62,19 +64,21 @@ class SwarmSyncEngine:
 
             async with db.execute(query, params) as cursor:
                 rows = await cursor.fetchall()
-                
+
                 delta = []
                 for r in rows:
-                    delta.append({
-                        "id": r[0],
-                        "project": r[1],
-                        "action": r[2],
-                        "detail": r[3],
-                        "prev_hash": r[4],
-                        "hash": r[5],
-                        "tenant_id": r[6],
-                        "timestamp": r[7],
-                    })
+                    delta.append(
+                        {
+                            "id": r[0],
+                            "project": r[1],
+                            "action": r[2],
+                            "detail": r[3],
+                            "prev_hash": r[4],
+                            "hash": r[5],
+                            "tenant_id": r[6],
+                            "timestamp": r[7],
+                        }
+                    )
 
                 # Sort by logical order (the autoincrement ID guarantees causal order)
                 delta.sort(key=lambda x: x["id"])

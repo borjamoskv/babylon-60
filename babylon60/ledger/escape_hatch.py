@@ -14,7 +14,7 @@ from typing import Any
 
 import aiosqlite
 
-logger = logging.getLogger("cortex.ledger.escape_hatch")
+logger = logging.getLogger("babylon60.ledger.escape_hatch")
 
 LIVENESS_KEY = "escape_hatch_last_liveness"
 
@@ -55,7 +55,6 @@ def record_liveness_sync(db_path: str | Path) -> None:
             conn.close()
     except Exception as e:
         logger.warning("Failed to record sync liveness at %s: %s", db_path, e)
-
 
 
 async def is_dead_man_switch_triggered(

@@ -24,7 +24,7 @@ from babylon60.cli.main import cli
 from babylon60.audit.rekor_client import RekorClient
 
 console = Console()
-logger = logging.getLogger("cortex.cli.verify")
+logger = logging.getLogger("babylon60.cli.verify")
 
 
 @cli.command("verify-bundle")

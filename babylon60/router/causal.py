@@ -13,7 +13,7 @@ from typing import Literal
 
 from babylon60.router.policy import EpistemicPolicyNetwork, SignalVector
 
-logger = logging.getLogger("cortex.router.causal")
+logger = logging.getLogger("babylon60.router.causal")
 
 ModelType = Literal["gemini-3.5-flash", "gemini-3.1-pro"]
 

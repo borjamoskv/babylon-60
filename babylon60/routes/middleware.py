@@ -21,7 +21,7 @@ __all__ = [
     "SelfHealingHook",
 ]
 
-logger = logging.getLogger("cortex.admin.middleware")
+logger = logging.getLogger("babylon60.admin.middleware")
 
 # ─── Audit Log Configuration ──────────────────────────────────────────
 from babylon60.core.paths import AUDIT_LOG_PATH as _AUDIT_LOG_PATH

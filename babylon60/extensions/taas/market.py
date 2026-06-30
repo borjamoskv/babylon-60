@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.taas")
+logger = logging.getLogger("babylon60.taas")
 
 
 class JobSLA(BaseModel):

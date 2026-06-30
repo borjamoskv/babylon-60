@@ -17,7 +17,9 @@ def _canonicalize(value: Any) -> Any:
         # Sort maps by key lexicographically by bytes
         # cbor2 actually has canonical options, but we explicitly order here to ensure
         # that keys are evaluated canonically. However, string keys are sorted naturally.
-        return {k: _canonicalize(v) for k, v in sorted(value.items(), key=lambda item: str(item[0]))}
+        return {
+            k: _canonicalize(v) for k, v in sorted(value.items(), key=lambda item: str(item[0]))
+        }
     elif isinstance(value, (list, tuple)):
         return [_canonicalize(v) for v in value]
     elif isinstance(value, set):
@@ -30,10 +32,12 @@ def _canonicalize(value: Any) -> Any:
         return [cbor2.loads(b) for b in sorted_elements]
     return value
 
+
 def canonical_serialize(obj: Any) -> bytes:
     """Serialize an object into Deterministic CBOR (RFC 8949)."""
     canonical_obj = _canonicalize(obj)
     return cbor2.dumps(canonical_obj, canonical=True)
+
 
 def compute_object_hash(type_tag: str, obj: Any) -> str:
     """Compute the SHA3-256 hash of an EpistemicObject (CEP-002)."""

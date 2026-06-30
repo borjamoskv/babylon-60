@@ -19,7 +19,7 @@ try:
     HAS_Z3 = True
 except ImportError:
     HAS_Z3 = False
-logger = logging.getLogger("cortex.guards.smt_guard")
+logger = logging.getLogger("babylon60.guards.smt_guard")
 
 
 class SMTConstraintGuard:

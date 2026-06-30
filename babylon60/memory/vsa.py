@@ -23,7 +23,7 @@ from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash, cortex_hash_truncated
 
-logger = logging.getLogger("cortex.memory.vsa")
+logger = logging.getLogger("babylon60.memory.vsa")
 # ── Constants ────────────────────────────────────────────────────────
 DIMENSION = 10_000  # Hypervector dimensionality
 SDM_LOCATIONS = 1000  # Kanerva hard locations

@@ -16,7 +16,7 @@ from babylon60.engine.evo.decalcifier import SovereignDecalcifier
 from babylon60.engine.evo.growth import GROWTH_ENGINE
 from babylon60.engine.evo.reaper import GhostReaper
 
-logger = logging.getLogger("cortex.rem")
+logger = logging.getLogger("babylon60.rem")
 
 
 class REMCoordinator:

@@ -111,7 +111,11 @@ def triage_subscriber(email: str) -> tuple[str, int, str]:
         return ("V2_HIGH_PROFILE", 1, "High-profile domain (EA Filtered)")
 
     # [V-3] Academic SEG Filters
-    if _match_domain_or_parent(domain, V3_ACADEMIC_DOMAINS) or domain.endswith(".edu") or domain.endswith(".ac.uk"):
+    if (
+        _match_domain_or_parent(domain, V3_ACADEMIC_DOMAINS)
+        or domain.endswith(".edu")
+        or domain.endswith(".ac.uk")
+    ):
         return ("V3_ACADEMIC", 3, "Academic SEG Firewall")
 
     # [V-4] Web3/VC Noise

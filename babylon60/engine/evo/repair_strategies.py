@@ -28,7 +28,7 @@ __all__ = [
     "RepairStrategy",
 ]
 
-logger = logging.getLogger("cortex.engine.repair")
+logger = logging.getLogger("babylon60.engine.repair")
 
 
 # ─── Types ────────────────────────────────────────────────────────

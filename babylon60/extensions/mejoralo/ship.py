@@ -24,7 +24,7 @@ from babylon60.guards.path_guard import is_safe_path
 
 __all__ = ["check_ship_gate"]
 
-logger = logging.getLogger("cortex_extensions.mejoralo")
+logger = logging.getLogger("babylon60_extensions.mejoralo")
 
 
 # ─── Individual Seal Checks ─────────────────────────────────────────

@@ -8,7 +8,7 @@ from babylon60.extensions.browser.engine import BrowserEngine
 from babylon60.extensions.llm.provider import LLMProvider
 from babylon60.extensions.llm.router import IntentProfile
 
-LOG = logging.getLogger("cortex_extensions.browser")
+LOG = logging.getLogger("babylon60_extensions.browser")
 
 
 class SovereignBrowserAgent:

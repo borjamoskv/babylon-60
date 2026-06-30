@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.agents.registry")
+logger = logging.getLogger("babylon60_extensions.agents.registry")
 
 _DEFINITIONS_DIR = Path(__file__).parent / "definitions"
 _TRUE_BOOL_LITERALS = {"1", "true", "yes", "on", "y"}

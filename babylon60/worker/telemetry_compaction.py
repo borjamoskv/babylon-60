@@ -15,7 +15,7 @@ import aiosqlite
 
 from babylon60.database.core import causal_write, connect_async_ctx
 
-logger = logging.getLogger("cortex.worker.telemetry_compaction")
+logger = logging.getLogger("babylon60.worker.telemetry_compaction")
 
 
 class TelemetryCompactionWorker:

@@ -21,7 +21,7 @@ import logging
 
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger("cortex.memory.valence")
+logger = logging.getLogger("babylon60.memory.valence")
 
 
 class EmotionalTag(str, enum.Enum):

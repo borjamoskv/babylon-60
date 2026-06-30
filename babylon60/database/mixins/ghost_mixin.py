@@ -18,7 +18,7 @@ from babylon60.engine.mixins.base import EngineMixinBase
 
 __all__ = ["GhostMixin"]
 
-logger = logging.getLogger("cortex.ghosts")
+logger = logging.getLogger("babylon60.ghosts")
 
 
 class GhostMixin(EngineMixinBase):

@@ -9,7 +9,7 @@ from typing import Any
 from babylon60.agents.primitives.dispatcher import apex_dispatcher
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
-logger = logging.getLogger("cortex.ultramap")
+logger = logging.getLogger("babylon60.ultramap")
 
 try:
     import cortex_rs

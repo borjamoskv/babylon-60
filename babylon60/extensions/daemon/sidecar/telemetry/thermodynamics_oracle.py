@@ -8,7 +8,7 @@ import platform
 import time
 from typing import TYPE_CHECKING
 
-logger = logging.getLogger("cortex.extensions.daemon.sidecar.telemetry.thermodynamics_oracle")
+logger = logging.getLogger("babylon60.extensions.daemon.sidecar.telemetry.thermodynamics_oracle")
 
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine as AsyncCortexEngine

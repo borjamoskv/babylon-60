@@ -29,7 +29,7 @@ except ImportError:
     RedisError = Exception  # type: ignore[assignment,misc]
     HAS_REDIS = False
 
-logger = logging.getLogger("cortex.cache.redis_l1")
+logger = logging.getLogger("babylon60.cache.redis_l1")
 
 _PREFIX = "cortex:l1:"
 

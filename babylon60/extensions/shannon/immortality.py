@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 __all__ = ["ImmortalityIndex"]
 
-logger = logging.getLogger("cortex_extensions.shannon.immortality")
+logger = logging.getLogger("babylon60_extensions.shannon.immortality")
 
 # ── Weights ──────────────────────────────────────────────────────────
 _W_DIVERSITY = 0.25

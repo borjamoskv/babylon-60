@@ -28,7 +28,7 @@ from babylon60.utils.respiration import breathe, oxygenate
 
 __all__ = ["SignalReactor"]
 
-logger = logging.getLogger("cortex_extensions.signals.reactor")
+logger = logging.getLogger("babylon60_extensions.signals.reactor")
 
 
 class SignalReactor:

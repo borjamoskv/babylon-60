@@ -17,7 +17,7 @@ from babylon60.extensions.ui_control.models import AXElement, InteractionResult
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.ui_control.accessibility")
+logger = logging.getLogger("babylon60_extensions.ui_control.accessibility")
 
 # Default max depth for tree traversals
 DEFAULT_MAX_DEPTH = 8

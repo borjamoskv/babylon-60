@@ -11,7 +11,7 @@ from typing import Any
 from babylon60.audit.cognitive_config import _CREATE_ROUTER_LOG_SQL
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.audit.cognitive_db")
+logger = logging.getLogger("babylon60.audit.cognitive_db")
 
 
 async def ensure_table_for_router(router: Any) -> None:

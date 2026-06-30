@@ -25,7 +25,7 @@ except ImportError:
 from babylon60.consensus.pki import trust_matrix
 from babylon60.extensions.llm.client import SovereignLLMClient  # Assume this is the real client
 
-logger = logging.getLogger("cortex.swarm.inference_proxy")
+logger = logging.getLogger("babylon60.swarm.inference_proxy")
 
 app = FastAPI(title="CORTEX Zero-Trust Inference Proxy")
 

@@ -10,7 +10,7 @@ import logging
 import time
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
-logger = logging.getLogger("cortex.centuria.10k")
+logger = logging.getLogger("babylon60.centuria.10k")
 
 SQUADS = [
     "FORGE (RTL-Titans)",

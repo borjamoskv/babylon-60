@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 __all__ = ["VEXRunner"]
 
-logger = logging.getLogger("cortex_extensions.vex")
+logger = logging.getLogger("babylon60_extensions.vex")
 
 
 # Type alias for tool executor functions.

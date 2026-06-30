@@ -129,7 +129,7 @@ class ProceduralMemory:
             if "no such table" not in str(e):
                 import logging
 
-                logging.getLogger("cortex.memory.procedural").error(
+                logging.getLogger("babylon60.memory.procedural").error(
                     "DB Operational error on load: %s", e
                 )
                 try:
@@ -144,7 +144,7 @@ class ProceduralMemory:
         except Exception as e:
             import logging
 
-            logging.getLogger("cortex.memory.procedural").error(
+            logging.getLogger("babylon60.memory.procedural").error(
                 "Unexpected procedural load error: %s", e
             )
             try:

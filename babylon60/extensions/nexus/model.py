@@ -13,7 +13,7 @@ from babylon60.database.tlru_cache import TLRUCache
 from babylon60.extensions.nexus.db import NexusDB
 from babylon60.extensions.nexus.types import DomainOrigin, IntentType, WorldMutation
 
-logger = logging.getLogger("cortex_extensions.nexus.model")
+logger = logging.getLogger("babylon60_extensions.nexus.model")
 
 _DEFAULT_DB: Final[str] = os.path.expanduser("~/.cortex/nexus.db")
 _DEDUP_TTL: Final[float] = 3600.0  # 1 hour dedup window

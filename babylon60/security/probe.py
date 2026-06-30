@@ -24,7 +24,7 @@ __all__ = [
     "probe_untested_assumptions",
 ]
 
-logger = logging.getLogger("cortex.security.probe")
+logger = logging.getLogger("babylon60.security.probe")
 
 
 @dataclass

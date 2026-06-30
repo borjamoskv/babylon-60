@@ -32,7 +32,7 @@ class MerkleIntegrityError(LedgerError):
     """Raised when Merkle verification fails."""
 
 
-logger = logging.getLogger("cortex.api.ledger")
+logger = logging.getLogger("babylon60.api.ledger")
 router = APIRouter(prefix="/v1/ledger", tags=["ledger"])
 
 

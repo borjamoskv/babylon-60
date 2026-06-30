@@ -33,7 +33,7 @@ from enum import Enum
 
 __all__ = ["PIICategory", "PIIMatch", "PIISanitizer", "SanitizationReport"]
 
-logger = logging.getLogger("cortex.memory.pii_sanitizer")
+logger = logging.getLogger("babylon60.memory.pii_sanitizer")
 
 
 class PIICategory(str, Enum):

@@ -20,7 +20,7 @@ from babylon60.guards.capability_guard import CapabilityGuard
 
 __all__ = ["AgentToolkit"]
 
-logger = logging.getLogger("cortex_extensions.aether.tools")
+logger = logging.getLogger("babylon60_extensions.aether.tools")
 
 _MAX_OUTPUT = 8000  # chars truncated to avoid flooding context
 _BASH_TIMEOUT = 60  # seconds

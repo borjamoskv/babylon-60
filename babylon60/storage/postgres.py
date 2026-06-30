@@ -25,7 +25,7 @@ from typing import Any, Final
 
 __all__ = ["PostgresBackend"]
 
-logger = logging.getLogger("cortex.storage.postgres")
+logger = logging.getLogger("babylon60.storage.postgres")
 
 # Threshold for "slow" queries in milliseconds
 SLOW_QUERY_THRESHOLD_MS: Final[int] = 500

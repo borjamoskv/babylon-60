@@ -21,7 +21,7 @@ from babylon60.extensions.immune.chaos import ChaosGate, async_interceptor
 
 __all__ = ["CortexConnectionPool"]
 
-logger = logging.getLogger("cortex.pool")
+logger = logging.getLogger("babylon60.pool")
 
 
 class _PoolState:

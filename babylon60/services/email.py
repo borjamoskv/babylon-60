@@ -14,7 +14,7 @@ import httpx
 from babylon60.audit.ledger import EnterpriseAuditLedger
 from babylon60.guards.egress_guard import EgressGuard
 
-logger = logging.getLogger("cortex.services.email")
+logger = logging.getLogger("babylon60.services.email")
 
 
 class CortexEmailTransport:

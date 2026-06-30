@@ -11,7 +11,7 @@ import re
 import subprocess
 from pathlib import Path
 
-logger = logging.getLogger("cortex.engine.causal.ouroboros_immune")
+logger = logging.getLogger("babylon60.engine.causal.ouroboros_immune")
 
 
 class OuroborosImmuneSystem:

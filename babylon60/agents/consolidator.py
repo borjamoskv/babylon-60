@@ -13,7 +13,7 @@ from typing import Any
 
 from babylon60.agents.base import ReactiveTaskAgent
 
-logger = logging.getLogger("cortex.agents.consolidator")
+logger = logging.getLogger("babylon60.agents.consolidator")
 
 
 class ConsolidatorAgent(ReactiveTaskAgent):

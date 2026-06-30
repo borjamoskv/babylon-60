@@ -9,7 +9,7 @@ from babylon60.graph.backends.sqlite.algorithms import SQLiteAlgorithmsMixin
 from babylon60.graph.backends.sqlite.query import SQLiteQueryMixin
 from babylon60.graph.backends.sqlite.store import SQLiteStoreMixin
 
-logger = logging.getLogger("cortex.graph.backends")
+logger = logging.getLogger("babylon60.graph.backends")
 
 
 class SQLiteBackend(SQLiteStoreMixin, SQLiteQueryMixin, SQLiteAlgorithmsMixin, GraphBackend):

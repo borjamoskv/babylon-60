@@ -14,7 +14,7 @@ from babylon60.mac_maestro.events import build_mac_maestro_event
 from babylon60.mac_maestro.intent import MacAction, MacIntent
 from babylon60.mac_maestro.oracle import VerificationOracle
 
-logger = logging.getLogger("cortex.mac_maestro.executor")
+logger = logging.getLogger("babylon60.mac_maestro.executor")
 
 
 class MaestroExecutor:

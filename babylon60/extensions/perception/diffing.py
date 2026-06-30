@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 from typing import Final
 
-logger = logging.getLogger("cortex_extensions.perception.diffing")
+logger = logging.getLogger("babylon60_extensions.perception.diffing")
 
 # Maximum size of a file to perform diffing on (100KB default to prevent OOM)
 MAX_DIFF_SIZE_BYTES: Final[int] = 100 * 1024

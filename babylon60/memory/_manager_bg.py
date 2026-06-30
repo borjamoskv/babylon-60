@@ -6,7 +6,7 @@ from typing import Any
 
 from babylon60.memory.memory_compression import compress_and_store
 
-logger = logging.getLogger("cortex.memory._manager_bg")
+logger = logging.getLogger("babylon60.memory._manager_bg")
 
 
 async def compression_worker_loop(worker_id: int, bg_queue: asyncio.Queue, manager: Any) -> None:

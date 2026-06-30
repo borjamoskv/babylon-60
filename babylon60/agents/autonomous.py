@@ -44,7 +44,7 @@ from babylon60.agents.planner import (
 )
 from babylon60.agents.tools import ToolRegistry
 
-logger = logging.getLogger("cortex.agents.autonomous")
+logger = logging.getLogger("babylon60.agents.autonomous")
 
 
 class AutonomousAgent(BaseAgent):

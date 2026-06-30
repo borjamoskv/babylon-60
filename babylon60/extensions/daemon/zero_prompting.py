@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.daemon.zero_prompting")
+logger = logging.getLogger("babylon60_extensions.daemon.zero_prompting")
 
 
 class ZeroPromptingDaemon:

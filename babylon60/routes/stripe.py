@@ -124,6 +124,7 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
 
         try:
             from decimal import Decimal
+
             amount_decimal = Decimal(str(body.amount_usd))
             amount_in_cents = int((amount_decimal * Decimal("100")).quantize(Decimal("1")))
             line_item = {

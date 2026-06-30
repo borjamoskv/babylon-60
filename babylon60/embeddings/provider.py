@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Protocol, runtime_checkable
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 @runtime_checkable

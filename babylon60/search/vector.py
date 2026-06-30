@@ -18,7 +18,7 @@ from babylon60.storage import StorageMode, get_storage_mode
 
 __all__ = ["semantic_search", "semantic_search_sync"]
 
-logger = logging.getLogger("cortex.search.vector")
+logger = logging.getLogger("babylon60.search.vector")
 
 # ─── SQL fragment constants ────────────────────────────────
 _FILTER_PROJECT = " AND f.project = ?"

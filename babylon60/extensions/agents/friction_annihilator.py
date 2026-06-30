@@ -17,7 +17,7 @@ from babylon60.engine.smte.llm_mutator import (
     LLMMutator,  # pyright: ignore[reportAttributeAccessIssue]
 )
 
-logger = logging.getLogger("cortex_extensions.agents.friction_annihilator")
+logger = logging.getLogger("babylon60_extensions.agents.friction_annihilator")
 
 
 class FrictionAnnihilatorAgent(EngineAwareMixin):

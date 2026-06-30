@@ -36,7 +36,7 @@ __all__ = ["Tip", "TipCategory", "TipsEngine"]
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.tips")
+logger = logging.getLogger("babylon60.tips")
 
 _PACKAGE_ASSET_PATH: Final[Path] = Path(__file__).with_name("assets") / "tips.json"
 _LEGACY_ASSET_PATH: Final[Path] = (

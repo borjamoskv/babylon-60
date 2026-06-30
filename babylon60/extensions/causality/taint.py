@@ -33,7 +33,7 @@ __all__ = [
     "recompute_effective_confidence",
 ]
 
-logger = logging.getLogger("cortex_extensions.causality.taint")
+logger = logging.getLogger("babylon60_extensions.causality.taint")
 
 
 def downgrade_confidence(base: Confidence, steps: int) -> Confidence:

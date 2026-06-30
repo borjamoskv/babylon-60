@@ -13,7 +13,7 @@ from typing import Any
 from babylon60.events.bus import DistributedEventBus
 from babylon60.memory.ledger import EventLedgerL3
 
-logger = logging.getLogger("cortex_extensions.agents.scavenger_governance")
+logger = logging.getLogger("babylon60_extensions.agents.scavenger_governance")
 
 
 class ScavengerGovernance:

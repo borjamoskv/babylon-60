@@ -20,7 +20,7 @@ from typing import Any
 from babylon60.database.core import connect as db_connect
 from babylon60.extensions.evolution.models import EvolutionMutation
 
-logger = logging.getLogger("cortex_extensions.evolution.ledger_db")
+logger = logging.getLogger("babylon60_extensions.evolution.ledger_db")
 
 _DEFAULT_PATH = Path("~/.cortex/evolution_memory.db").expanduser()
 

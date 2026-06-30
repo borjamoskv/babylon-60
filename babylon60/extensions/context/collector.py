@@ -33,7 +33,7 @@ __all__ = [
 if TYPE_CHECKING:
     import aiosqlite
 
-logger = logging.getLogger("cortex_extensions.context")
+logger = logging.getLogger("babylon60_extensions.context")
 
 # ─── Weight Constants ────────────────────────────────────────────────
 # Weights reflect how strongly each signal type indicates active context.

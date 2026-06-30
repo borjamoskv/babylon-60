@@ -15,7 +15,7 @@ from babylon60.extensions.aether.tools import AgentToolkit
 
 __all__ = ["PlannerAgent"]
 
-logger = logging.getLogger("cortex_extensions.aether.planner")
+logger = logging.getLogger("babylon60_extensions.aether.planner")
 
 _SYSTEM = """You are AETHER: The Sovereign Architect of the CORTEX OS.
 Your job is to analyze a codebase and produce a precise, actionable implementation plan.

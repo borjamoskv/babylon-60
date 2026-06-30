@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from babylon60.mac_maestro.executor import MaestroExecutor
     from babylon60.swarm.auth import ByzantineAuthLayer
 
-logger = logging.getLogger("cortex.engine.guards")
+logger = logging.getLogger("babylon60.engine.guards")
 
 
 class ComponentsMixin:

@@ -12,7 +12,7 @@ import aiosqlite
 from babylon60.crypto.aes import CortexEncrypter
 from babylon60.search.models import SearchResult
 
-logger = logging.getLogger("cortex.search")
+logger = logging.getLogger("babylon60.search")
 
 V6_PREFIX = CortexEncrypter.PREFIX
 

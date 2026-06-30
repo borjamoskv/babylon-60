@@ -9,7 +9,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.gate.ouroboros")
+logger = logging.getLogger("babylon60_extensions.gate.ouroboros")
 
 
 class OuroborosGate:

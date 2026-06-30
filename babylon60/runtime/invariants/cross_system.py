@@ -23,7 +23,7 @@ from babylon60.engine.core.evolution_ledger import EvolutionLedger, MutationReco
 from babylon60.shannon.env.trace import EpisodeTrace
 from babylon60.shannon.verification.cross_verifier import CrossVerifier
 
-logger = logging.getLogger("cortex.runtime.invariants")
+logger = logging.getLogger("babylon60.runtime.invariants")
 
 
 @dataclass(frozen=True)

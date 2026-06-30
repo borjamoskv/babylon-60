@@ -12,7 +12,7 @@ from typing import Any
 
 from babylon60.memory.engrams import CortexSemanticEngram
 
-logger = logging.getLogger("cortex.memory.homeostasis")
+logger = logging.getLogger("babylon60.memory.homeostasis")
 
 
 class EntropyPruner:

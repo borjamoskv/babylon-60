@@ -23,7 +23,7 @@ import time
 from collections.abc import Callable
 from typing import Any, TypeVar
 
-logger = logging.getLogger("cortex.respiration")
+logger = logging.getLogger("babylon60.respiration")
 
 F = TypeVar("F", bound=Callable[..., Any])
 

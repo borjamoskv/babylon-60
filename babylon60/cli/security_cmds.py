@@ -18,7 +18,7 @@ from rich.table import Table
 
 from babylon60.cli.common import cli
 
-logger = logging.getLogger("cortex.cli.security")
+logger = logging.getLogger("babylon60.cli.security")
 
 console = Console()
 

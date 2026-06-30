@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.daemon.hot_state")
+logger = logging.getLogger("babylon60.daemon.hot_state")
 
 __all__ = ["HotStateDB"]
 

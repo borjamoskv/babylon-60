@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 __all__ = ["SearchMixin"]
 
-logger = logging.getLogger("cortex.engine.search")
+logger = logging.getLogger("babylon60.engine.search")
 
 
 class SearchMixin(EngineMixinBase):

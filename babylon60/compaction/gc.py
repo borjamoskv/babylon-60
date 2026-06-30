@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine as AsyncCortexEngine
 
-logger = logging.getLogger("cortex.gc")
+logger = logging.getLogger("babylon60.gc")
 
 
 class GarbageCollector:

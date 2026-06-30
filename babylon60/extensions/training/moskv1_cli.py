@@ -82,23 +82,40 @@ def cmd_train(
 
     # Use non-deprecated mlx_lm subcommand syntax
     cmd = [
-        sys.executable, "-m", "mlx_lm", "lora",
-        "--model", model,
+        sys.executable,
+        "-m",
+        "mlx_lm",
+        "lora",
+        "--model",
+        model,
         "--train",
-        "--data", str(dataset_dir),
-        "--adapter-path", str(adapter_path),
-        "--fine-tune-type", "lora",
-        "--optimizer", "adamw",
+        "--data",
+        str(dataset_dir),
+        "--adapter-path",
+        str(adapter_path),
+        "--fine-tune-type",
+        "lora",
+        "--optimizer",
+        "adamw",
         "--mask-prompt",
-        "--num-layers", str(lora_layers),
-        "--iters", str(iters),
-        "--batch-size", str(batch_size),
-        "--learning-rate", str(learning_rate),
-        "--steps-per-report", "10",
-        "--steps-per-eval", "50",
-        "--max-seq-length", "2048",
-        "--save-every", "100",
-        "--seed", "42",
+        "--num-layers",
+        str(lora_layers),
+        "--iters",
+        str(iters),
+        "--batch-size",
+        str(batch_size),
+        "--learning-rate",
+        str(learning_rate),
+        "--steps-per-report",
+        "10",
+        "--steps-per-eval",
+        "50",
+        "--max-seq-length",
+        "2048",
+        "--save-every",
+        "100",
+        "--seed",
+        "42",
     ]
 
     print(f"🧠 MLX LoRA Training — {model}")
@@ -152,8 +169,14 @@ def cmd_validate() -> None:
     anergy_detected = 0
 
     anergy_words = [
-        "hola", "buenos días", "espero que", "por supuesto",
-        "aquí tienes", "here you go", "of course", "hope this helps",
+        "hola",
+        "buenos días",
+        "espero que",
+        "por supuesto",
+        "aquí tienes",
+        "here you go",
+        "of course",
+        "hope this helps",
     ]
 
     categories: Counter[str] = Counter()
@@ -209,11 +232,15 @@ def cmd_validate() -> None:
     # Shannon entropy of output length distribution
     length_buckets = Counter(length // 100 * 100 for length in output_lengths)
     total_length = sum(length_buckets.values())
-    len_entropy = -sum(
-        (c / total_length) * math.log2(c / total_length)
-        for c in length_buckets.values()
-        if c > 0
-    ) if total_length > 0 else 0.0
+    len_entropy = (
+        -sum(
+            (c / total_length) * math.log2(c / total_length)
+            for c in length_buckets.values()
+            if c > 0
+        )
+        if total_length > 0
+        else 0.0
+    )
 
     # ─── Report ────────────────────────────────────────────────────
     print("═══ MOSKV-1 DATASET VALIDATION v2.0 ═══")
@@ -228,18 +255,20 @@ def cmd_validate() -> None:
     print(f"  Length entropy:          {len_entropy:.2f} bits")
     print()
     print("── Content Quality ──")
-    print(f"  Has code blocks:         {has_code} ({has_code/n*100:.1f}%)")
-    print(f"  Has YAML/structured:     {has_yaml} ({has_yaml/n*100:.1f}%)")
-    print(f"  Has lists/tables:        {has_structure} ({has_structure/n*100:.1f}%)")
+    print(f"  Has code blocks:         {has_code} ({has_code / n * 100:.1f}%)")
+    print(f"  Has YAML/structured:     {has_yaml} ({has_yaml / n * 100:.1f}%)")
+    print(f"  Has lists/tables:        {has_structure} ({has_structure / n * 100:.1f}%)")
     print()
     print("── Defects ──")
-    print(f"  HTML in instructions:    {html_in_instruction} {'✅' if html_in_instruction == 0 else '❌'}")
+    print(
+        f"  HTML in instructions:    {html_in_instruction} {'✅' if html_in_instruction == 0 else '❌'}"
+    )
     print(f"  Anergy detected:         {anergy_detected} {'✅' if anergy_detected == 0 else '⚠️'}")
     print()
     print("── Category Distribution ──")
     for cat, count in categories.most_common():
         bar = "█" * (count * 40 // n)
-        print(f"  {cat:20s} {count:5d} ({count/n*100:5.1f}%) {bar}")
+        print(f"  {cat:20s} {count:5d} ({count / n * 100:5.1f}%) {bar}")
 
     # ─── Split Validation ──────────────────────────────────────────
     print()
@@ -259,8 +288,8 @@ def cmd_validate() -> None:
     if anergy_detected < n * 0.01:
         score += 200
     score += min(int(has_code / n * 300), 200)  # Code density
-    score += min(int(len_entropy * 50), 200)     # Length diversity
-    score += min(int(len(categories) * 30), 200) # Category diversity
+    score += min(int(len_entropy * 50), 200)  # Length diversity
+    score += min(int(len(categories) * 30), 200)  # Category diversity
 
     print()
     print(f"🎯 DATASET EXERGY SCORE: {score}/1000")
@@ -284,10 +313,10 @@ def cmd_stats() -> None:
         for line in f:
             entries.append(json.loads(line))
 
-    total_tokens = sum(
-        sum(len(m.get("content", "")) for m in e.get("conversations", []))
-        for e in entries
-    ) // 4
+    total_tokens = (
+        sum(sum(len(m.get("content", "")) for m in e.get("conversations", [])) for e in entries)
+        // 4
+    )
 
     print(f"📊 Dataset: {dataset_path}")
     print(f"   Entries: {len(entries)}")

@@ -15,7 +15,7 @@ import aiosqlite
 from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 from babylon60.engine.core.mutation_engine import MUTATION_ENGINE
 
-logger = logging.getLogger("cortex.growth")
+logger = logging.getLogger("babylon60.growth")
 
 # Threshold for bridge promotion (Neural-Growth level)
 _PROMOTION_THRESHOLD = 0.8

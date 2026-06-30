@@ -12,7 +12,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from babylon60.engine.meta.metacognition import DoubtCircuit
 
 router = APIRouter(tags=["topology"])
-logger = logging.getLogger("cortex.api.topology")
+logger = logging.getLogger("babylon60.api.topology")
 
 
 class TopologyManager:

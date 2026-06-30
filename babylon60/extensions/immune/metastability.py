@@ -18,7 +18,7 @@ __all__ = [
     "assess_metastability",
 ]
 
-logger = logging.getLogger("cortex_extensions.immune.metastability")
+logger = logging.getLogger("babylon60_extensions.immune.metastability")
 
 # ── Heuristic weights ────────────────────────────────────────────────
 # Sum to 1.0. Each signal contributes independently.

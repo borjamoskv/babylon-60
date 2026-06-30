@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 __all__ = ["MemoryScanner"]
 
-logger = logging.getLogger("cortex_extensions.shannon")
+logger = logging.getLogger("babylon60_extensions.shannon")
 
 # Age bucket boundaries in days
 _AGE_BUCKETS = [

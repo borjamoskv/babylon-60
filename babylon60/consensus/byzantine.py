@@ -48,7 +48,7 @@ from babylon60.extensions.thinking.fusion_models import (
 
 __all__ = ["ByzantineVerdict", "ResponseTrust", "WBFTConsensus"]
 
-logger = logging.getLogger("cortex.consensus.byzantine")
+logger = logging.getLogger("babylon60.consensus.byzantine")
 
 
 # ─── Data Models ─────────────────────────────────────────────────────

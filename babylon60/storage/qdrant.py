@@ -23,7 +23,7 @@ from typing import Any, Final, Protocol, runtime_checkable
 
 __all__ = ["QdrantVectorBackend", "VectorBackend", "get_vector_backend"]
 
-logger = logging.getLogger("cortex.storage.qdrant")
+logger = logging.getLogger("babylon60.storage.qdrant")
 
 # Vector dimension (all-MiniLM-L6-v2)
 VECTOR_DIM: Final[int] = 384

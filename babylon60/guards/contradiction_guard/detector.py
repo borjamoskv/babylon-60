@@ -19,13 +19,14 @@ from babylon60.guards.contradiction_guard.utils import (
 )
 from babylon60.utils.void_vec import cosine_similarity
 
-logger = logging.getLogger("cortex.guards.contradiction.detector")
+logger = logging.getLogger("babylon60.guards.contradiction.detector")
 
 MAX_CANDIDATES = 10
 MIN_OVERLAP_SCORE = 0.10  # Jaccard threshold for keyword overlap
 EMBEDDING_BOOST_WEIGHT = 0.3  # Max boost from embedding similarity
 
 _embedding_cosine_similarity = cosine_similarity
+
 
 def _score_candidate(
     row: aiosqlite.Row,

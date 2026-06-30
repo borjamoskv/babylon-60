@@ -12,7 +12,7 @@ from babylon60.engine.flow.causality import AsyncCausalGraph
 from babylon60.utils.canonical import now_iso
 from babylon60.database.core import causal_write
 
-logger = logging.getLogger("cortex.store_mutation")
+logger = logging.getLogger("babylon60.store_mutation")
 
 
 async def _fetch_fact_state(

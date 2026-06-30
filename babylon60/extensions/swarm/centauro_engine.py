@@ -35,7 +35,7 @@ class CentauroMissionResult(TypedDict, total=False):
     formation: str
 
 
-logger = logging.getLogger("cortex_extensions.swarm.centauro")
+logger = logging.getLogger("babylon60_extensions.swarm.centauro")
 
 
 class SubTask(BaseModel):

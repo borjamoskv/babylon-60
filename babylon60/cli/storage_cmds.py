@@ -148,7 +148,9 @@ def storage_status() -> None:
         grid.add_row("Mode", f"[bold #CCFF00]{mode.value.upper()}[/]")
         grid.add_row(
             "Env CORTEX_STORAGE",
-            os.environ.get("MOSKV_STORAGE", os.environ.get("CORTEX_STORAGE", "[dim]not set \u2192 local[/]")),
+            os.environ.get(
+                "MOSKV_STORAGE", os.environ.get("CORTEX_STORAGE", "[dim]not set \u2192 local[/]")
+            ),
         )
 
         if mode.value == "postgres":

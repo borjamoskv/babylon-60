@@ -7,7 +7,7 @@ Replaces stochastic LLM inferences with strict formal mathematical proofs for co
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.engine.logic.z3")
+logger = logging.getLogger("babylon60.engine.logic.z3")
 
 try:
     import z3

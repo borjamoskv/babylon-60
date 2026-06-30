@@ -12,7 +12,7 @@ from pathlib import Path
 
 import yaml
 
-logger = logging.getLogger("cortex.nexus.config")
+logger = logging.getLogger("babylon60.nexus.config")
 
 
 @dataclass

@@ -27,7 +27,7 @@ from typing import Any, Final
 
 from babylon60.utils.void_vec import cosine_similarity
 
-logger = logging.getLogger("cortex.memory.void_detector")
+logger = logging.getLogger("babylon60.memory.void_detector")
 
 __all__ = [
     "EpistemicAnalysis",

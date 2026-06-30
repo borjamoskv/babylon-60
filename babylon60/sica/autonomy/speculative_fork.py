@@ -8,7 +8,7 @@ from babylon60.sica.meta_level import MetaJudgment
 from babylon60.sica.object_level import ExecutionTrace, StepOutcome
 from babylon60.sica.strategy import SearchStrategy
 
-logger = logging.getLogger("cortex.sica.autonomy.fork")
+logger = logging.getLogger("babylon60.sica.autonomy.fork")
 from dataclasses import dataclass
 
 

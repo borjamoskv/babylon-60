@@ -3,7 +3,7 @@
 import logging
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.swarm.verification")
+logger = logging.getLogger("babylon60.swarm.verification")
 
 
 from babylon60.security.types import RiskLevel

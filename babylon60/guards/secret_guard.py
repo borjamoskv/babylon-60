@@ -9,7 +9,7 @@ in the Ledger, even if encrypted. This is a deterministic structural gate.
 import logging
 import re
 
-logger = logging.getLogger("cortex.guards.secret")
+logger = logging.getLogger("babylon60.guards.secret")
 
 
 class PlaintextSecretError(Exception):

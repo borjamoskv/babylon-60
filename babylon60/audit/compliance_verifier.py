@@ -16,7 +16,7 @@ from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.audit.verifier")
+logger = logging.getLogger("babylon60.audit.verifier")
 
 
 class ComplianceVerifier:

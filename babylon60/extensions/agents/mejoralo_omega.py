@@ -24,7 +24,7 @@ from babylon60.extensions.mejoralo.constants import (
 )
 from babylon60.extensions.mejoralo.models import ScanResult
 
-logger = logging.getLogger("cortex_extensions.agents.mejoralo_omega")
+logger = logging.getLogger("babylon60_extensions.agents.mejoralo_omega")
 
 # ── Constants ──────────────────────────────────────────────────────
 DEFAULT_CYCLE_INTERVAL = 120  # seconds between full cycles

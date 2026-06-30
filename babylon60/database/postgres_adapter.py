@@ -12,7 +12,7 @@ import logging
 import re
 from typing import Any
 
-logger = logging.getLogger("cortex.db.postgres_adapter")
+logger = logging.getLogger("babylon60.db.postgres_adapter")
 
 
 class PostgresCursorAdapter:

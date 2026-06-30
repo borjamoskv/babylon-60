@@ -20,7 +20,7 @@ import sys
 
 __all__ = ["main", "run_cli", "run_web"]
 
-logger = logging.getLogger("cortex_extensions.adk.runner")
+logger = logging.getLogger("babylon60_extensions.adk.runner")
 
 
 def _parse_args() -> argparse.Namespace:

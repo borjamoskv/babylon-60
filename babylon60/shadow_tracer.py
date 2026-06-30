@@ -17,10 +17,13 @@ from pathlib import Path
 class _TracerAliasLoader(importlib.abc.Loader):
     def __init__(self, target_module):
         self.target_module = target_module
+
     def create_module(self, spec):
         return self.target_module
+
     def exec_module(self, module):
         pass
+
 
 class ShadowResolver(importlib.abc.MetaPathFinder):
     """
@@ -28,6 +31,7 @@ class ShadowResolver(importlib.abc.MetaPathFinder):
     Redirects imports from cortex to babylon60 if a physical replacement exists,
     otherwise tracks the legacy dependency ('would-break-in-wave2') and falls back.
     """
+
     def __init__(self, tracer):
         self.tracer = tracer
 
@@ -40,11 +44,11 @@ class ShadowResolver(importlib.abc.MetaPathFinder):
         if fullname == "cortex" or fullname.startswith("cortex."):
             # Determine caller
             caller = self.tracer.get_caller_module()
-            
+
             # Map name to babylon60 space to see if a physical file exists there
             babylon_fullname = fullname.replace("cortex", "babylon60", 1)
             has_replacement = self.tracer.has_physical_module(babylon_fullname)
-            
+
             if has_replacement:
                 # Redirect to babylon60 implementation
                 self.tracer.log_redirect(fullname, babylon_fullname, caller)
@@ -59,21 +63,27 @@ class ShadowResolver(importlib.abc.MetaPathFinder):
             else:
                 # Log would-break event
                 self.tracer.log_would_break(fullname, caller)
-        
+
         # Intercept babylon60 imports if shadow is disabled
-        if (fullname == "babylon60" or fullname.startswith("babylon60.")) and self.tracer.mode == "shadow-disabled":
+        if (
+            fullname == "babylon60" or fullname.startswith("babylon60.")
+        ) and self.tracer.mode == "shadow-disabled":
             # In shadow-disabled mode, babylon60 must act completely independent and not alias to cortex.
             # If no physical module exists in babylon60, the import should fail (ModuleNotFoundError)
             if not self.tracer.has_physical_module(fullname):
-                raise ModuleNotFoundError(f"No physical module found for '{fullname}' in shadow-disabled mode")
+                raise ModuleNotFoundError(
+                    f"No physical module found for '{fullname}' in shadow-disabled mode"
+                )
 
         return None
+
 
 class ImportTracer:
     """
     Tracks import dependency relationships, detects cycles under alias collapse,
     and generates the compatibility delta graph.
     """
+
     def __init__(self, mode="present"):
         # Mode can be: "present", "shadow-disabled", "redirected"
         self.mode = mode
@@ -93,7 +103,13 @@ class ImportTracer:
             frame = sys._getframe(1)
             while frame:
                 name = frame.f_globals.get("__name__")
-                if name and name not in ("importlib._bootstrap", "importlib._bootstrap_external", "builtins", "sys", "babylon60.shadow_tracer"):
+                if name and name not in (
+                    "importlib._bootstrap",
+                    "importlib._bootstrap_external",
+                    "builtins",
+                    "sys",
+                    "babylon60.shadow_tracer",
+                ):
                     # We also want to skip python internal frames where possible
                     filename = frame.f_code.co_filename
                     if "importlib" not in filename and "<frozen" not in filename:
@@ -120,17 +136,13 @@ class ImportTracer:
         subpath = Path(*parts)
         py_file = self.project_root / f"{subpath}.py"
         init_file = self.project_root / subpath / "__init__.py"
-        
+
         exists = py_file.exists() or init_file.exists()
         self.physical_cache[fullname] = exists
         return exists
 
     def log_redirect(self, source, target, caller):
-        self.redirects.append({
-            "source": source,
-            "target": target,
-            "caller": caller
-        })
+        self.redirects.append({"source": source, "target": target, "caller": caller})
         self.imports[caller].add(target)
         if self.ledger:
             self.ledger.log_resolution(caller, source, "REDIRECTED", target)
@@ -138,10 +150,7 @@ class ImportTracer:
     def log_would_break(self, source, caller):
         # Only log if not already recorded for this caller/source combination
         if not any(x["source"] == source and x["caller"] == caller for x in self.would_breaks):
-            self.would_breaks.append({
-                "source": source,
-                "caller": caller
-            })
+            self.would_breaks.append({"source": source, "caller": caller})
         self.imports[caller].add(source)
         if self.ledger:
             self.ledger.log_resolution(caller, source, "WOULD_BREAK", "None")
@@ -150,7 +159,9 @@ class ImportTracer:
         if importer and imported:
             if importer != "unknown" and importer != imported:
                 # Filter to only care about cortex/babylon60 related imports
-                if ("cortex" in importer or "babylon60" in importer) or ("cortex" in imported or "babylon60" in imported):
+                if ("cortex" in importer or "babylon60" in importer) or (
+                    "cortex" in imported or "babylon60" in imported
+                ):
                     self.imports[importer].add(imported)
                     if self.ledger:
                         res_type = "DIRECT"
@@ -162,10 +173,14 @@ class ImportTracer:
         """Installs the tracer hook into sys.meta_path and overrides standard import."""
         if self._installed:
             return
-        
+
         # Initialize ledger if configured
-        if os.environ.get("CORTEX_IMPORT_LEDGER") == "1" or os.environ.get("CORTEX_IMPORT_LEDGER") == "true":
+        if (
+            os.environ.get("CORTEX_IMPORT_LEDGER") == "1"
+            or os.environ.get("CORTEX_IMPORT_LEDGER") == "true"
+        ):
             from babylon60.import_ledger import ImportResolutionLedger
+
             ledger_path = os.environ.get("CORTEX_IMPORT_LEDGER_PATH")
             self.ledger = ImportResolutionLedger(filepath=ledger_path)
             self.ledger.start_session()
@@ -173,17 +188,17 @@ class ImportTracer:
         # Set up our shadow resolver at the top of meta_path
         self._resolver = ShadowResolver(self)
         sys.meta_path.insert(0, self._resolver)
-        
+
         # Intercept builtin __import__ to build the dependency graph
         self._orig_import = __builtins__["__import__"]
-        
+
         def custom_import(name, globals=None, locals=None, fromlist=(), level=0):
             caller = self.get_caller_module()
             module = self._orig_import(name, globals, locals, fromlist, level)
-            
+
             # Record base module import
             self.record_import(caller, name)
-            
+
             # Record elements from fromlist if specified
             if fromlist and hasattr(module, "__name__"):
                 mod_name = module.__name__
@@ -192,7 +207,7 @@ class ImportTracer:
                     if sub_name in sys.modules:
                         self.record_import(caller, sub_name)
             return module
-            
+
         __builtins__["__import__"] = custom_import
         self._installed = True
 
@@ -215,7 +230,7 @@ class ImportTracer:
         """
         # Build adjacency list
         graph = defaultdict(set)
-        
+
         def map_node(node):
             if not collapsed:
                 return node
@@ -259,10 +274,10 @@ class ImportTracer:
         """Exports the collected compatibility metrics as a JSON DAG report."""
         uncollapsed_cycles = self.detect_cycles(collapsed=False)
         collapsed_cycles = self.detect_cycles(collapsed=True)
-        
+
         # Serialize sets for JSON
         serializable_imports = {k: list(v) for k, v in self.imports.items()}
-        
+
         report = {
             "mode": self.mode,
             "metrics": {
@@ -270,23 +285,25 @@ class ImportTracer:
                 "uncollapsed_cycles_count": len(uncollapsed_cycles),
                 "collapsed_cycles_count": len(collapsed_cycles),
                 "would_break_count": len(self.would_breaks),
-                "redirects_count": len(self.redirects)
+                "redirects_count": len(self.redirects),
             },
             "uncollapsed_cycles": uncollapsed_cycles,
             "collapsed_cycles": collapsed_cycles,
             "would_breaks": self.would_breaks,
             "redirects": self.redirects,
-            "import_graph": serializable_imports
+            "import_graph": serializable_imports,
         }
-        
+
         # Write to file
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2)
-        
+
         return report
+
 
 # Global tracer instance
 _global_tracer = None
+
 
 def enable_tracer(mode="present", force=False):
     global _global_tracer
@@ -299,6 +316,7 @@ def enable_tracer(mode="present", force=False):
     _global_tracer = ImportTracer(mode=mode)
     _global_tracer.install()
     return _global_tracer
+
 
 def disable_tracer(force=False):
     global _global_tracer

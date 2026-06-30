@@ -6,7 +6,7 @@ from babylon60.engine.smte.parser import AgentASTParser
 from babylon60.engine.smte.weismann_barrier import enforce_weismann_barrier
 from babylon60.guards.exergy_guard import calculate_exergy
 
-logger = logging.getLogger("cortex.engine.smte.trigger")
+logger = logging.getLogger("babylon60.engine.smte.trigger")
 logging.basicConfig(level=logging.INFO)
 
 

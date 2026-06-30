@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
     from babylon60.engine import CortexEngine as AsyncCortexEngine
 
-logger = logging.getLogger("cortex.sidecar.telemetry.iot_oracle")
+logger = logging.getLogger("babylon60.sidecar.telemetry.iot_oracle")
 
 
 class IoTOracle:

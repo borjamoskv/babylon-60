@@ -6,13 +6,16 @@ from pydantic import BaseModel, Field
 class TextMessage(BaseModel):
     body: str
 
+
 class WhatsAppTemplateLanguage(BaseModel):
     code: str
+
 
 class WhatsAppTemplate(BaseModel):
     name: str
     language: WhatsAppTemplateLanguage
     components: Optional[list[dict[str, Any]]] = None
+
 
 class WhatsAppMessage(BaseModel):
     messaging_product: str = "whatsapp"

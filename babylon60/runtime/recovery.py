@@ -5,7 +5,7 @@ from typing import Any
 from .snapshot import SnapshotManager
 from .state import RuntimeState
 
-logger = logging.getLogger("cortex.recovery")
+logger = logging.getLogger("babylon60.recovery")
 
 
 class RecoveryKernel:

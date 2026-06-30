@@ -45,7 +45,7 @@ from babylon60.cli.loop_models import TaskResult, TaskStatus
 
 __all__ = ["loop"]
 
-logger = logging.getLogger("cortex.loop")
+logger = logging.getLogger("babylon60.loop")
 
 # ─── Industrial Noir Palette ──────────────────────────────────────────
 CYBER_LIME = "#CCFF00"

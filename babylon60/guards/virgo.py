@@ -17,7 +17,7 @@ from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.crypto.keys import ZKSwarmIdentity
 from babylon60.utils.errors import CortexError
 
-logger = logging.getLogger("cortex.security.virgo")
+logger = logging.getLogger("babylon60.security.virgo")
 
 
 class VirgoValidationError(ValueError, CortexError):
@@ -238,6 +238,7 @@ class VirgoContextGuard:
         words = content.split()
         if len(words) > 30:
             from collections import Counter
+
             # Check for excessive n-gram repetition (e.g. agent repeating the same phrase over and over)
             for n in (3, 4, 5):
                 ngrams = (" ".join(words[i : i + n]) for i in range(len(words) - n + 1))
@@ -273,6 +274,7 @@ class VirgoContextGuard:
         if not s:
             return 0.0
         from collections import Counter
+
         probabilities = [float(count) / len(s) for count in Counter(s).values()]
         return -sum(p * math.log(p, 2) for p in probabilities)
 

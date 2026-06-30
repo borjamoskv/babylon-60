@@ -16,7 +16,7 @@ import aiosqlite
 from babylon60.engine.core.mutation_engine import MUTATION_ENGINE
 from babylon60.memory.temporal import now_iso
 
-logger = logging.getLogger("cortex.evaporator")
+logger = logging.getLogger("babylon60.evaporator")
 
 
 class EntropicEvaporator:

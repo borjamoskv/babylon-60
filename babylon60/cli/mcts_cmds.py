@@ -66,21 +66,25 @@ def prune() -> None:
     from pathlib import Path
 
     from babylon60.mcts.git_env import MCTSGitEnvironment
-    
+
     try:
-        console.print(Panel.fit("[bold red]🗑️  CHRONOS GC: Initiating Apoptosis[/bold red]", border_style="red"))
-        
+        console.print(
+            Panel.fit(
+                "[bold red]🗑️  CHRONOS GC: Initiating Apoptosis[/bold red]", border_style="red"
+            )
+        )
+
         # We don't need a real router or target file for pruning, just any file in the repo
         env = MCTSGitEnvironment(router=None, target_file=Path(__file__))  # type: ignore
-        
+
         metrics = asyncio.run(env.prune_orphans())
-        
+
         console.print(f"[green]✔ Pruned Worktrees:[/green] {metrics['worktrees_removed']}")
         console.print(f"[green]✔ Pruned Branches:[/green] {metrics['branches_removed']}")
-        
-        if metrics['worktrees_removed'] == 0 and metrics['branches_removed'] == 0:
+
+        if metrics["worktrees_removed"] == 0 and metrics["branches_removed"] == 0:
             console.print("[dim]The timeline is already clean. Zero anergy detected.[/dim]")
-            
+
     except Exception as e:
         console.print(f"[red]Pruning Error:[/red] {e}")
         raise click.Abort() from e

@@ -12,7 +12,7 @@ import logging
 from dataclasses import dataclass
 from enum import Enum, auto
 
-logger = logging.getLogger("cortex_extensions.protocols.zenon_1")
+logger = logging.getLogger("babylon60_extensions.protocols.zenon_1")
 
 
 class ZenonSignal(Enum):

@@ -26,7 +26,7 @@ from babylon60.extensions.scraper.models import (
     ScrapeResult,
 )
 
-LOG = logging.getLogger("cortex_extensions.scraper.engine")
+LOG = logging.getLogger("babylon60_extensions.scraper.engine")
 
 
 class ScraperEngine:

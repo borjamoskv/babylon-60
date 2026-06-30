@@ -19,7 +19,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel, Field
 
-logger = logging.getLogger("cortex.memory.schemas")
+logger = logging.getLogger("babylon60.memory.schemas")
 
 __all__ = ["MemorySchema", "SchemaEngine", "SchemaEngineConfig"]
 

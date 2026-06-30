@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 __all__ = ["register_mega_tools"]
 
-logger = logging.getLogger("cortex.mcp_server.mega")
+logger = logging.getLogger("babylon60.mcp_server.mega")
 
 # Safe base directories for entropy scanning
 # Include resolved tempdir for macOS (/var/folders/... symlinked from /tmp)

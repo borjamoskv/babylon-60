@@ -23,7 +23,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from babylon60.extensions.signals.bus import AsyncSignalBus
 
-logger = logging.getLogger("cortex.exergy.middleware")
+logger = logging.getLogger("babylon60.exergy.middleware")
 
 router = APIRouter(prefix="/llm-proxy/v1", tags=["Exergy Proxy"])
 

@@ -12,7 +12,7 @@ from typing import Any
 
 from babylon60.extensions.songlines.sensor import TopographicSensor
 
-logger = logging.getLogger("cortex_extensions.songlines.economy")
+logger = logging.getLogger("babylon60_extensions.songlines.economy")
 
 
 class ThermalEconomy:

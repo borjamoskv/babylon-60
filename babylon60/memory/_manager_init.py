@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-logger = logging.getLogger("cortex.memory._manager_init")
+logger = logging.getLogger("babylon60.memory._manager_init")
 
 
 def init_dynamic_space(l2: Any, manager: Any) -> Any | None:

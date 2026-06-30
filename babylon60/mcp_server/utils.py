@@ -25,7 +25,7 @@ __all__ = [
     "SimpleAsyncCache",
 ]
 
-logger = logging.getLogger("cortex.mcp_server.utils")
+logger = logging.getLogger("babylon60.mcp_server.utils")
 
 
 @dataclass

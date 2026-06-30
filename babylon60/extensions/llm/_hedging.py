@@ -23,7 +23,7 @@ from babylon60.extensions.llm._models import BaseProvider, CortexPrompt, HedgedR
 
 __all__ = ["HedgedRequestStrategy"]
 
-logger = logging.getLogger("cortex_extensions.llm.hedging")
+logger = logging.getLogger("babylon60_extensions.llm.hedging")
 
 
 class HedgedRequestStrategy:

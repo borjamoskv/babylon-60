@@ -24,7 +24,7 @@ __all__ = [
     "text_search_sync",
 ]
 
-logger = logging.getLogger("cortex.search_sync")
+logger = logging.getLogger("babylon60.search_sync")
 
 # RRF smoothing constant (standard value from the RRF paper)
 RRF_K = 60

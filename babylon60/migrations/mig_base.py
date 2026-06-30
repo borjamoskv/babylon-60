@@ -2,7 +2,7 @@
 import logging
 import sqlite3
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 def _migration_001_add_updated_at(conn: sqlite3.Connection):

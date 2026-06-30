@@ -32,7 +32,7 @@ __all__ = [
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex.reflection")
+logger = logging.getLogger("babylon60.reflection")
 
 # Fact types considered "learnable" for injection
 LEARNABLE_TYPES = ("reflection", "error", "meta_learning")

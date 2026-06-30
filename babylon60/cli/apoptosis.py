@@ -24,17 +24,24 @@ async def _execute_apoptosis(target: str, tenant: str) -> None:
         return
 
     with console.status(
-        f"[bold red]Executing cell death (entropy pruning) on {target}...[/bold red]", spinner="bouncingBar"
+        f"[bold red]Executing cell death (entropy pruning) on {target}...[/bold red]",
+        spinner="bouncingBar",
     ):
         # Determine target type
         if target.endswith(".aof"):
-            console.print("[yellow]Detected Append-Only File (AOF). Triggering Thermodynamic Ledger Apoptosis...[/yellow]")
+            console.print(
+                "[yellow]Detected Append-Only File (AOF). Triggering Thermodynamic Ledger Apoptosis...[/yellow]"
+            )
             apoptosis = ThermodynamicLedgerApoptosis(target)
             retained = apoptosis.trigger_snapshot()
-            console.print(f"[bold green]AOF Apoptosis complete. Bounded snapshot generated. Retained {retained} active nodes.[/bold green]")
-        
+            console.print(
+                f"[bold green]AOF Apoptosis complete. Bounded snapshot generated. Retained {retained} active nodes.[/bold green]"
+            )
+
         elif target.endswith(".db"):
-            console.print(f"[yellow]Detected SQLite database. Running ApoptosisAgent for tenant '{tenant}'...[/yellow]")
+            console.print(
+                f"[yellow]Detected SQLite database. Running ApoptosisAgent for tenant '{tenant}'...[/yellow]"
+            )
             # Initialize with default free tier limits
             agent = ApoptosisAgent(db_path=target, atp_free_threshold=0.4, max_free_facts=1000)
             stats = await agent.run_apoptosis_cycle(tenant_id=tenant)
@@ -46,9 +53,11 @@ async def _execute_apoptosis(target: str, tenant: str) -> None:
             )
             if stats["errors"]:
                 console.print(f"[bold red]Errors encountered: {stats['errors']}[/bold red]")
-        
+
         else:
-            console.print(f"[bold red]Error: Target '{target}' is not a recognized .aof or .db file.[/bold red]")
+            console.print(
+                f"[bold red]Error: Target '{target}' is not a recognized .aof or .db file.[/bold red]"
+            )
 
 
 @cli.command("apoptosis")

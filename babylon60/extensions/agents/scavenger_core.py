@@ -22,7 +22,7 @@ from babylon60.extensions.skills.cadastral.models import (
 from babylon60.memory.ledger import EventLedgerL3
 from babylon60.memory.models import MemoryEvent
 
-logger = logging.getLogger("cortex_extensions.agents.scavenger_core")
+logger = logging.getLogger("babylon60_extensions.agents.scavenger_core")
 
 
 @dataclass(frozen=True)

@@ -19,7 +19,7 @@ import logging
 from typing import Any
 from urllib.parse import urlparse
 
-logger = logging.getLogger("cortex.guards.url_guard")
+logger = logging.getLogger("babylon60.guards.url_guard")
 
 # Private IP ranges (RFC 1918, etc.) to block
 _PRIVATE_NETWORKS = [

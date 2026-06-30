@@ -27,7 +27,7 @@ from babylon60.extensions.skills.autodidact.epistemology import Hypothesis
 from babylon60.swarm.legion import AsyncSignalBus, LegionPool, SwarmAgent, SwarmSignal
 from babylon60.swarm.state_store import CausalStateStore
 
-logger = logging.getLogger("cortex.swarm.supervisor")
+logger = logging.getLogger("babylon60.swarm.supervisor")
 
 
 class DummyAgent(SwarmAgent):

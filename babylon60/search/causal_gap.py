@@ -22,7 +22,7 @@ __all__ = [
     "retrieve_for_causal_gap",
 ]
 
-logger = logging.getLogger("cortex.search.causal_gap")
+logger = logging.getLogger("babylon60.search.causal_gap")
 
 # ── Scoring weights ──────────────────────────────────────────────────
 # Sum to 1.0. evidence_match and confidence_gain dominate by design.

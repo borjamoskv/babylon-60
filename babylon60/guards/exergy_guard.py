@@ -14,7 +14,7 @@ import math
 import re
 from collections import Counter
 
-logger = logging.getLogger("cortex.guards.exergy")
+logger = logging.getLogger("babylon60.guards.exergy")
 
 # Standard stopwords and LLM-isms that consume tokens but provide 0 exergy
 _DECORATIVE_MARKERS = frozenset(
@@ -391,17 +391,17 @@ class LandauerGuard:
     def check_landauer_limit(self, content: str, is_sacred: bool = False) -> float:
         """
         Validates thermodynamic density.
-        
+
         Raises:
             ValueError: If the Shannon entropy falls below the threshold for a sacred fact.
         """
         entropy = calculate_shannon_entropy(content)
-        
+
         # Thresholds: Sacred facts require high density (minimum 4.0 bits/char)
         if is_sacred and entropy < 4.0:
             logger.warning(
-                "Landauer Violation (Axiom Ω₄): Rejected low entropy sacred fact "
-                "(Entropy: %.2f).", entropy
+                "Landauer Violation (Axiom Ω₄): Rejected low entropy sacred fact (Entropy: %.2f).",
+                entropy,
             )
             raise ValueError(
                 f"[Axiom Ω₄] Landauer Violation: Thermodynamic density too low for Sacred Axiom "

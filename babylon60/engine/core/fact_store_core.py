@@ -16,7 +16,7 @@ import aiosqlite
 from babylon60.memory.temporal import now_iso
 from babylon60.utils.canonical import compute_fact_hash
 
-logger = logging.getLogger("cortex")
+logger = logging.getLogger("babylon60")
 
 
 async def _get_table_columns(conn: aiosqlite.Connection, table_name: str) -> set[str]:

@@ -23,7 +23,7 @@ __all__ = [
     "is_adk_available",
 ]
 
-logger = logging.getLogger("cortex_extensions.adk.agents")
+logger = logging.getLogger("babylon60_extensions.adk.agents")
 
 _ADK_INSTALL_MSG = "Google ADK not installed. Install with: pip install google-adk"
 

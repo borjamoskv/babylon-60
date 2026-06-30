@@ -20,7 +20,7 @@ Architecture:
 
 import logging
 
-logger = logging.getLogger("cortex.exergy")
+logger = logging.getLogger("babylon60.exergy")
 import glob
 import json
 import os

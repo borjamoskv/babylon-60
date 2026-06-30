@@ -31,7 +31,7 @@ __all__ = [
     "create_pool_async",
 ]
 
-logger = logging.getLogger("cortex.db.postgres")
+logger = logging.getLogger("babylon60.db.postgres")
 
 # ─── Configuration ────────────────────────────────────────────────────
 PG_TIMEOUT_S = int(os.environ.get("CORTEX_PG_TIMEOUT", "5"))

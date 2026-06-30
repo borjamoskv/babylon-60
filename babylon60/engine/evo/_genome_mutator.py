@@ -26,7 +26,7 @@ from babylon60.isa.builder import (
     seq,
 )
 
-logger = logging.getLogger("cortex.engine.evo.genome")
+logger = logging.getLogger("babylon60.engine.evo.genome")
 
 
 class GenomeMutator:

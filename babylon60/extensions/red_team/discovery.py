@@ -18,7 +18,7 @@ import types
 from collections.abc import Callable
 from typing import Any
 
-logger = logging.getLogger("cortex_extensions.red_team.discovery")
+logger = logging.getLogger("babylon60_extensions.red_team.discovery")
 
 
 class DiscoveryProvider:

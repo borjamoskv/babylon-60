@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 from babylon60.crypto.hash_registry import cortex_hash
 
-logger = logging.getLogger("cortex.engine.causal.verification_oracle")
+logger = logging.getLogger("babylon60.engine.causal.verification_oracle")
 
 
 class InvariantViolationError(ValueError):

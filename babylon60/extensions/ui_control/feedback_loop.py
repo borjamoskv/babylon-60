@@ -26,7 +26,7 @@ except ImportError:
     Vision = None
     NSURL = None
 
-logger = logging.getLogger("cortex_extensions.ui_control.feedback_loop")
+logger = logging.getLogger("babylon60_extensions.ui_control.feedback_loop")
 
 
 class UIFeedbackLoop:

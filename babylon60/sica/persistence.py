@@ -27,7 +27,7 @@ from babylon60.sica.strategy import (
     StrategyGenome,
 )
 
-logger = logging.getLogger("cortex.sica.persistence")
+logger = logging.getLogger("babylon60.sica.persistence")
 
 # Default persistence directory
 _DEFAULT_DIR = Path.home() / ".cortex" / "sica" / "genomes"

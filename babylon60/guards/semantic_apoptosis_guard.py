@@ -13,7 +13,7 @@ from typing import Any
 
 from babylon60.utils.errors import CortexError
 
-logger = logging.getLogger("cortex.guards.semantic_apoptosis")
+logger = logging.getLogger("babylon60.guards.semantic_apoptosis")
 
 
 class SemanticApoptosisError(ValueError, CortexError):

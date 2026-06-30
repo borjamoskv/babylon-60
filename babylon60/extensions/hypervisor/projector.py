@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 __all__ = ["EventProjector"]
 
-logger = logging.getLogger("cortex_extensions.hypervisor.projector")
+logger = logging.getLogger("babylon60_extensions.hypervisor.projector")
 
 
 class EventProjector:

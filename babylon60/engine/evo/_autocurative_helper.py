@@ -15,7 +15,7 @@ from babylon60.engine.forensic.circuit_breaker import CircuitState
 if TYPE_CHECKING:
     from babylon60.swarm.autocurative_agent import AutoCurativeAgent
 
-logger = logging.getLogger("cortex.engine.autocurative")
+logger = logging.getLogger("babylon60.engine.autocurative")
 
 
 async def execute_with_healing(

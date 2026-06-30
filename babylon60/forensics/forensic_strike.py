@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from babylon60.swarm.swarm_10k import SwarmCommander
 
-logger = logging.getLogger("cortex.forensics.strike")
+logger = logging.getLogger("babylon60.forensics.strike")
 
 
 @dataclass

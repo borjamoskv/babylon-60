@@ -42,7 +42,7 @@ except ImportError:
             return 1.0
 
 
-logger = logging.getLogger("cortex.guards.health")
+logger = logging.getLogger("babylon60.guards.health")
 
 
 class HealthGuard(HealthMixin):

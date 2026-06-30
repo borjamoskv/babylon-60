@@ -31,7 +31,7 @@ from typing import Any
 
 from babylon60.sica.object_level import ExecutionStep, ExecutionTrace, StepOutcome
 
-logger = logging.getLogger("cortex.sica.world_model")
+logger = logging.getLogger("babylon60.sica.world_model")
 
 
 # ═══════════════════════════════════════════════════════════════════

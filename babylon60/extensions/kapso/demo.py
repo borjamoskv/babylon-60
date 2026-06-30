@@ -19,7 +19,7 @@ async def main():
     target = os.getenv("KAPSO_TARGET")
 
     print("[*] Initiating Kapso Singularity Test...")
-    
+
     if not all([api_key, phone_id, target]):
         print("[!] Missing Environment Variables (Anergy Drain).")
         print("    Requires: KAPSO_API_KEY, KAPSO_PHONE_ID, KAPSO_TARGET")
@@ -28,11 +28,11 @@ async def main():
         sys.exit(0)
 
     gateway = KapsoGateway(api_key=api_key, phone_number_id=phone_id)
-    
+
     msg = WhatsAppMessage(
         to=target,
         type="text",
-        text=TextMessage(body="[CORTEX-PERSIST] C5-REAL: Transmission from MOSKV-1 APEX.")
+        text=TextMessage(body="[CORTEX-PERSIST] C5-REAL: Transmission from MOSKV-1 APEX."),
     )
 
     try:
@@ -41,6 +41,7 @@ async def main():
     except Exception as e:
         print(f"[-] Transmission Failed. Entropic Collapse: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

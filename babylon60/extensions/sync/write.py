@@ -24,7 +24,7 @@ __all__ = ["export_to_json"]
 if TYPE_CHECKING:
     from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.sync")
+logger = logging.getLogger("babylon60_extensions.sync")
 
 
 def _decrypt_json(val: str | None) -> dict:

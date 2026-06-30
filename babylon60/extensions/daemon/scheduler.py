@@ -32,7 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.daemon.scheduler")
+logger = logging.getLogger("babylon60.daemon.scheduler")
 
 __all__ = ["ScheduleEntry", "SovereignScheduler"]
 

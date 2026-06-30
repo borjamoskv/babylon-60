@@ -17,7 +17,7 @@ from babylon60.memory.encoder import AsyncEncoder
 from babylon60.memory.models import CortexFactModel
 from babylon60.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-logger = logging.getLogger("cortex.mcp_server.knowledge_watcher")
+logger = logging.getLogger("babylon60.mcp_server.knowledge_watcher")
 
 KNOWLEDGE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
 

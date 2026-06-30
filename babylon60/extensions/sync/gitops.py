@@ -7,7 +7,7 @@ from typing import Any
 
 __all__ = ["export_gitops_memory", "sync_fact_to_repo"]
 
-logger = logging.getLogger("cortex_extensions.sync.gitops")
+logger = logging.getLogger("babylon60_extensions.sync.gitops")
 
 
 def _locate_repo_root(project_name: str) -> Path | None:

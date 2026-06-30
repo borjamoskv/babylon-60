@@ -25,7 +25,7 @@ from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
-logger = logging.getLogger("cortex_extensions.swarm.error_ghost_pipeline")
+logger = logging.getLogger("babylon60_extensions.swarm.error_ghost_pipeline")
 
 # ── Constants ──────────────────────────────────────────────────────────
 _DEDUP_WINDOW_SIZE = 64  # Ring buffer: last N error hashes

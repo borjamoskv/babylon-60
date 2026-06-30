@@ -27,7 +27,9 @@ class ExperimentDesign(BaseModel):
 class PredictionSchemaL3(BaseModel):
     prediction_id: UUID
     model_id: UUID
-    falsifiable_condition: str = Field(min_length=1, description="If model is true, this MUST occur.")
+    falsifiable_condition: str = Field(
+        min_length=1, description="If model is true, this MUST occur."
+    )
     experiment_design: ExperimentDesign
     experiment_result: Optional[ExperimentResult] = None
 
@@ -43,7 +45,9 @@ class ExecutionContext(str, Enum):
 
 class ExperimentOutcome(BaseModel):
     refuted: StrictBool = Field(description="True if prediction failed.")
-    evidence_hash: str = Field(pattern=r"^[a-fA-F0-9]{64}$", description="Hash of the test execution log.")
+    evidence_hash: str = Field(
+        pattern=r"^[a-fA-F0-9]{64}$", description="Hash of the test execution log."
+    )
 
     model_config = ConfigDict(extra="forbid")
 

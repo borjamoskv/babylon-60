@@ -18,7 +18,7 @@ from babylon60.extensions.aether.models import AgentTask, TaskStatus
 
 __all__ = ["TaskQueue"]
 
-logger = logging.getLogger("cortex_extensions.aether.queue")
+logger = logging.getLogger("babylon60_extensions.aether.queue")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS agent_tasks (

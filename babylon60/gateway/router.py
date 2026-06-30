@@ -41,7 +41,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-logger = logging.getLogger("cortex.gateway")
+logger = logging.getLogger("babylon60.gateway")
 
 
 # ─── Request / Response Models ────────────────────────────────────────

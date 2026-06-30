@@ -20,7 +20,7 @@ import httpx
 from babylon60.extensions.notifications.adapters.base import BaseAdapter
 from babylon60.extensions.notifications.events import CortexEvent
 
-logger = logging.getLogger("cortex_extensions.notifications.telegram")
+logger = logging.getLogger("babylon60_extensions.notifications.telegram")
 
 _TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
 

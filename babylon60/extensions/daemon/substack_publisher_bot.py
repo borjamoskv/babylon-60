@@ -18,6 +18,7 @@ class SubstackPublisherBot:
     def __init__(self, cdp_url="http://localhost:9222"):
         # Loopback boundary enforcement to block remote hijacking / DNS rebinding
         from urllib.parse import urlparse
+
         parsed = urlparse(cdp_url)
         hostname = parsed.hostname or ""
         if hostname not in ("localhost", "127.0.0.1", "[::1]"):
@@ -93,7 +94,8 @@ class SubstackPublisherBot:
 
                 # Simulamos escribir markdown puro. Substack suele parsearlo si se pega o se tipea.
                 # Para evitar tipear lentamente, usamos inserción en DOM o pegado.
-                await page.evaluate("""
+                await page.evaluate(
+                    """
                     (content) => {
                         const editor = document.querySelector('.ProseMirror');
                         if (editor) {
@@ -105,7 +107,9 @@ class SubstackPublisherBot:
                             editor.appendChild(pre);
                         }
                     }
-                """, markdown_content)
+                """,
+                    markdown_content,
+                )
 
                 logger.info("[C5-REAL] Ensayo inyectado en Substack.")
 

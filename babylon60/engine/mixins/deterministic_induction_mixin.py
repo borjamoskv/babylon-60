@@ -14,7 +14,7 @@ from __future__ import annotations
 import ast
 import logging
 
-logger = logging.getLogger("cortex.engine.deterministic_induction")
+logger = logging.getLogger("babylon60.engine.deterministic_induction")
 
 
 class DeterministicInductionMixin:

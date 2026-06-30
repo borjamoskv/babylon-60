@@ -7,7 +7,7 @@ from typing import Any
 
 from babylon60.engine import CortexEngine
 
-logger = logging.getLogger("cortex_extensions.immune.breaker")
+logger = logging.getLogger("babylon60_extensions.immune.breaker")
 
 
 @dataclass

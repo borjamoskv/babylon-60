@@ -20,7 +20,7 @@ from babylon60.config import FEDERATION_MODE, SHARD_DIR
 
 __all__ = ["FederatedEngine", "get_engine"]
 
-logger = logging.getLogger("cortex_extensions.federation")
+logger = logging.getLogger("babylon60_extensions.federation")
 
 
 class FederatedEngine:

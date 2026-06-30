@@ -20,7 +20,7 @@ from babylon60.extensions.thinking.fusion_models import (
 
 __all__ = ["ContextFusion", "ThoughtFusion"]
 
-logger = logging.getLogger("cortex_extensions.thinking.fusion")
+logger = logging.getLogger("babylon60_extensions.thinking.fusion")
 
 
 class ContextFusion:

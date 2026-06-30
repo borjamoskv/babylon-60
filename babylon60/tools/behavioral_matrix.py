@@ -31,11 +31,13 @@ class ConversationTurn:
     latency_ms: float
     completion_tokens: int
 
+
 class BehavioralAnalyzer:
     """
     Computes mathematical invariants over prompt-response sets to isolate
     behavioral footprints without relying on model-labeled classes.
     """
+
     def __init__(self, embedding_provider=None):
         self.embedding_provider = embedding_provider
 
@@ -68,7 +70,7 @@ class BehavioralAnalyzer:
             return 0.0
         similarities = []
         for i in range(1, len(history)):
-            v_prev = self._get_embedding(history[i-1].response)
+            v_prev = self._get_embedding(history[i - 1].response)
             v_curr = self._get_embedding(history[i].response)
             dot = np.dot(v_prev, v_curr)
             norm_p = np.linalg.norm(v_prev)
@@ -164,6 +166,7 @@ class BehavioralAnalyzer:
         norm_c = np.linalg.norm(v_corr)
         sim = dot / (norm_o * norm_c) if norm_o > 0 and norm_c > 0 else 0.0
         return float(1.0 - sim)
+
 
 def compute_mahalanobis_distance(u: np.ndarray, v: np.ndarray, cov: np.ndarray) -> float:
     """

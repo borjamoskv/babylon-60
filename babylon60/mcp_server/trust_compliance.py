@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 __all__ = ["register_compliance_tools"]
 
-logger = logging.getLogger("cortex.mcp_server.trust")
+logger = logging.getLogger("babylon60.mcp_server.trust")
 
 
 def register_compliance_tools(mcp: FastMCP, ctx: _MCPContext) -> None:

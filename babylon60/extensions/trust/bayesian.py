@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 __all__ = ["BayesianTrustUpdater", "Signal", "TrustUpdate"]
 
-logger = logging.getLogger("cortex_extensions.trust")
+logger = logging.getLogger("babylon60_extensions.trust")
 
 
 # Confidence → (α₀, β₀) priors - start from empirical base rates

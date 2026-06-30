@@ -14,7 +14,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-logger = logging.getLogger("cortex.daemon.reaper")
+logger = logging.getLogger("babylon60.daemon.reaper")
 
 
 class DeathCertificate:

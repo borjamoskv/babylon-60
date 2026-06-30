@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 
-logger = logging.getLogger("cortex.migrations")
+logger = logging.getLogger("babylon60.migrations")
 
 _STATEMENTS = [
     # ── Facts: Quarantine Support ──────────────────────────────────

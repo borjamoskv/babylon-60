@@ -11,7 +11,7 @@ from pathlib import Path
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-logger = logging.getLogger("cortex_extensions.daemon.loops.watcher")
+logger = logging.getLogger("babylon60_extensions.daemon.loops.watcher")
 
 
 class GitWatcherHandler(FileSystemEventHandler):

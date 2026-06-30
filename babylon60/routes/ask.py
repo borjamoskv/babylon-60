@@ -39,7 +39,7 @@ __all__ = [
     "llm_status",
 ]
 
-logger = logging.getLogger("cortex.routes.ask")
+logger = logging.getLogger("babylon60.routes.ask")
 
 router = APIRouter(tags=["ask"])
 

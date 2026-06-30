@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.memory.causal")
+logger = logging.getLogger("babylon60.memory.causal")
 
 
 @dataclass()

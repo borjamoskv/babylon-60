@@ -14,7 +14,7 @@ import aiosqlite
 from babylon60.engine.cognitive.models import row_to_fact
 from babylon60.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 
-logger = logging.getLogger("cortex.engine.guards")
+logger = logging.getLogger("babylon60.engine.guards")
 
 
 class DelegatesMixin:

@@ -12,7 +12,7 @@ from typing import Any
 
 import httpx
 
-logger = logging.getLogger("cortex.audit.rekor")
+logger = logging.getLogger("babylon60.audit.rekor")
 
 REKOR_URL = "https://rekor.sigstore.dev/api/v1/log/entries"
 

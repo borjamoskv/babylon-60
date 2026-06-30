@@ -8,7 +8,7 @@ from pathlib import Path
 
 from babylon60.extensions.health.models import MetricSnapshot
 
-logger = logging.getLogger("cortex_extensions.health.ledger")
+logger = logging.getLogger("babylon60_extensions.health.ledger")
 
 
 class LedgerCollector:

@@ -16,7 +16,7 @@ from pathlib import Path
 from babylon60.audit.ledger import EnterpriseAuditLedger
 from babylon60.database.core import connect_async_ctx
 
-logger = logging.getLogger("cortex.daemon.apoptosis")
+logger = logging.getLogger("babylon60.daemon.apoptosis")
 
 
 class ApoptosisDaemon:

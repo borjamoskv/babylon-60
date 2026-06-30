@@ -61,7 +61,7 @@ except ImportError:
     _REDIS_AVAILABLE = False
     aioredis = None  # type: ignore[assignment]
 
-logger = logging.getLogger("cortex.memory.distributed_cache")
+logger = logging.getLogger("babylon60.memory.distributed_cache")
 
 # ─── Constants ─────────────────────────────────────────────────────────────
 _CHAIN_TIP_KEY = "cortex:audit:chain_tip"

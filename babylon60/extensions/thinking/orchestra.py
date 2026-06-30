@@ -55,7 +55,7 @@ from babylon60.utils.respiration import oxygenate
 
 __all__ = ["ThoughtOrchestra"]
 
-logger = logging.getLogger("cortex_extensions.thinking.orchestra")
+logger = logging.getLogger("babylon60_extensions.thinking.orchestra")
 
 # ─── Mode → Intent mapping ───────────────────────────────────────────
 # Maps ThinkingMode strings to the IntentProfile used by CortexLLMRouter
