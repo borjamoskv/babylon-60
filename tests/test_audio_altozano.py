@@ -16,7 +16,7 @@ def mock_audio_file(tmp_path):
     """Generates a pure 440Hz Sine Wave (A4 note) and saves to a temp WAV."""
     path = tmp_path / "test_A4.wav"
     sr = 22050
-    duration = 1.0
+    duration = 3.0
     t = np.linspace(0, duration, int(sr * duration), endpoint=False)
     # 440Hz is A
     y = np.sin(2 * np.pi * 440.0 * t)

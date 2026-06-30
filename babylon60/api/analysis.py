@@ -19,7 +19,7 @@ from pydantic import BaseModel
 # API Versioning and Metadata
 __version__ = "2.3.0"
 
-JWT_SECRET = os.getenv("CORTEX_JWT_SECRET", "moskv-omega-strict-key-2026")
+JWT_SECRET = os.getenv("CORTEX_JWT_SECRET", "moskv-omega-strict-key-2026-c5-real")
 JWT_ALGORITHM = "HS256"
 DB_PATH = os.path.expanduser("~/.babylon60/cortex.db")
 MEMORY_PATH = os.path.expanduser("~/.agent/memory")
