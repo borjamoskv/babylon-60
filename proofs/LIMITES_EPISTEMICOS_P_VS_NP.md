@@ -49,7 +49,7 @@ Por tanto, los problemas abiertos centrales de separación (P vs NP, NEXP vs P/p
 Ninguna técnica conocida supera simultáneamente las tres barreras (relativización, pruebas naturales y algebrización).
 
 Los avances más serios hacia cotas inferiores fuertes son intentos explícitos de evadirlas a través de programas activos:
-- **Geometric Complexity Theory (GCT)** de Mulmuley y Sohoni: usa geometría algebraica y teoría de representaciones para atacar la versión algebraica VP vs VNP. GCT sufrió un revés estructural severo cuando Bürgisser, Ikenmeyer y Panova (FOCS 2016, *"No occurrence obstructions in geometric complexity theory"*) demostraron la no-existencia de obstrucciones de ocurrencia, obligando a abandonar las formulaciones simples del programa original.
+- **Geometric Complexity Theory (GCT)** de Mulmuley y Sohoni: usa geometría algebraica y teoría de representaciones para atacar la versión algebraica VP vs VNP. Bürgisser–Ikenmeyer–Panova (2016) clausuraron la estrategia basada en *obstrucciones de ocurrencia*, pero la vía general mediante *obstrucciones de multiplicidad* (probadas estrictamente más fuertes en 2019) mantiene el programa abierto.
 - **Algorithms-to-lower-bounds** de Williams: convierte mejoras algorítmicas de búsqueda en cotas inferiores no-naturales y no-algebrizantes.
 - **Complejidad de Pruebas (Proof Complexity) y Lifting Theorems**: buscan acotar la longitud de pruebas proposicionales y elevar cotas de árboles de decisión a comunicación.
 
