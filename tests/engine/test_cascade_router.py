@@ -47,7 +47,7 @@ class TestCascadeRouter:
         # Refactor task with 6 files -> gemini (normally claude)
         assert router._select_engine("refactor", ["f1", "f2", "f3", "f4", "f5", "f6"]) == "gemini"
 
-    @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.create_subprocess_exec")
     @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "1"})
     async def test_execute_gemini_with_files(self, mock_create):
         """Should call ollama qwen2.5-coder:32b when local_first is enabled."""
@@ -70,7 +70,7 @@ class TestCascadeRouter:
         assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
         assert "Check this code" in cmd
 
-    @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.create_subprocess_exec")
     @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "0"})
     async def test_execute_gemini_with_files_npx(self, mock_create):
         """Should call ollama regardless of local_first due to OMEGA override."""
@@ -91,7 +91,7 @@ class TestCascadeRouter:
         assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
         assert "Check this code" in cmd
 
-    @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.create_subprocess_exec")
     @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "1"})
     async def test_execute_claude(self, mock_create):
         """Should call ollama qwen2.5-coder:32b when local_first is enabled."""
@@ -110,7 +110,7 @@ class TestCascadeRouter:
         assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
         assert "Fix this typo" in cmd
 
-    @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.create_subprocess_exec")
     @patch.dict("os.environ", {"CORTEX_LLM_LOCAL_FIRST": "0"})
     async def test_execute_claude_npx(self, mock_create):
         """Should call ollama regardless of local_first due to OMEGA override."""
@@ -129,8 +129,8 @@ class TestCascadeRouter:
         assert cmd[:3] == ("ollama", "run", "qwen2.5-coder:32b")
         assert "Fix this typo" in cmd
 
-    @patch("cortex.engine.flow.cascade_router.asyncio.sleep")
-    @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.sleep")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.create_subprocess_exec")
     async def test_execute_timeout(self, mock_create, mock_sleep):
         """Should return timeout error message on subprocess timeout."""
         router = CascadeRouter()
@@ -153,8 +153,8 @@ class TestCascadeRouter:
         assert "timed out" in response
         assert mock_create.call_count == 3
 
-    @patch("cortex.engine.flow.cascade_router.asyncio.sleep")
-    @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.sleep")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.create_subprocess_exec")
     async def test_execute_error_code(self, mock_create, mock_sleep):
         """Should return stderr error message on non-zero exit code."""
         router = CascadeRouter()
@@ -168,8 +168,8 @@ class TestCascadeRouter:
         assert response == "Error (codex): Permission Denied"
         assert mock_create.call_count == 3
 
-    @patch("cortex.engine.flow.cascade_router.asyncio.sleep")
-    @patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.sleep")
+    @patch("babylon60.engine.flow.cascade_router.asyncio.create_subprocess_exec")
     async def test_execute_file_not_found(self, mock_create, mock_sleep):
         """Should handle FileNotFoundError gracefully."""
         router = CascadeRouter()

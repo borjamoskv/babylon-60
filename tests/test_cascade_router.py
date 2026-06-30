@@ -29,7 +29,7 @@ def test_fallback_response():
 from unittest.mock import patch
 
 
-@patch("cortex.engine.flow.cascade_router.asyncio.create_subprocess_exec")
+@patch("babylon60.engine.flow.cascade_router.asyncio.create_subprocess_exec")
 def test_route_task_fallback(mock_create_exec):
     import asyncio
 
