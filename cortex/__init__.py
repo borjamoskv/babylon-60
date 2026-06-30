@@ -74,10 +74,26 @@ class _CortexCompat(types.ModuleType):
                 f"({target_pkg}.{name} not found)"
             )
 
+    def __setattr__(self, name, value):
+        super().__setattr__(name, value)
+        target_pkg = _map_name(self.__name__)
+        try:
+            mod = importlib.import_module(target_pkg)
+            setattr(mod, name, value)
+        except Exception:
+            pass
+
     def __delattr__(self, name):
         try:
             super().__delattr__(name)
         except AttributeError:
+            pass
+        target_pkg = _map_name(self.__name__)
+        try:
+            mod = importlib.import_module(target_pkg)
+            if hasattr(mod, name):
+                delattr(mod, name)
+        except Exception:
             pass
 
 

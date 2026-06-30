@@ -182,7 +182,7 @@ def cmd_validate() -> None:
     categories: Counter[str] = Counter()
 
     for e in entries:
-        conversations = e.get("conversations", [])
+        conversations = e.get("messages") or e.get("conversations") or []
         if len(conversations) < 3:
             continue
 

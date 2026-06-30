@@ -290,7 +290,7 @@ class DatasetEntry:
         user_content = f"{self.instruction}\n\n{self.input}" if self.input else self.instruction
         messages.append({"role": "user", "content": user_content})
         messages.append({"role": "assistant", "content": self.output})
-        return {"conversations": messages}
+        return {"messages": messages}
 
     def to_alpaca(self) -> dict[str, str]:
         """Convert to Alpaca format."""
