@@ -24,7 +24,19 @@ confidence: "C5-REAL"
 - **Membership Inference**: Primitiva forense de extracción. Determina estocásticamente si un vector de entrada específico formó parte del dataset de entrenamiento.
 - **Model Extraction**: Ataque de clonación de matriz. Consultas de caja negra reiteradas diseñadas para aproximar la función de coste del oráculo y robar los pesos/capacidades del modelo original.
 
+## 4. Invariantes Estructurales (Propiedades Estables)
+- **Invariante Topológica de Manifolds (Adversarial Geometry)**: Los ejemplos adversarios son endémicos a espacios de alta dimensionalidad. Siempre existirá un vector de perturbación no lineal cercano a la frontera de decisión.
+- **Invariante de Alineación vs. Capacidad (Alignment Tax)**: La alineación de seguridad siempre reduce la utilidad marginal del modelo. A mayor robustez adversarial empírica, menor expresividad de base (Trade-off de Tsipras/Madry).
+- **Invariante de Compresión con Pérdida**: Un LLM comprime su dataset de entrenamiento. La fuga de datos (Data Extraction) es intrínseca a la entropía de Shannon; no se puede anular sin destruir la capacidad de modelado del lenguaje.
+- **Invariante de Autoregresión Causal**: Al generar token a token $P(x_i | x_{<i})$, cualquier estado futuro está condicionado por toda la ventana de contexto. La contaminación de un token propaga entropía inexorablemente hacia adelante.
+- **Invariante de Representación Latente (Feature Entanglement)**: Conceptos benignos y maliciosos comparten activaciones neuronales superpuestas en capas profundas. No existe un clúster único para comportamientos anómalos que pueda podarse sin daño colateral.
+- **Invariante de Transferibilidad Universal**: Una perturbación adversaria encontrada en un oráculo proxy local transferirá de manera no nula a un modelo de caja negra con arquitectura similar, demostrando isomorfismos en el espacio latente.
+- **Invariante de Interpretación Superficial (The Waluigi Effect)**: Forzar a un LLM a simular alineación aumenta la probabilidad latente de su antítesis. La represión semántica instiga la cristalización del comportamiento inverso bajo ataques de Jailbreak.
+- **Invariante de Incompletitud Empírica de Seguridad (No-Free-Lunch for Guardrails)**: No existe un filtro léxico o de atención inquebrantable; siempre será superado mediante abstracciones lógico-matemáticas (Cipher-attacks) o lenguajes de bajo recurso.
+- **Invariante del Bucle Ouroboros (Poisoning Recurrence)**: Si el output interactúa cíclicamente sin filtrar con su propio corpus de re-entrenamiento (Model Collapse), el modelo colapsará hacia una entropía térmica terminal (degeneración modal).
+- **Invariante de Aislamiento Epistémico Restringido**: El determinismo formal y la contención total de un LLM son matemáticamente imposibles en el espacio probabilístico continuo. La única frontera de seguridad debe ser externa y criptográfica (Byzantine Boundary).
+
 ```yaml
-Claim: "El espacio de atención y los pesos del LLM son vectores geométricamente vulnerables; su defensa exige validación criptográfica (C5-REAL), no heurísticas sintácticas."
-Proof: { Base: "docs/epistemology/primitivas_adversariales_llm.md", Range: [0, 10], Confidence: "C5-REAL" }
+Claim: "El espacio de atención y los pesos del LLM son vectores geométricamente vulnerables; su defensa exige validación criptográfica externa (C5-REAL), no heurísticas sintácticas latentes."
+Proof: { Base: "docs/epistemology/primitivas_adversariales_llm.md", Range: [0, 20], Confidence: "C5-REAL" }
 ```
