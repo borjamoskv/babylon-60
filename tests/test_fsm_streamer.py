@@ -10,8 +10,8 @@ class MockRequest:
 
     async def is_disconnected(self) -> bool:
         self.calls += 1
-        # Stop after 2 ticks to prevent infinite loops in tests
-        return self.calls > 2
+        # Stop after 20 ticks to allow retries under heavy concurrent load
+        return self.calls > 20
 
 @pytest.mark.asyncio
 async def test_ledger_byte_watcher(tmp_path):

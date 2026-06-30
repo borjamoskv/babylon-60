@@ -45,19 +45,20 @@ def test_cli_apoptosis_db(tmp_path):
     engine = CortexEngine(db_path=db_file)
     engine.init_db_sync()
     
-    # Seed facts using raw SQL to manually specify exergy_score
+    # Seed facts using raw SQL to manually specify exergy_score and metadata to pass taint trigger
     import sqlite3
     conn = sqlite3.connect(db_file)
     cursor = conn.cursor()
+    metadata_val = json.dumps({"cortex_taint": "taint:system:test:2026-06-30T00:00:00Z:0:test_bypass"})
     # High exergy fact (should keep)
     cursor.execute(
-        "INSERT INTO facts (project, content, tenant_id, exergy_score, is_tombstoned) VALUES (?, ?, ?, ?, 0)",
-        ("proj", "This is a very high quality structured fact for execution.", "default", 1.0)
+        "INSERT INTO facts (project, content, tenant_id, exergy_score, metadata, is_tombstoned) VALUES (?, ?, ?, ?, ?, 0)",
+        ("proj", "This is a very high quality structured fact for execution.", "default", 1.0, metadata_val)
     )
     # Low exergy fact (should prune)
     cursor.execute(
-        "INSERT INTO facts (project, content, tenant_id, exergy_score, is_tombstoned) VALUES (?, ?, ?, ?, 0)",
-        ("proj", "thanks!", "default", 0.1)
+        "INSERT INTO facts (project, content, tenant_id, exergy_score, metadata, is_tombstoned) VALUES (?, ?, ?, ?, ?, 0)",
+        ("proj", "thanks!", "default", 0.1, metadata_val)
     )
     conn.commit()
     conn.close()
