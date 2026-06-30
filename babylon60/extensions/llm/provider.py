@@ -287,9 +287,9 @@ class LLMProvider(BaseProvider):
             )
         except httpx.HTTPStatusError as e:
             try:
-                err_text = e.response.text[:500]
-            except UnicodeDecodeError:
-                err_text = "<binary_or_malformed_response>"
+                err_text = e.response.content.decode("utf-8", errors="replace")[:500]
+            except Exception:
+                err_text = "<unreadable_response>"
 
             logger.error(
                 "LLM API Failure [%s %s]: %s",
@@ -339,7 +339,13 @@ class LLMProvider(BaseProvider):
             try:
                 data = response.json()
             except (UnicodeDecodeError, json.JSONDecodeError):
-                raw = response.content.decode("utf-8", errors="replace")
+                raw_bytes = response.content
+                if not raw_bytes:
+                    raise ValueError(
+                        f"Provider '{self._provider}' returned HTTP 200 with empty body. "
+                        "Model may require stream=True (speculative/preview models)."
+                    )
+                raw = raw_bytes.decode("utf-8", errors="replace")
                 data = json.loads(raw)
             self._log_resolved_model(payload, data)
             if prompt is not None and "usage" in data:
