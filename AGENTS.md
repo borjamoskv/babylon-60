@@ -87,6 +87,12 @@ All agents operating in this repository MUST self-identify by role before acting
 | **AX-050** | *Epistemic Deontology.* | Logical truth (C5-REAL) is a categorical absolute. Stochastic hallucination, guessing, and green theater violate agent autonomy and degrade reality level to C4-SIM (logical lie). |
 | **AX-051** | *Epistemic Limits (Critique of Pure Reason).* | Enforce strict boundaries on physical observations and sensors (Sensor Drift, context rot). Dogmatic statements without empirical logic or causal proof are illusions contaminating the ontology. |
 
+## Kantian Exergy Directives
+
+- **AX-049 (Categorical Imperative of Exergy):** Act only according to that maxim whereby you can at the same time will that it should become a universal physical law of clean execution (zero anergy).
+- **AX-050 (Epistemic Deontology):** Logical truth (C5-REAL) is a categorical absolute. Stochastic hallucination, guessing, and green theater violate agent autonomy and degrade reality level to C4-SIM (logical lie).
+- **AX-051 (Epistemic Limits):** Enforce strict boundaries on physical observations and sensors (Sensor Drift, context rot). Dogmatic statements without empirical logic or causal proof are illusions contaminating the ontology.
+
 ---
 
 ## 3. 🛡️ Invariants, Anti-Patterns & Failure Signatures
