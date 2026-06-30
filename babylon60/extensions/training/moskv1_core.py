@@ -41,6 +41,7 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 import time
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -155,6 +156,7 @@ class MOSKV1Core:
         self._mlx_base_model_path = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
         self._mlx_loaded_mtime = 0.0
         self._mlx_is_reloading = False
+        self._pool = ThreadPoolExecutor(max_workers=1)
 
     async def warmup(self) -> bool:
         """Pre-warm model weights into unified memory asynchronously."""
@@ -174,8 +176,6 @@ class MOSKV1Core:
             self._mlx_model = None
             self._mlx_tokenizer = None
 
-        from concurrent.futures import ThreadPoolExecutor
-
         def _load():
             try:
                 from mlx_lm import load
@@ -191,14 +191,13 @@ class MOSKV1Core:
                 return None, None
 
         loop = asyncio.get_running_loop()
-        with ThreadPoolExecutor(max_workers=1) as pool:
-            model, tokenizer = await loop.run_in_executor(pool, _load)
-            if model and tokenizer:
-                self._mlx_model = model
-                self._mlx_tokenizer = tokenizer
-                self._mlx_loaded_mtime = current_mtime
-                logger.info("Warmup complete. MOSKV-1 loaded in Metal memory.")
-                return True
+        model, tokenizer = await loop.run_in_executor(self._pool, _load)
+        if model and tokenizer:
+            self._mlx_model = model
+            self._mlx_tokenizer = tokenizer
+            self._mlx_loaded_mtime = current_mtime
+            logger.info("Warmup complete. MOSKV-1 loaded in Metal memory.")
+            return True
         return False
 
     def clear_history(self) -> None:
@@ -648,8 +647,6 @@ class MOSKV1Core:
         try:
             current_mtime = adapter_file.stat().st_mtime
             
-            from concurrent.futures import ThreadPoolExecutor
-
             def _load_and_gen():
                 # Lazy-load MLX model and tokenizer (synchronous load if never loaded)
                 model = self._mlx_model
@@ -691,20 +688,19 @@ class MOSKV1Core:
             # Run synchronous MLX loading and generation in a separate thread
             # to avoid blocking the asyncio event loop.
             loop = asyncio.get_running_loop()
-            with ThreadPoolExecutor(max_workers=1) as pool:
-                response = await loop.run_in_executor(pool, _load_and_gen)
-                
-                # Hot reload weights asynchronously post-inference if file was modified
-                if self._mlx_model is not None and current_mtime > self._mlx_loaded_mtime:
-                    if not self._mlx_is_reloading:
-                        logger.info("Hot Reload: New adapter weights detected. Triggering post-inference background reload.")
-                        self._mlx_is_reloading = True
-                        asyncio.create_task(self._async_reload_weights(current_mtime))
-                else:
-                    # Update mtime if this was a synchronous load or no update needed
-                    self._mlx_loaded_mtime = current_mtime
-                
-                return response
+            response = await loop.run_in_executor(self._pool, _load_and_gen)
+            
+            # Hot reload weights asynchronously post-inference if file was modified
+            if self._mlx_model is not None and current_mtime > self._mlx_loaded_mtime:
+                if not self._mlx_is_reloading:
+                    logger.info("Hot Reload: New adapter weights detected. Triggering post-inference background reload.")
+                    self._mlx_is_reloading = True
+                    asyncio.create_task(self._async_reload_weights(current_mtime))
+            else:
+                # Update mtime if this was a synchronous load or no update needed
+                self._mlx_loaded_mtime = current_mtime
+            
+            return response
 
         except ImportError as e:
             logger.warning("mlx_lm not available for native inference: %s", e)
@@ -716,8 +712,6 @@ class MOSKV1Core:
     async def _async_reload_weights(self, target_mtime: float) -> None:
         """Asynchronously loads the new LoRA weights and swaps them atomically in memory."""
         try:
-            from concurrent.futures import ThreadPoolExecutor
-            
             def _load_new():
                 from mlx_lm import load
                 logger.info("Background Reload: Loading base model and new LoRA adapter...")
@@ -728,13 +722,12 @@ class MOSKV1Core:
                 return res[0], res[1]
 
             loop = asyncio.get_running_loop()
-            with ThreadPoolExecutor(max_workers=1) as pool:
-                model, tokenizer = await loop.run_in_executor(pool, _load_new)
-                if model and tokenizer:
-                    self._mlx_model = model
-                    self._mlx_tokenizer = tokenizer
-                    self._mlx_loaded_mtime = target_mtime
-                    logger.info("Background Reload: Success! Atomic model weights swap complete.")
+            model, tokenizer = await loop.run_in_executor(self._pool, _load_new)
+            if model and tokenizer:
+                self._mlx_model = model
+                self._mlx_tokenizer = tokenizer
+                self._mlx_loaded_mtime = target_mtime
+                logger.info("Background Reload: Success! Atomic model weights swap complete.")
         except Exception as e:
             logger.error("Background weight reload failed: %s", e)
         finally:
