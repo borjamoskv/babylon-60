@@ -6,10 +6,10 @@ import asyncio
 from pathlib import Path
 
 import click
-from cortex.swarm.swarm_10k import SwarmCommander
 from rich.panel import Panel
 
-from cortex.cli.common import cli, console
+from babylon60.cli.common import cli, console
+from babylon60.swarm.swarm_10k import SwarmCommander
 
 
 @cli.group()
@@ -81,7 +81,7 @@ def swarm_10k_status(db_path):
         commander = SwarmCommander(bus_path=p)
         await commander.initialize()
 
-        from cortex.engine.core.shared_bus import SovereignSharedBus
+        from babylon60.engine.core.shared_bus import SovereignSharedBus
 
         if isinstance(commander.bus, SovereignSharedBus):
             metrics = commander.bus.metrics

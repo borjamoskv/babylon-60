@@ -15,11 +15,10 @@ from rich.panel import Panel
 from rich.theme import Theme
 
 if TYPE_CHECKING:
-    from cortex.engine import CortexEngine
-    from cortex.extensions.timing import TimingTracker
+    from babylon60.engine import CortexEngine
+    from babylon60.extensions.timing import TimingTracker
 
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-
+from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex import __version__
 
 # Theme and Console
@@ -46,7 +45,7 @@ GLOBAL_CLI_TIMEOUT: float = 120.0  # Chronos Sniper: No CLI command hangs indefi
 def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
     """Create an engine instance (lazy import)."""
     try:
-        from cortex.engine import CortexEngine
+        from babylon60.engine import CortexEngine
 
         return CortexEngine(db_path=db)
     except Exception as err:
@@ -64,21 +63,21 @@ def get_engine(db: str = DEFAULT_DB) -> CortexEngine:
 
 def get_tracker(engine: CortexEngine) -> TimingTracker:
     """Create a timing tracker from an engine (lazy import)."""
-    from cortex.extensions.timing import TimingTracker
+    from babylon60.extensions.timing import TimingTracker
 
     return TimingTracker(engine._get_conn())  # type: ignore[reportArgumentType]
 
 
 def close_engine_sync(engine: CortexEngine) -> None:
     """Close the engine synchronously."""
-    from cortex.events.loop import sovereign_run
+    from babylon60.events.loop import sovereign_run
 
     sovereign_run(engine.close())
 
 
 def _run_async(coro):
     """Helper to run async coroutines from sync CLI (sovereign uvloop)."""
-    from cortex.events.loop import sovereign_run
+    from babylon60.events.loop import sovereign_run
 
     # Chronos Sniper: Apply strict timeout to CLI commands to prevent deadlocks
     return sovereign_run(asyncio.wait_for(coro, timeout=GLOBAL_CLI_TIMEOUT))
@@ -87,7 +86,7 @@ def _run_async(coro):
 def _show_tip(engine=None) -> None:
     """Show a random contextual tip after CLI operations."""
     try:
-        from cortex.cli.tips_cmds import TipsEngine
+        from babylon60.cli.tips_cmds import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=engine is not None, lang="es")
 
@@ -117,7 +116,7 @@ def _show_tip(engine=None) -> None:
 def _get_tip_text(engine=None) -> str:
     """Get a short tip string for inline display."""
     try:
-        from cortex.cli.tips_cmds import TipsEngine
+        from babylon60.cli.tips_cmds import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=False, lang="es")
 
@@ -134,7 +133,7 @@ def _detect_agent_source() -> str:
     """Auto-detect the AI agent calling CORTEX from environment."""
     import os
 
-    explicit = os.environ.get("CORTEX_SOURCE")
+    explicit = os.environ.get("MOSKV_SOURCE", os.environ.get("CORTEX_SOURCE"))
     if explicit:
         return explicit
     markers = [

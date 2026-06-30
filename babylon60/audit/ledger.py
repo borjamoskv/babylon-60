@@ -531,15 +531,30 @@ class EnterpriseAuditLedger:
         async with self._lock:
             async with AsyncFileLock():
                 # [C5-REAL] Circuit Breaker: Fail-Close against Phantom Fork (Adversarial Vector 1)
-                # Ensure the number of unanchored events does not exceed the maximum allowed threshold.
+                # Ensure the number of unanchored events does not exceed the maximum allowed threshold,
+                # or that the oldest unanchored event hasn't been stalled for too long.
                 cursor = await self._conn.execute(
-                    "SELECT COUNT(*) FROM security_audit_log WHERE external_anchor IS NULL"
+                    "SELECT COUNT(*), MIN(timestamp) FROM security_audit_log WHERE external_anchor IS NULL"
                 )
                 row = await cursor.fetchone()
-                if row and row[0] > (self.max_batch_size * 2):
-                    raise RuntimeError(
-                        f"[C5-REAL] Circuit Breaker Tripped: {row[0]} unanchored events. Anchor worker stalled or blocked by adversarial network isolation."
-                    )
+                if row and row[0] > 0:
+                    unanchored_count = row[0]
+                    oldest_ts_str = row[1]
+
+                    # 1. Trigger if count is extremely high (burst protection limit)
+                    if unanchored_count > max(1000, self.max_batch_size * 10):
+                        raise RuntimeError(
+                            f"[C5-REAL] Circuit Breaker Tripped: {unanchored_count} unanchored events exceed the structural burst limit."
+                        )
+
+                    # 2. Trigger if the oldest unanchored event has been stalled for more than 60 seconds (network isolation)
+                    if oldest_ts_str:
+                        oldest_dt = datetime.fromisoformat(oldest_ts_str)
+                        now_dt = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                        if (now_dt - oldest_dt).total_seconds() > 60.0:
+                            raise RuntimeError(
+                                f"[C5-REAL] Circuit Breaker Tripped: Oldest unanchored event ({unanchored_count} total) is older than 60 seconds. Anchor worker stalled."
+                            )
 
                 # 1. Fetch the actual last hash from DB to support transparent rollbacks
                 cursor = await self._conn.execute(

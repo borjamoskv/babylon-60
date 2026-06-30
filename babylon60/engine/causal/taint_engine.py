@@ -49,7 +49,7 @@ def generate_secure_taint_token(
     """Generates a secure cryptographically signed CORTEX-TAINT token.
 
     Format (Legacy): taint:{agent_id}:{session_id}:{timestamp_iso8601}:{nonce}:{signature}
-    Format (Multi-Curve): taint:{curve}:{agent_id}:{session_id}:{timestamp_iso8601}:{nonce}:{signature}
+    Format (Multi-Curve): moskv-taint:{curve}:{agent_id}:{session_id}:{timestamp_iso8601}:{nonce}:{signature}
     """
     timestamp = datetime.now(timezone.utc).isoformat()
     if not nonce:
@@ -66,12 +66,12 @@ def generate_secure_taint_token(
         from babylon60.crypto.keys import Secp256k1Signer
 
         signature = Secp256k1Signer.sign_raw_content(private_key_b64, canonical_payload)
-        return f"taint:{curve}:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
+        return f"moskv-taint:{curve}:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
     else:
         from babylon60.crypto.keys import Signer
 
         signature = Signer.sign_raw_content(private_key_b64, canonical_payload)
-        return f"taint:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
+        return f"moskv-taint:{agent_id}:{session_id}:{timestamp}:{nonce}:{signature}"
 
 
 def parse_utc_timestamp(ts_str: str) -> datetime:
@@ -182,8 +182,8 @@ async def verify_taint_token(conn, token: str | None, content: str) -> bool:
         return False
 
     prefix = parts[0]
-    if prefix != "taint":
-        logger.error("[TaintEngine] SAGA-1: Token prefix must be 'taint': %s", prefix)
+    if prefix not in ("taint", "moskv-taint"):
+        logger.error("[TaintEngine] SAGA-1: Token prefix must be 'taint' or 'moskv-taint': %s", prefix)
         return False
 
     if parts[1] in ("secp256k1", "ed25519"):

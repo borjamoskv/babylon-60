@@ -9,7 +9,7 @@ import click
 from rich.panel import Panel
 from rich.text import Text
 
-from cortex.cli.common import _run_async, cli, console
+from babylon60.cli.common import _run_async, cli, console
 
 
 async def _execute_apoptosis(target: str) -> None:

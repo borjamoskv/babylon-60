@@ -6,10 +6,11 @@ Exposes the native API to calculate Human vs AI asymmetry.
 """
 
 import click
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from cortex.extensions.timing.chronos import ChronosEngine
 from rich.console import Console
 from rich.panel import Panel
+
+from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from babylon60.extensions.timing.chronos import ChronosEngine
 
 __all__ = ["analyze", "chronos_cmds", "compound", "projection"]
 
@@ -86,8 +87,9 @@ def analyze(ai_time: float, complexity: str) -> None:
 )
 def compound(project: str | None, persist: bool) -> None:
     """Detect compound causal chains and report exponential Ω₁₁ yield."""
-    from cortex.engine.core.compound_yield import CompoundYieldTracker
     from rich.table import Table
+
+    from babylon60.engine.core.compound_yield import CompoundYieldTracker
 
     try:
         tracker = CompoundYieldTracker(db_path=str(DEFAULT_DB_PATH))
@@ -140,8 +142,9 @@ def compound(project: str | None, persist: bool) -> None:
 @click.option("--rate", "-r", type=float, default=0.15, help="Compound reuse rate (default 0.15).")
 def projection(years: int, base_hours: float, rate: float) -> None:
     """Project Linear vs Compound CHRONOS-1 yield over a decade."""
-    from cortex.engine.core.compound_yield import CompoundProjector
     from rich.table import Table
+
+    from babylon60.engine.core.compound_yield import CompoundProjector
 
     try:
         report = CompoundProjector.project(

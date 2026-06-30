@@ -16,12 +16,12 @@ from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import NoReturn
 
-from cortex.utils.i18n import get_trans
 from rich.panel import Panel
 
 # Re-use the shared CLI console so errors appear in the same stream
 # as regular output (important for Click test runner capture).
-from cortex.cli.common import console
+from babylon60.cli.common import console
+from babylon60.utils.i18n import get_trans
 
 __all__ = [
     "CortexErrorStruct",
@@ -77,7 +77,7 @@ def _lang() -> str | None:
     """Detect current language from environment or context."""
     import os
 
-    return os.environ.get("CORTEX_LANG") or os.environ.get("LANG", "en")[:2] or None
+    return os.environ.get("MOSKV_LANG", os.environ.get("CORTEX_LANG")) or os.environ.get("LANG", "en")[:2] or None
 
 
 def _t(key: str, **kwargs) -> str:
@@ -342,7 +342,7 @@ def handle_cli_error(e: Exception, *, db_path: str = "", context: str = "") -> N
     struct = classify_error(e, db_path=db_path, context=context)
 
     # If JSON output is requested (e.g., by SDKs or other tools via env var)
-    if os.environ.get("CORTEX_JSON_OUTPUT") == "1":
+    if os.environ.get("MOSKV_JSON_OUTPUT", os.environ.get("CORTEX_JSON_OUTPUT")) == "1":
         console.print(json.dumps({"status": "error", "error": asdict(struct)}))
         sys.exit(1)
 

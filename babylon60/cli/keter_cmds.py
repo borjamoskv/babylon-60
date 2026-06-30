@@ -7,12 +7,12 @@ Sovereign Orchestration and Reality Weaver.
 from __future__ import annotations
 
 import click
-from cortex.engine.speculative.keter import KeterEngine
-from cortex.utils.errors import CortexError
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.cli.common import _run_async, cli
+from babylon60.cli.common import _run_async, cli
+from babylon60.engine.speculative.keter import KeterEngine
+from babylon60.utils.errors import CortexError
 
 console = Console()
 
@@ -64,8 +64,8 @@ def sovereign_cmds() -> None:
 @sovereign_cmds.command("status")
 def sovereign_status_cmd() -> None:
     """Displays the status of DigitalEndocrine and PowerLevel."""
-    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-    from cortex.extensions.sovereign.observability import Dimension, compute_power
+    from babylon60.extensions.sovereign.endocrine import DigitalEndocrine
+    from babylon60.extensions.sovereign.observability import Dimension, compute_power
 
     endocrine = DigitalEndocrine()
     # Mocking dimension scores for status display
@@ -86,7 +86,7 @@ def sovereign_status_cmd() -> None:
 @click.option("--env", default="production", help="Execution environment.")
 def sovereign_ignite_cmd(env: str) -> None:
     """Executes the complete sovereign pipeline."""
-    from cortex.extensions.sovereign.engine import run_pipeline
+    from babylon60.extensions.sovereign.engine import run_pipeline
 
     console.print(Panel("[bold green]⚡ STARTING SOVEREIGN IGNITION[/]", border_style="green"))
 

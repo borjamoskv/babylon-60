@@ -9,7 +9,6 @@ import aiosqlite
 
 from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from babylon60.database.core import connect_async_ctx
-from babylon60.utils.void_vec import cosine_similarity
 from babylon60.guards.contradiction_guard.models import ConflictCandidate, ConflictReport
 from babylon60.guards.contradiction_guard.utils import (
     _classify_conflict,
@@ -18,6 +17,7 @@ from babylon60.guards.contradiction_guard.utils import (
     _jaccard,
     _tokenize,
 )
+from babylon60.utils.void_vec import cosine_similarity
 
 logger = logging.getLogger("cortex.guards.contradiction.detector")
 

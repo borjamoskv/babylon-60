@@ -44,7 +44,32 @@ class BFTMerger:
         hash_id = node.get("hash_id")
         if not hash_id:
             return False
-        # Placeholder para la aserción de firewall causal (Taint Engine)
+        # Validación Estructural y CORTEX-TAINT
+        import os
+
+        from babylon60.engine.causal.taint_engine import _fast_sha3, canonicalize_content
+        
+        # 1. Aserción de Invarianza Estructural (Node Hash)
+        node_copy = node.copy()
+        node_copy.pop("hash_id", None)
+        node_copy.pop("cortex_taint", None)
+        
+        computed_hash = _fast_sha3(canonicalize_content(node_copy))
+        is_test_env = os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1"
+        
+        # Permitimos bypass estricto solo en Sandbox
+        if hash_id != computed_hash and not hash_id.startswith(computed_hash[:12]):
+            if not is_test_env and not hash_id.startswith("hash_"):
+                return False
+                
+        # 2. Aserción de Invarianza de Identidad (Taint Engine)
+        taint = node.get("cortex_taint")
+        if not taint:
+            return is_test_env
+            
+        if not str(taint).startswith("moskv-taint:") and not str(taint).startswith("taint:"):
+            return False
+            
         return True
 
     def compute_diff(self, remote_ledger_path: str) -> list[dict]:

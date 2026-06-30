@@ -20,8 +20,8 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.exceptions import InvalidSignature
 from rich.console import Console
 
-from cortex.cli.main import cli
-from cortex.audit.rekor_client import RekorClient
+from babylon60.cli.main import cli
+from babylon60.audit.rekor_client import RekorClient
 
 console = Console()
 logger = logging.getLogger("cortex.cli.verify")

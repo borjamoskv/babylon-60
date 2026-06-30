@@ -11,12 +11,12 @@ import asyncio
 import sqlite3
 
 import click
-from cortex.engine.core.tips import Tip, TipCategory, TipsEngine
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
-from cortex.cli.errors import err_empty_results, handle_cli_error
+from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
+from babylon60.cli.errors import err_empty_results, handle_cli_error
+from babylon60.engine.core.tips import Tip, TipCategory, TipsEngine
 
 
 def _run_async(coro):

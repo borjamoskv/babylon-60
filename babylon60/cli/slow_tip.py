@@ -126,10 +126,10 @@ class SlowOpTipEmitter:
     def _emit_tip(self) -> None:
         """Emit a single tip to Rich console. Fully isolated - never crashes."""
         try:
-            from cortex.engine.core.tips import TipsEngine
             from rich.panel import Panel
 
-            from cortex.cli.common import console
+            from babylon60.cli.common import console
+            from babylon60.engine.core.tips import TipsEngine
 
             tips_engine = TipsEngine(
                 None,
@@ -218,7 +218,7 @@ def slow_tips_spinner(
         from rich.spinner import Spinner
         from rich.text import Text
 
-        from cortex.cli.common import console
+        from babylon60.cli.common import console
 
         spin = Spinner(spinner, text=Text(f" {label}", style="noir.violet"))
 

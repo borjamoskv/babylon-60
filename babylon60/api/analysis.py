@@ -16,7 +16,7 @@ app = FastAPI(
 )
 
 security = HTTPBearer()
-EXPECTED_TOKEN = os.environ.get("CORTEX_ANALYSIS_TOKEN", "c5-real-omega-key")
+EXPECTED_TOKEN = os.environ.get("MOSKV_ANALYSIS_TOKEN", os.environ.get("CORTEX_ANALYSIS_TOKEN", "c5-real-omega-key"))
 
 
 def verify_token(credentials: HTTPAuthorizationCredentials = Security(security)):

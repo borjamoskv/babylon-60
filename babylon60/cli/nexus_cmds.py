@@ -7,8 +7,8 @@ from pathlib import Path
 import click
 from rich.console import Console
 
-from cortex.cli.common import cli
-from cortex.cli.errors import err_execution_failed, err_skill_not_found
+from babylon60.cli.common import cli
+from babylon60.cli.errors import err_execution_failed, err_skill_not_found
 
 __all__ = [
     "auto_sync_cmd",
@@ -94,7 +94,7 @@ def bind_cmd(target: str, artifact: str):
     """Force a physical symlink to a CORTEX artifact."""
     import os
 
-    from cortex.extensions.nexus.symlink_engine import SymlinkEngine
+    from babylon60.extensions.nexus.symlink_engine import SymlinkEngine
 
     # Assumes CORTEX root is current directory or predefined
     cortex_root = os.path.abspath(os.getcwd())
@@ -113,8 +113,8 @@ def auto_sync_cmd(config: str):
     """Automatically propagate symlinks across all projects defined in configuration."""
     import os
 
-    from cortex.extensions.nexus.config import load_nexus_config
-    from cortex.extensions.nexus.symlink_engine import SymlinkEngine
+    from babylon60.extensions.nexus.config import load_nexus_config
+    from babylon60.extensions.nexus.symlink_engine import SymlinkEngine
 
     cortex_root = os.path.abspath(os.getcwd())
     engine = SymlinkEngine(canonical_root=cortex_root)
@@ -144,8 +144,8 @@ def audit_cmd(config: str):
     """Audit the physical filesystem for INV_NEXUS_LINK violations."""
     import os
 
-    from cortex.extensions.nexus.config import load_nexus_config
-    from cortex.extensions.nexus.symlink_engine import SymlinkEngine
+    from babylon60.extensions.nexus.config import load_nexus_config
+    from babylon60.extensions.nexus.symlink_engine import SymlinkEngine
 
     cortex_root = os.path.abspath(os.getcwd())
     engine = SymlinkEngine(canonical_root=cortex_root)

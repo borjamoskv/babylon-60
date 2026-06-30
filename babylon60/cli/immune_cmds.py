@@ -1,14 +1,14 @@
 # [C5-REAL] Exergy-Maximized
 import click
-from cortex.extensions.immune.breaker import (
+from rich.console import Console
+from rich.panel import Panel
+
+from babylon60.cli.common import cli, get_engine
+from babylon60.extensions.immune.breaker import (
     EpistemicState,
     evaluate_circuit_breaker,
     execute_circuit_trip,
 )
-from rich.console import Console
-from rich.panel import Panel
-
-from cortex.cli.common import cli, get_engine
 
 console = Console()
 

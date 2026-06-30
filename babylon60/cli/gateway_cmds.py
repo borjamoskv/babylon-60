@@ -6,7 +6,7 @@ import json
 
 import click
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from babylon60.cli.common import DEFAULT_DB, cli, console, get_engine
 
 
 @click.group("gateway")
@@ -20,7 +20,7 @@ def gateway_cmds() -> None:
 def health(db: str, as_json: bool) -> None:
     """Check gateway resonance and health."""
     # For now, it mirrors global health or specific gateway metrics if available
-    from cortex.extensions.health import HealthCollector, HealthScorer
+    from babylon60.extensions.health import HealthCollector, HealthScorer
 
     engine = get_engine(db)
     collector = HealthCollector(db_path=db)

@@ -5,7 +5,7 @@ import asyncio
 
 from rich.table import Table
 
-from cortex.cli.common import _run_async, cli, console
+from babylon60.cli.common import _run_async, cli, console
 
 
 async def _render_telemetry():

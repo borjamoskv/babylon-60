@@ -9,12 +9,12 @@ import asyncio
 import logging
 
 import click
-from cortex.audit.ledger import EnterpriseAuditLedger
-from cortex.audit.moskv_aegis import MoskvAegisEngine
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console
+from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.audit.moskv_aegis import MoskvAegisEngine
+from babylon60.cli.common import DEFAULT_DB, cli, console
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def run_audit(db_path: str) -> None:
     )
 
     async def _audit() -> None:
-        from cortex.database.core import connect_async_ctx
+        from babylon60.database.core import connect_async_ctx
 
         async with connect_async_ctx(db_path) as conn:
             ledger = EnterpriseAuditLedger(conn)

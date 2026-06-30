@@ -19,9 +19,10 @@ from pathlib import Path
 
 import click
 import dotenv
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexPrompt
 from rich.console import Console
+
+from babylon60.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm.router import CortexPrompt
 
 dotenv.load_dotenv()
 
@@ -66,7 +67,7 @@ async def auto_heal(filepath: Path) -> None:
     original_code = filepath.read_text(encoding="utf-8")
 
     try:
-        provider_name = os.environ.get("CORTEX_LLM_PROVIDER", "gemini")
+        provider_name = os.environ.get("MOSKV_LLM_PROVIDER", os.environ.get("CORTEX_LLM_PROVIDER", "gemini"))
         provider = LLMProvider(provider=provider_name)
     except (OSError, ValueError, RuntimeError, ImportError) as e:
         console.print(f"[red]❌ Error initializing LLMProvider:[/red] {e}")

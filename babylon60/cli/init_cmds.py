@@ -9,8 +9,8 @@ from contextlib import contextmanager
 import click
 from rich.panel import Panel
 
+from babylon60.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 from cortex import __version__
-from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 
 
 @contextmanager
@@ -22,27 +22,27 @@ def _bootstrap_without_embeddings() -> Iterator[None]:
     or downloading the local embedding model, nor run the Omega LLM auditor
     (axiomatic identity facts are ground truth - not external claims).
     """
-    prev_embed = os.environ.get("CORTEX_NO_EMBED")
-    prev_omega = os.environ.get("CORTEX_NO_OMEGA")
-    prev_taint = os.environ.get("CORTEX_NO_TAINT_ENFORCE")
-    os.environ["CORTEX_NO_EMBED"] = "1"
-    os.environ["CORTEX_NO_OMEGA"] = "1"
-    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+    prev_embed = os.environ.get("MOSKV_NO_EMBED", os.environ.get("CORTEX_NO_EMBED"))
+    prev_omega = os.environ.get("MOSKV_NO_OMEGA", os.environ.get("CORTEX_NO_OMEGA"))
+    prev_taint = os.environ.get("MOSKV_NO_TAINT_ENFORCE", os.environ.get("CORTEX_NO_TAINT_ENFORCE"))
+    os.environ["MOSKV_NO_EMBED"] = "1"
+    os.environ["MOSKV_NO_OMEGA"] = "1"
+    os.environ["MOSKV_NO_TAINT_ENFORCE"] = "1"
     try:
         yield
     finally:
         if prev_embed is None:
             os.environ.pop("CORTEX_NO_EMBED", None)
         else:
-            os.environ["CORTEX_NO_EMBED"] = prev_embed
+            os.environ["MOSKV_NO_EMBED"] = prev_embed
         if prev_omega is None:
             os.environ.pop("CORTEX_NO_OMEGA", None)
         else:
-            os.environ["CORTEX_NO_OMEGA"] = prev_omega
+            os.environ["MOSKV_NO_OMEGA"] = prev_omega
         if prev_taint is None:
             os.environ.pop("CORTEX_NO_TAINT_ENFORCE", None)
         else:
-            os.environ["CORTEX_NO_TAINT_ENFORCE"] = prev_taint
+            os.environ["MOSKV_NO_TAINT_ENFORCE"] = prev_taint
 
 
 @cli.command()
@@ -78,7 +78,7 @@ def init(db, ouroboros: bool) -> None:
                     source="ag:genesis",
                 )
             if ouroboros:
-                from cortex.extensions.gate.ouroboros import get_ouroboros_gate
+                from babylon60.extensions.gate.ouroboros import get_ouroboros_gate
 
                 og = get_ouroboros_gate(engine)
                 entropy = og.measure_entropy()
@@ -113,7 +113,7 @@ def init(db, ouroboros: bool) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def migrate(source, db) -> None:
     """Import CORTEX v3.1 data into v4.0."""
-    from cortex.migrate import migrate_v31_to_v40
+    from babylon60.migrate import migrate_v31_to_v40
 
     async def _migrate_flow():
         engine = get_engine(db)

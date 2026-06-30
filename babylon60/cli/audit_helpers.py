@@ -5,16 +5,17 @@ from __future__ import annotations
 import os
 import sys
 
-from cortex.utils.landauer import audit_calcification
 from rich.console import Console
 from rich.table import Table
+
+from babylon60.utils.landauer import audit_calcification
 
 console = Console()
 
 
 def audit_frontend() -> None:
     """Run Zero-Latency UI Axiom audit (CC < 5)."""
-    from cortex.verification.frontend_oracle import FrontendOracle
+    from babylon60.verification.frontend_oracle import FrontendOracle
 
     project_dir = os.getcwd()
     oracle = FrontendOracle()

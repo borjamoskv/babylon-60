@@ -1,11 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 
 import click
-from cortex.engine import CortexEngine
-from cortex.swarm.auth_gateway import QuorumGateway
 from rich.console import Console
 
-from cortex.cli.common import _run_async, cli
+from babylon60.cli.common import _run_async, cli
+from babylon60.engine import CortexEngine
+from babylon60.swarm.auth_gateway import QuorumGateway
 
 console = Console()
 
@@ -21,7 +21,7 @@ def submit_vote(req_id: str) -> None:
     """Submits a cryptographic vote for a pending consensus request."""
 
     async def _run() -> None:
-        from cortex.extensions.security.signatures import get_default_signer
+        from babylon60.extensions.security.signatures import get_default_signer
 
         engine = CortexEngine()
         auth_gw = QuorumGateway(engine)

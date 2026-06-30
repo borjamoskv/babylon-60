@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import time
 
-from cortex.cli.bicameral import bicameral
+from babylon60.cli.bicameral import bicameral
 
 
 def run_swarm_demo():

@@ -3,14 +3,14 @@
 import asyncio
 
 import click
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.mcts.tree import MCTSEngine
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.cli.common import cli
+from babylon60.cli.common import cli
+from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from babylon60.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm.router import CortexLLMRouter
+from babylon60.mcts.tree import MCTSEngine
 
 console = Console()
 
@@ -65,7 +65,7 @@ def prune() -> None:
     """[LEA-OMEGA] Garbage Collect orphaned MCTS Chronos worktrees and branches."""
     from pathlib import Path
 
-    from cortex.mcts.git_env import MCTSGitEnvironment
+    from babylon60.mcts.git_env import MCTSGitEnvironment
     
     try:
         console.print(Panel.fit("[bold red]🗑️  CHRONOS GC: Initiating Apoptosis[/bold red]", border_style="red"))

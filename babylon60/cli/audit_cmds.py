@@ -7,10 +7,10 @@ Commands for system security and architectural auditing.
 import asyncio
 
 import click
-from cortex.audit.frontier import FrontierAuditor
 
-from cortex.cli.common import console, get_engine
-from cortex.cli.trust_cmds import audit
+from babylon60.audit.frontier import FrontierAuditor
+from babylon60.cli.common import console, get_engine
+from babylon60.cli.trust_cmds import audit
 
 
 @audit.command("frontier")
@@ -62,7 +62,7 @@ def export_cmd(format: str, out: str):
         f"[bold magenta]📦 Exporting {format.upper()} Compliance Bundle to {out}...[/bold magenta]"
     )
 
-    from cortex.audit.compliance_bundle import ComplianceBundler
+    from babylon60.audit.compliance_bundle import ComplianceBundler
 
     # In a real CLI, we'd fetch the configured db path, but we'll use the default or typical local path.
     bundler = ComplianceBundler(db_path=".cortex/cortex_ledger.db")
@@ -85,7 +85,7 @@ def verify_bundle_cmd(bundle: str, public_key: str):
         f"[bold magenta]🔍 Initiating offline verification of bundle: {bundle}[/bold magenta]"
     )
 
-    from cortex.audit.compliance_verifier import ComplianceVerifier
+    from babylon60.audit.compliance_verifier import ComplianceVerifier
 
     verifier = ComplianceVerifier(bundle_path=bundle, public_key_b64=public_key)
     report = verifier.verify()

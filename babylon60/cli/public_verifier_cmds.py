@@ -4,9 +4,9 @@ from __future__ import annotations
 import json
 
 import click
-from cortex.ledger.public_verifier import verify_export
 
-from cortex.cli.common import cli
+from babylon60.cli.common import cli
+from babylon60.ledger.public_verifier import verify_export
 
 
 @cli.command("verify-ledger-export")

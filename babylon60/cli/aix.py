@@ -8,7 +8,7 @@ Quantifies agent sovereignty and system evolution metrics.
 import logging
 import math
 
-from cortex.engine.cognitive.endocrine import ENDOCRINE, HormoneType
+from babylon60.engine.cognitive.endocrine import ENDOCRINE, HormoneType
 
 logger = logging.getLogger("cortex.cli.aix")
 

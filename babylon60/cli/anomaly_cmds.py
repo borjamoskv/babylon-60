@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import (
+from babylon60.cli.common import (
     DEFAULT_DB,
     _run_async,
     cli,
@@ -31,7 +31,7 @@ def anomaly_hunt_cmd(hours: int, project: str | None, db: str) -> None:
     """Full scan: detect ontological anomalies in the Ledger."""
     engine = get_engine(db)
     try:
-        from cortex.engine.forensic.anomaly_hunter import AnomalyHunterEngine
+        from babylon60.engine.forensic.anomaly_hunter import AnomalyHunterEngine
 
         hunter = AnomalyHunterEngine(engine, lookback_hours=hours)
 
@@ -57,7 +57,7 @@ def contradiction_scan_cmd(entity: str, db: str) -> None:
     """TARGETED: Search for contradictions regarding a specific entity."""
     engine = get_engine(db)
     try:
-        from cortex.engine.forensic.anomaly_hunter import AnomalyHunterEngine
+        from babylon60.engine.forensic.anomaly_hunter import AnomalyHunterEngine
 
         hunter = AnomalyHunterEngine(engine)
 
@@ -104,7 +104,7 @@ def memory_clean_cmd(db: str) -> None:
     """PURGE: Apply automatic actions for low severity anomalies."""
     engine = get_engine(db)
     try:
-        from cortex.engine.forensic.anomaly_hunter import AnomalyHunterEngine
+        from babylon60.engine.forensic.anomaly_hunter import AnomalyHunterEngine
 
         hunter = AnomalyHunterEngine(engine)
 

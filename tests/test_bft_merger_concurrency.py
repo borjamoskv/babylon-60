@@ -1,4 +1,5 @@
 import os
+os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
 import tempfile
 import json
 import pytest

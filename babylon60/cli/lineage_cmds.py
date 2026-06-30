@@ -8,13 +8,13 @@ import asyncio
 import re
 
 import click
-from cortex.core.lineage import LineageNode, LineageVerifier
-from cortex.engine import CortexEngine
 from rich.console import Console
 from rich.panel import Panel
 from rich.tree import Tree
 
-from cortex.cli.common import DEFAULT_DB, cli
+from babylon60.cli.common import DEFAULT_DB, cli
+from babylon60.core.lineage import LineageNode, LineageVerifier
+from babylon60.engine import CortexEngine
 
 console = Console()
 

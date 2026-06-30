@@ -7,10 +7,10 @@ CLI entry points for compiling, dry-running, and executing declarative .nous mig
 from pathlib import Path
 
 import click
-from cortex.extensions.nous.compiler_v2 import NousCompilerV2
-from cortex.extensions.nous.runtime import NousRuntime
 
-from cortex.cli.common import _run_async, cli, console, get_engine
+from babylon60.cli.common import _run_async, cli, console, get_engine
+from babylon60.extensions.nous.compiler_v2 import NousCompilerV2
+from babylon60.extensions.nous.runtime import NousRuntime
 
 
 @cli.group("nous")

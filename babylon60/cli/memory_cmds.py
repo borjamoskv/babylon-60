@@ -8,7 +8,7 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import (
+from babylon60.cli.common import (
     DEFAULT_DB,
     _detect_agent_source,
     _run_async,
@@ -17,8 +17,8 @@ from cortex.cli.common import (
     console,
     get_engine,
 )
-from cortex.cli.errors import err_empty_results
-from cortex.cli.slow_tip import with_slow_tips
+from babylon60.cli.errors import err_empty_results
+from babylon60.cli.slow_tip import with_slow_tips
 
 
 def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
@@ -28,11 +28,11 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
     """
     import os
 
-    if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
+    if os.environ.get("MOSKV_NO_TAINT_ENFORCE", os.environ.get("CORTEX_NO_TAINT_ENFORCE")) == "1":
         return
 
     priv_b64 = None
-    if not os.environ.get("CORTEX_TESTING"):
+    if not os.environ.get("MOSKV_TESTING", os.environ.get("CORTEX_TESTING")):
         try:
             import keyring
 
@@ -41,10 +41,10 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
             pass
 
     if not priv_b64:
-        priv_b64 = os.environ.get("CORTEX_ED25519_PRIVATE_KEY")
+        priv_b64 = os.environ.get("MOSKV_ED25519_PRIVATE_KEY", os.environ.get("CORTEX_ED25519_PRIVATE_KEY"))
 
     if priv_b64:
-        from cortex.engine.causal.taint_engine import generate_secure_taint_token
+        from babylon60.engine.causal.taint_engine import generate_secure_taint_token
 
         try:
             token = generate_secure_taint_token(
@@ -55,13 +55,13 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
             )
             meta["cortex_taint"] = token
         except (ValueError, TypeError, OSError, KeyError) as e:
-            from cortex.cli.common import console
+            from babylon60.cli.common import console
 
             console.print(f"[yellow]Warning: Failed to generate taint token: {e}[/]")
-            os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+            os.environ["MOSKV_NO_TAINT_ENFORCE"] = "1"
     else:
         # Fallback for human users on clean setups where no keys exist yet
-        os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+        os.environ["MOSKV_NO_TAINT_ENFORCE"] = "1"
 
 
 @click.group("memory")
@@ -137,7 +137,7 @@ def store(
         if ai_time is not None and complexity is not None:
             import dataclasses
 
-            from cortex.extensions.timing.chronos import ChronosEngine
+            from babylon60.extensions.timing.chronos import ChronosEngine
 
             metrics = ChronosEngine.analyze(ai_time, complexity)
             meta["chronos"] = dataclasses.asdict(metrics)
@@ -154,7 +154,7 @@ def store(
 
         import os
 
-        actor_id = os.environ.get("CORTEX_ACTOR_ID", "borjamoskv")
+        actor_id = os.environ.get("MOSKV_ACTOR_ID", os.environ.get("CORTEX_ACTOR_ID", "borjamoskv"))
 
         fact_id = _run_async(
             engine.store(
@@ -193,7 +193,7 @@ def store_batch(file_path, db) -> None:
 
     engine = get_engine(db)
     import os
-    actor_id = os.environ.get("CORTEX_ACTOR_ID", "borjamoskv")
+    actor_id = os.environ.get("MOSKV_ACTOR_ID", os.environ.get("CORTEX_ACTOR_ID", "borjamoskv"))
 
     async def _run_batch() -> int:
         stored = 0
@@ -283,7 +283,7 @@ def search(query, project, top, scope, db, epistemic) -> None:
                 )
         else:
             # Federated search across partitioned databases
-            from cortex.search.federation import federated_search_sync
+            from babylon60.search.federation import federated_search_sync
 
             with console.status(
                 f"[noir.violet]Federated search (scope={scope})...[/]",
@@ -326,7 +326,7 @@ def search(query, project, top, scope, db, epistemic) -> None:
 
         # Epistemic analysis overlay
         if epistemic:
-            from cortex.memory.void_detector import EpistemicVoidDetector
+            from babylon60.memory.void_detector import EpistemicVoidDetector
 
             detector = EpistemicVoidDetector()
             candidates = [

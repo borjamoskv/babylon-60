@@ -8,7 +8,9 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 import click
-from cortex.forensics.evidence_bundle import (
+
+from babylon60.cli.common import DEFAULT_DB, cli
+from babylon60.forensics.evidence_bundle import (
     build_evidence_manifest,
     commit_evidence_manifest,
     dump_evidence_manifest,
@@ -16,8 +18,6 @@ from cortex.forensics.evidence_bundle import (
     verify_evidence_commit,
     verify_evidence_manifest,
 )
-
-from cortex.cli.common import DEFAULT_DB, cli
 
 
 @click.group("forensics")
@@ -266,5 +266,5 @@ def _emit_status_json(payload: dict[str, Any], *, status_code: int) -> None:
         raise click.exceptions.Exit(status_code)
 
 
-if os.environ.get("CORTEX_ENABLE_EXPERIMENTAL_CLI") == "1":
+if os.environ.get("MOSKV_ENABLE_EXPERIMENTAL_CLI", os.environ.get("CORTEX_ENABLE_EXPERIMENTAL_CLI")) == "1":
     cli.add_command(forensics_cmds)

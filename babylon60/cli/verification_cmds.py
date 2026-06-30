@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import click
-from cortex.verification.verifier import SovereignVerifier
 from rich.console import Console
 from rich.table import Table
 
-from cortex.cli.common import cli
+from babylon60.cli.common import cli
+from babylon60.verification.verifier import SovereignVerifier
 
 console = Console()
 
@@ -67,7 +67,7 @@ def verify_ledger_cmd(db_path: str | None) -> None:
     """Cryptographically verifies the offline integrity of the CORTEX Ledger (H5.1)."""
     import asyncio
 
-    from cortex.compliance.tracker import ComplianceTracker
+    from babylon60.compliance.tracker import ComplianceTracker
 
     console.print("[bold cyan]Starting offline audit of the Sovereign Ledger...[/]")
 

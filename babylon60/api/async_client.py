@@ -19,8 +19,9 @@ import os
 from typing import Any
 
 import httpx
-from cortex.api.client import CortexError, Fact
 from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
+
+from cortex.api.client import CortexError, Fact
 
 __all__ = ["AsyncCortexClient"]
 
@@ -30,7 +31,7 @@ class AsyncCortexClient:
 
     Args:
         base_url: API server URL (default: http://localhost:8484)
-        api_key: API key (or set CORTEX_API_KEY env var)
+        api_key: API key (or set MOSKV_API_KEY env var)
         timeout: Request timeout in seconds
     """
 
@@ -41,7 +42,7 @@ class AsyncCortexClient:
         timeout: float = 30.0,
     ):
         self.base_url = base_url.rstrip("/")
-        self.api_key = api_key or os.environ.get("CORTEX_API_KEY", "")
+        self.api_key = api_key or os.environ.get("MOSKV_API_KEY") or os.environ.get("CORTEX_API_KEY", "")
         self._client = httpx.AsyncClient(
             base_url=self.base_url,
             timeout=timeout,

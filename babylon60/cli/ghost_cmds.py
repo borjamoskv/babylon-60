@@ -5,13 +5,13 @@ import subprocess
 import sys
 
 import click
-from cortex.core.paths import SKILLS_DIR
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import cli
-from cortex.cli.errors import err_execution_failed, err_skill_not_found
+from babylon60.cli.common import cli
+from babylon60.cli.errors import err_execution_failed, err_skill_not_found
+from babylon60.core.paths import SKILLS_DIR
 
 __all__ = [
     "GHOST_SKILL_PATH",
@@ -91,7 +91,7 @@ def field(root_dir):
     import asyncio
     from pathlib import Path
 
-    from cortex.cli.common import get_engine
+    from babylon60.cli.common import get_engine
 
     engine = get_engine()
     try:

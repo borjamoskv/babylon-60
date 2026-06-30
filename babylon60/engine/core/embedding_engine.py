@@ -85,7 +85,7 @@ async def embed_fact_async(
 
             if context_hv is not None:
                 intent_hv = bind(fact_hv, context_hv)
-                specular_bytes = np.array(intent_hv, dtype=np.float32).tobytes()
+                _specular_bytes = np.array(intent_hv, dtype=np.float32).tobytes()
                 
                 logger.debug("Specular Memory generated for fact %d", fact_id)
 

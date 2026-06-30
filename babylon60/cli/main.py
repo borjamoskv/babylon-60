@@ -12,7 +12,7 @@ import logging
 import pkgutil
 from pathlib import Path
 
-from cortex.cli.common import cli
+from babylon60.cli.common import cli
 
 logger = logging.getLogger(__name__)
 

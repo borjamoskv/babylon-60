@@ -4,16 +4,16 @@ import asyncio
 from datetime import datetime
 
 import click
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
-from cortex.darknet.agents import AVATARS, DarknetAgent
-from cortex.darknet.ingestor import DarknetIngestor
-from cortex.darknet.social_ledger import DarknetLedger
-from cortex.extensions.llm.provider import LLMProvider
-from cortex.extensions.llm.router import CortexLLMRouter
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.cli.common import cli
+from babylon60.cli.common import cli
+from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from babylon60.darknet.agents import AVATARS, DarknetAgent
+from babylon60.darknet.ingestor import DarknetIngestor
+from babylon60.darknet.social_ledger import DarknetLedger
+from babylon60.extensions.llm.provider import LLMProvider
+from babylon60.extensions.llm.router import CortexLLMRouter
 
 console = Console()
 
@@ -117,7 +117,7 @@ def inject_vad(entropy: str) -> None:
     """[RED TEAM] Inyecta colisiones termodinámicas deliberadas en el Sanedrín (VAD)."""
     import time
 
-    from cortex.engine.logic.sanedrin import SanedrinCouncil
+    from babylon60.engine.logic.sanedrin import SanedrinCouncil
     
     console.print(Panel.fit(f"[bold red]☢️  ADVERSARIAL INJECTION (VAD): Entropy Level [{entropy.upper()}][/bold red]", border_style="red"))
     console.print("[dim]Forging Virtual Adversarial Data...[/dim]")

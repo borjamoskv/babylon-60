@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
+from babylon60.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 
 # ── Constants ──────────────────────────────────────────────────────────
 NOTEBOOKLM_DIR = Path("notebooklm_sources")
@@ -230,14 +230,14 @@ def _get_db_path() -> str:
 
 def _run_async(coro: Any) -> Any:
     """Helper to run async coroutines from sync CLI."""
-    from cortex.events.loop import sovereign_run
+    from babylon60.events.loop import sovereign_run
 
     return sovereign_run(coro)
 
 
 async def _get_engine_active_facts(project: str | None = None) -> list[Any]:
     """Fetch cleartext facts using CortexEngine."""
-    from cortex.cli.common import get_engine
+    from babylon60.cli.common import get_engine
 
     engine = get_engine()
     try:

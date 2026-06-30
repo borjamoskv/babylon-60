@@ -18,12 +18,12 @@ import asyncio
 from pathlib import Path
 
 import click
-from cortex.extensions.llm.sovereign import SovereignLLM
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.syntax import Syntax
 
-from cortex.cli.common import cli, console
+from babylon60.cli.common import cli, console
+from babylon60.extensions.llm.sovereign import SovereignLLM
 
 __all__ = ["architect"]
 

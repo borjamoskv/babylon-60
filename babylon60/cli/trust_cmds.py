@@ -8,8 +8,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli
-from cortex.cli.trust_helpers import (
+from babylon60.cli.common import DEFAULT_DB, cli
+from babylon60.cli.trust_helpers import (
     _check_chain_integrity,
     _check_merkle,
     _extract_agents,
@@ -44,9 +44,8 @@ def _run_async(coro):
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def verify_fact(fact_id: int, db: str) -> None:
     """Verify cryptographic integrity of a specific fact."""
-    from cortex.database.core import connect as db_connect
-
-    from cortex.cli.errors import err_fact_not_found, handle_cli_error
+    from babylon60.cli.errors import err_fact_not_found, handle_cli_error
+    from babylon60.database.core import connect as db_connect
 
     conn = None
     try:
@@ -93,9 +92,8 @@ def compliance_report(db: str) -> None:
     """Generate EU AI Act Article 12 compliance snapshot."""
     from datetime import datetime, timezone
 
-    from cortex.database.core import connect as db_connect
-
-    from cortex.cli.errors import handle_cli_error
+    from babylon60.cli.errors import handle_cli_error
+    from babylon60.database.core import connect as db_connect
 
     conn = None
     try:
@@ -149,7 +147,7 @@ def compliance_report(db: str) -> None:
 
         from pathlib import Path
 
-        from cortex.utils.landauer import audit_calcification
+        from babylon60.utils.landauer import audit_calcification
 
         cortex_root = Path(__file__).parent.parent
         calc_results = audit_calcification(cortex_root, limit=5)
@@ -204,8 +202,8 @@ def compliance_report(db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def audit_cognitive(tenant: str, db: str) -> None:
     """Run a deep cryptographic audit of the Cognitive Event Ledger (L3)."""
-    from cortex.database.core import connect_async
-    from cortex.memory.ledger import EventLedgerL3
+    from babylon60.database.core import connect_async
+    from babylon60.memory.ledger import EventLedgerL3
 
     async def _run_audit():
         conn = await connect_async(db)
@@ -238,7 +236,7 @@ def audit_cognitive(tenant: str, db: str) -> None:
     try:
         _run_async(_run_audit())
     except (ValueError, TypeError, OSError, KeyError) as e:
-        from cortex.cli.errors import handle_cli_error
+        from babylon60.cli.errors import handle_cli_error
 
         handle_cli_error(e, db_path=db, context="cognitive audit")
     finally:
@@ -247,9 +245,8 @@ def audit_cognitive(tenant: str, db: str) -> None:
 
 def _audit_trail(project: str, limit: int, db: str) -> None:
     """Display the audit trail from the database."""
-    from cortex.database.core import connect as db_connect
-
-    from cortex.cli.errors import handle_cli_error
+    from babylon60.cli.errors import handle_cli_error
+    from babylon60.database.core import connect as db_connect
 
     conn = None
     try:
@@ -275,11 +272,11 @@ def audit(ctx, calcification: bool, frontend: bool, project: str, limit: int, db
     """Run audits or view Audit Trail."""
     if ctx.invoked_subcommand is None:
         if frontend:
-            from cortex.cli.audit_helpers import audit_frontend
+            from babylon60.cli.audit_helpers import audit_frontend
 
             audit_frontend()
         elif calcification:
-            from cortex.cli.audit_helpers import audit_calcification_report
+            from babylon60.cli.audit_helpers import audit_calcification_report
 
             audit_calcification_report(limit)
         else:
@@ -290,12 +287,11 @@ def audit(ctx, calcification: bool, frontend: bool, project: str, limit: int, db
 @click.option("--db", default=DEFAULT_DB, help="Database path to attack")
 def siege(db: str) -> None:
     """Run an autonomous Red Team swarm to test Ledger and Vault BFT compliance."""
-    from cortex.crypto.vault import Vault
-    from cortex.database.pool import CortexConnectionPool
-    from cortex.engine import CortexEngine as AsyncCortexEngine
-    from cortex.swarm.legion_vectors import COMPLIANCE_SIEGE_SWARM
-
-    from cortex.cli.errors import handle_cli_error
+    from babylon60.cli.errors import handle_cli_error
+    from babylon60.crypto.vault import Vault
+    from babylon60.database.pool import CortexConnectionPool
+    from babylon60.engine import CortexEngine as AsyncCortexEngine
+    from babylon60.swarm.legion_vectors import COMPLIANCE_SIEGE_SWARM
 
     async def _run_siege():
         pool = CortexConnectionPool(db, min_connections=2, max_connections=10, read_only=False)
@@ -304,7 +300,7 @@ def siege(db: str) -> None:
         try:
             import os
 
-            key = os.environ.get("CORTEX_VAULT_KEY")
+            key = os.environ.get("MOSKV_VAULT_KEY", os.environ.get("CORTEX_VAULT_KEY"))
             if key:
                 engine.vault = Vault(key.encode("utf-8"))  # pyright: ignore[reportAttributeAccessIssue]
         except Exception as exc:

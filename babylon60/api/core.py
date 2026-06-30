@@ -13,18 +13,7 @@ import logging
 import sqlite3
 from contextlib import asynccontextmanager
 
-import cortex.api.state as api_state
-from cortex.api.middleware import (
-    ContentSizeLimitMiddleware,
-    CortexBillingMiddleware,
-    RateLimitMiddleware,
-    SecurityFraudMiddleware,
-    SecurityHeadersMiddleware,
-    SovereignIsolationMiddleware,
-    TracingMiddleware,
-)
 from cortex.auth import AuthManager
-from cortex.engine import CortexEngine
 from cortex.extensions.llm.quota import QuotaRejectedError
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.swarm.manager import get_swarm_manager
@@ -36,7 +25,18 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+import cortex.api.state as api_state
 from cortex import __version__, config
+from cortex.api.middleware import (
+    ContentSizeLimitMiddleware,
+    CortexBillingMiddleware,
+    RateLimitMiddleware,
+    SecurityFraudMiddleware,
+    SecurityHeadersMiddleware,
+    SovereignIsolationMiddleware,
+    TracingMiddleware,
+)
+from cortex.engine import CortexEngine
 from cortex.mcp_server.knowledge_watcher import start_knowledge_daemon
 
 __all__ = [
@@ -62,6 +62,7 @@ logger = logging.getLogger("uvicorn.error")
 async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
     from cortex.database.pool import CortexConnectionPool
+
     from cortex.engine import CortexEngine as AsyncCortexEngine
 
     db_path = config.DB_PATH
@@ -227,7 +228,7 @@ async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResp
     if "database is locked" in str(exc).lower():
         return JSONResponse(
             status_code=503,
-            content={"detail": "CORTEX_BUSY: Database is under heavy load. Retry in 2s."},
+            content={"detail": "MOSKV_BUSY: Database is under heavy load. Retry in 2s."},
             headers={"Retry-After": "2"},
         )
 
@@ -239,7 +240,7 @@ async def quota_rejected_handler(request: Request, exc: QuotaRejectedError) -> J
     logger.error("Sovereign Quota Rejected: %s", exc)
     return JSONResponse(
         status_code=429,
-        content={"detail": "CORTEX_OVERLOAD: Local PULMONES queue is full. Backoff required."},
+        content={"detail": "MOSKV_OVERLOAD: Local PULMONES queue is full. Backoff required."},
         headers={"Retry-After": "5"},
     )
 

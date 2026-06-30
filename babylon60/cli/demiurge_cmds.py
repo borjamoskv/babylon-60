@@ -7,11 +7,11 @@ Dynamically forge and execute skills.
 from __future__ import annotations
 
 import click
-from cortex.extensions.evolution.demiurge import DemiurgeCompiler
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from cortex.cli.common import _run_async, cli, console
+from babylon60.cli.common import _run_async, cli, console
+from babylon60.extensions.evolution.demiurge import DemiurgeCompiler
 
 
 @cli.group(name="demiurge")
