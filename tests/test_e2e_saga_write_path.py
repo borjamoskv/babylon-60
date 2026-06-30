@@ -130,3 +130,69 @@ async def test_saga_write_path_invalid_taint(tmp_path: Path, clean_payload: str,
             row = await cursor.fetchone()
             assert row is not None
             assert row[1] == "WRITE_REJECTED"
+
+
+@pytest.mark.asyncio
+async def test_saga_write_path_with_encryption(tmp_path: Path, clean_payload: str, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CORTEX_TEST_ENV", "1")
+    monkeypatch.setenv("CORTEX_NO_TAINT_ENFORCE", "0")
+    # Provide a dummy 32-byte master key (hex) to activate encryption
+    monkeypatch.setenv("CORTEX_ENCRYPTION_KEY", "0" * 64)
+    
+    # We must reset the encrypter so it picks up the new master key
+    from babylon60.crypto.aes import reset_default_encrypter
+    reset_default_encrypter()
+    
+    db_file = str(tmp_path / "saga_test_encrypt.db")
+    keypair = ZKSwarmIdentity.generate_keypair()
+    
+    async with connect_async_ctx(db_file) as conn:
+        with causal_write(conn):
+            await conn.execute("CREATE TABLE agents (id TEXT PRIMARY KEY, public_key TEXT, is_active INTEGER)")
+            await conn.execute("INSERT INTO agents (id, public_key, is_active) VALUES ('test_agent', ?, 1)", (keypair.public_key_b64,))
+            await conn.commit()
+            
+        ledger = EnterpriseAuditLedger(conn)
+        await ledger.ensure_table()
+        
+        coordinator = SagaCoordinator(ledger)
+        
+        token = generate_secure_taint_token(
+            agent_id="test_agent",
+            session_id="test_session",
+            content=clean_payload,
+            private_key_b64=keypair.private_key_b64,
+            curve="ed25519"
+        )
+        
+        with patch("babylon60.agents.primitives.dispatcher.apex_dispatcher.execute") as mock_exec:
+            mock_exec.return_value = "mock_hash"
+            
+            # Request encryption via metadata
+            metadata = {"encrypt": True}
+            
+            audit_id = await coordinator.execute_write_path(
+                tenant_id="test_tenant",
+                actor_role="test_role",
+                actor_id="test_agent",
+                resource="test_resource",
+                content=clean_payload,
+                taint_token=token,
+                schema_name="mock_schema",
+                metadata=metadata
+            )
+            
+            assert audit_id is not None
+            # Check that content was actually encrypted in the metadata trace before passing to secure_state_commit
+            assert metadata.get("cortex_encrypted") is True
+            
+            # Extract the actual state frozen in OP_FREEZE_MEM
+            # mock_exec.call_args_list[0] is OP_FREEZE_MEM
+            freeze_call = mock_exec.call_args_list[0]
+            frozen_state = freeze_call.kwargs.get("state")
+            assert frozen_state is not None
+            
+            # The content sent to freeze should now be an encrypted string starting with AESGCM prefix
+            frozen_content = frozen_state["content"]
+            assert frozen_content.startswith("v6_aesgcm:")
+            assert frozen_content != clean_payload
