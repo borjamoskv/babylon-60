@@ -3,5 +3,6 @@
 # [C5-REAL] Alpha V2
 
 from babylon60.engine.causal.saga_coordinator import SagaCoordinator
+from babylon60.engine.causal.autodidact_functor import AutodidactFunctor, EntropicState, OntologyForgeMatrix
 
-__all__ = ["SagaCoordinator"]
+__all__ = ["SagaCoordinator", "AutodidactFunctor", "EntropicState", "OntologyForgeMatrix"]
