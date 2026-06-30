@@ -9,37 +9,46 @@ async def main():
     db_path = os.path.expanduser("~/.cortex/cortex.db")
     print(f"Connecting to {db_path}...")
 
-    conn = sqlite3.connect(db_path)
-    # Ensure table exists for safety
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS tasks (
-            id TEXT PRIMARY KEY,
-            payload TEXT,
-            status TEXT,
-            priority INTEGER,
-            created_at REAL
-        )
-    """)
+    # We must insert the workspace path first so we can import babylon60 modules correctly
+    workspace_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    import sys
+    sys.path.insert(0, workspace_root)
 
-    conn.execute(
-        """
-        INSERT OR REPLACE INTO tasks (id, payload, status, priority, created_at)
-        VALUES (?, ?, 'pending', 7, ?)
-    """,
-        (
-            "cascade-smoke-001",
-            json.dumps(
-                {
-                    "type": "architecture",
-                    "prompt": "Refactor cascade_router.py: add async retry logic with exponential backoff per engine",
-                    "context_tokens": 4200,
-                    "target_engine": None,  # forzar decisión del router
-                }
+    from babylon60.database.core import connect as secure_connect, causal_write
+
+    conn = secure_connect(db_path)
+    # Ensure table exists for safety
+    with causal_write(conn):
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS tasks (
+                id TEXT PRIMARY KEY,
+                payload TEXT,
+                status TEXT,
+                priority INTEGER,
+                created_at REAL
+            )
+        """)
+
+    with causal_write(conn):
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO tasks (id, payload, status, priority, created_at)
+            VALUES (?, ?, 'pending', 7, ?)
+        """,
+            (
+                "cascade-smoke-001",
+                json.dumps(
+                    {
+                        "type": "architecture",
+                        "prompt": "Refactor cascade_router.py: add async retry logic with exponential backoff per engine",
+                        "context_tokens": 4200,
+                        "target_engine": None,  # forzar decisión del router
+                    }
+                ),
+                time.time(),
             ),
-            time.time(),
-        ),
-    )
-    conn.commit()
+        )
+        conn.commit()
     print("Task injected successfully.")
 
     # Pull the task and route it.
@@ -50,16 +59,13 @@ async def main():
         payload = json.loads(row[1])
 
         # Update to processing
-        conn.execute("UPDATE tasks SET status='processing' WHERE id=?", (task_id,))
-        conn.commit()
+        with causal_write(conn):
+            conn.execute("UPDATE tasks SET status='processing' WHERE id=?", (task_id,))
+            conn.commit()
         conn.close()
 
         print(f"Processing task {task_id}...")
 
-        import sys
-
-        workspace_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        sys.path.insert(0, workspace_root)
         os.environ["PATH"] = (
             f"{workspace_root}/tests/mock-bin:{os.environ.get('PATH', '')}"
         )
@@ -73,7 +79,7 @@ async def main():
         print("Result snippet:", result[:300])
 
         # Check task status in db after run by opening a new connection
-        conn = sqlite3.connect(db_path)
+        conn = secure_connect(db_path)
         cursor = conn.execute("SELECT status FROM tasks WHERE id=?", (task_id,))
         new_status = cursor.fetchone()[0]
         print(f"Post-execution Task Status in DB: {new_status}")
