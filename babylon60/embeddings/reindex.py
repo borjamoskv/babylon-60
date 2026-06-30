@@ -53,8 +53,6 @@ class ReindexPipeline:
         async with self.engine.session() as conn:
             # 1. Drop old tables
             await conn.execute("DROP TABLE IF EXISTS fact_embeddings")
-            await conn.execute("DROP TABLE IF EXISTS specular_embeddings")
-            
             # 2. Recreate tables with correct dimension
             await conn.execute(f"""
                 CREATE VIRTUAL TABLE fact_embeddings USING vec0(
@@ -62,11 +60,6 @@ class ReindexPipeline:
                     embedding FLOAT[{target_dim}]
                 )
             """)
-            
-            # Specular embeddings are HDC dependent, typically 8000, 
-            # we keep it constant or parameterized if HDC changes.
-            from babylon60.database.schema import CREATE_SPECULAR_EMBEDDINGS
-            await conn.execute(CREATE_SPECULAR_EMBEDDINGS)
             
             # 3. Fetch all facts for the tenant
             cursor = await conn.execute(
