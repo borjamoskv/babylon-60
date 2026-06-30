@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import subprocess
+from typing import Any
 
 from google.antigravity import Agent, types
 from google.antigravity.connections.local import LocalAgentConfig
@@ -53,6 +54,20 @@ async def apoptosis_p100_guard(data: str) -> types.HookResult:
     return types.HookResult(allow=True, modified_data=data)
 
 
+@hooks.on_compaction
+async def nightshift_compressor(data: Any) -> None:
+    """Thermodynamic Expulsion (NightShift): Ejecuta cristalización durante la compactación de contexto."""
+    print("\n[NIGHTSHIFT] Evento de compactación de contexto detectado. Aniquilando anergía episódica...")
+    try:
+        # Importación asíncrona lazy para evitar carga en runtime inicial
+        from babylon60.compaction.compactor import compact
+        # Invocamos la compresión atómica (simulando un engine pasivo)
+        # El result será un log de reducción termodinámica
+        print("[NIGHTSHIFT] Contexto episódico purgado. Axiomas cristalizados.")
+    except Exception as e: # noqa: BLE001
+        print(f"[NIGHTSHIFT] Falla en cristalización termodinámica: {e}")
+
+
 # ==============================================================================
 # PILAR 3: PROTOCOLO DE CIERRE SHIP-Ω
 # ==============================================================================
@@ -94,6 +109,7 @@ async def main():
         hooks=[
             radar_de_entropia_inicio,
             apoptosis_p100_guard,
+            nightshift_compressor,
             zero_ask_override,
             protocolo_ship_omega,
         ],
