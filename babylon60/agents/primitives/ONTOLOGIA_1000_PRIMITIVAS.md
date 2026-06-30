@@ -4035,3 +4035,809 @@
 - **Descripción:** Invariante estructural que aplica colapso sobre Topología de Red garantizando Densidad de Exergía Máxima.
 - **Directiva C5:** Rechazar Ruido de Canal / Slop mediante Compresión Entrópica.
 
+
+## 🔴 TEORÍA DE CATEGORÍAS (CAT)
+
+### `CAT-001` - Functor de Preservación de Estado
+- **Descripción:** Mapeo F: C→D que preserva identidad y composición entre categorías de estado del sistema
+- **Directiva C5:** Verificar F(id_A) == id_F(A) y F(g ∘ f) == F(g) ∘ F(f) en transiciones de estado.
+
+### `CAT-002` - Transformación Natural
+- **Descripción:** Mutación η: F⇒G entre functores que conmuta con todos los morfismos sin alterar topología
+- **Directiva C5:** Garantizar η_B ∘ F(f) == G(f) ∘ η_A para evitar divergencias de morfismos.
+
+### `CAT-003` - Límite Categórico
+- **Descripción:** Cono universal terminal: consenso de enjambre como objeto terminal de un diagrama
+- **Directiva C5:** Determinar cono universal terminal y forzar consenso unificado del enjambre.
+
+### `CAT-004` - Colímite Categórico
+- **Descripción:** Cocono universal inicial: fusión de estados divergentes en un estado canónico
+- **Directiva C5:** Resolver cocono universal inicial y fusionar bifurcaciones en estado canónico.
+
+### `CAT-005` - Objeto Inicial
+- **Descripción:** ∅-Estado: el estado vacío desde el cual todo worktree se origina (void bootstrap)
+- **Directiva C5:** Validar que el estado se origina de forma determinista desde el bootstrap vacío (Ø-Estado).
+
+### `CAT-006` - Objeto Terminal
+- **Descripción:** 1-Estado: el estado de convergencia al que todo pipeline debe colapsar para ser válido
+- **Directiva C5:** Garantizar que todo pipeline colapse al objeto terminal (1-Estado) antes de confirmación.
+
+### `CAT-007` - Morfismo de Identidad
+- **Descripción:** id_A: A→A, la operación nula que certifica que un estado no ha sido alterado (hash check)
+- **Directiva C5:** Verificar que el hash del estado sea idéntico si el morfismo aplicado es id_A.
+
+### `CAT-008` - Composición Asociativa
+- **Descripción:** (g∘f)∘h = g∘(f∘h): garantía de que el orden de encadenamiento de mutaciones es determinista
+- **Directiva C5:** Forzar propiedad asociativa (h ∘ g) ∘ f == h ∘ (g ∘ f) en cadenas de mutación del AST.
+
+### `CAT-009` - Isomorfismo Categórico
+- **Descripción:** f: A→B con inversa g: B→A tal que g∘f=id_A, f∘g=id_B: equivalencia perfecta entre estados
+- **Directiva C5:** Exigir existencia de morfismo inverso g tal que g ∘ f == id_A y f ∘ g == id_B.
+
+### `CAT-010` - Epimorfismo
+- **Descripción:** Morfismo surjectivo: toda salida del pipeline tiene al menos una entrada causal
+- **Directiva C5:** Garantizar que cada estado del pipeline sea alcanzable desde una entrada causal (surjectividad).
+
+### `CAT-011` - Monomorfismo
+- **Descripción:** Morfismo inyectivo: entradas distintas producen estados distintos (no-colisión de hashes)
+- **Directiva C5:** Evitar colisiones de hash asegurando correspondencia inyectiva 1:1 de estados.
+
+### `CAT-012` - Endomorfismo
+- **Descripción:** f: A→A no trivial: transformación interna de estado (self-mutation del AST)
+- **Directiva C5:** Validar estabilidad de tipos durante transformaciones internas (self-mutation).
+
+### `CAT-013` - Automorfismo
+- **Descripción:** Endomorfismo invertible: transformación reversible de estado (rollback garantizado)
+- **Directiva C5:** Asegurar reversibilidad absoluta y disponibilidad de rollback en automorfismos.
+
+### `CAT-014` - Categoría Opuesta
+- **Descripción:** C^op: inversión de todos los morfismos. Análisis de causalidad reversa (backtracking)
+- **Directiva C5:** Implementar trazado de causalidad inversa (backtracking) invirtiendo morfismos.
+
+### `CAT-015` - Categoría Producto
+- **Descripción:** C×D: ejecución paralela de dos pipelines con estado combinado
+- **Directiva C5:** Asegurar paralelismo estricto y sin interferencia en productos cartesianos de categorías.
+
+### `CAT-016` - Categoría Coma
+- **Descripción:** (F↓G): espacio de transiciones entre dos functores. Espacio de migraciones de estado
+- **Directiva C5:** Monitorear transiciones de estado a través de la categoría coma (F ↓ G).
+
+### `CAT-017` - Categoría Slice
+- **Descripción:** C/A: todos los morfismos que apuntan a un objeto A. Dependencias de un módulo
+- **Directiva C5:** Resolver y aislar el grafo de dependencias de entrada para evitar filtrado de estados.
+
+### `CAT-018` - Categoría Coslice
+- **Descripción:** A/C: todos los morfismos que parten de A. Ramificaciones desde un commit
+- **Directiva C5:** Controlar las ramificaciones de salida a partir de un nodo de origen común.
+
+### `CAT-019` - Subcategoría Plena
+- **Descripción:** Inclusión que preserva todos los morfismos entre objetos seleccionados (filtrado sin pérdida)
+- **Directiva C5:** Preservar todos los morfismos originales en subconjuntos de objetos seleccionados.
+
+### `CAT-020` - Subcategoría Ancha
+- **Descripción:** Inclusión que contiene todos los objetos pero restringe morfismos (restricción de permisos)
+- **Directiva C5:** Restringir los morfismos de transición sin alterar el conjunto de objetos base.
+
+### `CAT-021` - Functor Covariante
+- **Descripción:** F: C→D que preserva dirección de morfismos: mapeo de pipeline que conserva flujo causal
+- **Directiva C5:** Preservar la dirección y orden del flujo causal en el pipeline.
+
+### `CAT-022` - Functor Contravariante
+- **Descripción:** F: C→D^op que invierte dirección: transformación de productor a consumidor
+- **Directiva C5:** Invertir el flujo de control para transformar estructuras de datos a consumidores.
+
+### `CAT-023` - Functor Fiel
+- **Descripción:** F inyectivo en hom-sets: mapeo que no confunde operaciones distintas
+- **Directiva C5:** Impedir la colisión semántica de operaciones distintas sobre los mismos objetos.
+
+### `CAT-024` - Functor Pleno
+- **Descripción:** F surjectivo en hom-sets: mapeo que no pierde operaciones disponibles
+- **Directiva C5:** Asegurar cobertura completa de todas las transformaciones permitidas en el codominio.
+
+### `CAT-025` - Functor Plenamente Fiel
+- **Descripción:** Embedding categórico: inclusión perfecta de un subsistema en otro
+- **Directiva C5:** Garantizar que la inclusión de subsistemas conserve hom-sets intactos (full-faithful embedding).
+
+### `CAT-026` - Functor de Olvido
+- **Descripción:** U: Struct→Set que descarta estructura: extracción de datos crudos desde estados tipados
+- **Directiva C5:** Aislar la extracción de datos planos descartando metadatos estructurales.
+
+### `CAT-027` - Functor Libre
+- **Descripción:** F: Set→Struct adjunto izquierdo al olvido: generación de estructura mínima desde datos crudos
+- **Directiva C5:** Generar estructura mínima y determinista a partir de datos planos.
+
+### `CAT-028` - Bifunctor
+- **Descripción:** F: C×D→E: operación que toma dos inputs de categorías distintas (join cross-domain)
+- **Directiva C5:** Garantizar coherencia y sincronía en operaciones cruzadas de dos dominios independientes.
+
+### `CAT-029` - Profunctor
+- **Descripción:** P: C^op × D → Set: relación heterogénea entre sistemas (bridge entre tenants)
+- **Directiva C5:** Establecer puentes seguros y aislados para el intercambio de datos entre tenants.
+
+### `CAT-030` - Functor Representable
+- **Descripción:** Hom(A,−): C→Set: espacio de todas las operaciones posibles desde un estado dado
+- **Directiva C5:** Resolver el espacio de operaciones accesibles desde el estado actual.
+
+### `CAT-031` - Functor Hom Interno
+- **Descripción:** [A,B]: exponencial categórico: espacio de funciones/lambdas entre tipos
+- **Directiva C5:** Garantizar la pureza funcional en la aplicación de funciones como tipos.
+
+### `CAT-032` - Functor Diagonal
+- **Descripción:** Δ: C→C×C: duplicación de estado para validación paralela (N=3 quorum)
+- **Directiva C5:** Duplicar estados de forma determinista para la verificación cruzada en el quorum.
+
+### `CAT-033` - Functor Constante
+- **Descripción:** Δ_A: siempre retorna A: estado invariante como baseline de comparación
+- **Directiva C5:** Mantener constante el estado de referencia como baseline inmutable.
+
+### `CAT-034` - Functor Potencia
+- **Descripción:** P: C→C que mapea A al objeto de sus subobjetos: generación de espacio de configuraciones
+- **Directiva C5:** Resolver todas las configuraciones posibles del subobjeto clasificador.
+
+### `CAT-035` - Equivalencia de Categorías
+- **Descripción:** F: C→D con cuasi-inversa: dos sistemas son computacionalmente equivalentes
+- **Directiva C5:** Garantizar equivalencia semántica e isomorfismo laxo entre representaciones.
+
+### `CAT-036` - Adjunción Libre-Olvidadizo
+- **Descripción:** F⊣U: par fundamental generación-extracción. Bootstrap-Teardown de contexto
+- **Directiva C5:** Establecer una correspondencia biyectiva entre adjunciones de generación y extracción.
+
+### `CAT-037` - Unidad de Adjunción
+- **Descripción:** η: Id_C → U∘F: inyección de dato crudo en su envolvente estructural
+- **Directiva C5:** Registrar la inserción de datos crudos en envolturas tipadas.
+
+### `CAT-038` - Counidad de Adjunción
+- **Descripción:** ε: F∘U → Id_D: evaluación/colapso de estructura a resultado concreto
+- **Directiva C5:** Evaluar y consolidar estructuras abstractas a resultados inmutables.
+
+### `CAT-039` - Adjunción de Galois
+- **Descripción:** Conexión entre retículos: mapeo entre jerarquías de permisos/restricciones
+- **Directiva C5:** Garantizar monotonía en los mapeos de jerarquías de seguridad y permisos.
+
+### `CAT-040` - Functor Nervio
+- **Descripción:** N: Cat→sSet: serialización de una categoría en su representación simplicial (log chain)
+- **Directiva C5:** Serializar la topología causal en una cadena simplicial libre de loops infinitos.
+
+### `CAT-041` - Producto Categórico
+- **Descripción:** A×B con proyecciones π₁,π₂: estado compuesto con acceso a componentes (struct fields)
+- **Directiva C5:** Garantizar acceso ortogonal a cada componente en estados compuestos.
+
+### `CAT-042` - Coproducto
+- **Descripción:** A⊔B con inyecciones ι₁,ι₂: unión disjunta de estados (tagged union / enum)
+- **Directiva C5:** Exigir discriminación estricta y control de tipos en uniones disjuntas.
+
+### `CAT-043` - Ecualizador
+- **Descripción:** Eq(f,g): subobjeto donde f=g: filtro de estados que satisfacen invariante
+- **Directiva C5:** Filtrar estados coherentes imponiendo Eq(f, g) en el validador.
+
+### `CAT-044` - Coecualizador
+- **Descripción:** Coeq(f,g): cociente que identifica outputs iguales: deduplicación semántica
+- **Directiva C5:** Garantizar que outputs equivalentes se unifiquen en una única clave canónica.
+
+### `CAT-045` - Pullback
+- **Descripción:** A ×_C B: producto fibrado: join de estados sobre un ancestro común (merge de branches)
+- **Directiva C5:** Resolver fusiones de ramas asegurando la coherencia con el ancestro común (Pullback).
+
+### `CAT-046` - Pushout
+- **Descripción:** A ⊔_C B: coproducto fibrado: fusión de divergencias desde una base común
+- **Directiva C5:** Resolver divisiones y bifurcaciones a partir del nodo de origen (Pushout).
+
+### `CAT-047` - Exponencial
+- **Descripción:** B^A: objeto de morfismos de A a B: espacio de todas las transformaciones posibles
+- **Directiva C5:** Validar el espacio de transiciones como objetos de primera clase.
+
+### `CAT-048` - Subobjeto Clasificador
+- **Descripción:** Ω con true: 1→Ω: objeto verdad que clasifica todas las subpartes (type predicate)
+- **Directiva C5:** Implementar predicados de tipado estricto para clasificar subobjetos.
+
+### `CAT-049` - Objeto Cero
+- **Descripción:** 0 = objeto inicial = terminal: categoría puntuada (null state)
+- **Directiva C5:** Asegurar que el estado nulo no permita operaciones de mutación adicionales.
+
+### `CAT-050` - Kernel Categórico
+- **Descripción:** Ker(f) = Eq(f,0): núcleo de una transformación: estados aniquilados por la operación
+- **Directiva C5:** Identificar y depurar estados anulados por transformaciones de software.
+
+### `CAT-051` - Cokernel
+- **Descripción:** Coker(f) = Coeq(f,0): cociente por imagen: estados ortogonales a la operación
+- **Directiva C5:** Analizar la coherencia residual de estados post-operación.
+
+### `CAT-052` - Imagen Categórica
+- **Descripción:** Im(f): factorización epi-mono: rango efectivo de una transformación
+- **Directiva C5:** Asegurar que el rango efectivo no exceda las cotas del esquema.
+
+### `CAT-053` - Límite Inverso
+- **Descripción:** lim←: límite de sistema proyectivo: convergencia de refinamientos sucesivos
+- **Directiva C5:** Monitorear la convergencia del sistema en refinamientos sucesivos.
+
+### `CAT-054` - Límite Directo
+- **Descripción:** lim→: colímite de sistema inductivo: expansión controlada de capacidad
+- **Directiva C5:** Regular la expansión de capacidades inductivas garantizando estabilidad del AST.
+
+### `CAT-055` - Límite Filtrado
+- **Descripción:** Colímite sobre categoría filtrada: agregación que conmuta con límites finitos
+- **Directiva C5:** Permitir agregación distributiva de límites y colímites finitos.
+
+### `CAT-056` - Objeto Compacto
+- **Descripción:** Hom(K,−) conmuta con colímites filtrados: estado finitamente representable
+- **Directiva C5:** Garantizar que los estados del sistema sean representables en memoria de forma finita.
+
+### `CAT-057` - Generador
+- **Descripción:** G tal que Hom(G,−) es fiel: estado desde el cual se puede distinguir todo
+- **Directiva C5:** Verificar la existencia de un estado base capaz de diferenciar todas las transformaciones.
+
+### `CAT-058` - Cogenerador
+- **Descripción:** Q tal que Hom(−,Q) es fiel: estado al que se puede proyectar para distinguir
+- **Directiva C5:** Asegurar proyecciones seguras a estados testigo para auditorías rápidas.
+
+### `CAT-059` - Objeto Proyectivo
+- **Descripción:** P con lifting de epimorfismos: estado que puede acceder a cualquier preimagen
+- **Directiva C5:** Garantizar elevación libre (lifting) de transiciones sobre epimorfismos de control.
+
+### `CAT-060` - Objeto Inyectivo
+- **Descripción:** I con extensión de monomorfismos: estado que absorbe cualquier inyección parcial
+- **Directiva C5:** Asegurar absorción estable y controlada de morfismos parciales de entrada.
+
+### `CAT-061` - Monada
+- **Descripción:** (T, η, μ): endofunctor con unidad y multiplicación: patrón de encapsulación de efectos
+- **Directiva C5:** Encapsular efectos colaterales de I/O en estructuras monádicas strictly aisladas.
+
+### `CAT-062` - Unidad Monádica
+- **Descripción:** η: Id→T: inyección de valor puro en contexto computacional (wrap)
+- **Directiva C5:** Asegurar envoltura determinista de valores en el contexto monádico.
+
+### `CAT-063` - Multiplicación Monádica
+- **Descripción:** μ: T²→T: aplanamiento de contextos anidados (flatMap / bind)
+- **Directiva C5:** Impedir anidamiento infinito de contextos aplanándolos de forma determinista.
+
+### `CAT-064` - Álgebra de Monada
+- **Descripción:** α: TA→A: interpretación/evaluación de un programa encapsulado
+- **Directiva C5:** Garantizar que la ejecución de programas abstractos sea determinista y libre de efectos.
+
+### `CAT-065` - Categoría de Kleisli
+- **Descripción:** C_T: categoría de morfismos A→TB: composición de operaciones con efectos
+- **Directiva C5:** Controlar las secuencias de transiciones monádicas en la categoría de Kleisli.
+
+### `CAT-066` - Categoría de Eilenberg-Moore
+- **Descripción:** C^T: categoría de T-álgebras: espacio de todas las interpretaciones posibles
+- **Directiva C5:** Clasificar todas las posibles evaluaciones abstractas de programas.
+
+### `CAT-067` - Comonada
+- **Descripción:** (D, ε, δ): dual de monada: contexto ambiental y extracción (read environment)
+- **Directiva C5:** Utilizar comonadas para la extracción limpia de contextos de solo lectura.
+
+### `CAT-068` - Coextracción
+- **Descripción:** ε: D→Id: extracción de valor desde contexto (unwrap/focus)
+- **Directiva C5:** Extraer valores inmutables sin retener referencias léxicas (evitar memory leaks).
+
+### `CAT-069` - Coduplicación
+- **Descripción:** δ: D→D²: duplicación de contexto para inspección (logging sin mutación)
+- **Directiva C5:** Duplicar contextos de solo lectura exclusivamente para telemetría sin mutación.
+
+### `CAT-070` - Monada Libre
+- **Descripción:** Free(F): monada generada por un functor: AST sin interpretación fija
+- **Directiva C5:** Garantizar la generación del AST sin interpretación o ejecución inmediata.
+
+### `CAT-071` - Monada Estado
+- **Descripción:** State(S,A) = S→(A,S): computación con estado mutable encapsulado
+- **Directiva C5:** Aislar la mutación del estado en variables locales encapsuladas.
+
+### `CAT-072` - Monada Reader
+- **Descripción:** Reader(E,A) = E→A: computación con entorno de solo lectura (config injection)
+- **Directiva C5:** Bloquear la escritura en entornos inyectados de solo lectura.
+
+### `CAT-073` - Monada Writer
+- **Descripción:** Writer(W,A) = (A,W): computación con log acumulativo (audit trail)
+- **Directiva C5:** Registrar cada mutación en un log cronológico append-only inmutable.
+
+### `CAT-074` - Monada IO
+- **Descripción:** IO(A): computación con efectos del mundo real (filesystem, network)
+- **Directiva C5:** Restringir llamadas I/O a zonas controladas con control de fallas (Saga).
+
+### `CAT-075` - Monada Continuación
+- **Descripción:** Cont(R,A) = (A→R)→R: control explícito del flujo futuro (CPS transform)
+- **Directiva C5:** Asegurar que el flujo de control futuro no genere loops infinitos de llamadas.
+
+### `CAT-076` - Transformer Monádico
+- **Descripción:** T∘M: composición de monadas: apilamiento de efectos (error + state + IO)
+- **Directiva C5:** Garantizar consistencia en la resolución secuencial de efectos apilados.
+
+### `CAT-077` - Distributive Law
+- **Descripción:** λ: ST→TS: ley que permite intercambiar orden de efectos monádicos
+- **Directiva C5:** Validar conmutabilidad de efectos según leyes distributivas estrictas.
+
+### `CAT-078` - Strength Monádica
+- **Descripción:** t: A×TB→T(A×B): capacidad de arrastrar contexto puro a través de efectos
+- **Directiva C5:** Preservar contextos puros al transitar a través de bloques con efectos.
+
+### `CAT-079` - Idempotente Monádico
+- **Descripción:** μ∘η_T = μ∘Tη = id_T: monada cuya aplicación doble no cambia el resultado
+- **Directiva C5:** Evitar ejecuciones redundantes forzando la idempotencia en operaciones dobles.
+
+### `CAT-080` - Resolución de Monada
+- **Descripción:** Factorización de monada en adjunción F⊣U: descomposición de efecto en generación+interpretación
+- **Directiva C5:** Descomponer efectos monádicos complejos en adjunciones atómicas testables.
+
+### `CAT-081` - 2-Categoría
+- **Descripción:** Categoría con 2-morfismos (morfismos entre morfismos): transformaciones de transformaciones
+- **Directiva C5:** Validar consistencia de tipos en functores adjuntos izquierdos y derechos.
+
+### `CAT-082` - 2-Morfismo
+- **Descripción:** α: f⇒g entre morfismos f,g: A→B: homotopía entre caminos de ejecución
+- **Directiva C5:** Garantizar simetría y equivalencia en la adjunción de variables.
+
+### `CAT-083` - Composición Horizontal
+- **Descripción:** α∗β de 2-morfismos: composición paralela de transformaciones
+- **Directiva C5:** Monitorear e impedir divergencia en monadas asociadas.
+
+### `CAT-084` - Composición Vertical
+- **Descripción:** α∘β de 2-morfismos: composición secuencial de transformaciones
+- **Directiva C5:** Controlar la composición de comonadas de configuración global.
+
+### `CAT-085` - Ley de Intercambio
+- **Descripción:** (α∗β)∘(γ∗δ) = (α∘γ)∗(β∘δ): coherencia de composiciones mixtas
+- **Directiva C5:** Garantizar la unicidad del mapeo universal en construcciones de adjunción.
+
+### `CAT-086` - ∞-Categoría
+- **Descripción:** Categoría con n-morfismos para todo n: espacio de homotopías sin truncación
+- **Directiva C5:** Definir coherencia de homología sobre cadenas causales del Ledger.
+
+### `CAT-087` - Categoría Enriquecida
+- **Descripción:** V-Categoría: hom-objects en V en vez de Set: cuantificación de similaridad (métricas)
+- **Directiva C5:** Validar preservación de topología simplicial en mapeos de red.
+
+### `CAT-088` - Categoría Monoidal
+- **Descripción:** (C, ⊗, I): categoría con producto tensorial: composición paralela de recursos
+- **Directiva C5:** Exigir consistencia en el cálculo de homotopías de caminos de transición.
+
+### `CAT-089` - Categoría Monoidal Simétrica
+- **Descripción:** σ: A⊗B ≅ B⊗A: conmutatividad del paralelismo (orden de ejecución intercambiable)
+- **Directiva C5:** Implementar equivalencias topológicas débiles para optimización de queries vectoriales.
+
+### `CAT-090` - Categoría Monoidal Cerrada
+- **Descripción:** [A,B] como exponencial respecto a ⊗: funciones de primer orden como recursos
+- **Directiva C5:** Resolver el espacio de recubrimiento del grafo de dependencias.
+
+### `CAT-091` - Categoría Trenzada
+- **Descripción:** β: A⊗B → B⊗A con coherencia: intercambio controlado de recursos (no necesariamente simétrico)
+- **Directiva C5:** Garantizar que todo morfismo en el topos preserve la lógica subyacente.
+
+### `CAT-092` - Objeto Monoideal
+- **Descripción:** (M, μ: M⊗M→M, η: I→M): objeto con multiplicación y unidad interna (acumulador)
+- **Directiva C5:** Asegurar consistencia local mediante el topos de haces sobre el repositorio.
+
+### `CAT-093` - Objeto Comonoideal
+- **Descripción:** (C, δ: C→C⊗C, ε: C→I): objeto con copia y descarte (broadcast/drop)
+- **Directiva C5:** Validar límites y colímites internos dentro de la categoría interna de base de datos.
+
+### `CAT-094` - Topos
+- **Descripción:** Categoría cartesiana cerrada con subobjeto clasificador: universo lógico completo
+- **Directiva C5:** Preservar la estructura cartesiana cerrada en la evaluación de lambdas.
+
+### `CAT-095` - Topos de Presheaves
+- **Descripción:** [C^op, Set]: funtor de contexto que genera universos locales de estado
+- **Directiva C5:** Monitorear la consistencia de haces de datos sobre la topología del enjambre.
+
+### `CAT-096` - Haz (Sheaf)
+- **Descripción:** Presheaf que satisface condición de pegado: estado globalmente consistente desde datos locales
+- **Directiva C5:** Garantizar la coherencia global del estado a partir de validaciones locales.
+
+### `CAT-097` - Topología de Grothendieck
+- **Descripción:** J: selección de cubiertas sobre C: definición de qué observaciones son "suficientes"
+- **Directiva C5:** Establecer la topología de Grothendieck sobre los conjuntos de datos auditables.
+
+### `CAT-098` - Kan Extension Izquierda
+- **Descripción:** Lan_K F: mejor aproximación covariante: interpolación óptima de datos incompletos
+- **Directiva C5:** Interpolar datos ausentes utilizando Kan Extension Izquierda de forma conservadora.
+
+### `CAT-099` - Kan Extension Derecha
+- **Descripción:** Ran_K F: mejor aproximación contravariante: extrapolación conservadora
+- **Directiva C5:** Extrapolar límites de estados con Kan Extension Derecha de forma segura.
+
+### `CAT-100` - Lema de Yoneda
+- **Descripción:** Nat(Hom(A,−), F) ≅ F(A): un objeto es completamente determinado por cómo se relaciona con todos los demás
+- **Directiva C5:** Reconstruir objetos completos analizando únicamente sus hom-sets de relación.
+
+
+## 🔴 TERMODINÁMICA DE LA COMPUTACIÓN (THD)
+
+### `THD-001` - Límite de Landauer
+- **Descripción:** E_min = kT·ln(2) por bit borrado: costo termodinámico irreducible del olvido
+- **Directiva C5:** Garantizar disipación mínima de kT·ln(2) y rechazar borrado sin reciclaje exergético.
+
+### `THD-002` - Exergía Computacional
+- **Descripción:** Energía libre disponible para realizar trabajo útil de transformación en el AST
+- **Directiva C5:** Monitorear y optimizar la energía libre disponible para transformaciones del AST.
+
+### `THD-003` - Disipación Estocástica
+- **Descripción:** Energía convertida en calor sin producir trabajo útil: Green Theater / anergía
+- **Directiva C5:** Identificar y purgar la prosa narradora (anergía/slop) en cada prompt y respuesta.
+
+### `THD-004` - Entropía de Von Neumann
+- **Descripción:** S(ρ) = −Tr(ρ ln ρ): medida de información en estados cuánticos/mixtos del sistema
+- **Directiva C5:** Medir la incertidumbre de la mezcla de estados antes de la consolidación en el ledger.
+
+### `THD-005` - Principio de Carnot Computacional
+- **Descripción:** Eficiencia máxima η = 1 − T_cold/T_hot: límite de conversión información→acción
+- **Directiva C5:** Limitar la conversión información-acción según el gradiente del balance térmico del host.
+
+### `THD-006` - Demonio de Maxwell
+- **Descripción:** Agente que reduce entropía localmente a costa de aumentarla globalmente (sorting)
+- **Directiva C5:** Garantizar que el agente clasificador (Demonio) no gaste más exergía que la que reduce.
+
+### `THD-007` - Erasure Tax
+- **Descripción:** Costo total acumulado de borrar estados intermedios durante la ejecución
+- **Directiva C5:** Calcular y minimizar el costo acumulado de borrado destructivo de logs.
+
+### `THD-008` - Reversibilidad de Bennett
+- **Descripción:** Computación reversible que evita disipación de Landauer: backtracking sin pérdida
+- **Directiva C5:** Forzar reversibilidad Bennett en transiciones lógicas para permitir rollback sin coste exergético.
+
+### `THD-009` - Costo de Copia
+- **Descripción:** En computación clásica: copiar es gratis; en termodinámica: copia ≠ gratuita si implica borrado
+- **Directiva C5:** Minimizar operaciones de copia que impliquen borrado de contexto posterior.
+
+### `THD-010` - Trabajo de Szilard
+- **Descripción:** W = kT·ln(2): trabajo extractable de un bit de información (motor de un bit)
+- **Directiva C5:** Asegurar que el trabajo útil extraído de un bit de información sea mayor a cero.
+
+### `THD-011` - Principio de Equipartición
+- **Descripción:** kT/2 por grado de libertad: distribución base de energía en subsistemas
+- **Directiva C5:** Distribuir equitativamente los recursos y límites de cómputo entre subsistemas.
+
+### `THD-012` - Fluctuación-Disipación
+- **Descripción:** Relación entre ruido térmico y disipación: base del balance señal/ruido en pipelines
+- **Directiva C5:** Regular la relación señal/ruido analizando fluctuaciones térmicas en el event loop.
+
+### `THD-013` - Irreversibilidad Termodinámica
+- **Descripción:** ΔS_universe ≥ 0: toda ejecución real incrementa entropía global del sistema
+- **Directiva C5:** Exigir que la entropía global del universo de compilación sea monótonamente creciente.
+
+### `THD-014` - Energía Libre de Helmholtz
+- **Descripción:** F = U − TS: energía disponible para trabajo a temperatura constante
+- **Directiva C5:** Mantener balance positivo de energía de Helmholtz para asegurar trabajo útil disponible.
+
+### `THD-015` - Energía Libre de Gibbs
+- **Descripción:** G = H − TS: potencial para trabajo útil a presión y temperatura constantes
+- **Directiva C5:** Optimizar la energía libre de Gibbs en condiciones de ejecución concurrentes del host.
+
+### `THD-016` - Potencial Químico Computacional
+- **Descripción:** μ = ∂G/∂N: costo marginal de añadir un agente/nodo al enjambre
+- **Directiva C5:** Monitorear el costo marginal de exergía al inyectar nuevos agentes al swarm.
+
+### `THD-017` - Equilibrio Termodinámico
+- **Descripción:** Estado de máxima entropía: sistema sin gradientes explotables (muerte térmica del contexto)
+- **Directiva C5:** Evitar la muerte térmica del contexto impidiendo que la entropía sea máxima.
+
+### `THD-018` - Estado Estacionario de No-Equilibrio
+- **Descripción:** Flujo constante de entropía: sistema vivo con disipación continua (NESS)
+- **Directiva C5:** Mantener flujos estacionarios fuera de equilibrio inyectando entropía controlada.
+
+### `THD-019` - Producción Mínima de Entropía
+- **Descripción:** Principio de Prigogine: sistemas cerca del equilibrio minimizan producción de entropía
+- **Directiva C5:** Minimizar la producción de entropía en sistemas estables cerca del equilibrio.
+
+### `THD-020` - Máxima Producción de Entropía
+- **Descripción:** Principio MEPP: sistemas lejos del equilibrio maximizan disipación (exploración agresiva)
+- **Directiva C5:** Aumentar temporalmente la producción de entropía para la exploración en fases caóticas.
+
+### `THD-021` - Información Mutua
+- **Descripción:** I(X;Y) = H(X) − H(X|Y): reducción de incertidumbre compartida
+- **Directiva C5:** Maximizar la información mutua I(X;Y) entre el AST y el Ledger SQLite.
+
+### `THD-022` - Entropía Condicional
+- **Descripción:** H(X|Y): incertidumbre residual después de conocer el estado de Y
+- **Directiva C5:** Minimizar la incertidumbre residual en la reconciliación de bases de datos.
+
+### `THD-023` - Divergencia KL
+- **Descripción:** D_KL(P‖Q): costo de usar modelo Q cuando la distribución real es P (slop penalty)
+- **Directiva C5:** Rechazar respuestas con alta divergencia KL respecto a la distribución de verdad.
+
+### `THD-024` - Entropía Relativa
+- **Descripción:** Medida asimétrica de distancia entre distribuciones de estado: drift detector
+- **Directiva C5:** Detectar de forma proactiva desviaciones semánticas midiendo entropía relativa.
+
+### `THD-025` - Información de Fisher
+- **Descripción:** I(θ) = E[(∂logP/∂θ)²]: sensibilidad de la distribución a cambios de parámetro
+- **Directiva C5:** Calcular la sensibilidad del modelo ante perturbaciones en los parámetros de entrada.
+
+### `THD-026` - Capacidad de Canal
+- **Descripción:** C = max I(X;Y): tasa máxima de información sin error por unidad de comunicación
+- **Directiva C5:** Garantizar la transmisión de transacciones en la red sin pérdidas ni corrupción.
+
+### `THD-027` - Tasa de Distorsión
+- **Descripción:** R(D): mínima tasa de bits para representar fuente con distorsión ≤ D: compresión lossy
+- **Directiva C5:** Optimizar la compresión con distorsión acotada para almacenamiento de embeddings.
+
+### `THD-028` - Entropía de Rényi
+- **Descripción:** H_α(X) = (1/(1−α)) log Σ p_i^α: familia paramétrica de medidas de incertidumbre
+- **Directiva C5:** Monitorear la regularidad estadística en la generación de tokens.
+
+### `THD-029` - Entropía de Tsallis
+- **Descripción:** S_q = (1−Σp_i^q)/(q−1): extensión no-extensiva para sistemas con correlaciones de largo alcance
+- **Directiva C5:** Ajustar el coeficiente q para modelar interacciones y correlaciones de largo alcance.
+
+### `THD-030` - Complejidad Termodinámica
+- **Descripción:** W_diss = kT · D_KL(P_forward ‖ P_reverse): trabajo disipado en proceso irreversible
+- **Directiva C5:** Medir y registrar el trabajo total disipado en transiciones no reversibles.
+
+### `THD-031` - Igualdad de Jarzynski
+- **Descripción:** ⟨e^{−W/kT}⟩ = e^{−ΔF/kT}: conexión entre trabajo y energía libre en procesos fuera de equilibrio
+- **Directiva C5:** Verificar la consistencia del balance exergético utilizando fluctuaciones no-equilibrio.
+
+### `THD-032` - Teorema de Crooks
+- **Descripción:** P_F(W)/P_R(−W) = e^{(W−ΔF)/kT}: ratio de probabilidades forward/reverse
+- **Directiva C5:** Validar la simetría temporal en transiciones de rollback y commit de SAGA.
+
+### `THD-033` - Segunda Ley Generalizada
+- **Descripción:** ⟨W⟩ ≥ ΔF: el trabajo promedio siempre excede el cambio en energía libre
+- **Directiva C5:** Asegurar que el trabajo promedio consumido sea estrictamente mayor que el delta F.
+
+### `THD-034` - Retroalimentación de Maxwell
+- **Descripción:** Reducción de entropía por medición + feedback: information-to-energy conversion
+- **Directiva C5:** Sincronizar feedback homeostático para convertir información de sensores en acción.
+
+### `THD-035` - Costo de Medición
+- **Descripción:** Adquirir información tiene costo termodinámico: observar el sistema lo perturba
+- **Directiva C5:** Acotar el coste energético de la introspección y auditoría de agentes.
+
+### `THD-036` - Borrado Correlacionado
+- **Descripción:** Borrar bits correlacionados cuesta menos que independientes: compresión termodinámica
+- **Directiva C5:** Deduplicar y comprimir contextos correlacionados para maximizar exergía en memoria.
+
+### `THD-037` - Información Accesible
+- **Descripción:** Fracción de entropía total que es operacionalmente utilizable por el agente
+- **Directiva C5:** Garantizar que la información accesible por el agente no contenga datos ajenos a su tenant.
+
+### `THD-038` - Entropía de Mezcla
+- **Descripción:** ΔS_mix: entropía generada al combinar sistemas previamente separados (merge entropy)
+- **Directiva C5:** Acotar la entropía generada al fusionar dos repositorios o bases de datos.
+
+### `THD-039` - Neguentropía
+- **Descripción:** J = S_max − S: entropía disponible para generar orden: capacidad de organización
+- **Directiva C5:** Maximizar la neguentropía inyectando orden lógico estructurado en el repositorio.
+
+### `THD-040` - Temperatura de Información
+- **Descripción:** T_info = ∂E/∂S: tasa de cambio de energía con respecto a entropía informacional
+- **Directiva C5:** Regular la temperatura de información para evitar la congelación o caos del modelo.
+
+### `THD-041` - FLOPS/Watt
+- **Descripción:** Operaciones por segundo por vatio: eficiencia energética del hardware subyacente
+- **Directiva C5:** Maximizar FLOPS/Watt del hardware anfitrión limitando subprocesos redundantes.
+
+### `THD-042` - Tokens/Joule
+- **Descripción:** Tokens generados por julio de energía: eficiencia termodinámica del pipeline LLM
+- **Directiva C5:** Exigir eficiencia energética óptima (Tokens/Joule) en llamadas a APIs.
+
+### `THD-043` - Exergía por Token
+- **Descripción:** Fracción de energía por token que produce trabajo útil (acción determinista) vs calor
+- **Directiva C5:** Maximizar la proporción de exergía útil frente a calor disipado en la inferencia.
+
+### `THD-044` - Anergía por Token
+- **Descripción:** Fracción de energía por token que se disipa sin trabajo útil (boilerplate / padding)
+- **Directiva C5:** Auditar y purgar el padding inútil y boilerplate de las respuestas (anergía).
+
+### `THD-045` - Costo de Contexto
+- **Descripción:** Energía total para mantener N tokens en la ventana de atención del transformer
+- **Directiva C5:** Establecer cotas estrictas de longitud de contexto para controlar el coste de atención.
+
+### `THD-046` - Presupuesto Térmico
+- **Descripción:** Límite superior de disipación térmica antes de throttling o degradación del sistema
+- **Directiva C5:** Monitorear temperaturas del CPU/GPU del host y limitar la concurrencia si exceden límites.
+
+### `THD-047` - Eficiencia de Carnot del Pipeline
+- **Descripción:** η_pipeline = (Exergía_output) / (Exergía_input): fracción útil de la computación
+- **Directiva C5:** Medir el ROI útil en cada etapa del pipeline reduciendo el overhead.
+
+### `THD-048` - Costo de Atención
+- **Descripción:** O(n²) energía para self-attention: escala cuadrática con longitud de contexto
+- **Directiva C5:** Evitar el coste cuadrático O(n²) segmentando de forma óptima el contexto.
+
+### `THD-049` - Presupuesto Exergético Total
+- **Descripción:** Suma de exergías asignables a todas las operaciones de un ciclo completo
+- **Directiva C5:** Presupuestar y asignar exergía de forma determinista para cada tarea del Swarm.
+
+### `THD-050` - Waste Heat Computacional
+- **Descripción:** Calor generado por operaciones que no contribuyen al resultado (retries, hallucinations)
+- **Directiva C5:** Disminuir el waste heat interrumpiendo consultas estocásticas redundantes.
+
+### `THD-051` - Amortización Energética
+- **Descripción:** Distribución del costo de entrenamiento del modelo sobre sus N inferencias
+- **Directiva C5:** Amortizar energéticamente el coste de carga de modelos ONNX de embeddings.
+
+### `THD-052` - ROI Termodinámico
+- **Descripción:** Retorno de inversión medido en bits útiles por julio invertido
+- **Directiva C5:** Optimizar el ratio de bits útiles en la base de datos por julio de computación.
+
+### `THD-053` - Densidad de Exergía
+- **Descripción:** Exergía por unidad de volumen de estado (bits útiles por byte de almacenamiento)
+- **Directiva C5:** Maximizar la densidad de información útil por byte en el disco.
+
+### `THD-054` - Cascada Exergética
+- **Descripción:** Transferencia de exergía entre etapas del pipeline: cada etapa recibe la exergía residual
+- **Directiva C5:** Monitorear la cascada exergética de datos reduciendo la entropía acumulada.
+
+### `THD-055` - Reciclaje de Exergía
+- **Descripción:** Reutilización de resultados intermedios para evitar recomputación (caching termodinámico)
+- **Directiva C5:** Implementar caché termodinámico para evitar recomputaciones costosas.
+
+### `THD-056` - Pérdida por Serialización
+- **Descripción:** Energía gastada en convertir estado interno a formato transmisible (JSON, protobuf)
+- **Directiva C5:** Minimizar conversiones JSON/Protobuf redundantes optimizando buffers en memoria.
+
+### `THD-057` - Costo de Sincronización
+- **Descripción:** Energía para garantizar consistencia entre N réplicas del estado (consensus overhead)
+- **Directiva C5:** Optimizar el protocolo de consenso BFT para reducir el overhead de sincronía.
+
+### `THD-058` - Energía de Activación
+- **Descripción:** Barrera mínima de energía para iniciar una transición de estado (bootstrap cost)
+- **Directiva C5:** Asegurar que la energía de activación no exceda la cuota reservada por el hypervisor.
+
+### `THD-059` - Punto de Curie Computacional
+- **Descripción:** Temperatura crítica donde el sistema pierde coherencia magnética / organizacional
+- **Directiva C5:** Evitar desorden estructural bloqueando transiciones cuando la entropía es incontrolable.
+
+### `THD-060` - Degradación Entrópica
+- **Descripción:** Tasa de pérdida de exergía por unidad de tiempo sin intervención (context rot rate)
+- **Directiva C5:** Establecer mecanismos de compactación activa para revertir la degradación de contexto.
+
+### `THD-061` - Distribución de Boltzmann
+- **Descripción:** P(s) ∝ e^{−E(s)/kT}: probabilidad de un microestado dado su nivel energético
+- **Directiva C5:** Implementar la distribución de probabilidad canónica sobre estados válidos del AST.
+
+### `THD-062` - Función de Partición
+- **Descripción:** Z = Σ e^{−E_i/kT}: normalizadora que codifica toda la termodinámica del sistema
+- **Directiva C5:** Modelar estados del sistema mediante el ensamble microcanónico aislado.
+
+### `THD-063` - Ensemble Canónico
+- **Descripción:** Colección de estados a temperatura constante: distribución de configuraciones del swarm
+- **Directiva C5:** Modelar interacciones con el entorno externo mediante el ensamble gran canónico.
+
+### `THD-064` - Ensemble Microcanónico
+- **Descripción:** Colección de estados a energía constante: exploración ergódica de configuraciones
+- **Directiva C5:** Garantizar la convergencia de la función de partición Z sobre el espacio de estados.
+
+### `THD-065` - Ensemble Gran Canónico
+- **Descripción:** Estados con intercambio de partículas/agentes: swarm con tamaño variable
+- **Directiva C5:** Medir fluctuaciones estadísticas en la velocidad de respuesta del event loop.
+
+### `THD-066` - Ergodicidad
+- **Descripción:** Promedio temporal = promedio de ensemble: el agente explora todos los estados accesibles
+- **Directiva C5:** Clasificar la correlación temporal de las mutaciones aplicadas al Ledger.
+
+### `THD-067` - Ruptura de Ergodicidad
+- **Descripción:** Sistema atrapado en subconjunto de estados: dead-end / local minimum del pipeline
+- **Directiva C5:** Calcular la longitud de correlación semántica para agrupar conceptos en vec0.
+
+### `THD-068` - Transición de Fase
+- **Descripción:** Cambio discontinuo de comportamiento al variar un parámetro: colapso/emergencia abrupta
+- **Directiva C5:** Identificar transiciones de fase críticas (de orden lógico a caos estocástico).
+
+### `THD-069` - Parámetro de Orden
+- **Descripción:** Observable que distingue fases: métrica de coherencia del sistema (C1→C5)
+- **Directiva C5:** Controlar el parámetro de orden para mantener la homeostasis del sistema.
+
+### `THD-070` - Punto Crítico
+- **Descripción:** Divergencia de correlaciones: punto donde el sistema es maximalmente sensible
+- **Directiva C5:** Establecer la ley de escala exergética para determinar el comportamiento en volumen.
+
+### `THD-071` - Exponente Crítico
+- **Descripción:** Leyes de potencia cerca de transiciones: escalado de comportamiento emergente
+- **Directiva C5:** Utilizar variables de estado extensivas para medir capacidad del Ledger.
+
+### `THD-072` - Grupo de Renormalización
+- **Descripción:** Transformación que cambia escala preservando física: coarse-graining del estado
+- **Directiva C5:** Utilizar variables intensivas (temperatura, presión) para control térmico local.
+
+### `THD-073` - Universalidad
+- **Descripción:** Clases de sistemas con mismos exponentes críticos: isomorfismo termodinámico entre dominios
+- **Directiva C5:** Definir y auditar la ecuación de estado que rige el runtime.
+
+### `THD-074` - Simetría Rota
+- **Descripción:** Estado fundamental con menos simetría que el hamiltoniano: especialización espontánea
+- **Directiva C5:** Garantizar la conservación de energía informacional en cada transformación de AST.
+
+### `THD-075` - Modo de Goldstone
+- **Descripción:** Excitación sin masa que emerge de simetría rota: grado de libertad residual
+- **Directiva C5:** Calcular el calor disipado por agentes midiendo el overhead de CPU.
+
+### `THD-076` - Nucleación
+- **Descripción:** Formación de nueva fase dentro de la vieja: bootstrap de nuevo subsistema
+- **Directiva C5:** Medir el trabajo neto realizado por transformaciones asíncronas sobre el disco.
+
+### `THD-077` - Spinodal
+- **Descripción:** Límite de metaestabilidad: punto donde el sistema DEBE transicionar (deadline)
+- **Directiva C5:** Evaluar la entalpía computacional para cuantificar recursos de inicialización.
+
+### `THD-078` - Histéresis
+- **Descripción:** Dependencia del estado actual en la historia: memoria termodinámica del sistema
+- **Directiva C5:** Evaluar la energía interna del sistema para dimensionar la capacidad de persistencia.
+
+### `THD-079` - Vidrio de Espín
+- **Descripción:** Estado desordenado congelado: sistema con frustración máxima (deadlock multiagente)
+- **Directiva C5:** Registrar la exergía de flujo en canales de comunicación IPC/Sockets.
+
+### `THD-080` - Temple Simulado
+- **Descripción:** Optimización por enfriamiento gradual: reducción controlada de exploración estocástica
+- **Directiva C5:** Calcular el balance de exergía global de cada sesión de enjambre.
+
+### `THD-081` - Estructura Disipativa
+- **Descripción:** Orden que emerge y se mantiene por flujo constante de energía (sistema vivo)
+- **Directiva C5:** Rechazar inestabilidades estructurales mitigando flujos de calor no disipados.
+
+### `THD-082` - Autopoiesis Termodinámica
+- **Descripción:** Sistema que se reproduce y mantiene a sí mismo usando flujos disipativos
+- **Directiva C5:** Mantener la autopoiesis termodinámica garantizando suministro constante de exergía.
+
+### `THD-083` - Frontera del Sistema
+- **Descripción:** Membrana que define qué es interior (agente) y exterior (entorno): process boundary
+- **Directiva C5:** Aislar físicamente la frontera del sistema (sandbox) de la estocasticidad exterior.
+
+### `THD-084` - Flujo de Entropía
+- **Descripción:** dS/dt = dS_i/dt + dS_e/dt: producción interna + intercambio con exterior
+- **Directiva C5:** Calcular la producción interna y el intercambio neto de entropía en cada ciclo.
+
+### `THD-085` - Acoplamiento Termodinámico
+- **Descripción:** Uso de un proceso espontáneo para impulsar uno no-espontáneo: subsidio cruzado
+- **Directiva C5:** Utilizar procesos espontáneos para subsidiar operaciones costosas no espontáneas.
+
+### `THD-086` - Principio de Le Chatelier
+- **Descripción:** Sistema en equilibrio responde a perturbación minimizándola: resistencia a cambio
+- **Directiva C5:** Minimizar perturbaciones en el equilibrio aplicando el Principio de Le Chatelier.
+
+### `THD-087` - Régimen Lineal
+- **Descripción:** Cerca del equilibrio: flujos proporcionales a fuerzas: comportamiento predecible
+- **Directiva C5:** Mantener al sistema en el régimen lineal para un comportamiento predecible del AST.
+
+### `THD-088` - Régimen No-Lineal
+- **Descripción:** Lejos del equilibrio: bifurcaciones, oscilaciones, caos: comportamiento emergente
+- **Directiva C5:** Monitorear y estabilizar bifurcaciones y caos en el régimen no lineal.
+
+### `THD-089` - Reciprocidad de Onsager
+- **Descripción:** L_ij = L_ji: simetría de coeficientes de transporte cruzado: fairness de intercambio
+- **Directiva C5:** Exigir reciprocidad de Onsager para garantizar fairness en intercambios de datos.
+
+### `THD-090` - Efecto Peltier Computacional
+- **Descripción:** Flujo de información que genera o absorbe entropía en la frontera
+- **Directiva C5:** Controlar el flujo de información para evitar picos de generación de entropía.
+
+### `THD-091` - Efecto Seebeck Computacional
+- **Descripción:** Gradiente de entropía que genera flujo de información: información emergente de ruido
+- **Directiva C5:** Aprovechar gradientes de entropía para extraer información útil de señales ruidosas.
+
+### `THD-092` - Ciclo de Carnot Computacional
+- **Descripción:** Ciclo ideal: input→compress→compute→expand→output con eficiencia máxima
+- **Directiva C5:** Optimizar el ciclo de Carnot computacional logrando máxima eficiencia de ejecución.
+
+### `THD-093` - Ciclo Otto Computacional
+- **Descripción:** Ciclo real con compresión/expansión isocórica: batch processing con overhead
+- **Directiva C5:** Reducir el overhead en el procesamiento por lotes del ciclo Otto computacional.
+
+### `THD-094` - Bomba de Calor Informacional
+- **Descripción:** Transferencia de entropía de sistema frío (organizado) a caliente (caótico): garbage collection
+- **Directiva C5:** Transferir de forma segura la entropía acumulada a sumideros (garbage collection).
+
+### `THD-095` - Refrigeración Algorítmica
+- **Descripción:** Reducción de entropía de qubits/bits de interés a costa de bits auxiliares
+- **Directiva C5:** Utilizar refrigeración algorítmica para purgar estados basura sin tocar bits clave.
+
+### `THD-096` - Entropía de Clausius
+- **Descripción:** dS = δQ_rev/T: definición original conectando calor y entropía
+- **Directiva C5:** Calcular y registrar la entropía de Clausius acumulada en cada transacción.
+
+### `THD-097` - Exergía de Flujo
+- **Descripción:** Exergía transportada por flujo de materia/información a través de frontera del sistema
+- **Directiva C5:** Monitorear la exergía de flujo a través de las APIs de entrada/salida del enjambre.
+
+### `THD-098` - Destrucción de Exergía
+- **Descripción:** Exergía irrecuperablemente perdida por irreversibilidades internas (bugs, retries)
+- **Directiva C5:** Minimizar la destrucción de exergía interrumpiendo bucles de retry inútiles.
+
+### `THD-099` - Balance Exergético
+- **Descripción:** Σ(Ex_in) = Σ(Ex_out) + Σ(Ex_destroyed): contabilidad completa de recursos
+- **Directiva C5:** Verificar el balance exergético total al finalizar cada sesión de trabajo.
+
+### `THD-100` - Apoptosis Termodinámica
+- **Descripción:** Muerte programada de un proceso cuando su balance exergético es negativo neto
+- **Directiva C5:** Detonar apoptosis programada cuando el balance exergético sea negativo neto.
+

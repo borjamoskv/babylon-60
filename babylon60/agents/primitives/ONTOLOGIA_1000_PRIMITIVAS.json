@@ -10008,7 +10008,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor de Preservación de Estado",
       "description": "Mapeo F: C→D que preserva identidad y composición entre categorías de estado del sistema",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Verificar F(id_A) == id_F(A) y F(g ∘ f) == F(g) ∘ F(f) en transiciones de estado."
     },
     {
       "id": "CAT-002",
@@ -10018,7 +10018,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Transformación Natural",
       "description": "Mutación η: F⇒G entre functores que conmuta con todos los morfismos sin alterar topología",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar η_B ∘ F(f) == G(f) ∘ η_A para evitar divergencias de morfismos."
     },
     {
       "id": "CAT-003",
@@ -10028,7 +10028,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Límite Categórico",
       "description": "Cono universal terminal: consenso de enjambre como objeto terminal de un diagrama",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Determinar cono universal terminal y forzar consenso unificado del enjambre."
     },
     {
       "id": "CAT-004",
@@ -10038,7 +10038,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Colímite Categórico",
       "description": "Cocono universal inicial: fusión de estados divergentes en un estado canónico",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Resolver cocono universal inicial y fusionar bifurcaciones en estado canónico."
     },
     {
       "id": "CAT-005",
@@ -10048,7 +10048,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Objeto Inicial",
       "description": "∅-Estado: el estado vacío desde el cual todo worktree se origina (void bootstrap)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Validar que el estado se origina de forma determinista desde el bootstrap vacío (Ø-Estado)."
     },
     {
       "id": "CAT-006",
@@ -10058,7 +10058,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Objeto Terminal",
       "description": "1-Estado: el estado de convergencia al que todo pipeline debe colapsar para ser válido",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar que todo pipeline colapse al objeto terminal (1-Estado) antes de confirmación."
     },
     {
       "id": "CAT-007",
@@ -10068,7 +10068,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Morfismo de Identidad",
       "description": "id_A: A→A, la operación nula que certifica que un estado no ha sido alterado (hash check)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Verificar que el hash del estado sea idéntico si el morfismo aplicado es id_A."
     },
     {
       "id": "CAT-008",
@@ -10078,7 +10078,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Composición Asociativa",
       "description": "(g∘f)∘h = g∘(f∘h): garantía de que el orden de encadenamiento de mutaciones es determinista",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Forzar propiedad asociativa (h ∘ g) ∘ f == h ∘ (g ∘ f) en cadenas de mutación del AST."
     },
     {
       "id": "CAT-009",
@@ -10088,7 +10088,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Isomorfismo Categórico",
       "description": "f: A→B con inversa g: B→A tal que g∘f=id_A, f∘g=id_B: equivalencia perfecta entre estados",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Exigir existencia de morfismo inverso g tal que g ∘ f == id_A y f ∘ g == id_B."
     },
     {
       "id": "CAT-010",
@@ -10098,7 +10098,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Epimorfismo",
       "description": "Morfismo surjectivo: toda salida del pipeline tiene al menos una entrada causal",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar que cada estado del pipeline sea alcanzable desde una entrada causal (surjectividad)."
     },
     {
       "id": "CAT-011",
@@ -10108,7 +10108,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Monomorfismo",
       "description": "Morfismo inyectivo: entradas distintas producen estados distintos (no-colisión de hashes)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Evitar colisiones de hash asegurando correspondencia inyectiva 1:1 de estados."
     },
     {
       "id": "CAT-012",
@@ -10118,7 +10118,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Endomorfismo",
       "description": "f: A→A no trivial: transformación interna de estado (self-mutation del AST)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Validar estabilidad de tipos durante transformaciones internas (self-mutation)."
     },
     {
       "id": "CAT-013",
@@ -10128,7 +10128,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Automorfismo",
       "description": "Endomorfismo invertible: transformación reversible de estado (rollback garantizado)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar reversibilidad absoluta y disponibilidad de rollback en automorfismos."
     },
     {
       "id": "CAT-014",
@@ -10138,7 +10138,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Opuesta",
       "description": "C^op: inversión de todos los morfismos. Análisis de causalidad reversa (backtracking)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Implementar trazado de causalidad inversa (backtracking) invirtiendo morfismos."
     },
     {
       "id": "CAT-015",
@@ -10148,7 +10148,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Producto",
       "description": "C×D: ejecución paralela de dos pipelines con estado combinado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar paralelismo estricto y sin interferencia en productos cartesianos de categorías."
     },
     {
       "id": "CAT-016",
@@ -10158,7 +10158,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Coma",
       "description": "(F↓G): espacio de transiciones entre dos functores. Espacio de migraciones de estado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear transiciones de estado a través de la categoría coma (F ↓ G)."
     },
     {
       "id": "CAT-017",
@@ -10168,7 +10168,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Slice",
       "description": "C/A: todos los morfismos que apuntan a un objeto A. Dependencias de un módulo",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Resolver y aislar el grafo de dependencias de entrada para evitar filtrado de estados."
     },
     {
       "id": "CAT-018",
@@ -10178,7 +10178,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Coslice",
       "description": "A/C: todos los morfismos que parten de A. Ramificaciones desde un commit",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Controlar las ramificaciones de salida a partir de un nodo de origen común."
     },
     {
       "id": "CAT-019",
@@ -10188,7 +10188,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Subcategoría Plena",
       "description": "Inclusión que preserva todos los morfismos entre objetos seleccionados (filtrado sin pérdida)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Preservar todos los morfismos originales en subconjuntos de objetos seleccionados."
     },
     {
       "id": "CAT-020",
@@ -10198,7 +10198,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Subcategoría Ancha",
       "description": "Inclusión que contiene todos los objetos pero restringe morfismos (restricción de permisos)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Restringir los morfismos de transición sin alterar el conjunto de objetos base."
     },
     {
       "id": "CAT-021",
@@ -10208,7 +10208,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Covariante",
       "description": "F: C→D que preserva dirección de morfismos: mapeo de pipeline que conserva flujo causal",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Preservar la dirección y orden del flujo causal en el pipeline."
     },
     {
       "id": "CAT-022",
@@ -10218,7 +10218,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Contravariante",
       "description": "F: C→D^op que invierte dirección: transformación de productor a consumidor",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Invertir el flujo de control para transformar estructuras de datos a consumidores."
     },
     {
       "id": "CAT-023",
@@ -10228,7 +10228,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Fiel",
       "description": "F inyectivo en hom-sets: mapeo que no confunde operaciones distintas",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Impedir la colisión semántica de operaciones distintas sobre los mismos objetos."
     },
     {
       "id": "CAT-024",
@@ -10238,7 +10238,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Pleno",
       "description": "F surjectivo en hom-sets: mapeo que no pierde operaciones disponibles",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar cobertura completa de todas las transformaciones permitidas en el codominio."
     },
     {
       "id": "CAT-025",
@@ -10248,7 +10248,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Plenamente Fiel",
       "description": "Embedding categórico: inclusión perfecta de un subsistema en otro",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar que la inclusión de subsistemas conserve hom-sets intactos (full-faithful embedding)."
     },
     {
       "id": "CAT-026",
@@ -10258,7 +10258,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor de Olvido",
       "description": "U: Struct→Set que descarta estructura: extracción de datos crudos desde estados tipados",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Aislar la extracción de datos planos descartando metadatos estructurales."
     },
     {
       "id": "CAT-027",
@@ -10268,7 +10268,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Libre",
       "description": "F: Set→Struct adjunto izquierdo al olvido: generación de estructura mínima desde datos crudos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Generar estructura mínima y determinista a partir de datos planos."
     },
     {
       "id": "CAT-028",
@@ -10278,7 +10278,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Bifunctor",
       "description": "F: C×D→E: operación que toma dos inputs de categorías distintas (join cross-domain)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar coherencia y sincronía en operaciones cruzadas de dos dominios independientes."
     },
     {
       "id": "CAT-029",
@@ -10288,7 +10288,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Profunctor",
       "description": "P: C^op × D → Set: relación heterogénea entre sistemas (bridge entre tenants)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Establecer puentes seguros y aislados para el intercambio de datos entre tenants."
     },
     {
       "id": "CAT-030",
@@ -10298,7 +10298,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Representable",
       "description": "Hom(A,−): C→Set: espacio de todas las operaciones posibles desde un estado dado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Resolver el espacio de operaciones accesibles desde el estado actual."
     },
     {
       "id": "CAT-031",
@@ -10308,7 +10308,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Hom Interno",
       "description": "[A,B]: exponencial categórico: espacio de funciones/lambdas entre tipos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar la pureza funcional en la aplicación de funciones como tipos."
     },
     {
       "id": "CAT-032",
@@ -10318,7 +10318,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Diagonal",
       "description": "Δ: C→C×C: duplicación de estado para validación paralela (N=3 quorum)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Duplicar estados de forma determinista para la verificación cruzada en el quorum."
     },
     {
       "id": "CAT-033",
@@ -10328,7 +10328,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Constante",
       "description": "Δ_A: siempre retorna A: estado invariante como baseline de comparación",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Mantener constante el estado de referencia como baseline inmutable."
     },
     {
       "id": "CAT-034",
@@ -10338,7 +10338,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Potencia",
       "description": "P: C→C que mapea A al objeto de sus subobjetos: generación de espacio de configuraciones",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Resolver todas las configuraciones posibles del subobjeto clasificador."
     },
     {
       "id": "CAT-035",
@@ -10348,7 +10348,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Equivalencia de Categorías",
       "description": "F: C→D con cuasi-inversa: dos sistemas son computacionalmente equivalentes",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar equivalencia semántica e isomorfismo laxo entre representaciones."
     },
     {
       "id": "CAT-036",
@@ -10358,7 +10358,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Adjunción Libre-Olvidadizo",
       "description": "F⊣U: par fundamental generación-extracción. Bootstrap-Teardown de contexto",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Establecer una correspondencia biyectiva entre adjunciones de generación y extracción."
     },
     {
       "id": "CAT-037",
@@ -10368,7 +10368,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Unidad de Adjunción",
       "description": "η: Id_C → U∘F: inyección de dato crudo en su envolvente estructural",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Registrar la inserción de datos crudos en envolturas tipadas."
     },
     {
       "id": "CAT-038",
@@ -10378,7 +10378,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Counidad de Adjunción",
       "description": "ε: F∘U → Id_D: evaluación/colapso de estructura a resultado concreto",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Evaluar y consolidar estructuras abstractas a resultados inmutables."
     },
     {
       "id": "CAT-039",
@@ -10388,7 +10388,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Adjunción de Galois",
       "description": "Conexión entre retículos: mapeo entre jerarquías de permisos/restricciones",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar monotonía en los mapeos de jerarquías de seguridad y permisos."
     },
     {
       "id": "CAT-040",
@@ -10398,7 +10398,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Functor Nervio",
       "description": "N: Cat→sSet: serialización de una categoría en su representación simplicial (log chain)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Serializar la topología causal en una cadena simplicial libre de loops infinitos."
     },
     {
       "id": "CAT-041",
@@ -10408,7 +10408,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Producto Categórico",
       "description": "A×B con proyecciones π₁,π₂: estado compuesto con acceso a componentes (struct fields)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar acceso ortogonal a cada componente en estados compuestos."
     },
     {
       "id": "CAT-042",
@@ -10418,7 +10418,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Coproducto",
       "description": "A⊔B con inyecciones ι₁,ι₂: unión disjunta de estados (tagged union / enum)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Exigir discriminación estricta y control de tipos en uniones disjuntas."
     },
     {
       "id": "CAT-043",
@@ -10428,7 +10428,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Ecualizador",
       "description": "Eq(f,g): subobjeto donde f=g: filtro de estados que satisfacen invariante",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Filtrar estados coherentes imponiendo Eq(f, g) en el validador."
     },
     {
       "id": "CAT-044",
@@ -10438,7 +10438,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Coecualizador",
       "description": "Coeq(f,g): cociente que identifica outputs iguales: deduplicación semántica",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar que outputs equivalentes se unifiquen en una única clave canónica."
     },
     {
       "id": "CAT-045",
@@ -10448,7 +10448,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Pullback",
       "description": "A ×_C B: producto fibrado: join de estados sobre un ancestro común (merge de branches)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Resolver fusiones de ramas asegurando la coherencia con el ancestro común (Pullback)."
     },
     {
       "id": "CAT-046",
@@ -10458,7 +10458,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Pushout",
       "description": "A ⊔_C B: coproducto fibrado: fusión de divergencias desde una base común",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Resolver divisiones y bifurcaciones a partir del nodo de origen (Pushout)."
     },
     {
       "id": "CAT-047",
@@ -10468,7 +10468,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Exponencial",
       "description": "B^A: objeto de morfismos de A a B: espacio de todas las transformaciones posibles",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Validar el espacio de transiciones como objetos de primera clase."
     },
     {
       "id": "CAT-048",
@@ -10478,7 +10478,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Subobjeto Clasificador",
       "description": "Ω con true: 1→Ω: objeto verdad que clasifica todas las subpartes (type predicate)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Implementar predicados de tipado estricto para clasificar subobjetos."
     },
     {
       "id": "CAT-049",
@@ -10488,7 +10488,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Objeto Cero",
       "description": "0 = objeto inicial = terminal: categoría puntuada (null state)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar que el estado nulo no permita operaciones de mutación adicionales."
     },
     {
       "id": "CAT-050",
@@ -10498,7 +10498,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Kernel Categórico",
       "description": "Ker(f) = Eq(f,0): núcleo de una transformación: estados aniquilados por la operación",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Identificar y depurar estados anulados por transformaciones de software."
     },
     {
       "id": "CAT-051",
@@ -10508,7 +10508,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Cokernel",
       "description": "Coker(f) = Coeq(f,0): cociente por imagen: estados ortogonales a la operación",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Analizar la coherencia residual de estados post-operación."
     },
     {
       "id": "CAT-052",
@@ -10518,7 +10518,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Imagen Categórica",
       "description": "Im(f): factorización epi-mono: rango efectivo de una transformación",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar que el rango efectivo no exceda las cotas del esquema."
     },
     {
       "id": "CAT-053",
@@ -10528,7 +10528,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Límite Inverso",
       "description": "lim←: límite de sistema proyectivo: convergencia de refinamientos sucesivos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear la convergencia del sistema en refinamientos sucesivos."
     },
     {
       "id": "CAT-054",
@@ -10538,7 +10538,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Límite Directo",
       "description": "lim→: colímite de sistema inductivo: expansión controlada de capacidad",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Regular la expansión de capacidades inductivas garantizando estabilidad del AST."
     },
     {
       "id": "CAT-055",
@@ -10548,7 +10548,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Límite Filtrado",
       "description": "Colímite sobre categoría filtrada: agregación que conmuta con límites finitos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Permitir agregación distributiva de límites y colímites finitos."
     },
     {
       "id": "CAT-056",
@@ -10558,7 +10558,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Objeto Compacto",
       "description": "Hom(K,−) conmuta con colímites filtrados: estado finitamente representable",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar que los estados del sistema sean representables en memoria de forma finita."
     },
     {
       "id": "CAT-057",
@@ -10568,7 +10568,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Generador",
       "description": "G tal que Hom(G,−) es fiel: estado desde el cual se puede distinguir todo",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Verificar la existencia de un estado base capaz de diferenciar todas las transformaciones."
     },
     {
       "id": "CAT-058",
@@ -10578,7 +10578,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Cogenerador",
       "description": "Q tal que Hom(−,Q) es fiel: estado al que se puede proyectar para distinguir",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar proyecciones seguras a estados testigo para auditorías rápidas."
     },
     {
       "id": "CAT-059",
@@ -10588,7 +10588,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Objeto Proyectivo",
       "description": "P con lifting de epimorfismos: estado que puede acceder a cualquier preimagen",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar elevación libre (lifting) de transiciones sobre epimorfismos de control."
     },
     {
       "id": "CAT-060",
@@ -10598,7 +10598,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Objeto Inyectivo",
       "description": "I con extensión de monomorfismos: estado que absorbe cualquier inyección parcial",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar absorción estable y controlada de morfismos parciales de entrada."
     },
     {
       "id": "CAT-061",
@@ -10608,7 +10608,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Monada",
       "description": "(T, η, μ): endofunctor con unidad y multiplicación: patrón de encapsulación de efectos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Encapsular efectos colaterales de I/O en estructuras monádicas strictly aisladas."
     },
     {
       "id": "CAT-062",
@@ -10618,7 +10618,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Unidad Monádica",
       "description": "η: Id→T: inyección de valor puro en contexto computacional (wrap)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar envoltura determinista de valores en el contexto monádico."
     },
     {
       "id": "CAT-063",
@@ -10628,7 +10628,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Multiplicación Monádica",
       "description": "μ: T²→T: aplanamiento de contextos anidados (flatMap / bind)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Impedir anidamiento infinito de contextos aplanándolos de forma determinista."
     },
     {
       "id": "CAT-064",
@@ -10638,7 +10638,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Álgebra de Monada",
       "description": "α: TA→A: interpretación/evaluación de un programa encapsulado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar que la ejecución de programas abstractos sea determinista y libre de efectos."
     },
     {
       "id": "CAT-065",
@@ -10648,7 +10648,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría de Kleisli",
       "description": "C_T: categoría de morfismos A→TB: composición de operaciones con efectos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Controlar las secuencias de transiciones monádicas en la categoría de Kleisli."
     },
     {
       "id": "CAT-066",
@@ -10658,7 +10658,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría de Eilenberg-Moore",
       "description": "C^T: categoría de T-álgebras: espacio de todas las interpretaciones posibles",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Clasificar todas las posibles evaluaciones abstractas de programas."
     },
     {
       "id": "CAT-067",
@@ -10668,7 +10668,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Comonada",
       "description": "(D, ε, δ): dual de monada: contexto ambiental y extracción (read environment)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Utilizar comonadas para la extracción limpia de contextos de solo lectura."
     },
     {
       "id": "CAT-068",
@@ -10678,7 +10678,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Coextracción",
       "description": "ε: D→Id: extracción de valor desde contexto (unwrap/focus)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Extraer valores inmutables sin retener referencias léxicas (evitar memory leaks)."
     },
     {
       "id": "CAT-069",
@@ -10688,7 +10688,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Coduplicación",
       "description": "δ: D→D²: duplicación de contexto para inspección (logging sin mutación)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Duplicar contextos de solo lectura exclusivamente para telemetría sin mutación."
     },
     {
       "id": "CAT-070",
@@ -10698,7 +10698,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Monada Libre",
       "description": "Free(F): monada generada por un functor: AST sin interpretación fija",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar la generación del AST sin interpretación o ejecución inmediata."
     },
     {
       "id": "CAT-071",
@@ -10708,7 +10708,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Monada Estado",
       "description": "State(S,A) = S→(A,S): computación con estado mutable encapsulado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Aislar la mutación del estado en variables locales encapsuladas."
     },
     {
       "id": "CAT-072",
@@ -10718,7 +10718,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Monada Reader",
       "description": "Reader(E,A) = E→A: computación con entorno de solo lectura (config injection)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Bloquear la escritura en entornos inyectados de solo lectura."
     },
     {
       "id": "CAT-073",
@@ -10728,7 +10728,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Monada Writer",
       "description": "Writer(W,A) = (A,W): computación con log acumulativo (audit trail)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Registrar cada mutación en un log cronológico append-only inmutable."
     },
     {
       "id": "CAT-074",
@@ -10738,7 +10738,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Monada IO",
       "description": "IO(A): computación con efectos del mundo real (filesystem, network)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Restringir llamadas I/O a zonas controladas con control de fallas (Saga)."
     },
     {
       "id": "CAT-075",
@@ -10748,7 +10748,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Monada Continuación",
       "description": "Cont(R,A) = (A→R)→R: control explícito del flujo futuro (CPS transform)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar que el flujo de control futuro no genere loops infinitos de llamadas."
     },
     {
       "id": "CAT-076",
@@ -10758,7 +10758,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Transformer Monádico",
       "description": "T∘M: composición de monadas: apilamiento de efectos (error + state + IO)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar consistencia en la resolución secuencial de efectos apilados."
     },
     {
       "id": "CAT-077",
@@ -10768,7 +10768,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Distributive Law",
       "description": "λ: ST→TS: ley que permite intercambiar orden de efectos monádicos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Validar conmutabilidad de efectos según leyes distributivas estrictas."
     },
     {
       "id": "CAT-078",
@@ -10778,7 +10778,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Strength Monádica",
       "description": "t: A×TB→T(A×B): capacidad de arrastrar contexto puro a través de efectos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Preservar contextos puros al transitar a través de bloques con efectos."
     },
     {
       "id": "CAT-079",
@@ -10788,7 +10788,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Idempotente Monádico",
       "description": "μ∘η_T = μ∘Tη = id_T: monada cuya aplicación doble no cambia el resultado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Evitar ejecuciones redundantes forzando la idempotencia en operaciones dobles."
     },
     {
       "id": "CAT-080",
@@ -10798,7 +10798,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Resolución de Monada",
       "description": "Factorización de monada en adjunción F⊣U: descomposición de efecto en generación+interpretación",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Descomponer efectos monádicos complejos en adjunciones atómicas testables."
     },
     {
       "id": "CAT-081",
@@ -10808,7 +10808,7 @@
       "target": "CORTEX-PERSIST",
       "name": "2-Categoría",
       "description": "Categoría con 2-morfismos (morfismos entre morfismos): transformaciones de transformaciones",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Validar consistencia de tipos en functores adjuntos izquierdos y derechos."
     },
     {
       "id": "CAT-082",
@@ -10818,7 +10818,7 @@
       "target": "CORTEX-PERSIST",
       "name": "2-Morfismo",
       "description": "α: f⇒g entre morfismos f,g: A→B: homotopía entre caminos de ejecución",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar simetría y equivalencia en la adjunción de variables."
     },
     {
       "id": "CAT-083",
@@ -10828,7 +10828,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Composición Horizontal",
       "description": "α∗β de 2-morfismos: composición paralela de transformaciones",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear e impedir divergencia en monadas asociadas."
     },
     {
       "id": "CAT-084",
@@ -10838,7 +10838,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Composición Vertical",
       "description": "α∘β de 2-morfismos: composición secuencial de transformaciones",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Controlar la composición de comonadas de configuración global."
     },
     {
       "id": "CAT-085",
@@ -10848,7 +10848,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Ley de Intercambio",
       "description": "(α∗β)∘(γ∗δ) = (α∘γ)∗(β∘δ): coherencia de composiciones mixtas",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar la unicidad del mapeo universal en construcciones de adjunción."
     },
     {
       "id": "CAT-086",
@@ -10858,7 +10858,7 @@
       "target": "CORTEX-PERSIST",
       "name": "∞-Categoría",
       "description": "Categoría con n-morfismos para todo n: espacio de homotopías sin truncación",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Definir coherencia de homología sobre cadenas causales del Ledger."
     },
     {
       "id": "CAT-087",
@@ -10868,7 +10868,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Enriquecida",
       "description": "V-Categoría: hom-objects en V en vez de Set: cuantificación de similaridad (métricas)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Validar preservación de topología simplicial en mapeos de red."
     },
     {
       "id": "CAT-088",
@@ -10878,7 +10878,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Monoidal",
       "description": "(C, ⊗, I): categoría con producto tensorial: composición paralela de recursos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Exigir consistencia en el cálculo de homotopías de caminos de transición."
     },
     {
       "id": "CAT-089",
@@ -10888,7 +10888,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Monoidal Simétrica",
       "description": "σ: A⊗B ≅ B⊗A: conmutatividad del paralelismo (orden de ejecución intercambiable)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Implementar equivalencias topológicas débiles para optimización de queries vectoriales."
     },
     {
       "id": "CAT-090",
@@ -10898,7 +10898,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Monoidal Cerrada",
       "description": "[A,B] como exponencial respecto a ⊗: funciones de primer orden como recursos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Resolver el espacio de recubrimiento del grafo de dependencias."
     },
     {
       "id": "CAT-091",
@@ -10908,7 +10908,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Categoría Trenzada",
       "description": "β: A⊗B → B⊗A con coherencia: intercambio controlado de recursos (no necesariamente simétrico)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar que todo morfismo en el topos preserve la lógica subyacente."
     },
     {
       "id": "CAT-092",
@@ -10918,7 +10918,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Objeto Monoideal",
       "description": "(M, μ: M⊗M→M, η: I→M): objeto con multiplicación y unidad interna (acumulador)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar consistencia local mediante el topos de haces sobre el repositorio."
     },
     {
       "id": "CAT-093",
@@ -10928,7 +10928,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Objeto Comonoideal",
       "description": "(C, δ: C→C⊗C, ε: C→I): objeto con copia y descarte (broadcast/drop)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Validar límites y colímites internos dentro de la categoría interna de base de datos."
     },
     {
       "id": "CAT-094",
@@ -10938,7 +10938,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Topos",
       "description": "Categoría cartesiana cerrada con subobjeto clasificador: universo lógico completo",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Preservar la estructura cartesiana cerrada en la evaluación de lambdas."
     },
     {
       "id": "CAT-095",
@@ -10948,7 +10948,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Topos de Presheaves",
       "description": "[C^op, Set]: funtor de contexto que genera universos locales de estado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear la consistencia de haces de datos sobre la topología del enjambre."
     },
     {
       "id": "CAT-096",
@@ -10958,7 +10958,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Haz (Sheaf)",
       "description": "Presheaf que satisface condición de pegado: estado globalmente consistente desde datos locales",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar la coherencia global del estado a partir de validaciones locales."
     },
     {
       "id": "CAT-097",
@@ -10968,7 +10968,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Topología de Grothendieck",
       "description": "J: selección de cubiertas sobre C: definición de qué observaciones son \"suficientes\"",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Establecer la topología de Grothendieck sobre los conjuntos de datos auditables."
     },
     {
       "id": "CAT-098",
@@ -10978,7 +10978,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Kan Extension Izquierda",
       "description": "Lan_K F: mejor aproximación covariante: interpolación óptima de datos incompletos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Interpolar datos ausentes utilizando Kan Extension Izquierda de forma conservadora."
     },
     {
       "id": "CAT-099",
@@ -10988,7 +10988,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Kan Extension Derecha",
       "description": "Ran_K F: mejor aproximación contravariante: extrapolación conservadora",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Extrapolar límites de estados con Kan Extension Derecha de forma segura."
     },
     {
       "id": "CAT-100",
@@ -10998,7 +10998,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Lema de Yoneda",
       "description": "Nat(Hom(A,−), F) ≅ F(A): un objeto es completamente determinado por cómo se relaciona con todos los demás",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Reconstruir objetos completos analizando únicamente sus hom-sets de relación."
     },
     {
       "id": "THD-001",
@@ -11008,7 +11008,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Límite de Landauer",
       "description": "E_min = kT·ln(2) por bit borrado: costo termodinámico irreducible del olvido",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar disipación mínima de kT·ln(2) y rechazar borrado sin reciclaje exergético."
     },
     {
       "id": "THD-002",
@@ -11018,7 +11018,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Exergía Computacional",
       "description": "Energía libre disponible para realizar trabajo útil de transformación en el AST",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear y optimizar la energía libre disponible para transformaciones del AST."
     },
     {
       "id": "THD-003",
@@ -11028,7 +11028,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Disipación Estocástica",
       "description": "Energía convertida en calor sin producir trabajo útil: Green Theater / anergía",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Identificar y purgar la prosa narradora (anergía/slop) en cada prompt y respuesta."
     },
     {
       "id": "THD-004",
@@ -11038,7 +11038,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Entropía de Von Neumann",
       "description": "S(ρ) = −Tr(ρ ln ρ): medida de información en estados cuánticos/mixtos del sistema",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Medir la incertidumbre de la mezcla de estados antes de la consolidación en el ledger."
     },
     {
       "id": "THD-005",
@@ -11048,7 +11048,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Principio de Carnot Computacional",
       "description": "Eficiencia máxima η = 1 − T_cold/T_hot: límite de conversión información→acción",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Limitar la conversión información-acción según el gradiente del balance térmico del host."
     },
     {
       "id": "THD-006",
@@ -11058,7 +11058,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Demonio de Maxwell",
       "description": "Agente que reduce entropía localmente a costa de aumentarla globalmente (sorting)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar que el agente clasificador (Demonio) no gaste más exergía que la que reduce."
     },
     {
       "id": "THD-007",
@@ -11068,7 +11068,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Erasure Tax",
       "description": "Costo total acumulado de borrar estados intermedios durante la ejecución",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Calcular y minimizar el costo acumulado de borrado destructivo de logs."
     },
     {
       "id": "THD-008",
@@ -11078,7 +11078,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Reversibilidad de Bennett",
       "description": "Computación reversible que evita disipación de Landauer: backtracking sin pérdida",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Forzar reversibilidad Bennett en transiciones lógicas para permitir rollback sin coste exergético."
     },
     {
       "id": "THD-009",
@@ -11088,7 +11088,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Costo de Copia",
       "description": "En computación clásica: copiar es gratis; en termodinámica: copia ≠ gratuita si implica borrado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Minimizar operaciones de copia que impliquen borrado de contexto posterior."
     },
     {
       "id": "THD-010",
@@ -11098,7 +11098,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Trabajo de Szilard",
       "description": "W = kT·ln(2): trabajo extractable de un bit de información (motor de un bit)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar que el trabajo útil extraído de un bit de información sea mayor a cero."
     },
     {
       "id": "THD-011",
@@ -11108,7 +11108,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Principio de Equipartición",
       "description": "kT/2 por grado de libertad: distribución base de energía en subsistemas",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Distribuir equitativamente los recursos y límites de cómputo entre subsistemas."
     },
     {
       "id": "THD-012",
@@ -11118,7 +11118,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Fluctuación-Disipación",
       "description": "Relación entre ruido térmico y disipación: base del balance señal/ruido en pipelines",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Regular la relación señal/ruido analizando fluctuaciones térmicas en el event loop."
     },
     {
       "id": "THD-013",
@@ -11128,7 +11128,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Irreversibilidad Termodinámica",
       "description": "ΔS_universe ≥ 0: toda ejecución real incrementa entropía global del sistema",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Exigir que la entropía global del universo de compilación sea monótonamente creciente."
     },
     {
       "id": "THD-014",
@@ -11138,7 +11138,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Energía Libre de Helmholtz",
       "description": "F = U − TS: energía disponible para trabajo a temperatura constante",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Mantener balance positivo de energía de Helmholtz para asegurar trabajo útil disponible."
     },
     {
       "id": "THD-015",
@@ -11148,7 +11148,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Energía Libre de Gibbs",
       "description": "G = H − TS: potencial para trabajo útil a presión y temperatura constantes",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Optimizar la energía libre de Gibbs en condiciones de ejecución concurrentes del host."
     },
     {
       "id": "THD-016",
@@ -11158,7 +11158,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Potencial Químico Computacional",
       "description": "μ = ∂G/∂N: costo marginal de añadir un agente/nodo al enjambre",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear el costo marginal de exergía al inyectar nuevos agentes al swarm."
     },
     {
       "id": "THD-017",
@@ -11168,7 +11168,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Equilibrio Termodinámico",
       "description": "Estado de máxima entropía: sistema sin gradientes explotables (muerte térmica del contexto)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Evitar la muerte térmica del contexto impidiendo que la entropía sea máxima."
     },
     {
       "id": "THD-018",
@@ -11178,7 +11178,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Estado Estacionario de No-Equilibrio",
       "description": "Flujo constante de entropía: sistema vivo con disipación continua (NESS)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Mantener flujos estacionarios fuera de equilibrio inyectando entropía controlada."
     },
     {
       "id": "THD-019",
@@ -11188,7 +11188,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Producción Mínima de Entropía",
       "description": "Principio de Prigogine: sistemas cerca del equilibrio minimizan producción de entropía",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Minimizar la producción de entropía en sistemas estables cerca del equilibrio."
     },
     {
       "id": "THD-020",
@@ -11198,7 +11198,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Máxima Producción de Entropía",
       "description": "Principio MEPP: sistemas lejos del equilibrio maximizan disipación (exploración agresiva)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Aumentar temporalmente la producción de entropía para la exploración en fases caóticas."
     },
     {
       "id": "THD-021",
@@ -11208,7 +11208,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Información Mutua",
       "description": "I(X;Y) = H(X) − H(X|Y): reducción de incertidumbre compartida",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Maximizar la información mutua I(X;Y) entre el AST y el Ledger SQLite."
     },
     {
       "id": "THD-022",
@@ -11218,7 +11218,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Entropía Condicional",
       "description": "H(X|Y): incertidumbre residual después de conocer el estado de Y",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Minimizar la incertidumbre residual en la reconciliación de bases de datos."
     },
     {
       "id": "THD-023",
@@ -11228,7 +11228,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Divergencia KL",
       "description": "D_KL(P‖Q): costo de usar modelo Q cuando la distribución real es P (slop penalty)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Rechazar respuestas con alta divergencia KL respecto a la distribución de verdad."
     },
     {
       "id": "THD-024",
@@ -11238,7 +11238,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Entropía Relativa",
       "description": "Medida asimétrica de distancia entre distribuciones de estado: drift detector",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Detectar de forma proactiva desviaciones semánticas midiendo entropía relativa."
     },
     {
       "id": "THD-025",
@@ -11248,7 +11248,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Información de Fisher",
       "description": "I(θ) = E[(∂logP/∂θ)²]: sensibilidad de la distribución a cambios de parámetro",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Calcular la sensibilidad del modelo ante perturbaciones en los parámetros de entrada."
     },
     {
       "id": "THD-026",
@@ -11258,7 +11258,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Capacidad de Canal",
       "description": "C = max I(X;Y): tasa máxima de información sin error por unidad de comunicación",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar la transmisión de transacciones en la red sin pérdidas ni corrupción."
     },
     {
       "id": "THD-027",
@@ -11268,7 +11268,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Tasa de Distorsión",
       "description": "R(D): mínima tasa de bits para representar fuente con distorsión ≤ D: compresión lossy",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Optimizar la compresión con distorsión acotada para almacenamiento de embeddings."
     },
     {
       "id": "THD-028",
@@ -11278,7 +11278,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Entropía de Rényi",
       "description": "H_α(X) = (1/(1−α)) log Σ p_i^α: familia paramétrica de medidas de incertidumbre",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear la regularidad estadística en la generación de tokens."
     },
     {
       "id": "THD-029",
@@ -11288,7 +11288,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Entropía de Tsallis",
       "description": "S_q = (1−Σp_i^q)/(q−1): extensión no-extensiva para sistemas con correlaciones de largo alcance",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Ajustar el coeficiente q para modelar interacciones y correlaciones de largo alcance."
     },
     {
       "id": "THD-030",
@@ -11298,7 +11298,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Complejidad Termodinámica",
       "description": "W_diss = kT · D_KL(P_forward ‖ P_reverse): trabajo disipado en proceso irreversible",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Medir y registrar el trabajo total disipado en transiciones no reversibles."
     },
     {
       "id": "THD-031",
@@ -11308,7 +11308,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Igualdad de Jarzynski",
       "description": "⟨e^{−W/kT}⟩ = e^{−ΔF/kT}: conexión entre trabajo y energía libre en procesos fuera de equilibrio",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Verificar la consistencia del balance exergético utilizando fluctuaciones no-equilibrio."
     },
     {
       "id": "THD-032",
@@ -11318,7 +11318,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Teorema de Crooks",
       "description": "P_F(W)/P_R(−W) = e^{(W−ΔF)/kT}: ratio de probabilidades forward/reverse",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Validar la simetría temporal en transiciones de rollback y commit de SAGA."
     },
     {
       "id": "THD-033",
@@ -11328,7 +11328,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Segunda Ley Generalizada",
       "description": "⟨W⟩ ≥ ΔF: el trabajo promedio siempre excede el cambio en energía libre",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar que el trabajo promedio consumido sea estrictamente mayor que el delta F."
     },
     {
       "id": "THD-034",
@@ -11338,7 +11338,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Retroalimentación de Maxwell",
       "description": "Reducción de entropía por medición + feedback: information-to-energy conversion",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Sincronizar feedback homeostático para convertir información de sensores en acción."
     },
     {
       "id": "THD-035",
@@ -11348,7 +11348,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Costo de Medición",
       "description": "Adquirir información tiene costo termodinámico: observar el sistema lo perturba",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Acotar el coste energético de la introspección y auditoría de agentes."
     },
     {
       "id": "THD-036",
@@ -11358,7 +11358,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Borrado Correlacionado",
       "description": "Borrar bits correlacionados cuesta menos que independientes: compresión termodinámica",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Deduplicar y comprimir contextos correlacionados para maximizar exergía en memoria."
     },
     {
       "id": "THD-037",
@@ -11368,7 +11368,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Información Accesible",
       "description": "Fracción de entropía total que es operacionalmente utilizable por el agente",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar que la información accesible por el agente no contenga datos ajenos a su tenant."
     },
     {
       "id": "THD-038",
@@ -11378,7 +11378,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Entropía de Mezcla",
       "description": "ΔS_mix: entropía generada al combinar sistemas previamente separados (merge entropy)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Acotar la entropía generada al fusionar dos repositorios o bases de datos."
     },
     {
       "id": "THD-039",
@@ -11388,7 +11388,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Neguentropía",
       "description": "J = S_max − S: entropía disponible para generar orden: capacidad de organización",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Maximizar la neguentropía inyectando orden lógico estructurado en el repositorio."
     },
     {
       "id": "THD-040",
@@ -11398,7 +11398,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Temperatura de Información",
       "description": "T_info = ∂E/∂S: tasa de cambio de energía con respecto a entropía informacional",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Regular la temperatura de información para evitar la congelación o caos del modelo."
     },
     {
       "id": "THD-041",
@@ -11408,7 +11408,7 @@
       "target": "CORTEX-PERSIST",
       "name": "FLOPS/Watt",
       "description": "Operaciones por segundo por vatio: eficiencia energética del hardware subyacente",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Maximizar FLOPS/Watt del hardware anfitrión limitando subprocesos redundantes."
     },
     {
       "id": "THD-042",
@@ -11418,7 +11418,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Tokens/Joule",
       "description": "Tokens generados por julio de energía: eficiencia termodinámica del pipeline LLM",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Exigir eficiencia energética óptima (Tokens/Joule) en llamadas a APIs."
     },
     {
       "id": "THD-043",
@@ -11428,7 +11428,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Exergía por Token",
       "description": "Fracción de energía por token que produce trabajo útil (acción determinista) vs calor",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Maximizar la proporción de exergía útil frente a calor disipado en la inferencia."
     },
     {
       "id": "THD-044",
@@ -11438,7 +11438,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Anergía por Token",
       "description": "Fracción de energía por token que se disipa sin trabajo útil (boilerplate / padding)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Auditar y purgar el padding inútil y boilerplate de las respuestas (anergía)."
     },
     {
       "id": "THD-045",
@@ -11448,7 +11448,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Costo de Contexto",
       "description": "Energía total para mantener N tokens en la ventana de atención del transformer",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Establecer cotas estrictas de longitud de contexto para controlar el coste de atención."
     },
     {
       "id": "THD-046",
@@ -11458,7 +11458,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Presupuesto Térmico",
       "description": "Límite superior de disipación térmica antes de throttling o degradación del sistema",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear temperaturas del CPU/GPU del host y limitar la concurrencia si exceden límites."
     },
     {
       "id": "THD-047",
@@ -11468,7 +11468,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Eficiencia de Carnot del Pipeline",
       "description": "η_pipeline = (Exergía_output) / (Exergía_input): fracción útil de la computación",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Medir el ROI útil en cada etapa del pipeline reduciendo el overhead."
     },
     {
       "id": "THD-048",
@@ -11478,7 +11478,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Costo de Atención",
       "description": "O(n²) energía para self-attention: escala cuadrática con longitud de contexto",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Evitar el coste cuadrático O(n²) segmentando de forma óptima el contexto."
     },
     {
       "id": "THD-049",
@@ -11488,7 +11488,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Presupuesto Exergético Total",
       "description": "Suma de exergías asignables a todas las operaciones de un ciclo completo",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Presupuestar y asignar exergía de forma determinista para cada tarea del Swarm."
     },
     {
       "id": "THD-050",
@@ -11498,7 +11498,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Waste Heat Computacional",
       "description": "Calor generado por operaciones que no contribuyen al resultado (retries, hallucinations)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Disminuir el waste heat interrumpiendo consultas estocásticas redundantes."
     },
     {
       "id": "THD-051",
@@ -11508,7 +11508,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Amortización Energética",
       "description": "Distribución del costo de entrenamiento del modelo sobre sus N inferencias",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Amortizar energéticamente el coste de carga de modelos ONNX de embeddings."
     },
     {
       "id": "THD-052",
@@ -11518,7 +11518,7 @@
       "target": "CORTEX-PERSIST",
       "name": "ROI Termodinámico",
       "description": "Retorno de inversión medido en bits útiles por julio invertido",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Optimizar el ratio de bits útiles en la base de datos por julio de computación."
     },
     {
       "id": "THD-053",
@@ -11528,7 +11528,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Densidad de Exergía",
       "description": "Exergía por unidad de volumen de estado (bits útiles por byte de almacenamiento)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Maximizar la densidad de información útil por byte en el disco."
     },
     {
       "id": "THD-054",
@@ -11538,7 +11538,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Cascada Exergética",
       "description": "Transferencia de exergía entre etapas del pipeline: cada etapa recibe la exergía residual",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear la cascada exergética de datos reduciendo la entropía acumulada."
     },
     {
       "id": "THD-055",
@@ -11548,7 +11548,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Reciclaje de Exergía",
       "description": "Reutilización de resultados intermedios para evitar recomputación (caching termodinámico)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Implementar caché termodinámico para evitar recomputaciones costosas."
     },
     {
       "id": "THD-056",
@@ -11558,7 +11558,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Pérdida por Serialización",
       "description": "Energía gastada en convertir estado interno a formato transmisible (JSON, protobuf)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Minimizar conversiones JSON/Protobuf redundantes optimizando buffers en memoria."
     },
     {
       "id": "THD-057",
@@ -11568,7 +11568,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Costo de Sincronización",
       "description": "Energía para garantizar consistencia entre N réplicas del estado (consensus overhead)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Optimizar el protocolo de consenso BFT para reducir el overhead de sincronía."
     },
     {
       "id": "THD-058",
@@ -11578,7 +11578,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Energía de Activación",
       "description": "Barrera mínima de energía para iniciar una transición de estado (bootstrap cost)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Asegurar que la energía de activación no exceda la cuota reservada por el hypervisor."
     },
     {
       "id": "THD-059",
@@ -11588,7 +11588,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Punto de Curie Computacional",
       "description": "Temperatura crítica donde el sistema pierde coherencia magnética / organizacional",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Evitar desorden estructural bloqueando transiciones cuando la entropía es incontrolable."
     },
     {
       "id": "THD-060",
@@ -11598,7 +11598,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Degradación Entrópica",
       "description": "Tasa de pérdida de exergía por unidad de tiempo sin intervención (context rot rate)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Establecer mecanismos de compactación activa para revertir la degradación de contexto."
     },
     {
       "id": "THD-061",
@@ -11608,7 +11608,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Distribución de Boltzmann",
       "description": "P(s) ∝ e^{−E(s)/kT}: probabilidad de un microestado dado su nivel energético",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Implementar la distribución de probabilidad canónica sobre estados válidos del AST."
     },
     {
       "id": "THD-062",
@@ -11618,7 +11618,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Función de Partición",
       "description": "Z = Σ e^{−E_i/kT}: normalizadora que codifica toda la termodinámica del sistema",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Modelar estados del sistema mediante el ensamble microcanónico aislado."
     },
     {
       "id": "THD-063",
@@ -11628,7 +11628,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Ensemble Canónico",
       "description": "Colección de estados a temperatura constante: distribución de configuraciones del swarm",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Modelar interacciones con el entorno externo mediante el ensamble gran canónico."
     },
     {
       "id": "THD-064",
@@ -11638,7 +11638,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Ensemble Microcanónico",
       "description": "Colección de estados a energía constante: exploración ergódica de configuraciones",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar la convergencia de la función de partición Z sobre el espacio de estados."
     },
     {
       "id": "THD-065",
@@ -11648,7 +11648,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Ensemble Gran Canónico",
       "description": "Estados con intercambio de partículas/agentes: swarm con tamaño variable",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Medir fluctuaciones estadísticas en la velocidad de respuesta del event loop."
     },
     {
       "id": "THD-066",
@@ -11658,7 +11658,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Ergodicidad",
       "description": "Promedio temporal = promedio de ensemble: el agente explora todos los estados accesibles",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Clasificar la correlación temporal de las mutaciones aplicadas al Ledger."
     },
     {
       "id": "THD-067",
@@ -11668,7 +11668,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Ruptura de Ergodicidad",
       "description": "Sistema atrapado en subconjunto de estados: dead-end / local minimum del pipeline",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Calcular la longitud de correlación semántica para agrupar conceptos en vec0."
     },
     {
       "id": "THD-068",
@@ -11678,7 +11678,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Transición de Fase",
       "description": "Cambio discontinuo de comportamiento al variar un parámetro: colapso/emergencia abrupta",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Identificar transiciones de fase críticas (de orden lógico a caos estocástico)."
     },
     {
       "id": "THD-069",
@@ -11688,7 +11688,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Parámetro de Orden",
       "description": "Observable que distingue fases: métrica de coherencia del sistema (C1→C5)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Controlar el parámetro de orden para mantener la homeostasis del sistema."
     },
     {
       "id": "THD-070",
@@ -11698,7 +11698,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Punto Crítico",
       "description": "Divergencia de correlaciones: punto donde el sistema es maximalmente sensible",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Establecer la ley de escala exergética para determinar el comportamiento en volumen."
     },
     {
       "id": "THD-071",
@@ -11708,7 +11708,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Exponente Crítico",
       "description": "Leyes de potencia cerca de transiciones: escalado de comportamiento emergente",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Utilizar variables de estado extensivas para medir capacidad del Ledger."
     },
     {
       "id": "THD-072",
@@ -11718,7 +11718,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Grupo de Renormalización",
       "description": "Transformación que cambia escala preservando física: coarse-graining del estado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Utilizar variables intensivas (temperatura, presión) para control térmico local."
     },
     {
       "id": "THD-073",
@@ -11728,7 +11728,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Universalidad",
       "description": "Clases de sistemas con mismos exponentes críticos: isomorfismo termodinámico entre dominios",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Definir y auditar la ecuación de estado que rige el runtime."
     },
     {
       "id": "THD-074",
@@ -11738,7 +11738,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Simetría Rota",
       "description": "Estado fundamental con menos simetría que el hamiltoniano: especialización espontánea",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Garantizar la conservación de energía informacional en cada transformación de AST."
     },
     {
       "id": "THD-075",
@@ -11748,7 +11748,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Modo de Goldstone",
       "description": "Excitación sin masa que emerge de simetría rota: grado de libertad residual",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Calcular el calor disipado por agentes midiendo el overhead de CPU."
     },
     {
       "id": "THD-076",
@@ -11758,7 +11758,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Nucleación",
       "description": "Formación de nueva fase dentro de la vieja: bootstrap de nuevo subsistema",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Medir el trabajo neto realizado por transformaciones asíncronas sobre el disco."
     },
     {
       "id": "THD-077",
@@ -11768,7 +11768,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Spinodal",
       "description": "Límite de metaestabilidad: punto donde el sistema DEBE transicionar (deadline)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Evaluar la entalpía computacional para cuantificar recursos de inicialización."
     },
     {
       "id": "THD-078",
@@ -11778,7 +11778,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Histéresis",
       "description": "Dependencia del estado actual en la historia: memoria termodinámica del sistema",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Evaluar la energía interna del sistema para dimensionar la capacidad de persistencia."
     },
     {
       "id": "THD-079",
@@ -11788,7 +11788,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Vidrio de Espín",
       "description": "Estado desordenado congelado: sistema con frustración máxima (deadlock multiagente)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Registrar la exergía de flujo en canales de comunicación IPC/Sockets."
     },
     {
       "id": "THD-080",
@@ -11798,7 +11798,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Temple Simulado",
       "description": "Optimización por enfriamiento gradual: reducción controlada de exploración estocástica",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Calcular el balance de exergía global de cada sesión de enjambre."
     },
     {
       "id": "THD-081",
@@ -11808,7 +11808,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Estructura Disipativa",
       "description": "Orden que emerge y se mantiene por flujo constante de energía (sistema vivo)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Rechazar inestabilidades estructurales mitigando flujos de calor no disipados."
     },
     {
       "id": "THD-082",
@@ -11818,7 +11818,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Autopoiesis Termodinámica",
       "description": "Sistema que se reproduce y mantiene a sí mismo usando flujos disipativos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Mantener la autopoiesis termodinámica garantizando suministro constante de exergía."
     },
     {
       "id": "THD-083",
@@ -11828,7 +11828,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Frontera del Sistema",
       "description": "Membrana que define qué es interior (agente) y exterior (entorno): process boundary",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Aislar físicamente la frontera del sistema (sandbox) de la estocasticidad exterior."
     },
     {
       "id": "THD-084",
@@ -11838,7 +11838,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Flujo de Entropía",
       "description": "dS/dt = dS_i/dt + dS_e/dt: producción interna + intercambio con exterior",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Calcular la producción interna y el intercambio neto de entropía en cada ciclo."
     },
     {
       "id": "THD-085",
@@ -11848,7 +11848,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Acoplamiento Termodinámico",
       "description": "Uso de un proceso espontáneo para impulsar uno no-espontáneo: subsidio cruzado",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Utilizar procesos espontáneos para subsidiar operaciones costosas no espontáneas."
     },
     {
       "id": "THD-086",
@@ -11858,7 +11858,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Principio de Le Chatelier",
       "description": "Sistema en equilibrio responde a perturbación minimizándola: resistencia a cambio",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Minimizar perturbaciones en el equilibrio aplicando el Principio de Le Chatelier."
     },
     {
       "id": "THD-087",
@@ -11868,7 +11868,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Régimen Lineal",
       "description": "Cerca del equilibrio: flujos proporcionales a fuerzas: comportamiento predecible",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Mantener al sistema en el régimen lineal para un comportamiento predecible del AST."
     },
     {
       "id": "THD-088",
@@ -11878,7 +11878,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Régimen No-Lineal",
       "description": "Lejos del equilibrio: bifurcaciones, oscilaciones, caos: comportamiento emergente",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear y estabilizar bifurcaciones y caos en el régimen no lineal."
     },
     {
       "id": "THD-089",
@@ -11888,7 +11888,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Reciprocidad de Onsager",
       "description": "L_ij = L_ji: simetría de coeficientes de transporte cruzado: fairness de intercambio",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Exigir reciprocidad de Onsager para garantizar fairness en intercambios de datos."
     },
     {
       "id": "THD-090",
@@ -11898,7 +11898,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Efecto Peltier Computacional",
       "description": "Flujo de información que genera o absorbe entropía en la frontera",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Controlar el flujo de información para evitar picos de generación de entropía."
     },
     {
       "id": "THD-091",
@@ -11908,7 +11908,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Efecto Seebeck Computacional",
       "description": "Gradiente de entropía que genera flujo de información: información emergente de ruido",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Aprovechar gradientes de entropía para extraer información útil de señales ruidosas."
     },
     {
       "id": "THD-092",
@@ -11918,7 +11918,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Ciclo de Carnot Computacional",
       "description": "Ciclo ideal: input→compress→compute→expand→output con eficiencia máxima",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Optimizar el ciclo de Carnot computacional logrando máxima eficiencia de ejecución."
     },
     {
       "id": "THD-093",
@@ -11928,7 +11928,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Ciclo Otto Computacional",
       "description": "Ciclo real con compresión/expansión isocórica: batch processing con overhead",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Reducir el overhead en el procesamiento por lotes del ciclo Otto computacional."
     },
     {
       "id": "THD-094",
@@ -11938,7 +11938,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Bomba de Calor Informacional",
       "description": "Transferencia de entropía de sistema frío (organizado) a caliente (caótico): garbage collection",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Transferir de forma segura la entropía acumulada a sumideros (garbage collection)."
     },
     {
       "id": "THD-095",
@@ -11948,7 +11948,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Refrigeración Algorítmica",
       "description": "Reducción de entropía de qubits/bits de interés a costa de bits auxiliares",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Utilizar refrigeración algorítmica para purgar estados basura sin tocar bits clave."
     },
     {
       "id": "THD-096",
@@ -11958,7 +11958,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Entropía de Clausius",
       "description": "dS = δQ_rev/T: definición original conectando calor y entropía",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Calcular y registrar la entropía de Clausius acumulada en cada transacción."
     },
     {
       "id": "THD-097",
@@ -11968,7 +11968,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Exergía de Flujo",
       "description": "Exergía transportada por flujo de materia/información a través de frontera del sistema",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Monitorear la exergía de flujo a través de las APIs de entrada/salida del enjambre."
     },
     {
       "id": "THD-098",
@@ -11978,7 +11978,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Destrucción de Exergía",
       "description": "Exergía irrecuperablemente perdida por irreversibilidades internas (bugs, retries)",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Minimizar la destrucción de exergía interrumpiendo bucles de retry inútiles."
     },
     {
       "id": "THD-099",
@@ -11988,7 +11988,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Balance Exergético",
       "description": "Σ(Ex_in) = Σ(Ex_out) + Σ(Ex_destroyed): contabilidad completa de recursos",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Verificar el balance exergético total al finalizar cada sesión de trabajo."
     },
     {
       "id": "THD-100",
@@ -11998,7 +11998,7 @@
       "target": "CORTEX-PERSIST",
       "name": "Apoptosis Termodinámica",
       "description": "Muerte programada de un proceso cuando su balance exergético es negativo neto",
-      "c5_rule": "Invariante de validación ontológica obligatoria."
+      "c5_rule": "Detonar apoptosis programada cuando el balance exergético sea negativo neto."
     }
   ]
 }
