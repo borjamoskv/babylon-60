@@ -1,6 +1,12 @@
 # CORTEX ENGINE FACADE
 # Auto-generated to maintain compatibility after structural mitosis.
 
+from .analytics import (
+    chronos_roi,
+    performance_tracker,
+    reporter,
+    reporterd,
+)
 from .core import (
     _engine_connection,
     _engine_delegates,
@@ -71,6 +77,14 @@ from .flow import (
     saga_protocol,
     storage_guard,
 )
+from .forgetting import (
+    forgetting_models,
+)
+from .healing import (
+    anomaly_hunter,
+    circuit_breaker,
+    predictive_healer,
+)
 from .meta import (
     _autopoietic_oracle,
     cognitive,
@@ -87,6 +101,22 @@ from .meta import (
     right_brain,
     sovereign_arbiter,
     vision_reasoner,
+)
+from .query import (
+    query_mixin,
+    search_mixin,
+)
+from .reflection import (
+    apotheosis,
+    apotheosis_audits_mixin,
+    genesis,
+    reflexion,
+)
+from .scheduling import (
+    cost_scheduler,
+    enrichment_queue,
+    heartbeat,
+    watcher,
 )
 from .swarm import (
     agent_mixin,
@@ -109,36 +139,6 @@ from .swarm import (
     swarm_10k,
     test_autopoietic_agent,
     trust_registry,
-)
-from .healing import (
-    anomaly_hunter,
-    circuit_breaker,
-    predictive_healer,
-)
-from .reflection import (
-    apotheosis,
-    apotheosis_audits_mixin,
-    genesis,
-    reflexion,
-)
-from .analytics import (
-    chronos_roi,
-    performance_tracker,
-    reporter,
-    reporterd,
-)
-from .scheduling import (
-    cost_scheduler,
-    enrichment_queue,
-    heartbeat,
-    watcher,
-)
-from .forgetting import (
-    forgetting_models,
-)
-from .query import (
-    query_mixin,
-    search_mixin,
 )
 from .sync import (
     sync_mixin,

@@ -848,11 +848,7 @@ source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
     { name = "click" },
-    { name = "confluent-kafka" },
     { name = "cryptography" },
-    { name = "langchain-community" },
-    { name = "langchain-core" },
-    { name = "langchain-ollama" },
     { name = "pydantic" },
     { name = "rich" },
     { name = "sqlite-vec" },
@@ -873,12 +869,16 @@ all = [
     { name = "atheris", marker = "sys_platform == 'linux'" },
     { name = "beautifulsoup4" },
     { name = "chromadb" },
+    { name = "confluent-kafka" },
     { name = "email-validator" },
     { name = "fastapi" },
     { name = "google-antigravity" },
     { name = "httpx" },
     { name = "hypothesis" },
     { name = "keyring" },
+    { name = "langchain-community" },
+    { name = "langchain-core" },
+    { name = "langchain-ollama" },
     { name = "markdownify" },
     { name = "mcp" },
     { name = "neo4j" },
@@ -971,6 +971,11 @@ embeddings = [
 graph = [
     { name = "neo4j" },
 ]
+llm = [
+    { name = "langchain-community" },
+    { name = "langchain-core" },
+    { name = "langchain-ollama" },
+]
 mcp = [
     { name = "aiohttp" },
     { name = "beautifulsoup4" },
@@ -989,6 +994,9 @@ secure = [
     { name = "keyring" },
     { name = "rfc3161ng" },
     { name = "sigstore" },
+]
+streaming = [
+    { name = "confluent-kafka" },
 ]
 toolbox = [
     { name = "toolbox-core" },
@@ -1016,8 +1024,8 @@ requires-dist = [
     { name = "beautifulsoup4", marker = "extra == 'mcp'" },
     { name = "chromadb", marker = "extra == 'embeddings'", specifier = ">=1.5.9" },
     { name = "click", specifier = ">=8.0" },
-    { name = "confluent-kafka", specifier = ">=2.1.0" },
-    { name = "cortex-persist", extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality"], marker = "extra == 'all'" },
+    { name = "confluent-kafka", marker = "extra == 'streaming'", specifier = ">=2.1.0" },
+    { name = "cortex-persist", extras = ["llm", "streaming", "compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality"], marker = "extra == 'all'" },
     { name = "cryptography", specifier = ">=47.0.0" },
     { name = "email-validator", marker = "extra == 'api'", specifier = ">=2.1.0" },
     { name = "fastapi", marker = "extra == 'api'", specifier = ">=0.110" },
@@ -1026,9 +1034,9 @@ requires-dist = [
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
     { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.92.0" },
     { name = "keyring", marker = "extra == 'secure'", specifier = ">=25.7.0" },
-    { name = "langchain-community", specifier = ">=0.4.2" },
-    { name = "langchain-core", specifier = ">=1.4.7" },
-    { name = "langchain-ollama", specifier = ">=1.1.0" },
+    { name = "langchain-community", marker = "extra == 'llm'", specifier = ">=0.4.2" },
+    { name = "langchain-core", marker = "extra == 'llm'", specifier = ">=1.4.7" },
+    { name = "langchain-ollama", marker = "extra == 'llm'", specifier = ">=1.1.0" },
     { name = "markdownify", marker = "extra == 'mcp'", specifier = ">=0.13" },
     { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.0" },
     { name = "neo4j", marker = "extra == 'graph'", specifier = ">=6.2.0" },
@@ -1068,7 +1076,7 @@ requires-dist = [
     { name = "watchdog", marker = "extra == 'mcp'", specifier = ">=6.0.0" },
     { name = "z3-solver", marker = "extra == 'dev'", specifier = ">=4.13.0" },
 ]
-provides-extras = ["compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality", "all"]
+provides-extras = ["llm", "streaming", "compute", "secure", "api", "mcp", "daemon", "platform", "authoring", "dev", "adk", "toolbox", "billing", "cloud", "trends", "embeddings", "acceleration", "bci", "graph", "quality", "all"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "argon2-cffi", specifier = ">=25.1.0" }]

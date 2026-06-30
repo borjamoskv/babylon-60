@@ -33,14 +33,14 @@ from cortex.engine.evo.genome import (
     MutationType,
     StrategyGenome,
 )
-from cortex.engine.swarm.autopoietic_agent import (
-    AutopoieticAgent,
-    EvolutionConfig,
-)
 from cortex.engine.reflection.genesis import (
     AgentBlueprint,
     AgentSpecies,
     GenesisEngine,
+)
+from cortex.engine.swarm.autopoietic_agent import (
+    AutopoieticAgent,
+    EvolutionConfig,
 )
 from cortex.isa.builder import (
     dispatch_targets,
