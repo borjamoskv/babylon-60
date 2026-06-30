@@ -20,7 +20,7 @@ async def run_10k_stress():
     commander = SwarmCommander(bus_path=test_bus_dir)
     import sys
 
-    print(f"DEBUG: SwarmCommander module: {sys.modules['cortex.swarm.swarm_10k'].__file__}")
+    print(f"DEBUG: SwarmCommander module: {sys.modules['babylon60.swarm.swarm_10k'].__file__}")
     print(f"DEBUG: SwarmCommander class: {SwarmCommander}")
     await commander.initialize()
 
