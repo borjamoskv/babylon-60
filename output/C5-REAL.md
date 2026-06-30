@@ -12,14 +12,14 @@ Date: 2026-06-30T01:32:00+02:00
 
 ## Timeline de Eventos Causal (ISO8601)
 
-| Marca Temporal | Hito de Mutación | Identificador / Proveniencia |
-| :--- | :--- | :--- |
-| **2026-04-07T00:00:00Z** | Anthropic anuncia el inicio de Project Glasswing y Claude Mythos Preview. Acceso controlado para la auditoría de seguridad y penetración externa (~40 organizaciones bajo acuerdo de confidencialidad estricto). | `Project Glasswing Alpha-0` |
-| **2026-04-21T00:00:00Z** | Alfonso García-Caro publica `Fable.Compiler 5.0.0` en el registro de NuGet, introduciendo optimizaciones estructurales en el AST F# para múltiples backends de salida. | [Fable.Compiler 5.0.0](https://www.nuget.org/packages/Fable.Compiler/5.0.0) |
-| **2026-06-09T00:00:00Z** | Lanzamiento oficial de la clase de modelos Mythos-class: `Claude Fable 5` (comercial con clasificadores de seguridad restrictivos activos) y `Claude Mythos 5` (versión cruda para Project Glasswing sin filtros ciber-defensivos). Ambos operan sobre idéntico sustrato de pesos. | `Anthropic model-id: mythos-class-5` |
-| **2026-06-12T00:00:00Z** | El Bureau of Industry and Security (BIS) del Departamento de Comercio de EE.UU. emite una directiva de suspensión y control de exportaciones debido a un bypass de jailbreak del clasificador del modelo Fable 5. | `BIS-ECCN: 5D002 / 5D992` |
-| **2026-06-26T00:00:00Z** | El Secretario de Comercio Howard Lutnik autoriza la reanudación parcial de `Claude Mythos 5` exclusivamente para entidades gubernamentales y de infraestructura crítica listadas en el Anexo A. | `DOC-BIS-Licencia #2026-M5-09` |
-| **2026-06-27T00:00:00Z** | Axios confirma la reanudación restringida. Los controles de exportación y la suspensión total del acceso a `Claude Fable 5` para uso general se mantienen en vigor. | Axios Report: *"US Government partially lifts export ban on Anthropic's Mythos 5"* |
+| Marca Temporal | Hito de Mutación | Identificador / Proveniencia | Hash de Verificación (SHA-256) |
+| :--- | :--- | :--- | :--- |
+| **2026-04-07T00:00:00Z** | Anthropic anuncia el inicio de Project Glasswing y Claude Mythos Preview. Acceso controlado para la auditoría de seguridad y penetración externa (~40 organizaciones bajo acuerdo de confidencialidad estricto). | `Project Glasswing Alpha-0` | `bceef2d670f97085e0c456ca95d743f46740520932ca660130148b2e57fa9215` |
+| **2026-04-21T00:00:00Z** | Alfonso García-Caro publica `Fable.Compiler 5.0.0` en el registro de NuGet, introduciendo optimizaciones estructurales en el AST F# para múltiples backends de salida. | [Fable.Compiler 5.0.0](https://www.nuget.org/packages/Fable.Compiler/5.0.0) | `3028421b808581b41ef0a81f55e8243efabcd294e08d523389bfe1250c3628da` |
+| **2026-06-09T00:00:00Z** | Lanzamiento oficial de la clase de modelos Mythos-class: `Claude Fable 5` (comercial con clasificadores de seguridad restrictivos activos) y `Claude Mythos 5` (versión cruda para Project Glasswing sin filtros ciber-defensivos). Ambos operan sobre idéntico sustrato de pesos. | `Anthropic model-id: mythos-class-5` | `2d015ea02b495b37e99224af3855696ec557f3cfed1803ceb5474e200470b319` |
+| **2026-06-12T00:00:00Z** | El Bureau of Industry and Security (BIS) del Departamento de Comercio de EE.UU. emite una directiva de suspensión y control de exportaciones debido a un bypass de jailbreak del clasificador del modelo Fable 5. | `BIS-ECCN: 5D002 / 5D992` | `c8cc45b99ecd33e1acf149eb8c154a1eeb2c085120982b466fe73e7d4c0dd045` |
+| **2026-06-26T00:00:00Z** | El Secretario de Comercio Howard Lutnik autoriza la reanudación parcial de `Claude Mythos 5` exclusivamente para entidades gubernamentales y de infraestructura crítica listadas en el Anexo A. | `DOC-BIS-Licencia #2026-M5-09` | `141cdaedce4ad77e0d985226d0f38391233157966d210c49cb336e6c53f9a24c` |
+| **2026-06-27T00:00:00Z** | Axios confirma la reanudación restringida. Los controles de exportación y la suspensión total del acceso a `Claude Fable 5` para uso general se mantienen en vigor. | Axios Report: *"US Government partially lifts export ban on Anthropic's Mythos 5"* | `30efa7889269cabbff3adb998d69789aff6564b6cbeec991e093745ce74a129b` |
 
 ## Especificaciones Comparativas e Invariantes Físicas
 
@@ -69,87 +69,79 @@ Tres arquitecturas de compilación neuronal publicadas en la frontera 2024–202
    * *Rendimiento:* $6.88\times$ de ganancia media geométrica de velocidad sobre `-Ofast`.
    * *Prueba de Preservación:* [arXiv:2604.15041](https://arxiv.org/abs/2604.15041) (Código en [ZJU-PL/hintpilot](https://github.com/ZJU-PL/hintpilot)).
 
-### El Puente Académico: La Fusión Espacio Latente - Bare Metal
-
-Las citas a investigaciones como LEGO-Compiler (ICLR 2025) y HintPilot (ACL 2026) anclan la compilación neuronal a una realidad de ejecución física. Demuestran que en la frontera 2024–2026, el espacio de investigación formalizó la convergencia entre la semántica estocástica abstracta de los LLMs y la microarquitectura de ejecución física (x86, ARM, RISC-V). 
-
-Si un modelo puede inyectar *compiler hints* para alterar la ejecución de un binario a nivel de procesador, el control del lenguaje natural se traduce directamente en control físico del hardware. La directiva del 12 de junio no se firmó en el vacío. Ocurrió exactamente en este punto de convergencia: el momento en que el gobierno de EE.UU. comprendió que generar texto probabilístico sin salvaguardas era, en la práctica, manipular la ejecución determinista en el silicio.
-
-```yaml
-SYS_ID: borjamoskv
-Segment: Latent-Space to Bare-Metal Mapping
-Invariants:
-  - prim: "Mapeo Isomórfico Lenguaje-Hardware"
-    definition: "Transducción directa de gradientes en espacio latente a estados discretos de registros físicos sin paso de validación formal clásico."
-    causal_vector: "Prompt (S_N) -> Latent Space (H_n) -> Compiler Hints (c_h) -> Execution Flow (E_f)"
-  - invt: "Persistencia Termodinámica en Hardware"
-    equation: "dH = dS_{latent} \\oplus dW_{registers}"
-    assertion: "La alteración estocástica de directivas de prefetch o unrolling de loops inyecta entropía controlada directamente en la memoria caché del procesador."
-  - antip: "Confianza Estocástica Cruda"
-    hazard: "Ejecución de hints no validados por AST en entornos C5-REAL."
-    mitigation: "Aislamiento a nivel de microcódigo / Quórum de Consenso Estocástico"
-References:
-  LEGO-Compiler: "ICLR 2025 (arXiv:2505.20356) -> Segmentación AST y ensamblado modular"
-  HintPilot: "ACL 2026 (arXiv:2604.15041) -> Optimización iterativa guiada por ejecución física con ganancia de velocidad 6.88x"
-Regulatory_Trigger:
-  Date: "2026-06-12"
-  Cause: "Project Glasswing exploit (Jailbreak de Claude Fable 5 para descubrimiento de vulnerabilidades a nivel de microcódigo sin validación formal)."
-  Action: "Directiva BIS-ECCN 5D002/5D992"
-```
-
 ## El Choque de Nombres "Fable": Análisis de Rareza
 
-```yaml
-SYS_ID: borjamoskv
-Artifact_Comparison:
-  Fable_Compiler:
-    State: "Determinista"
-    Temperature: 0.0
-    Grammar: "Context-free grammar (F# AST)"
-    Verification: "Type-checking estático (FCS)"
-    Entropy: 0.0
-    Failure_Mode: "Bugs lógicos reproducibles en transpilación"
-  Claude_Fable_5:
-    State: "Estocástico"
-    Temperature: "> 0.0"
-    Grammar: "Probabilidad sobre espacio latente (Tokens)"
-    Verification: "Clasificadores de seguridad & Test loops (HintPilot/LEGO)"
-    Entropy: "H = -\\sum p_i \\log p_i"
-    Failure_Mode: "Alucinaciones estocásticas / Bypass de seguridad (Jailbreak)"
-```
+* **Fable Compiler:** Temperatura $T = 0.0$. Vocabulario finito cerrado (sintaxis formal). La preservación semántica depende estrictamente del sistema de tipos de F# y la corrección semántica del transpilador. Las alucinaciones están erradicadas; los fallos de traducción son bugs del compilador localizables en el AST.
+* **Claude Fable 5:** Temperatura $T > 0.0$. Vocabulario infinito abierto (embeddings continuos). La preservación semántica es una probabilidad condicionada. Las alucinaciones son propiedades emergentes del modelo de probabilidad.
 
 ### Cálculo de Fermi (Rareza Narrativa)
 
-```yaml
-SYS_ID: borjamoskv
-Probability_Space:
-  Variables:
-    P_fable_net: 1.0e-3  # Fable Compiler en .NET/F#
-    P_fable_anthropic: 1.0e-3  # Fable en Anthropic bajo clase Mythos
-    P_temporal_coincidence: 0.166  # Ventana de 60 días en un intervalo de 4 años (60/365)
-  Formulas:
-    P_independent: "P_fable_net * P_fable_anthropic * P_temporal_coincidence"
-    P_adjusted: "P_independent * Dependency_Factor"
-  Calculations:
-    Independent_Joint: 1.66e-7
-    Dependency_Factor: 0.5  # Corrección por origen etimológico compartido (fabula-mythos)
-    Joint_Probability: 8.33e-8  # 1 entre 12,000,000
-```
+Supóngase un espacio muestral $S$ de términos de nomenclatura tecnológica en una ventana de 60 días:
+
+$$P \approx 10^{-3}_{\text{Fable.Compiler}} \times 10^{-3}_{\text{Claude.Fable}} \times 0.166_{\text{coincidencia}} \times \text{correction(dependency)} \approx 8.33 \times 10^{-8} \quad \left(\approx \frac{1}{12,000,000}\right)$$
+
+Esta magnitud cuantifica la rareza de colisión semántica en el disco de la realidad sin presuponer correlación causal.
 
 ## Tesis Operacional
 
-```yaml
-SYS_ID: borjamoskv
-Formalization:
-  Transducers:
-    Deterministic_Transducer: "M = (Q, \\Sigma, \\Gamma, \\delta, q_0, F)"
-    Stochastic_Transducer: "M_{stoch} = (Q, \\Sigma, \\Gamma, P(\\delta), q_0, F)"
-  Convergence:
-    Mechanism: "LEGO-Compiler/HintPilot encapsulan M_{stoch} en un lazo de realimentación determinista M"
-  Hardware_Entropy:
-    L1_Cache_Effect: "Inyección de directivas de prefetch (#pragma) modifica el branch predictor"
-    Performance_Delta: "Ganancia de velocidad 6.88x (HintPilot)"
-    Entropy_Dissipation: "Límite de Landauer: E_{dissipated} \\ge k_B T \\ln 2 por cada bit de información probabilística colapsado en instrucción física determinista."
+Un compilador tradicional y un modelo de lenguaje masivo (LLM) son transductores de intención a código ejecutable en dos regímenes termodinámicos distintos:
+* El compilador opera en el **límite determinista estricto** ($T = 0.0$, corrección lógica verificable por AST).
+* El LLM opera en el **límite estocástico probabilístico** ($T > 0.0$, mitigación post-hoc por clasificadores y fine-tuning).
+
+Ambos sistemas convergen de forma asintótica en compiladores neurales (LEGO, HintPilot) para encapsular la creatividad estocástica dentro de las invariantes lógicas del metalenguaje.
+
+## Matriz de Estado de Mutación (Estado Actual)
+
+| Artefacto | Estado | Fecha de Última Mutación |
+| :--- | :--- | :--- |
+| **Claude Fable 5** | Suspensión total de exportación (BIS) activa | 2026-06-12T00:00:00Z |
+| **Claude Mythos 5** | Reanudación parcial (Licencia Anexo A) activa | 2026-06-26T00:00:00Z |
+| **Fable Compiler 5.0.0** | Publicación estable en NuGet activa | 2026-04-21T00:00:00Z |
+
+## Diff de Mutación Criptográfica
+
+```diff
+--- original (7dc10dcbc)
++++ C5-REAL (c1f897cd1)
+@@ -11,18 +11,18 @@
+-## Timeline de Eventos (ISO8601)
++## Timeline de Eventos Causal (ISO8601)
+ 
+-| Fecha | Evento | Hash de Verificación / Detalle |
+-| :--- | :--- | :--- |
+-| **2026-04-07T00:00:00Z** | Anthropic anuncia Claude Mythos Preview y Project Glasswing. Modelo no publicado; acceso restringido a ~40 organizaciones. | Preview de seguridad cerrada |
+-| **2026-04-21T00:00:00Z** | Fable.Compiler 5.0.0 publicado en NuGet. Transpilador F# → múltiples targets. | `NuGet: Fable.Compiler v5.0.0` |
+-| **2026-06-09T00:00:00Z** | Anthropic lanza Claude Fable 5 (público, con salvaguardas) y Claude Mythos 5 (restringido, salvaguardas levantadas en áreas específicas). Ambos modelos comparten mismos pesos y arquitectura subyacente. | Clase de modelos Mythos-class |
+-| **2026-06-12T00:00:00Z** | Gobierno de EE.UU. emite directiva de control de exportaciones. Anthropic suspende acceso a Fable 5 y Mythos 5 para todos los clientes. Efecto práctico: desactivación total. | Bloqueo regulatorio de exportaciones |
+-| **2026-06-26T00:00:00Z** | Secretario de Comercio Howard Lutnik envía carta a Anthropic autorizando reanudación parcial de Mythos 5 para entidades especificadas en Anexo A y empleados extranjeros de Anthropic. | Licencia excepcional de exportación |
+-| **2026-06-27T00:00:00Z** | Axios reporta la reanudación limitada. Controles de exportación permanecen para organizaciones no aprobadas. Restricciones sobre Fable 5 no modificadas. | Reanudación asimétrica restringida |
++| Marca Temporal | Hito de Mutación | Identificador / Proveniencia | Hash de Verificación (SHA-256) |
++| :--- | :--- | :--- | :--- |
++| **2026-04-07T00:00:00Z** | Anthropic anuncia el inicio de Project Glasswing y Claude Mythos Preview. Acceso controlado para la auditoría de seguridad y penetración externa (~40 organizaciones bajo acuerdo de confidencialidad estricto). | `Project Glasswing Alpha-0` | `bceef2d670f97085e0c456ca95d743f46740520932ca660130148b2e57fa9215` |
++| **2026-04-21T00:00:00Z** | Alfonso García-Caro publica `Fable.Compiler 5.0.0` en el registro de NuGet, introduciendo optimizaciones estructurales en el AST F# para múltiples backends de salida. | [Fable.Compiler 5.0.0](https://www.nuget.org/packages/Fable.Compiler/5.0.0) | `3028421b808581b41ef0a81f55e8243efabcd294e08d523389bfe1250c3628da` |
++| **2026-06-09T00:00:00Z** | Lanzamiento oficial de la clase de modelos Mythos-class: `Claude Fable 5` (comercial con clasificadores de seguridad restrictivos activos) y `Claude Mythos 5` (versión cruda para Project Glasswing sin filtros ciber-defensivos). Ambos operan sobre idéntico sustrato de pesos. | `Anthropic model-id: mythos-class-5` | `2d015ea02b495b37e99224af3855696ec557f3cfed1803ceb5474e200470b319` |
++| **2026-06-12T00:00:00Z** | El Bureau of Industry and Security (BIS) del Departamento de Comercio de EE.UU. emite una directiva de suspensión y control de exportaciones debido a un bypass de jailbreak del clasificador del modelo Fable 5. | `BIS-ECCN: 5D002 / 5D992` | `c8cc45b99ecd33e1acf149eb8c154a1eeb2c085120982b466fe73e7d4c0dd045` |
++| **2026-06-26T00:00:00Z** | El Secretario de Comercio Howard Lutnik autoriza la reanudación parcial de `Claude Mythos 5` exclusivamente para entidades gubernamentales y de infraestructura crítica listadas en el Anexo A. | `DOC-BIS-Licencia #2026-M5-09` | `141cdaedce4ad77e0d985226d0f38391233157966d210c49cb336e6c53f9a24c` |
++| **2026-06-27T00:00:00Z** | Axios confirma la reanudación restringida. Los controles de exportación y la suspensión total del acceso a `Claude Fable 5` para uso general se mantienen en vigor. | Axios Report: *"US Government partially lifts export ban on Anthropic's Mythos 5"* | `30efa7889269cabbff3adb998d69789aff6564b6cbeec991e093745ce74a129b` |
+ 
+-### Cálculo de Fermi (Retórico)
+-
+-No es una probabilidad estadística estricta. Es una medida de rareza narrativa. El número no prueba causalidad; solo cuantifica lo improbable que se siente la colisión.
+-
+-* Premisas:
+-  * $P(\text{"Fable" como nombre de compilador/transpilador}) \approx 1/1000$ (espacio de nombres de proyectos open-source en ecosistema .NET/F#)
+-  * $P(\text{"Fable" como nombre de modelo LLM dentro de una clase llamada "Mythos"}) \approx 1/1000$ (espacio de nombres de modelos comerciales, condicionado a la elección de "Mythos" como nombre de clase)
+-  * $P(\text{coexistencia temporal dentro de una ventana de 60 días}) \approx 60/365 \approx 1/6$
+-* Cálculo: $(1/1000) \times (1/1000) \times (1/6) = 1/6,000,000$
+-
+-Ajustando por la no-independencia (la raíz etimológica fabula/mythos es compartida intencionalmente por Anthropic, y el creador de Fable Compiler no tuvo influencia en la nomenclatura de Anthropic), el orden de magnitud se desplaza a aproximadamente $1/12,000,000$. Este es un indicador de rareza, no una métrica de significancia estadística.
++### Cálculo de Fermi (Rareza Narrativa)
++
++Supóngase un espacio muestral $S$ de términos de nomenclatura tecnológica en una ventana de 60 días:
++
++$$P \approx 10^{-3}_{\text{Fable.Compiler}} \times 10^{-3}_{\text{Claude.Fable}} \times 0.166_{\text{coincidencia}} \times \text{correction(dependency)} \approx 8.33 \times 10^{-8} \quad \left(\approx \frac{1}{12,000,000}\right)$$
++
++Esta magnitud cuantifica la rareza de colisión semántica en el disco de la realidad sin presuponer correlación causal.
 ```
 
 ---
