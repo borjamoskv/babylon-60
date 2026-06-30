@@ -45,15 +45,15 @@ class NotchHub:
 
     @property
     def client_count(self) -> int:
-        return len(self._clients)  # type: ignore[reportAttributeAccessIssue]
+        return len(self._clients)
 
     async def connect(self, ws: WebSocket) -> None:
         await ws.accept()
-        self._clients.add(ws)  # type: ignore[reportAttributeAccessIssue]
+        self._clients.add(ws)
         logger.info("Notch client connected (%d total)", self.client_count)
 
     def disconnect(self, ws: WebSocket) -> None:
-        self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
+        self._clients.discard(ws)
         logger.info("Notch client disconnected (%d remaining)", self.client_count)
 
     async def broadcast(self, message: str | dict[str, Any]) -> None:
@@ -61,24 +61,24 @@ class NotchHub:
         if isinstance(message, dict):
             message = json.dumps(message)
         dead: list[WebSocket] = []
-        for ws in self._clients:  # type: ignore[reportAttributeAccessIssue]
+        for ws in self._clients:
             try:
                 await ws.send_text(message)
             except (WebSocketDisconnect, RuntimeError, OSError):
                 dead.append(ws)
         for ws in dead:
-            self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
+            self._clients.discard(ws)
 
     async def send_to_first(self, message: str | dict[str, Any]) -> bool:
         """Send to the first connected client (primary notch). Returns False if none."""
         if isinstance(message, dict):
             message = json.dumps(message)
-        for ws in self._clients:  # type: ignore[reportAttributeAccessIssue]
+        for ws in self._clients:
             try:
                 await ws.send_text(message)
                 return True
             except (WebSocketDisconnect, RuntimeError, OSError):
-                self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
+                self._clients.discard(ws)
         return False
 
 

@@ -104,7 +104,7 @@ class CortexMemoryManager:
     def __init__(
         self,
         l1: WorkingMemoryL1,
-        l2: VectorStoreL2,  # type: ignore[reportInvalidTypeForm]
+        l2: VectorStoreL2,
         l3: EventLedgerL3,
         encoder: AsyncEncoder,
         hdc_l2: Any | None = None,

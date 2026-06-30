@@ -40,29 +40,29 @@ class OrchestraIntrospectionMixin:
 
     async def quick_think(self, prompt: str) -> FusedThought:
         """Pensamiento rápido. Retorna solo el contenido."""
-        return await self.think(prompt, mode="quick")  # type: ignore[reportAttributeAccessIssue]
+        return await self.think(prompt, mode="quick")
 
     async def deep_think(self, prompt: str) -> FusedThought:
         """Razonamiento profundo con síntesis."""
-        return await self.think(  # type: ignore[reportAttributeAccessIssue]
+        return await self.think(
             prompt, mode="deep_reasoning", strategy="synthesis"
         )
 
     async def code_think(self, prompt: str) -> FusedThought:
         """Análisis de código con best-of-n."""
-        return await self.think(  # type: ignore[reportAttributeAccessIssue]
+        return await self.think(
             prompt, mode="code_analysis", strategy="best_of_n"
         )
 
     async def creative_think(self, prompt: str) -> FusedThought:
         """Pensamiento creativo con weighted synthesis."""
-        return await self.think(  # type: ignore[reportAttributeAccessIssue]
+        return await self.think(
             prompt, mode="creative", strategy="weighted"
         )
 
     async def consensus_think(self, prompt: str) -> FusedThought:
         """Máximo consenso - todos los modelos con síntesis."""
-        return await self.think(  # type: ignore[reportAttributeAccessIssue]
+        return await self.think(
             prompt, mode="consensus", strategy="synthesis"
         )
 
@@ -76,7 +76,7 @@ class OrchestraIntrospectionMixin:
         from cortex_extensions.llm.sovereign import Inquisitor
 
         # Phase 1: Hypothesis Synthesis
-        hypothesis = await self.think(  # type: ignore[reportAttributeAccessIssue]
+        hypothesis = await self.think(
             prompt, mode="omega", strategy="synthesis"
         )
 
@@ -95,7 +95,7 @@ class OrchestraIntrospectionMixin:
             f"the original intent with zero-defect architecture."
         )
 
-        final_thought = await self.think(  # type: ignore[reportAttributeAccessIssue]
+        final_thought = await self.think(
             refinement_prompt, mode="deep_reasoning", strategy="synthesis"
         )
 
@@ -112,7 +112,7 @@ class OrchestraIntrospectionMixin:
                 f"SECOND CRITIQUE: {siege_2.content}\n\n"
                 f"MISSION: Absolute perfection. Resolve remaining blind spots."
             )
-            final_thought = await self.think(  # type: ignore[reportAttributeAccessIssue]
+            final_thought = await self.think(
                 refinement_prompt_2, mode="deep_reasoning", strategy="synthesis"
             )
 
@@ -135,12 +135,12 @@ class OrchestraIntrospectionMixin:
         """Modos con al menos 1 modelo configurado."""
         from cortex_extensions.thinking.presets import ThinkingMode
 
-        return [m.value for m in ThinkingMode if self._resolve_models(m)]  # type: ignore[reportAttributeAccessIssue]
+        return [m.value for m in ThinkingMode if self._resolve_models(m)]
 
     @property
     def history(self) -> list:
         """Historial de pensamientos (más reciente al final)."""
-        return self._history  # type: ignore[reportAttributeAccessIssue]
+        return self._history
 
     def status(self) -> dict[str, Any]:
         """Estado completo del orchestra."""
@@ -148,46 +148,46 @@ class OrchestraIntrospectionMixin:
 
         mode_status = {}
         for mode in ThinkingMode:
-            models = self._resolve_models(mode)  # type: ignore[reportAttributeAccessIssue]
+            models = self._resolve_models(mode)
             mode_status[mode.value] = {
                 "models": [f"{p}:{m}" for p, m in models],
                 "count": len(models),
-                "ready": len(models) >= self.config.min_models,  # type: ignore[reportAttributeAccessIssue]
+                "ready": len(models) >= self.config.min_models,
             }
 
         return {
-            "initialized": self._initialized,  # type: ignore[reportAttributeAccessIssue]
+            "initialized": self._initialized,
             "judge": (
                 f"{self._judge.provider_name}:{self._judge.model}"  # type: ignore[reportAttributeAccessIssue, type-error]
                 if getattr(self, "_judge", None)
                 else None
             ),
-            "pool_size": self._pool.size,  # type: ignore[reportAttributeAccessIssue]
-            "history_count": len(self._history),  # type: ignore[reportAttributeAccessIssue]
+            "pool_size": self._pool.size,
+            "history_count": len(self._history),
             "modes": mode_status,
             "config": {
-                "min_models": self.config.min_models,  # type: ignore[reportAttributeAccessIssue]
-                "max_models": self.config.max_models,  # type: ignore[reportAttributeAccessIssue]
-                "timeout_seconds": self.config.timeout_seconds,  # type: ignore[reportAttributeAccessIssue]
-                "default_strategy": self.config.default_strategy.value,  # type: ignore[reportAttributeAccessIssue]
-                "retry_on_failure": self.config.retry_on_failure,  # type: ignore[reportAttributeAccessIssue]
-                "use_mode_prompts": self.config.use_mode_prompts,  # type: ignore[reportAttributeAccessIssue]
+                "min_models": self.config.min_models,
+                "max_models": self.config.max_models,
+                "timeout_seconds": self.config.timeout_seconds,
+                "default_strategy": self.config.default_strategy.value,
+                "retry_on_failure": self.config.retry_on_failure,
+                "use_mode_prompts": self.config.use_mode_prompts,
             },
         }
 
     def stats(self) -> dict[str, Any]:
         """Estadísticas agregadas del historial."""
-        if not self._history:  # type: ignore[reportAttributeAccessIssue]
+        if not self._history:
             return {"total_thoughts": 0}
 
-        total = len(self._history)  # type: ignore[reportAttributeAccessIssue]
-        avg_confidence = float(sum(r.confidence for r in self._history) / total)  # type: ignore[reportAttributeAccessIssue]
-        avg_agreement = float(sum(r.agreement for r in self._history) / total)  # type: ignore[reportAttributeAccessIssue]
-        avg_latency = float(sum(r.total_latency_ms for r in self._history) / total)  # type: ignore[reportAttributeAccessIssue]
+        total = len(self._history)
+        avg_confidence = float(sum(r.confidence for r in self._history) / total)
+        avg_agreement = float(sum(r.agreement for r in self._history) / total)
+        avg_latency = float(sum(r.total_latency_ms for r in self._history) / total)
         success_rate = float(
             sum(
                 r.models_succeeded / r.models_queried
-                for r in self._history  # type: ignore[reportAttributeAccessIssue]
+                for r in self._history
                 if r.models_queried > 0
             )
             / total
@@ -195,7 +195,7 @@ class OrchestraIntrospectionMixin:
 
         # Proveedor que más gana
         winner_counts: dict[str, int] = {}
-        for r in self._history:  # type: ignore[reportAttributeAccessIssue]
+        for r in self._history:
             if r.winner:
                 provider = r.winner.split(":")[0]
                 winner_counts[provider] = winner_counts.get(provider, 0) + 1
@@ -209,7 +209,7 @@ class OrchestraIntrospectionMixin:
             "model_success_rate": round(success_rate, 3),
             "top_winning_provider": top_winner,
             "mode_distribution": {
-                mode: sum(1 for r in self._history if r.mode == mode)  # type: ignore[reportAttributeAccessIssue]
-                for mode in {r.mode for r in self._history}  # type: ignore[reportAttributeAccessIssue]
+                mode: sum(1 for r in self._history if r.mode == mode)
+                for mode in {r.mode for r in self._history}
             },
         }

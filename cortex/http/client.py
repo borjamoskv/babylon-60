@@ -153,9 +153,9 @@ class SovereignHTTPClient:
     async def __aexit__(self, *exc) -> None:  # type: ignore[no-untyped-def]
         if self._client is not None:
             if self._backend == "httpx":
-                await self._client.aclose()  # type: ignore
+                await self._client.aclose()
             else:
-                await self._client.close()  # type: ignore
+                await self._client.close()
             self._client = None
 
     async def get(self, url: str, **kwargs) -> object:  # type: ignore

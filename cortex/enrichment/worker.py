@@ -60,7 +60,7 @@ class EnrichmentWorker:
                 else:
                     # Polling from EnrichmentQueue is currently synchronous to ensure
                     # atomic claim operations within the underlying SQLite transaction.
-                    job = self.queue.claim_one()  # type: ignore[reportOptionalMemberAccess]
+                    job = self.queue.claim_one()
 
                 if job:
                     await self._process_job(job)
@@ -75,7 +75,7 @@ class EnrichmentWorker:
     async def _get_next_job(self) -> dict[str, Any] | None:
         """Compatibility path for legacy enrichment_jobs-backed workers."""
         if not self._compat_db_mode:
-            return self.queue.claim_one()  # type: ignore[reportOptionalMemberAccess]
+            return self.queue.claim_one()
 
         now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         async with self.engine.session() as conn:
@@ -115,7 +115,7 @@ class EnrichmentWorker:
             logger.debug("Processing enrichment for event %s (job %s)", event_id, job_id)
 
             # 1. Fetch event detail
-            with self.store.tx() as conn:  # type: ignore[reportOptionalMemberAccess]
+            with self.store.tx() as conn:
                 row = conn.execute(
                     "SELECT payload_json FROM ledger_events WHERE event_id=?", (event_id,)
                 ).fetchone()
@@ -131,12 +131,12 @@ class EnrichmentWorker:
                     await self._enrich_fact(target["identifier"], payload)
 
             # 3. Mark successful
-            self.queue.mark_done(job_id, event_id)  # type: ignore[reportOptionalMemberAccess]
+            self.queue.mark_done(job_id, event_id)
             logger.info("Enrichment completed for event %s", event_id)
 
         except Exception as e:
             logger.error("Failed to process job %s: %s", job_id, e)
-            self.queue.mark_failed(job_id, event_id, str(e), attempts)  # type: ignore[reportOptionalMemberAccess]
+            self.queue.mark_failed(job_id, event_id, str(e), attempts)
 
     async def _process_queued_job(self, job: dict[str, Any]) -> None:
         """Process a legacy enrichment_jobs row for backward compatibility."""

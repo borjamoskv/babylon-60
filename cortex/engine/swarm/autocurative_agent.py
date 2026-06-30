@@ -71,7 +71,7 @@ class AutoCurativeAgent:
     def _try_init_rust_engine(self) -> None:
         """Attempt to load the Rust AutoCurativeEngine for fast-path diagnosis."""
         try:
-            from cortex_rs import AutoCurativeEngine  # type: ignore[import-untyped]
+            from cortex_rs import AutoCurativeEngine
 
             self._rust_engine = AutoCurativeEngine(window_size=1000)
             logger.info("[AUTOCURATIVE] Rust fast-path engine loaded")

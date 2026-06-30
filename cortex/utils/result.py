@@ -58,7 +58,7 @@ class Ok(Generic[T]):
         """Extract the value. Safe to call on Ok."""
         return self.value
 
-    def unwrap_or(self, default: T) -> T:  # type: ignore[override]
+    def unwrap_or(self, default: T) -> T:
         return self.value
 
     def map(self, fn: Callable[[T], U]) -> Result[U, Any]:

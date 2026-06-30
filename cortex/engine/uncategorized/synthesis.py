@@ -265,7 +265,7 @@ class CortexAutoSynthesisEngine:
         )
 
         # Autopoiesis observes and mutates _forge_phase if repeated breaches occur
-        wrapped = self._autopoiesis.observe_and_mutate(self._forge_phase)  # type: ignore[arg-type]
+        wrapped = self._autopoiesis.observe_and_mutate(self._forge_phase)
         _ = wrapped  # wired; fires on next invocation
 
         return True

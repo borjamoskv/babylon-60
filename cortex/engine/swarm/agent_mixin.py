@@ -43,7 +43,7 @@ class AgentMixin(EngineMixinBase):
         agent_id = str(uuid.uuid4())
 
         # 1. Local Registration
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             await conn.execute("BEGIN IMMEDIATE")
             try:
                 await conn.execute(
@@ -82,7 +82,7 @@ class AgentMixin(EngineMixinBase):
         return agent_id
 
     async def get_agent(self, agent_id: str, tenant_id: str = "default") -> dict[str, Any] | None:
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
                 "SELECT id, name, agent_type, reputation_score, created_at "
@@ -93,7 +93,7 @@ class AgentMixin(EngineMixinBase):
                 return dict(row) if row else None
 
     async def list_agents(self, tenant_id: str) -> list[dict[str, Any]]:
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
                 "SELECT id, name, agent_type, reputation_score, created_at "

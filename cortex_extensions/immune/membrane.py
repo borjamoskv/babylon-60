@@ -75,7 +75,7 @@ class ImmuneMembrane:
             for res in results
         ]
 
-        report = self._triage(filter_results)  # type: ignore[type-error]
+        report = self._triage(filter_results)
 
         if report.cortex_persistence and self._engine:
             task = asyncio.create_task(self._persist_triage(intent, report))

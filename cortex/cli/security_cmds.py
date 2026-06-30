@@ -304,7 +304,7 @@ def honeypot_list() -> None:
             # ISO format string
             created = created.replace("T", " ")[:16]
         elif hasattr(created, "strftime"):
-            created = created.strftime("%Y-%m-%d %H:%M")  # type: ignore[reportAttributeAccessIssue]
+            created = created.strftime("%Y-%m-%d %H:%M")
 
         table.add_row(
             decoy.id,

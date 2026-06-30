@@ -21,7 +21,7 @@ logger = logging.getLogger("cortex.mcp.genesis_tools")
 
 
 def register_genesis_tools(
-    mcp: FastMCP,  # type: ignore[reportInvalidTypeForm]
+    mcp: FastMCP,
     ctx: Any,
 ) -> None:
     """Register Genesis Engine tools on the MCP server.
@@ -78,7 +78,7 @@ def register_genesis_tools(
             for c in comp_list
         ]
 
-        spec = SystemSpec(  # type: ignore[type-error]
+        spec = SystemSpec(
             name=name,
             description=description or f"Genesis: {name}",
             system_type=system_type,
@@ -89,7 +89,7 @@ def register_genesis_tools(
         )
 
         try:
-            engine = GenesisEngine()  # type: ignore[type-error]
+            engine = GenesisEngine()
             result = engine.create(spec)
         except Exception as e:
             logger.error("Genesis create failed: %s", e)
@@ -123,13 +123,13 @@ def register_genesis_tools(
         from cortex_extensions.genesis.models import ComponentSpec
 
         comps = [ComponentSpec(**c) for c in _default_comps_for_type(system_type)]
-        spec = SystemSpec(  # type: ignore[type-error]
+        spec = SystemSpec(
             name=name,
             system_type=system_type,
             components=comps,
         )
 
-        engine = GenesisEngine()  # type: ignore[type-error]
+        engine = GenesisEngine()
         preview = engine.preview(spec)
 
         lines = [f"Genesis Preview: {name} ({system_type})\n"]
@@ -143,7 +143,7 @@ def register_genesis_tools(
         """List all available Genesis templates."""
         from cortex_extensions.genesis import TemplateRegistry
 
-        registry = TemplateRegistry()  # type: ignore[type-error]
+        registry = TemplateRegistry()
         templates = registry.list_templates()
 
         lines = ["Genesis Templates:\n"]

@@ -296,7 +296,7 @@ class CopilotAgent(BaseAgent):
 
     # ── Message Handler ───────────────────────────────────────────
 
-    async def handle_message(self, message: AgentMessage) -> None:  # type: ignore[override]
+    async def handle_message(self, message: AgentMessage) -> None:
         """Route incoming messages to context processing or verdict recording.
 
         The copilot only handles two message flows:

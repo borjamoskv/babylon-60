@@ -265,19 +265,19 @@ def _get_entities_and_relations(
     conn = __import__("cortex.database.core", fromlist=["connect"]).connect(_get_db_path())
     try:
         if project:
-            entities = pd.read_sql_query(  # type: ignore[reportCallIssue]
+            entities = pd.read_sql_query(
                 "SELECT name, entity_type, mention_count FROM entities WHERE project = ?",
                 conn,
-                params=(project,),  # type: ignore[type-error]
+                params=(project,),
             )
-            relations = pd.read_sql_query(  # type: ignore[reportCallIssue]
+            relations = pd.read_sql_query(
                 """SELECT e1.name as source, e2.name as target, r.relation_type
                    FROM entity_relations r
                    JOIN entities e1 ON r.source_entity_id = e1.id
                    JOIN entities e2 ON r.target_entity_id = e2.id
                    WHERE e1.project = ?""",
                 conn,
-                params=(project,),  # type: ignore[type-error]
+                params=(project,),
             )
         else:
             entities = pd.read_sql_query(

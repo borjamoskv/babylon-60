@@ -201,7 +201,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 if critical_actions and self.is_active:
                     from cortex.engine.keter import KeterEngine
 
-                    keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
+                    keter = KeterEngine(self.workspace)
                     for action in critical_actions:
                         if action.description not in self._ignited_tasks:
                             # 🛡️ IMMUNE-SYSTEM-v1: Sovereign Arbiter (Ω₆)
@@ -281,7 +281,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         """Autonomic healing for high-entropy nodes (Ω₅)."""
         from cortex.engine.keter import KeterEngine
 
-        keter = KeterEngine(self.workspace)  # type: ignore[reportCallIssue]
+        keter = KeterEngine(self.workspace)
 
         parasites = [f for f in entropy if f["type"] == "THERMAL_PARASITE"]
         if parasites:

@@ -21,7 +21,7 @@ def register_music_tools(mcp: FastMCP):
             concept: The artistic concept or mood (e.g., 'Berlin Techno 2026').
         """
         orchestrator = GRAMMYOrchestrator()
-        album = await orchestrator.create_album(title, concept)  # type: ignore[type-error]
+        album = await orchestrator.create_album(title, concept)
         return f"Album '{title}' created with ID: {album.id}. Concept: {concept}"
 
     @mcp.tool()
@@ -42,12 +42,12 @@ def register_music_tools(mcp: FastMCP):
 
         # Mocking album context if not found in session for this stateless tool example
         # In actual CORTEX, this would be tied to a persistent project context.
-        orchestrator.current_album = await orchestrator.create_album("Draft", "Concept")  # type: ignore[type-error]
+        orchestrator.current_album = await orchestrator.create_album("Draft", "Concept")
 
         track = TrackContext(id=f"trk_{track_title.lower().replace(' ', '_')}", title=track_title)
 
         try:
-            result = await orchestrator.run_pipeline(track, provider=adapter)  # type: ignore[reportCallIssue]
+            result = await orchestrator.run_pipeline(track, provider=adapter)
             return (
                 f"Track '{track_title}' generated successfully!\n"
                 f"GRI Score: {result.gri_score:.2f}\n"
@@ -69,6 +69,6 @@ def register_music_tools(mcp: FastMCP):
 
         try:
             evaluated_track = await orchestrator.evaluate_track_gri(track)
-            return f"GRI Evaluation complete for {track_id}. Score: {evaluated_track.gri_score:.2f}"  # type: ignore[type-error]
+            return f"GRI Evaluation complete for {track_id}. Score: {evaluated_track.gri_score:.2f}"
         except Exception as e:
             return f"Evaluation failed: {e!s}"

@@ -297,7 +297,7 @@ class SovereignLLM:
                     # Carga bypass OOM a traves de Extractor KV 3.5b (arXiv:2504.19874)
                     from cortex_extensions.llm.vllm_edge import NativeVLLMProvider
 
-                    self._providers_cache[provider_name] = NativeVLLMProvider()  # type: ignore[reportArgumentType]
+                    self._providers_cache[provider_name] = NativeVLLMProvider()
                 else:
                     self._providers_cache[provider_name] = LLMProvider(provider=provider_name)
             provider = self._providers_cache[provider_name]

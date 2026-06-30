@@ -523,7 +523,7 @@ class ReflexionEngine:
     def _emit_endocrine_reward(self, iterations_used: int) -> None:
         """Emit hormonal signals based on reflexion outcome."""
         try:
-            from cortex.engine.endocrine import ENDOCRINE, HormoneType
+            from cortex.engine.uncategorized.endocrine import ENDOCRINE, HormoneType
 
             if iterations_used == 0:
                 # First-try success: reward

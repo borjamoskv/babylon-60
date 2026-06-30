@@ -61,8 +61,8 @@ class NeuralGrowthEngine:
                 (project, content),
             )
             rows = await inner_cursor.fetchall()
-            master_id = rows[0][0]  # type: ignore[reportIndexIssue]
-            to_deprecate = [r[0] for r in rows[1:]]  # type: ignore[reportIndexIssue]
+            master_id = rows[0][0]
+            to_deprecate = [r[0] for r in rows[1:]]
 
             for fid in to_deprecate:
                 await MUTATION_ENGINE.apply(

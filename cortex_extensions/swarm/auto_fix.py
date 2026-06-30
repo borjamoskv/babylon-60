@@ -279,7 +279,7 @@ class AutoFixPipeline:
 
         cwd = str(self._repo_path)
         try:
-            proc_branch = await asyncio.to_thread(  # type: ignore[arg-type]
+            proc_branch = await asyncio.to_thread(
                 subprocess.run,
                 ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
                 capture_output=True,
@@ -294,7 +294,7 @@ class AutoFixPipeline:
             logger.info(
                 "🧬 [AUTOFIX] Attempting Ouroboros merge: %s into %s", branch_name, main_branch
             )
-            proc_merge = await asyncio.to_thread(  # type: ignore[arg-type]
+            proc_merge = await asyncio.to_thread(
                 subprocess.run,
                 ["git", "merge", "--ff-only", branch_name],
                 capture_output=True,
@@ -305,7 +305,7 @@ class AutoFixPipeline:
 
             if proc_merge.returncode == 0:
                 logger.info("🧬 [AUTOFIX] Merged successfully.")
-                await asyncio.to_thread(  # type: ignore[arg-type]
+                await asyncio.to_thread(
                     subprocess.run,
                     ["git", "branch", "-d", branch_name],
                     capture_output=True,

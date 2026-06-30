@@ -217,8 +217,8 @@ def reload() -> None:
         setattr(_module, attr, getattr(_cfg, attr))
 
     # Set properties/helpers
-    _module.PROD = _cfg.PROD  # type: ignore[reportAttributeAccessIssue]
-    _module.IS_PROD = _cfg.IS_PROD  # type: ignore[reportAttributeAccessIssue]
+    _module.PROD = _cfg.PROD
+    _module.IS_PROD = _cfg.IS_PROD
 
 
 def __getattr__(name: str) -> Any:

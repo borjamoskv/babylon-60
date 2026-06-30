@@ -42,7 +42,7 @@ class BicameralConsole:
         stream: str,
         source: str,
         message: str,
-        meta: dict[str, Any] = None,  # type: ignore[reportArgumentType]
+        meta: dict[str, Any] = None,
     ) -> None:
         """Relays the event to an external listener (Notch Alcove)."""
         event = {

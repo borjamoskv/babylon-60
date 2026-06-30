@@ -34,8 +34,8 @@ def get_backend(conn=None) -> GraphBackend:
     if backend_type == "neo4j":
         from cortex.graph.backends import Neo4jBackend
 
-        return Neo4jBackend()  # type: ignore[abstract]
-    return SQLiteBackend(conn)  # type: ignore[arg-type]
+        return Neo4jBackend()
+    return SQLiteBackend(conn)
 
 
 def extract_entities(content: str) -> list[dict]:
@@ -107,7 +107,7 @@ async def _upsert_entity(
         "VALUES (?, ?, ?, ?, ?, ?, 1)",
         (ent["name"], ent["entity_type"], project, tenant_id, timestamp, timestamp),
     )
-    return cursor.lastrowid  # type: ignore[return-value]
+    return cursor.lastrowid
 
 
 async def _upsert_relation(
@@ -183,7 +183,7 @@ def process_fact_graph_sync(
         backend = get_backend(conn)
         entity_ids: dict[str, int] = {}
         for ent in entities:
-            eid = backend.upsert_entity_sync(  # type: ignore[reportAttributeAccessIssue]
+            eid = backend.upsert_entity_sync(
                 ent["name"], ent["entity_type"], project, timestamp, tenant_id
             )
             entity_ids[ent["name"]] = eid
@@ -192,7 +192,7 @@ def process_fact_graph_sync(
             source_id = entity_ids.get(rel["source_name"])
             target_id = entity_ids.get(rel["target_name"])
             if source_id and target_id:
-                backend.upsert_relationship_sync(  # type: ignore[reportAttributeAccessIssue]
+                backend.upsert_relationship_sync(
                     source_id, target_id, rel["relation_type"], fact_id, timestamp, tenant_id
                 )
         return len(entities), len(relationships)
@@ -215,7 +215,7 @@ async def get_graph(
         tenant_id: Multi-tenant isolation ID.
     """
     backend = get_backend(conn)
-    return await backend.get_graph(project, limit, tenant_id)  # type: ignore[reportCallIssue]
+    return await backend.get_graph(project, limit, tenant_id)
 
 
 def get_graph_sync(
@@ -223,7 +223,7 @@ def get_graph_sync(
 ) -> dict:
     """Get graph data synchronously."""
     backend = get_backend(conn)
-    return backend.get_graph_sync(project, limit, tenant_id)  # type: ignore[reportAttributeAccessIssue]
+    return backend.get_graph_sync(project, limit, tenant_id)
 
 
 async def query_entity(
@@ -238,7 +238,7 @@ async def query_entity(
         tenant_id: Multi-tenant isolation ID.
     """
     backend = get_backend(conn)
-    return await backend.query_entity(name, project, tenant_id)  # type: ignore[reportCallIssue]
+    return await backend.query_entity(name, project, tenant_id)
 
 
 def query_entity_sync(
@@ -246,7 +246,7 @@ def query_entity_sync(
 ) -> dict | None:
     """Query entity synchronously."""
     backend = get_backend(conn)
-    return backend.query_entity_sync(name, project, tenant_id)  # type: ignore[reportAttributeAccessIssue]
+    return backend.query_entity_sync(name, project, tenant_id)
 
 
 async def find_path(
@@ -257,7 +257,7 @@ async def find_path(
     Useful for explaining connections (e.g., "How is Project A related to Library B?").
     """
     backend = get_backend(conn)
-    return await backend.find_path(source, target, max_depth, tenant_id)  # type: ignore[reportCallIssue]
+    return await backend.find_path(source, target, max_depth, tenant_id)
 
 
 async def get_context_subgraph(
@@ -269,4 +269,4 @@ async def get_context_subgraph(
     to find relevant context.
     """
     backend = get_backend(conn)
-    return await backend.find_context_subgraph(seeds, depth, max_nodes, tenant_id)  # type: ignore[reportCallIssue]
+    return await backend.find_context_subgraph(seeds, depth, max_nodes, tenant_id)

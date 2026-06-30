@@ -78,9 +78,9 @@ class QuarantineMixin(EngineMixinBase):
             return True
 
         if conn:
-            return await _impl(conn)  # type: ignore[reportArgumentType]
+            return await _impl(conn)
         async with self.session() as conn:
-            return await _impl(conn)  # type: ignore[reportArgumentType]
+            return await _impl(conn)
 
     async def unquarantine(
         self,
@@ -123,6 +123,6 @@ class QuarantineMixin(EngineMixinBase):
             return True
 
         if conn:
-            return await _impl(conn)  # type: ignore[reportArgumentType]
+            return await _impl(conn)
         async with self.session() as conn:
-            return await _impl(conn)  # type: ignore[reportArgumentType]
+            return await _impl(conn)

@@ -141,7 +141,7 @@ async def store_fact(
         embedding=vector,
         timestamp=time.time(),
         metadata=_meta,
-        cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
+        cognitive_layer=adjusted_layer,
         parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
     )
 

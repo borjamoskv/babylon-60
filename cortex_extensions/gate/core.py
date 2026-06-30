@@ -113,7 +113,7 @@ class SovereignGate:
         )
 
         challenge = hmac.new(
-            self._secret,  # type: ignore[arg-type]
+            self._secret,
             payload.encode("utf-8"),
             hashlib.sha256,
         ).hexdigest()

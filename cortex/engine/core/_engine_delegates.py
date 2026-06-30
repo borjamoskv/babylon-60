@@ -208,7 +208,7 @@ class DelegatesMixin:
         tenant_id: str = "default",
     ) -> dict:
         """Delegate to MixinBase (supports tenant-scoped decryption)."""
-        return super()._row_to_fact(  # type: ignore[reportAttributeAccessIssue]
+        return super()._row_to_fact(
             row,
             tenant_id=tenant_id,
         )

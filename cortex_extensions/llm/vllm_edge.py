@@ -162,7 +162,7 @@ class NativeVLLMProvider(BaseProvider):
         if lora_request:
             kwargs["lora_request"] = lora_request
 
-        generator = self._engine.generate(composed_prompt, sp, request_id, **kwargs)  # type: ignore[reportOptionalMemberAccess]
+        generator = self._engine.generate(composed_prompt, sp, request_id, **kwargs)
 
         final_output = ""
         async for output in generator:
@@ -272,7 +272,7 @@ class NativeVLLMProvider(BaseProvider):
         if lora_request:
             kwargs["lora_request"] = lora_request
 
-        generator = self._engine.generate(composed_prompt, sp, request_id, **kwargs)  # type: ignore[reportOptionalMemberAccess]
+        generator = self._engine.generate(composed_prompt, sp, request_id, **kwargs)
 
         previous_text = ""
         async for output in generator:
@@ -284,5 +284,5 @@ class NativeVLLMProvider(BaseProvider):
 
     async def close(self) -> None:
         """Release native in-process engine memory gracefully."""
-        self._engine = None  # type: ignore
+        self._engine = None
         logger.info("[vLLM Native Edge] Engine apagado. VRAM liberada.")

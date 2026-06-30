@@ -207,7 +207,7 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
         score = 0.5
 
     # Decrypt encrypted content
-    content = row[1] or ""  # type: ignore[reportGeneralTypeIssues]
+    content = row[1] or ""
     if content and str(content).startswith("v6_aesgcm:"):
         try:
             from cortex.crypto import get_default_encrypter
@@ -218,12 +218,12 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
             logger.warning("Suppressed exception: %s", exc)
 
     return SyncSearchResult(
-        fact_id=row[0],  # type: ignore[reportGeneralTypeIssues]
+        fact_id=row[0],
         content=content,
-        project=row[2],  # type: ignore[reportGeneralTypeIssues]
-        fact_type=row[3],  # type: ignore[reportGeneralTypeIssues]
-        confidence=row[4],  # type: ignore[reportGeneralTypeIssues]
-        source=row[5],  # type: ignore[reportGeneralTypeIssues]
+        project=row[2],
+        fact_type=row[3],
+        confidence=row[4],
+        source=row[5],
         tags=tags,
         score=score,
     )

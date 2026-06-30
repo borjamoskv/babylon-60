@@ -37,7 +37,7 @@ def vote(fact_id, value, agent, db) -> None:
         try:
             # En Wave 5 usamos sesiones transaccionales
             async with engine.session() as conn:
-                ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)  # type: ignore[reportAttributeAccessIssue]
+                ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)
 
                 if value not in [1, -1]:
                     err_validation("value", "El voto debe ser 1 (verificar) o -1 (disputar)")
@@ -110,8 +110,8 @@ def ledger_checkpoint(db):
         engine = get_engine(db)
         try:
             async with engine.session() as conn:
-                pool_attr = engine._pool if hasattr(engine, "_pool") else conn  # type: ignore[reportAttributeAccessIssue]
-                ledger = ImmutableVoteLedger(pool_attr)  # type: ignore[reportAttributeAccessIssue]
+                pool_attr = engine._pool if hasattr(engine, "_pool") else conn
+                ledger = ImmutableVoteLedger(pool_attr)
                 with console.status(
                     "[bold yellow]Calculando Merkle Root y creando punto de control...[/]"
                 ):
@@ -140,8 +140,8 @@ def ledger_verify(db):
         engine = get_engine(db)
         try:
             async with engine.session() as conn:
-                pool_attr = engine._pool if hasattr(engine, "_pool") else conn  # type: ignore[reportAttributeAccessIssue]
-                ledger_inst = ImmutableVoteLedger(pool_attr)  # type: ignore[reportAttributeAccessIssue]
+                pool_attr = engine._pool if hasattr(engine, "_pool") else conn
+                ledger_inst = ImmutableVoteLedger(pool_attr)
                 with console.status(
                     "[bold blue]Verificando la cadena de hashes del registro...[/]"
                 ):

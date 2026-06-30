@@ -83,10 +83,10 @@ class AdaptiveResonanceGate:
         try:
             from pathlib import Path
 
-            field = self._sensor.scan_field(Path(candidate.source_file).parent)  # type: ignore[type-error]
+            field = self._sensor.scan_field(Path(candidate.source_file).parent)
             # Find ghosts matching intent or project
             for ghost in field:
-                if ghost.get("project") == candidate.project:  # type: ignore[type-error]
+                if ghost.get("project") == candidate.project:
                     # Found a physical trace of the same project context
                     return 0.05  # Static boost for topographic proximity
         except (OSError, AttributeError, TypeError) as exc:
@@ -106,7 +106,7 @@ class AdaptiveResonanceGate:
         """
         if not self._endocrine:
             return 0.0
-        shift = (self._endocrine.cortisol * 0.1) - (self._endocrine.dopamine * 0.05)  # type: ignore[type-error]
+        shift = (self._endocrine.cortisol * 0.1) - (self._endocrine.dopamine * 0.05)
         return float(shift)
 
     async def _find_neighbors(self, candidate: CortexSemanticEngram, limit: int) -> list[Any]:

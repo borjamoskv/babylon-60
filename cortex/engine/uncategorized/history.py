@@ -21,7 +21,7 @@ class HistoryMixin(EngineMixinBase):
         """Reconstruct state as of transaction ID."""
         current_tenant = get_tenant_id()
 
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             clause, params = time_travel_filter(tx_id, table_alias="f")
 

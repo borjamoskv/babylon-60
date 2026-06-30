@@ -151,7 +151,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
             with causal_write(conn):
                 cursor = await conn.execute(SQL_INSERT_KEY, args)
                 await conn.commit()
-                return cursor.lastrowid  # type: ignore[reportReturnType]
+                return cursor.lastrowid
         finally:
             await conn.close()
 
@@ -252,7 +252,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
 
         if self._pool is None:
             self._pool = await asyncpg.create_pool(self.dsn)
-        return self._pool  # type: ignore[return-value]
+        return self._pool
 
     async def initialize(self) -> None:
         from cortex.auth import AUTH_SCHEMA

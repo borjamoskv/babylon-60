@@ -181,7 +181,7 @@ class GossipProtocol:
                 rng = secrets.SystemRandom()
                 if self.peers:
                     peer = rng.choice(list(self.peers))
-                    await self._perform_gossip(peer)  # type: ignore[type-error]
+                    await self._perform_gossip(peer)
             except (OSError, RuntimeError) as e:
                 logger.error("Gossip error on %s: %s", self.node_id, e)
 

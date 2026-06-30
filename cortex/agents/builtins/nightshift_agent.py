@@ -63,7 +63,7 @@ class NightshiftAgent(BaseAgent):
     # Ignore incoming task requests (daemon-only agent)
     # ------------------------------------------------------------------
 
-    async def handle_message(self, message: AgentMessage) -> None:  # type: ignore[override]
+    async def handle_message(self, message: AgentMessage) -> None:
         if message.kind == MessageKind.SHUTDOWN:
             logger.info("NightshiftAgent - shutdown requested by %s", message.sender)
             self._daemon.stop()

@@ -33,7 +33,7 @@ DEFAULT_SERVER_URL = "http://127.0.0.1:5050"
 
 _TOOLBOX_AVAILABLE = False
 try:
-    from toolbox_core import ToolboxClient  # type: ignore
+    from toolbox_core import ToolboxClient
 
     _TOOLBOX_AVAILABLE = True
 except ImportError:
@@ -116,15 +116,15 @@ class ToolboxBridge:
         self._validate_server_url()
 
         try:
-            self._client = ToolboxClient(self.config.server_url)  # type: ignore[reportOptionalCall]
+            self._client = ToolboxClient(self.config.server_url)
 
             # Load tools (all or specific set)
             load_coro = (
-                self._client.load_toolset(  # type: ignore[reportOptionalMemberAccess]
+                self._client.load_toolset(
                     self.config.toolset,
                 )
                 if self.config.toolset
-                else self._client.load_toolset()  # type: ignore[reportOptionalMemberAccess]
+                else self._client.load_toolset()
             )
             self._tools = await load_coro
 

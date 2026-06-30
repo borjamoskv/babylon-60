@@ -116,19 +116,19 @@ def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     return SearchResult(
         fact_id=fact_id,
         content=content,
-        project=row[2] if len(row) > 2 else "unknown",  # type: ignore[reportGeneralTypeIssues]
-        fact_type=row[3] if len(row) > 3 else "fact",  # type: ignore[reportGeneralTypeIssues]
-        confidence=confidence,  # type: ignore[reportGeneralTypeIssues]
-        valid_from=row[5] if len(row) > 5 else "",  # type: ignore[reportGeneralTypeIssues]
-        valid_until=row[6] if len(row) > 6 else None,  # type: ignore[reportGeneralTypeIssues]
+        project=row[2] if len(row) > 2 else "unknown",
+        fact_type=row[3] if len(row) > 3 else "fact",
+        confidence=confidence,
+        valid_from=row[5] if len(row) > 5 else "",
+        valid_until=row[6] if len(row) > 6 else None,
         tags=tags,
-        source=row[8] if len(row) > 8 else "unknown",  # type: ignore[reportGeneralTypeIssues]
+        source=row[8] if len(row) > 8 else "unknown",
         meta=meta,
         score=score,
-        created_at=row[10] if len(row) > 10 else "",  # type: ignore[reportGeneralTypeIssues]
-        updated_at=row[11] if len(row) > 11 else "",  # type: ignore[reportGeneralTypeIssues]
-        tx_id=tx_id,  # type: ignore[reportGeneralTypeIssues]
-        hash=tx_hash,  # type: ignore[reportGeneralTypeIssues]
+        created_at=row[10] if len(row) > 10 else "",
+        updated_at=row[11] if len(row) > 11 else "",
+        tx_id=tx_id,
+        hash=tx_hash,
     )
 
 
@@ -192,15 +192,15 @@ def _parse_row_sync(row: Any, has_rank: bool) -> SearchResult:
     from cortex.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
-    content = _decrypt_row_content(row[1], "default", enc)  # type: ignore[reportGeneralTypeIssues]
+    content = _decrypt_row_content(row[1], "default", enc)
 
     return SearchResult(
-        fact_id=row[0],  # type: ignore[reportGeneralTypeIssues]
+        fact_id=row[0],
         content=content,
-        project=row[2],  # type: ignore[reportGeneralTypeIssues]
-        fact_type=row[3],  # type: ignore[reportGeneralTypeIssues]
-        confidence=row[4],  # type: ignore[reportGeneralTypeIssues]
-        source=row[5],  # type: ignore[reportGeneralTypeIssues]
+        project=row[2],
+        fact_type=row[3],
+        confidence=row[4],
+        source=row[5],
         tags=tags,
         score=score,
         valid_from="unknown",

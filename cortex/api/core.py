@@ -109,7 +109,7 @@ async def lifespan(app: FastAPI):
     # 3. Global Auth Registration
     import cortex.auth
 
-    cortex.auth.manager._auth_manager = auth_manager  # type: ignore[reportAttributeAccessIssue]
+    cortex.auth.manager._auth_manager = auth_manager
 
     # 4. Temporal Tracking
     from cortex.database.core import connect as db_connect
@@ -133,7 +133,7 @@ async def lifespan(app: FastAPI):
     from cortex_extensions.notifications.setup import setup_notifications
 
     notification_bus = setup_notifications(config)
-    api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
+    api_state.notification_bus = notification_bus
 
     # 7. V4 Singularity Daemons (Execution Plane Only)
     if config.DEPLOY_MODE != "cloud":
@@ -157,11 +157,11 @@ async def lifespan(app: FastAPI):
         await engine.close()
         await auth_manager.close()
         timing_conn.close()
-        cortex.auth.manager._auth_manager = None  # type: ignore[reportAttributeAccessIssue]
+        cortex.auth.manager._auth_manager = None
         api_state.engine = None
         api_state.auth_manager = None
         api_state.tracker = None
-        api_state.notification_bus = None  # type: ignore[reportAttributeAccessIssue]
+        api_state.notification_bus = None
 
 
 app = FastAPI(

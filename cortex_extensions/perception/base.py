@@ -189,7 +189,7 @@ def _infer_from_workspace(p: Path, root: Path) -> str | None:
             return parts[1]
 
         # Single file or project in workspace root
-        return parts[0] if parts[0] else root.name  # type: ignore[reportGeneralTypeIssues]
+        return parts[0] if parts[0] else root.name
     except ValueError:
         return None
 

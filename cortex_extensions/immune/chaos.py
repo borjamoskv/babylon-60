@@ -101,7 +101,7 @@ async def async_interceptor(
             elif isinstance(res, str):
                 res = "!!CORRUPTED_STRING_BY_CHAOS_GATE!!"  # type: ignore[assignment]
 
-        return res  # type: ignore[type-error]
+        return res
     except Exception as e:
         # Re-check gate state
         gate.check()

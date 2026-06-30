@@ -36,7 +36,7 @@ __all__ = ["FileActivityObserver"]
 logger = logging.getLogger("cortex_extensions.perception")
 
 
-class _DebouncedHandler(FileSystemEventHandler):  # type: ignore[reportGeneralTypeIssues]
+class _DebouncedHandler(FileSystemEventHandler):
     """Watchdog handler with debouncing for rapid file changes."""
 
     def __init__(
@@ -51,7 +51,7 @@ class _DebouncedHandler(FileSystemEventHandler):  # type: ignore[reportGeneralTy
         self.debounce_s = debounce_s
         self._last_events: dict[str, float] = {}
 
-    def on_any_event(self, event: FileSystemEvent) -> None:  # type: ignore[reportInvalidTypeForm]
+    def on_any_event(self, event: FileSystemEvent) -> None:
         if event.is_directory:
             return
 
@@ -137,7 +137,7 @@ class FileActivityObserver:
                     logging.debug("Failed to emit file activity signal: %s", e)
 
         self.handler = _DebouncedHandler(_wrapped_callback, workspace, debounce_s)
-        self._observer = Observer()  # type: ignore[reportOptionalCall]
+        self._observer = Observer()
         self._observer.schedule(self.handler, workspace, recursive=recursive)
 
     def start(self) -> None:

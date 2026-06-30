@@ -176,7 +176,7 @@ class DistributedSovereignCache:
         try:
             await client.xgroup_create(_AUDIT_STREAM_KEY, _AUDIT_GROUP_NAME, id="0", mkstream=True)
             logger.info("🐉 [HYDRA-LOG] Created new audit stream consumer group.")
-        except aioredis.exceptions.ResponseError as e:  # type: ignore[reportOptionalMemberAccess]
+        except aioredis.exceptions.ResponseError as e:
             if "BUSYGROUP" not in str(e):
                 raise
 

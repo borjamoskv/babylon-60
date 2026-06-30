@@ -89,7 +89,7 @@ class EmbeddingManager:
         """Async embedding API that supports both local and cloud backends."""
         embedder = self._get_embedder()
         if self.mode == "api":
-            return await embedder.embed(text)  # type: ignore[reportGeneralTypeIssues]
+            return await embedder.embed(text)
         import asyncio
 
         return await asyncio.to_thread(embedder.embed, text)
@@ -98,7 +98,7 @@ class EmbeddingManager:
         """Async batch embedding API that supports both local and cloud backends."""
         embedder = self._get_embedder()
         if self.mode == "api":
-            return await embedder.embed_batch(texts, batch_size=batch_size)  # type: ignore[reportGeneralTypeIssues]
+            return await embedder.embed_batch(texts, batch_size=batch_size)
         import asyncio
 
         return await asyncio.to_thread(embedder.embed_batch, texts, batch_size=batch_size)
@@ -131,7 +131,7 @@ class EmbeddingManager:
         if not hasattr(embedder, "embed_multimodal"):
             raise RuntimeError("Current embedder does not support multimodal")
 
-        return await embedder.embed_multimodal(parts, task_type=task_type)  # type: ignore[type-error]
+        return await embedder.embed_multimodal(parts, task_type=task_type)
 
     async def embed_image(
         self,
@@ -150,7 +150,7 @@ class EmbeddingManager:
         if not hasattr(embedder, "embed_image"):
             raise RuntimeError("Current embedder does not support image embedding")
 
-        return await embedder.embed_image(image_bytes, mime_type=mime_type, task_type=task_type)  # type: ignore[type-error]
+        return await embedder.embed_image(image_bytes, mime_type=mime_type, task_type=task_type)
 
     @property
     def dimension(self) -> int:

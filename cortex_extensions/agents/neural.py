@@ -81,7 +81,7 @@ class MacOSWindowSensor(BaseWindowSensor):
         if not AppKit:
             return "unknown"
         try:
-            workspace = AppKit.NSWorkspace.sharedWorkspace()  # type: ignore[reportAttributeAccessIssue]
+            workspace = AppKit.NSWorkspace.sharedWorkspace()
             app = workspace.frontmostApplication()
             if app:
                 name = app.localizedName()
@@ -144,8 +144,8 @@ class MacOSClipboardSensor(BaseClipboardSensor):
         if not AppKit:
             return ""
         try:
-            pasteboard = AppKit.NSPasteboard.generalPasteboard()  # type: ignore[reportAttributeAccessIssue]
-            content = pasteboard.stringForType_(AppKit.NSPasteboardTypeString)  # type: ignore[reportAttributeAccessIssue]
+            pasteboard = AppKit.NSPasteboard.generalPasteboard()
+            content = pasteboard.stringForType_(AppKit.NSPasteboardTypeString)
             if content:
                 # Truncate to avoid massive clipboards blowing up memory/logs
                 return content[:2000]

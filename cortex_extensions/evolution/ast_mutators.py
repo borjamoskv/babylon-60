@@ -184,7 +184,7 @@ class _DocstringInjector(ast.NodeTransformer):
         return node
 
     def visit_AsyncFunctionDef(self, node):
-        return self.visit_FunctionDef(node)  # type: ignore[type-error]
+        return self.visit_FunctionDef(node)
 
 
 class _EntropyAnnihilator(ast.NodeTransformer):

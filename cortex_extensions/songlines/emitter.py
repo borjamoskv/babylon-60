@@ -53,7 +53,7 @@ class ResonanceEmitter:
         # Try os.setxattr first
         if hasattr(os, "setxattr"):
             try:
-                os.setxattr(str(target_file), attr_name, encoded_payload)  # type: ignore[reportAttributeAccessIssue]
+                os.setxattr(str(target_file), attr_name, encoded_payload)
                 logger.info("Embedded ghost %s on %s (os.setxattr)", ghost_id, target_file.name)
                 return
             except Exception as exc:

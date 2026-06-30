@@ -16,8 +16,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 try:
-    from watchdog.events import FileSystemEvent, FileSystemEventHandler  # type: ignore[type-error]
-    from watchdog.observers import Observer  # type: ignore[type-error]
+    from watchdog.events import FileSystemEvent, FileSystemEventHandler
+    from watchdog.observers import Observer
 
     _HAS_WATCHDOG = True
 except ImportError:

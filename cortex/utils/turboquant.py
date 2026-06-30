@@ -53,7 +53,7 @@ def optimize_vector_qjl(
 
         # Stage 1: Fast Walsh-Hadamard Transform O(D log D)
         try:
-            from scipy.fft import fwht  # type: ignore[reportAttributeAccessIssue]
+            from scipy.fft import fwht
 
             rotated = fwht(arr, norm="ortho")
         except ImportError:
@@ -112,7 +112,7 @@ def encode_query_qjl(vector: list[float]) -> list[float]:
         dim = arr.shape[1]
         # Stage 1 Query Match: FWHT O(D log D)
         try:
-            from scipy.fft import fwht  # type: ignore[reportAttributeAccessIssue]
+            from scipy.fft import fwht
 
             rotated = fwht(arr, norm="ortho")
         except ImportError:

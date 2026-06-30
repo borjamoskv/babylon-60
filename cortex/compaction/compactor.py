@@ -112,7 +112,7 @@ def _apply_dedup_strategy(
     from cortex.compaction.strategies.dedup import execute_dedup
 
     prev_count = len(result.deprecated_ids)
-    execute_dedup(  # type: ignore[reportUnusedCoroutine]
+    execute_dedup(
         engine,
         project,
         result,
@@ -190,7 +190,7 @@ async def compact(
         "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
         (project,),
     ) as cursor:
-        count_before = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+        count_before = (await cursor.fetchone())[0]
 
     result = CompactionResult(project=project, original_count=count_before, dry_run=dry_run)
 
@@ -210,7 +210,7 @@ async def compact(
         "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
         (project,),
     ) as cursor:
-        count_after = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+        count_after = (await cursor.fetchone())[0]
     result.compacted_count = count_after
 
     # Log compaction
@@ -378,7 +378,7 @@ async def get_compaction_stats(
         )
 
     return {
-        "total_compactions": len(rows),  # type: ignore[reportArgumentType]
+        "total_compactions": len(rows),
         "total_deprecated": total_deprecated,
         "history": history,
     }

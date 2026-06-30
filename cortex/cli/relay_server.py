@@ -5,7 +5,7 @@ import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import EventSourceResponse  # type: ignore[reportAttributeAccessIssue]
+from fastapi.responses import EventSourceResponse
 
 app = FastAPI(title="CORTEX Sovereign Relay")
 
@@ -47,7 +47,7 @@ async def message_stream(request: Request):
                 except (json.JSONDecodeError, ValueError):
                     continue
 
-    return EventSourceResponse(event_generator())  # type: ignore[reportArgumentType]
+    return EventSourceResponse(event_generator())
 
 
 @app.get("/status")

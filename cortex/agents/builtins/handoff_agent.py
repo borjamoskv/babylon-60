@@ -47,7 +47,7 @@ class HandoffAgent(BaseAgent):
     # Message handler
     # ------------------------------------------------------------------
 
-    async def handle_message(self, message: AgentMessage) -> None:  # type: ignore[override]
+    async def handle_message(self, message: AgentMessage) -> None:
         if message.kind == MessageKind.HANDOFF_REQUEST:
             await self._handle_handoff_request(message)
         elif message.kind == MessageKind.TASK_REQUEST:

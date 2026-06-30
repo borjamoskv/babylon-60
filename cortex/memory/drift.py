@@ -173,7 +173,7 @@ def intrinsic_dimensionality(
 
     # Try scipy for fast k-NN
     try:
-        from scipy.spatial import cKDTree  # type: ignore[reportAttributeAccessIssue]
+        from scipy.spatial import cKDTree
 
         tree = cKDTree(embeddings)
         dists, _ = tree.query(embeddings, k=k + 1)

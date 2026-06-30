@@ -177,19 +177,19 @@ class FactManager:
                         results = await self.engine.search(
                             query=content, tenant_id=tenant_id, project=project, top_k=1
                         )
-                        if results and results[0].score > 0.90:  # type: ignore[reportAttributeAccessIssue]
+                        if results and results[0].score > 0.90:
                             logger.info(
                                 "V8 Guardrail: Fact discarded - Semantic Duplicate of #%s (Score: %.2f)",
-                                results[0].fact_id,  # type: ignore[reportAttributeAccessIssue]
-                                results[0].score,  # type: ignore[reportAttributeAccessIssue]
+                                results[0].fact_id,
+                                results[0].score,
                             )
                             # We update updated_at / last_accessed
-                            await conn.execute(  # type: ignore[reportOptionalMemberAccess]
+                            await conn.execute(
                                 "UPDATE facts SET updated_at = ? WHERE id = ?",
                                 (now_iso(), results[0].fact_id),
                             )
-                            await conn.commit()  # type: ignore[reportOptionalMemberAccess]
-                            return results[0].fact_id  # type: ignore[reportAttributeAccessIssue]
+                            await conn.commit()
+                            return results[0].fact_id
         except ValidationError as e:
             raise ValueError(f"Ingestion Validation Failed: {e}") from e
         except (OSError, RuntimeError, ValueError) as e:
@@ -205,7 +205,7 @@ class FactManager:
         try:
             return await StoreMixin._store_impl(
                 cast("StoreMixin", self.engine),
-                conn,  # type: ignore[reportArgumentType]
+                conn,
                 project,
                 content,
                 tenant_id,
@@ -246,7 +246,7 @@ class FactManager:
         """Lower-level fetch from engine database."""
         async with self.engine.session() as conn:
             cursor = await conn.execute(query, params)
-            return [row_to_fact(r) for r in await cursor.fetchall()]  # type: ignore[reportArgumentType]
+            return [row_to_fact(r) for r in await cursor.fetchall()]
 
     async def get_all_active_facts(
         self,
@@ -297,7 +297,7 @@ class FactManager:
         return await self.engine.search(*args, **kwargs)
 
     async def update(self, *args, **kwargs) -> Any:
-        return await self.engine.update(*args, **kwargs)  # type: ignore[reportAttributeAccessIssue]
+        return await self.engine.update(*args, **kwargs)
 
     async def deprecate(self, *args, **kwargs) -> Any:
         return await self.engine.deprecate(*args, **kwargs)

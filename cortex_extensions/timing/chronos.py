@@ -26,7 +26,7 @@ class ChronosMetrics:
 class ChronosEngine:
     """Core mathematical engine for CHRONOS-1."""
 
-    COMPLEXITY_MULTIPLIERS: dict[str, dict[str, float]] = {  # type: ignore[reportAssignmentType]
+    COMPLEXITY_MULTIPLIERS: dict[str, dict[str, float]] = {
         "low": {
             "t_c": 1.5,  # 1.5x AI time for context loading
             "t_d": 1.0,  # 1.0x AI time for design
@@ -170,7 +170,7 @@ class ChronosEngine:
             ai_time_secs=ai_time_secs,
             human_time_secs=hst,
             asymmetry_factor=round(asym, 1),
-            context_msg=multipliers["context"],  # type: ignore[reportArgumentType]
+            context_msg=multipliers["context"],
             tip=tip,
             anti_tip=anti_tip,
         )

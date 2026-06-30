@@ -28,9 +28,9 @@ class SecurityMonitor:
         self.log_path = Path(log_path).expanduser()
         self.threshold = threshold
         self._encoder: AsyncEncoder | None = None
-        self._vector_store: VectorStoreL2 | None = None  # type: ignore[reportInvalidTypeForm]
+        self._vector_store: VectorStoreL2 | None = None
 
-    async def _get_store(self) -> VectorStoreL2:  # type: ignore[reportInvalidTypeForm]
+    async def _get_store(self) -> VectorStoreL2:
         """Lazily initialize the local LLM encoder and L2 vector store."""
         if self._vector_store and self._encoder:
             return self._vector_store
@@ -38,7 +38,7 @@ class SecurityMonitor:
         self._encoder = AsyncEncoder()
         # LocalEmbedder handles lazy loading of the model
 
-        self._vector_store = VectorStoreL2(  # type: ignore[type-error]
+        self._vector_store = VectorStoreL2(
             encoder=self._encoder, db_path=Path("~/.cortex/security_vectors.db").expanduser()
         )
         return self._vector_store
@@ -94,7 +94,7 @@ class SecurityMonitor:
     async def _process_single_event(
         self,
         store: VectorStoreL2,
-        event: dict[str, Any],  # type: ignore[reportInvalidTypeForm]
+        event: dict[str, Any],
     ) -> SecurityAlert | None:
         """Process a single event and return an alert if a threat is detected."""
         payload = event.get("payload", "")

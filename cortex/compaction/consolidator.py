@@ -104,7 +104,7 @@ class BeliefConsolidator:
         """Lazy-init Gemini client for SLM compression."""
         if self._client is None:
             try:
-                from google import genai  # type: ignore[attr-defined]
+                from google import genai
 
                 self._client = genai.Client()
             except (ImportError, ValueError, OSError, RuntimeError) as e:
@@ -252,7 +252,7 @@ class BeliefConsolidator:
             if not rows:
                 return result
 
-            result.total_events_scanned = len(rows)  # type: ignore[type-error]
+            result.total_events_scanned = len(rows)
             fact_ids = [row[0] for row in rows]
 
             # Decrypt content

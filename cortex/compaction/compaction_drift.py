@@ -50,8 +50,8 @@ async def apply_drift_check(
         )
         rows = await cursor.fetchall()
 
-        if not rows or len(rows) < 10:  # type: ignore[reportArgumentType]
-            result.details.append(f"DRIFT_CHECK: insufficient vectors ({len(rows) if rows else 0})")  # type: ignore[reportArgumentType]
+        if not rows or len(rows) < 10:
+            result.details.append(f"DRIFT_CHECK: insufficient vectors ({len(rows) if rows else 0})")
             result.strategies_applied.append(str(CompactionStrategy.DRIFT_CHECK.value))
             return
 

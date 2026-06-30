@@ -54,7 +54,7 @@ def trust_mcp(host: str, port: int, transport: str) -> None:
     from cortex.mcp.server import run_server
     from cortex.mcp.utils import MCPServerConfig
 
-    cfg = MCPServerConfig(host=host, port=port, transport=transport)  # type: ignore
+    cfg = MCPServerConfig(host=host, port=port, transport=transport)
     run_server(cfg)
 
 

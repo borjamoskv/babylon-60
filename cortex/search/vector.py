@@ -185,7 +185,7 @@ def _row_to_result(row: tuple, enc: CortexEncrypter, tenant_id: str) -> SearchRe
 
     return SearchResult(
         fact_id=row[0],
-        content=content,  # type: ignore[reportArgumentType]
+        content=content,
         project=row[2],
         fact_type=row[3],
         confidence=row[4],
@@ -193,7 +193,7 @@ def _row_to_result(row: tuple, enc: CortexEncrypter, tenant_id: str) -> SearchRe
         valid_until=row[6],
         tags=tags,
         source=row[8],
-        meta=meta,  # type: ignore[reportArgumentType]
+        meta=meta,
         score=score,
         created_at=row[11],
         updated_at=row[12],
@@ -262,7 +262,7 @@ def semantic_search_sync(
         results.append(
             SearchResult(
                 fact_id=row[0],
-                content=content,  # type: ignore[type-error]
+                content=content,
                 project=row[2],
                 fact_type=row[3],
                 confidence=row[4],

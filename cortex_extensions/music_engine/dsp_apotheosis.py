@@ -18,7 +18,7 @@ try:
 except ImportError:
     _NUMBA_AVAILABLE = False
 
-    def njit(func):  # type: ignore[misc]
+    def njit(func):
         """No-op decorator when numba is not available."""
         return func
 
@@ -119,7 +119,7 @@ class DSPApotheosis:
             gain = scipy.signal.savgol_filter(gain, win_size, 3)
 
         # Apply gain in frequency domain
-        spectrum_matched = spectrum * gain  # type: ignore[operator]
+        spectrum_matched = spectrum * gain
         audio_matched = np.fft.irfft(spectrum_matched, n=n)
 
         return audio_matched

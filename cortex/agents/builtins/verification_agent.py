@@ -40,7 +40,7 @@ class VerificationAgent(BaseAgent):
     # Message handler
     # ------------------------------------------------------------------
 
-    async def handle_message(self, message: AgentMessage) -> None:  # type: ignore[override]
+    async def handle_message(self, message: AgentMessage) -> None:
         if message.kind != MessageKind.TASK_REQUEST:
             return
 

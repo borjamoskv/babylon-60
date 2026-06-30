@@ -6,7 +6,7 @@ import logging
 import subprocess
 from typing import Any
 
-from cortex_extensions.daemon.models import ASTAlert  # type: ignore[reportAttributeAccessIssue]
+from cortex_extensions.daemon.models import ASTAlert
 from cortex_extensions.daemon.monitors.base import IntervalProjectMonitor
 
 logger = logging.getLogger("moskv-daemon")

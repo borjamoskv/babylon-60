@@ -85,7 +85,7 @@ def _get_stripe():
             detail="stripe package not installed. Install with: pip install stripe",
         ) from exc
 
-    stripe.api_key = config.STRIPE_SECRET_KEY  # type: ignore[reportAttributeAccessIssue]
+    stripe.api_key = config.STRIPE_SECRET_KEY
     return stripe
 
 
@@ -129,9 +129,9 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
         if body.customer_email:
             session_kwargs["customer_email"] = body.customer_email
 
-        # type: ignore[reportAttributeAccessIssue]
-        session = stripe.checkout.Session.create(**session_kwargs)  # type: ignore[reportAttributeAccessIssue]
-    except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
+
+        session = stripe.checkout.Session.create(**session_kwargs)
+    except stripe.StripeError as exc:
         logger.error("Stripe checkout error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
 
@@ -153,9 +153,9 @@ async def stripe_webhook(
     payload = await request.body()
 
     try:
-        # type: ignore[reportAttributeAccessIssue]
-        event = stripe.Webhook.construct_event(payload, stripe_signature, webhook_secret)  # type: ignore[reportAttributeAccessIssue]
-    except stripe.SignatureVerificationError as exc:  # type: ignore[reportAttributeAccessIssue]
+
+        event = stripe.Webhook.construct_event(payload, stripe_signature, webhook_secret)
+    except stripe.SignatureVerificationError as exc:
         raise HTTPException(status_code=400, detail="Invalid webhook signature") from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Invalid payload") from exc
@@ -176,11 +176,11 @@ async def create_portal_session(body: PortalRequest) -> dict:
     stripe = _get_stripe()
 
     try:
-        session = stripe.billing_portal.Session.create(  # type: ignore[reportAttributeAccessIssue]
+        session = stripe.billing_portal.Session.create(
             customer=body.customer_id,
             return_url=body.return_url,
         )
-    except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
+    except stripe.StripeError as exc:
         logger.error("Stripe portal error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
 

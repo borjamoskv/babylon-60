@@ -73,7 +73,7 @@ if TYPE_CHECKING:
     )
     from cortex.memory.working import WorkingMemoryL1
 
-__all__ = [  # type: ignore[reportUnsupportedDunderAll]
+__all__ = [
     "AdaptiveResonanceGate",
     "AsyncEncoder",
     "BIFTRouter",
@@ -199,7 +199,7 @@ def __getattr__(name: str) -> object:
             val = SovereignVectorStoreL2
         except ImportError:
             # cortex.memory.vector_store was removed; no further fallback
-            val = None  # type: ignore[assignment]
+            val = None
         globals()["VectorStoreL2"] = val
         return val
 

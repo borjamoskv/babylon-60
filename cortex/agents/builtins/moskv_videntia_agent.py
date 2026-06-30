@@ -35,7 +35,7 @@ class MoskvVidentiaAgent(BaseAgent):
     ) -> None:
         super().__init__(manifest, bus, tool_registry)
 
-    async def handle_message(self, message: AgentMessage) -> None:  # type: ignore[override]
+    async def handle_message(self, message: AgentMessage) -> None:
         if message.kind != MessageKind.TASK_REQUEST:
             return
 

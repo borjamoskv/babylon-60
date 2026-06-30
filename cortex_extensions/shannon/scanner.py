@@ -251,8 +251,8 @@ class MemoryScanner:
                 params,
             )
             rows = await cursor.fetchall()
-            if not rows or len(rows) < 2:  # type: ignore[type-error]
-                return 0.0, max(1.0, float(len(rows))), len(rows)  # type: ignore[type-error]
+            if not rows or len(rows) < 2:
+                return 0.0, max(1.0, float(len(rows))), len(rows)
 
             from datetime import date as dt_date
 

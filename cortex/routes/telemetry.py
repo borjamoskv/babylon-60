@@ -153,7 +153,7 @@ async def fiat_stream_ws(
         conn.execute("SELECT MAX(id) FROM facts WHERE fact_type = 'fiat_transaction'") as cursor,
     ):
         row = await cursor.fetchone()
-        last_id = row[0] or 0  # type: ignore[reportOptionalSubscript]
+        last_id = row[0] or 0
 
     try:
         while True:

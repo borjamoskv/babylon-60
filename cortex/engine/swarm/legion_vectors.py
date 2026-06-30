@@ -114,7 +114,7 @@ class EntropyDemon:
         if (
             "except (ValueError, TypeError, KeyError, OSError, RuntimeError):  # noqa: BLE001"
             in code
-            or "except:" in code
+            or "except Exception as e:" in code
         ):
             findings.append(
                 "Fragility: Bare `except` detected. System cannot tolerate undetected entropy."

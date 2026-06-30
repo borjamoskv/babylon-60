@@ -30,7 +30,7 @@ async def check_gate_11_cobbler() -> GateResult:
             tree = ast.parse(content)
             for node in ast.walk(tree):
                 if isinstance(node, ast.ExceptHandler) and node.type is None:
-                    v.append(f"bare-except:{node.lineno}")
+                    v.append(f"bare-except Exception as e:{node.lineno}")
                 if (
                     isinstance(node, ast.Call)
                     and isinstance(node.func, ast.Name)

@@ -53,10 +53,10 @@ class MejoraloDaemon:
         from cortex.config import DEFAULT_DB_PATH
 
         self.cortex_engine = get_engine(
-            db_path or DEFAULT_DB_PATH,  # type: ignore[type-error]
-        )  # type: ignore[reportArgumentType]
+            db_path or DEFAULT_DB_PATH,
+        )
         self.engine = MejoraloEngine(engine=self.cortex_engine)
-        self.canary = CanaryMonitor()  # type: ignore[reportCallIssue]
+        self.canary = CanaryMonitor()
         self.fusion = ContextFusion(self.cortex_engine)
         self._running = False
         self._loop_task: asyncio.Task | None = None
@@ -93,7 +93,7 @@ class MejoraloDaemon:
                 await self._execute_cycle()
             except (RuntimeError, OSError, ValueError) as e:
                 logger.exception("Daemon cycle failure: %s", e)
-                self.metrics.increment(  # type: ignore[reportAttributeAccessIssue]
+                self.metrics.increment(
                     "mejoralo_daemon_errors",
                 )
 
@@ -107,10 +107,10 @@ class MejoraloDaemon:
     async def _execute_cycle(self):
         """A single scan + heal + verify cycle with Sovereign Security."""
         logger.info("⚡ Starting MEJORAlo evolutionary wave...")
-        self.canary.capture_baselines()  # type: ignore[reportAttributeAccessIssue]
+        self.canary.capture_baselines()
 
         # 1. Pre-scan: capture baseline score
-        result = await self.engine.scan(  # type: ignore[reportGeneralTypeIssues]
+        result = await self.engine.scan(
             self.project,
             self.base_path,
         )
@@ -127,8 +127,8 @@ class MejoraloDaemon:
         )
 
         # 2. Memory/KI Context Fusion + Causal Analysis
-        fused_context = await self.fusion.fuse_context(  # type: ignore[reportCallIssue]
-            query=" ".join(  # type: ignore[reportCallIssue]
+        fused_context = await self.fusion.fuse_context(
+            query=" ".join(
                 d.name for d in result.dimensions if d.score < DAEMON_DIM_SCORE_THRESHOLD
             )
             if any(d.score < DAEMON_DIM_SCORE_THRESHOLD for d in result.dimensions)
@@ -142,7 +142,7 @@ class MejoraloDaemon:
                 "🔥 Stagnation detected (%d cycles). Escalating to relentless mode.",
                 self._consecutive_stagnant,
             )
-            success = await self.engine.relentless_heal(  # type: ignore[reportGeneralTypeIssues]
+            success = await self.engine.relentless_heal(
                 self.project, self.base_path, result, target_score=self.target_score
             )
         else:
@@ -151,11 +151,11 @@ class MejoraloDaemon:
                 self.base_path,
                 self.target_score,
                 result,
-                fused_context=fused_context,  # type: ignore[reportCallIssue]
+                fused_context=fused_context,
             )
 
         # 4. Post-heal verification: re-scan to measure real impact
-        result_after = await self.engine.scan(  # type: ignore[reportGeneralTypeIssues]
+        result_after = await self.engine.scan(
             self.project,
             self.base_path,
         )
@@ -200,7 +200,7 @@ class MejoraloDaemon:
             self.metrics.inc("mejoralo_heals_total")
             await self._ouroboros_absorb()
 
-            violations = self.canary.verify()  # type: ignore[reportAttributeAccessIssue]
+            violations = self.canary.verify()
             if violations:
                 for v in violations:
                     logger.error("🛑 SECURITY REGRESSION DETECTED: %s", v)

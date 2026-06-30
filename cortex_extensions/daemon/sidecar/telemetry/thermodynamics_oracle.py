@@ -80,7 +80,7 @@ class ThermodynamicsOracle:
             try:
                 disk_io = self._psutil.disk_io_counters()
                 if disk_io and hasattr(disk_io, "busy_time"):
-                    disk_busy_ms = disk_io.busy_time or 0.0  # type: ignore[reportAttributeAccessIssue]
+                    disk_busy_ms = disk_io.busy_time or 0.0
             except Exception as exc:
                 import logging
 
@@ -160,7 +160,7 @@ class ThermodynamicsOracle:
                     meta=meta,
                 )
             else:
-                self.engine.store_sync(  # type: ignore[type-error]
+                self.engine.store_sync(
                     project="SYSTEM",
                     content=content,
                     fact_type="thermal_noise",

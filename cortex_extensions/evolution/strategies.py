@@ -449,7 +449,7 @@ class StagnationBreakerStrategy:
 # Phase 6: Escape plateaus (stagnation break)
 DEFAULT_STRATEGIES: list[ImprovementStrategy] = [
     PruneDeadPathStrategy(),
-    BridgeImportStrategy(),  # type: ignore[reportAssignmentType]
+    BridgeImportStrategy(),
     HeuristicInjectionStrategy(),
     ParameterTuningStrategy(),
     AdversarialStressStrategy(),

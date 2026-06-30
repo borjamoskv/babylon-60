@@ -280,9 +280,9 @@ class EventLoopMixin:
         if self.frontier_daemon:
             self.frontier_daemon.stop()
         if getattr(self, "zero_prompting_daemon", None):
-            self.zero_prompting_daemon.stop()  # type: ignore[union-attr]
+            self.zero_prompting_daemon.stop()
         if getattr(self, "epistemic_breaker_daemon", None):
-            self.epistemic_breaker_daemon.stop()  # type: ignore[union-attr]
+            self.epistemic_breaker_daemon.stop()
         if getattr(self, "sovereignty_runtime", None):
             await self.sovereignty_runtime.stop()
 

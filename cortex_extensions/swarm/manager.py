@@ -86,7 +86,7 @@ class SwarmManager:
                 if state.status == "failed":
                     logger.warning("Worktree %s failed: Triggering AutoFix (Ω₅)", worktree_id)
                     try:
-                        await self.autofix.process_ghost(state)  # type: ignore[reportArgumentType]
+                        await self.autofix.process_ghost(state)
                     except Exception as fix_err:
                         logger.error("AutoFix failed for worktree %s: %s", worktree_id, fix_err)
 

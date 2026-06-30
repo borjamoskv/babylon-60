@@ -31,7 +31,7 @@ class NicheArbitrageEngine:
         scrape_req = ScrapeRequest(url=target.url, strategy=ExtractionStrategy.AUTO)
         scrape_result: ScrapeResult = await self.scraper.scrape(scrape_req)
 
-        if not scrape_result.success or not scrape_result.markdown:  # type: ignore[type-error]
+        if not scrape_result.success or not scrape_result.markdown:
             return MarketReport(
                 target_name=target.name,
                 summary=f"FAILED EXTRACTION: {scrape_result.error}",
@@ -39,7 +39,7 @@ class NicheArbitrageEngine:
             )
 
         # 2. Synthesis (LLM extraction of TrendSignals)
-        report = await self.synthesize_signals(target.name, scrape_result.markdown)  # type: ignore[type-error]
+        report = await self.synthesize_signals(target.name, scrape_result.markdown)
         return report
 
     async def synthesize_signals(self, target_name: str, raw_markdown: str) -> MarketReport:

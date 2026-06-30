@@ -69,7 +69,7 @@ class SovereignContext:
     started_at: float = field(default_factory=time.time)
     endocrine: DigitalEndocrine = field(default_factory=DigitalEndocrine)
     bridge: SovereignBridge = field(default_factory=SovereignBridge)
-    arbiter: Any = field(default_factory=lambda: ImmuneArbiter())  # type: ignore[type-error]
+    arbiter: Any = field(default_factory=lambda: ImmuneArbiter())
 
     @property
     def elapsed_ms(self) -> float:
@@ -307,7 +307,7 @@ async def run_pipeline(
 
             triage = await ctx.arbiter.triage(signal, plan, confidence=confidence)
 
-            if triage.verdict == Verdict.BLOCK:  # type: ignore[union-attr]
+            if triage.verdict == Verdict.BLOCK:
                 logger.critical(
                     "🚨 IMMUNE BLOCK: Phase %s aborted to prevent sabotage.", phase.name
                 )

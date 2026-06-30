@@ -76,7 +76,7 @@ def oxygenate(min_interval: float = 0.1):
                     await breathe(deficit)
                 return await func(*args, **kwargs)
 
-            return async_wrapper  # type: ignore[reportReturnType]
+            return async_wrapper
 
         @functools.wraps(func)
         def sync_wrapper(*args: Any, **kwargs: Any) -> Any:

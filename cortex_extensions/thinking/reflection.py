@@ -113,7 +113,7 @@ def generate_reflection(
         source=source,
     )
     logger.info("Stored reflection #%d for project '%s'", fact_id, project)
-    return fact_id  # type: ignore[reportReturnType]
+    return fact_id
 
 
 def inject_reflections(

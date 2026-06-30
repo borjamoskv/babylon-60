@@ -323,7 +323,7 @@ class EvolutionOpsMixin:
 
         self._decision_archaeology(sovereign)
 
-        domain_telemetry = metrics.get(sovereign.domain)  # type: ignore[type-error]
+        domain_telemetry = metrics.get(sovereign.domain)
         state = None
         if domain_telemetry:
             state = self._action_engine.compute_state(

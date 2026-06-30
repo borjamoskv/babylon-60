@@ -169,7 +169,7 @@ class CortexClient:
 
     def list_keys(self) -> list[dict]:
         """List all API keys (admin only)."""
-        return self._request("GET", "/v1/admin/keys")  # type: ignore[reportReturnType]
+        return self._request("GET", "/v1/admin/keys")
 
     # ─── Context Manager ──────────────────────────────────────────────
 

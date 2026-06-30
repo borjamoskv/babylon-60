@@ -87,7 +87,7 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
 
 def create_aether_server(
     db_path: str = DB_PATH, host: str = "127.0.0.1", port: int = 5001
-) -> FastMCP:  # type: ignore[reportInvalidTypeForm]
+) -> FastMCP:
     """Create the Aether FastMCP server instance."""
     if FastMCP is None:
         raise ImportError("MCP SDK not installed. Run: pip install 'mcp'")

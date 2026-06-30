@@ -83,7 +83,7 @@ def sovereign_execute(
                     degraded_action = action.as_text_only()
                     degraded_args = tuple(degraded_action if a is action else a for a in args)
                     try:
-                        result = await fn(*degraded_args, **kwargs)  # type: ignore[reportCallIssue]
+                        result = await fn(*degraded_args, **kwargs)
                         if isinstance(result, AgentResult):
                             result.latency_ms = (time.perf_counter() - t0) * 1000
                             result.degradation_level = DegradationLevel.L4_GRACEFUL
@@ -133,7 +133,7 @@ def sovereign_execute(
                 await _persist_to_cortex(cortex_engine, project, upgraded)
                 raise upgraded from e
 
-        return wrapper  # type: ignore[return-value]
+        return wrapper
 
     return decorator
 

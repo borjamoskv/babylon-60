@@ -35,7 +35,7 @@ class EngineMixinBase:
         """Provide a transactional session from the connection pool."""
         # This will be implemented by AsyncCortexEngine
         if False:
-            yield  # type: ignore
+            yield
         raise NotImplementedError("Mixins must be used with a class that implements session()")
 
     def _get_embedder(self) -> Any:

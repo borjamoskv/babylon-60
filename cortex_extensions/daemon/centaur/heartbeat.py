@@ -121,7 +121,7 @@ class HeartbeatDaemon:
 
                 # 6. Handle Result
                 if result.get("status") in ["success", "aleph_breakthrough"]:
-                    self._deposit_to_iturria(task, result)  # type: ignore[type-error]
+                    self._deposit_to_iturria(task, result)
                     self.queue.mark_completed(task["id"])
                     logger.info("Task %s completed successfully via %s.", task["id"], formation)
                 else:

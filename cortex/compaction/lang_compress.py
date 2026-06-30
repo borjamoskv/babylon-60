@@ -235,7 +235,7 @@ def detect_language(text: str) -> str:
 
     # Try optional langdetect if available
     try:
-        from langdetect import detect as _detect  # type: ignore[import-untyped]
+        from langdetect import detect as _detect
 
         detected = _detect(text[:500])
         if detected in _TOKEN_TAX_RATIOS:
@@ -322,7 +322,7 @@ class LangCompressor:
         """Lazy-init Gemini client."""
         if self._client is None:
             try:
-                from google import genai  # type: ignore[attr-defined]
+                from google import genai
 
                 self._client = genai.Client()
             except (ImportError, ValueError, OSError, RuntimeError) as e:
@@ -466,7 +466,7 @@ class LangCompressor:
         except (ImportError, ValueError, TypeError):
             content = raw_content or ""
             meta = json.loads(meta_json) if meta_json else {}
-        return fact_id, content, meta if isinstance(meta, dict) else {}  # type: ignore[type-error]
+        return fact_id, content, meta if isinstance(meta, dict) else {}
 
     async def _apply_compression(
         self,

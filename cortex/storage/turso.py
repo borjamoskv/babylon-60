@@ -42,7 +42,7 @@ class TursoBackend:
             return
 
         try:
-            import libsql_experimental as libsql  # type: ignore[reportMissingImports]
+            import libsql_experimental as libsql
 
             self._libsql = libsql
         except ImportError as exc:

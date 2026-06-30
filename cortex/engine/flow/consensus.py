@@ -74,7 +74,7 @@ class ConsensusMixin(EngineMixinBase):
         if value not in (-1, 0, 1):
             raise ValueError("Vote must be -1, 0, or 1")
 
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             from cortex.engine_async import (
                 TX_BEGIN_IMMEDIATE,  # pyright: ignore[reportMissingImports]
             )
@@ -95,7 +95,7 @@ class ConsensusMixin(EngineMixinBase):
                 await self._store_consensus_vote(conn, fact_id, agent, value, rep, tenant_id)
 
                 # 3. Log transaction
-                await self._log_transaction(  # type: ignore[reportAttributeAccessIssue]
+                await self._log_transaction(
                     conn,
                     "consensus",
                     "vote_v2",
@@ -170,7 +170,7 @@ class ConsensusMixin(EngineMixinBase):
 
     async def get_votes(self, fact_id: int, tenant_id: str = "default") -> list[dict[str, Any]]:
         """Get all votes for a fact from the canonical v2 table."""
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             conn.row_factory = aiosqlite.Row
             query = """SELECT v.vote, v.agent_id as agent, v.created_at, a.reputation_score
                        FROM consensus_votes_v2 v
@@ -188,12 +188,12 @@ class ConsensusMixin(EngineMixinBase):
         tenant_id: str = "default",
     ) -> float:
         """Slash an agent's reputation for consensus deviation."""
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             new_rep = await SlashingEngine.slash(conn, agent_id, penalty_type, reason, tenant_id)
             await conn.commit()
             return new_rep
 
     async def verify_vote_ledger(self, tenant_id: str = "default") -> dict[str, Any]:
-        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:
             ledger = ImmutableVoteLedger(conn)
             return await ledger.verify_chain_integrity(tenant_id=tenant_id)

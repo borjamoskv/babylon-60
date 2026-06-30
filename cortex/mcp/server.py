@@ -80,7 +80,7 @@ class _MCPContext:
 # ─── Tool Registrators ───────────────────────────────────────────────
 
 
-def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
     """Register the ``cortex_store`` tool on *mcp*."""
 
     @mcp.tool()
@@ -153,7 +153,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
         return f"✓ Stored fact #{fact_id} in project '{project}'"
 
 
-def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
     """Register the ``cortex_search`` tool on *mcp*."""
 
     @mcp.tool()
@@ -208,8 +208,8 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
 
             results = await engine.search(
                 query,
-                project or None,  # type: ignore[reportArgumentType]
-                min(max(top_k, 1), 20),  # type: ignore[reportArgumentType]
+                project or None,
+                min(max(top_k, 1), 20),
             )
 
         if not results:
@@ -220,7 +220,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         lines = [f"Found {len(results)} results:\n"]
         for r in results:
             lines.append(
-                f"[#{r.fact_id}] (score: {r.score:.3f}) [{r.project}/{r.fact_type}]\n{r.content}\n"  # type: ignore[reportAttributeAccessIssue]
+                f"[#{r.fact_id}] (score: {r.score:.3f}) [{r.project}/{r.fact_type}]\n{r.content}\n"
             )
 
         output = "\n".join(lines)
@@ -228,7 +228,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         return output
 
 
-def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
     """Register the ``cortex_status`` tool on *mcp*."""
 
     @mcp.tool()
@@ -253,7 +253,7 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         )
 
 
-def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
     """Register the ``cortex_ledger_verify`` tool on *mcp*."""
 
     @mcp.tool()
@@ -262,7 +262,7 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         await ctx.ensure_ready()
 
         # ImmutableLedger expects a pool, not a single connection
-        ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
+        ledger = ImmutableLedger(ctx.pool)
         report = await ledger.audit_integrity_async()
 
         if report["valid"]:
@@ -280,7 +280,7 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
-def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
+def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":
     """Create and configure an optimized CORTEX MCP server instance.
 
     Each tool is registered via a dedicated helper, keeping this
@@ -290,7 +290,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-persist[mcp]'")
 
     cfg = config or MCPServerConfig()
-    mcp = FastMCP(  # type: ignore[reportOptionalCall]
+    mcp = FastMCP(
         "CORTEX Trust Engine",
         host=cfg.host,
         port=cfg.port,

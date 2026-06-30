@@ -58,7 +58,7 @@ class TombstoneMonitor:
             # Fix HIGH-005 lock contention: use auto-commit mode (isolation_level=None)
             # to avoid taking a write-lock on the first SELECT. We'll manage transactions manually.
             with db_connect(
-                self.db_path,  # type: ignore[type-error]
+                self.db_path,
                 timeout=5,
                 isolation_level=None,  # Manual transaction control
             ) as conn:

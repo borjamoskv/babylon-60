@@ -135,7 +135,7 @@ def architect_reverse(text: str | None) -> None:
         async with SovereignLLM(temperature=0.1) as llm:
             with console.status("[bold cyan]Extracting stylistic vectors...[/]"):
                 result = await llm.generate(
-                    prompt=text,  # type: ignore
+                    prompt=text,
                     system=_REVERSE_SYSTEM_PROMPT,
                 )
 

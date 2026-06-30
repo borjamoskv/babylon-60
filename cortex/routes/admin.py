@@ -138,7 +138,7 @@ async def _verify_admin_auth(
         )
 
     token = authorization.split(" ", 1)[1]
-    result = await manager.authenticate_async(token)  # type: ignore[union-attr]
+    result = await manager.authenticate_async(token)
 
     if not result.authenticated:
         raise HTTPException(
@@ -178,12 +178,12 @@ async def export_project(
     target_file = _validate_export_path(path, project, lang)
 
     try:
-        facts = await run_in_threadpool(  # type: ignore[reportCallIssue]
+        facts = await run_in_threadpool(
             engine.search,
             project=project,
             limit=_MAX_EXPORT_FACTS,
         )
-        content = export_facts(facts, fmt="json")  # type: ignore[reportArgumentType]
+        content = export_facts(facts, fmt="json")
 
         def _write_export() -> Path:
             target_file.parent.mkdir(parents=True, exist_ok=True)
@@ -246,7 +246,7 @@ async def deep_health_check(
         _healthy = True
         for name, probe in probes.items():
             try:
-                status, ok, details = probe()  # type: ignore[misc]
+                status, ok, details = probe()
             except AttributeError:
                 status, ok, details = (
                     "unavailable",
@@ -262,7 +262,7 @@ async def deep_health_check(
             _healthy = _healthy and ok
             _checks[name] = HealthCheckDetail(
                 status=status,
-                **details,  # type: ignore[reportArgumentType]
+                **details,
             )
         return _checks, _healthy
 

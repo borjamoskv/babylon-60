@@ -90,8 +90,8 @@ class TopographicSensor:
         # 1. Try native os.listxattr (Linux mostly)
         if hasattr(os, "listxattr"):
             try:
-                # type: ignore[reportAttributeAccessIssue]
-                return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]  # type: ignore[reportAttributeAccessIssue]
+
+                return [a for a in os.listxattr(str(file_path)) if a.startswith(self.prefix)]
             except OSError:
                 import logging
 
@@ -126,7 +126,7 @@ class TopographicSensor:
         # 1. Try native os.getxattr
         if hasattr(os, "getxattr"):
             try:
-                return os.getxattr(str(file_path), attr)  # type: ignore[reportAttributeAccessIssue]
+                return os.getxattr(str(file_path), attr)
             except OSError:
                 import logging
 
@@ -171,7 +171,7 @@ class TopographicSensor:
 
             ghost["strength"] = strength
             ghost["source_file"] = str(file_path)
-            return ghost  # type: ignore[type-error]
+            return ghost
         except (json.JSONDecodeError, KeyError):
             return None
 
@@ -179,8 +179,8 @@ class TopographicSensor:
         """Helper to delete an xattr."""
         if hasattr(os, "removexattr"):
             try:
-                # type: ignore[reportAttributeAccessIssue]
-                os.removexattr(str(file_path), attr_name)  # type: ignore[reportAttributeAccessIssue]
+
+                os.removexattr(str(file_path), attr_name)
                 return
             except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)

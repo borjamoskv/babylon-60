@@ -178,7 +178,7 @@ class ComponentsMixin:
         def _virgo():
             from cortex.engine.flow.guard_adapters import VirgoGuardAdapter
 
-            return VirgoGuardAdapter(self)  # type: ignore
+            return VirgoGuardAdapter(self)
 
         def _omega():
             from cortex.engine.flow.guard_adapters import OmegaGuardAdapter
@@ -201,7 +201,7 @@ class ComponentsMixin:
         def _ledger():
             from cortex.engine.flow.guard_adapters import LedgerCheckpointHook
 
-            return LedgerCheckpointHook(self)  # type: ignore
+            return LedgerCheckpointHook(self)
 
         def _signal():
             from cortex.engine.flow.guard_adapters import SignalEmitHook

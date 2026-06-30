@@ -253,7 +253,7 @@ class SovereignLedger(LedgerAuditMixin):
         ts = now_iso()
         effective_tenant_id = self._effective_tenant_id(tenant_id)
 
-        async with self._get_conn_proxy() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self._get_conn_proxy() as conn:
             await conn.execute("BEGIN EXCLUSIVE")
             try:
                 cursor = await conn.execute(

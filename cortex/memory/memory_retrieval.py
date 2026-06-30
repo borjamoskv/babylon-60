@@ -84,14 +84,14 @@ async def _fetch_hdc_results(
     layer: str | None = None,
 ) -> list[CortexFactModel]:
     try:
-        toxic_ids = await manager._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)  # type: ignore[reportOptionalMemberAccess]
-        return await manager._hdc.recall_secure(  # type: ignore[reportOptionalMemberAccess]
+        toxic_ids = await manager._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)
+        return await manager._hdc.recall_secure(
             tenant_id=tenant_id,
             project_id=project_id,
             query=query,
             limit=max_episodes * 2,
             inhibit_ids=toxic_ids,
-            layer=layer,  # type: ignore[reportCallIssue]
+            layer=layer,
         )
     except (OSError, RuntimeError, ValueError) as e:
         logger.warning("HDC recall failed: %s", e)
@@ -108,7 +108,7 @@ async def _fetch_dense_results(
 ) -> list[CortexFactModel]:
     try:
         # [VECTOR-2] ZERO-FRICTION HOLOGRAPHIC RECALL
-        if getattr(manager, "_hologram", None) is not None and manager._hologram.is_ready:  # type: ignore
+        if getattr(manager, "_hologram", None) is not None and manager._hologram.is_ready:
             # O(1) in-RAM lookup without I/O
             logger.debug("🌌 Querying Holographic Memory (RAM-resident)")
             return await manager._hologram.recall_holographic(  # type: ignore
@@ -193,7 +193,7 @@ async def retrieve_episodic_context(
     metamemory = getattr(manager, "metamemory", None)
     if metamemory is not None and candidate_engrams:
         query_embedding = await manager._encoder.encode(query)
-        judgment = metamemory.judge_fok(query_embedding, candidate_engrams)  # type: ignore
+        judgment = metamemory.judge_fok(query_embedding, candidate_engrams)
         threshold = getattr(metamemory, "_fok_threshold", 0.3)
         if judgment.fok_score < threshold:
             logger.warning(

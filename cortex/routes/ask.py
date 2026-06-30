@@ -156,7 +156,7 @@ async def ask_cortex(
             content={
                 "detail": "No LLM provider configured. "
                 "Set CORTEX_LLM_PROVIDER env variable. "
-                f"Supported: {LLMProvider.list_providers()}",  # type: ignore[type-error]
+                f"Supported: {LLMProvider.list_providers()}",
             },
         )
 

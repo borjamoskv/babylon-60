@@ -189,7 +189,7 @@ class ConnectionMixin:
             if self._ledger is None:
                 from cortex.ledger import ImmutableLedger
 
-                self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
+                self._ledger = ImmutableLedger(conn)
             self._schema_ready = True
 
     async def _get_or_create_ledger(self):
@@ -199,7 +199,7 @@ class ConnectionMixin:
         if self._ledger is None:
             from cortex.ledger import ImmutableLedger
 
-            self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
+            self._ledger = ImmutableLedger(conn)
         return self._ledger
 
     def get_connection(self) -> aiosqlite.Connection:

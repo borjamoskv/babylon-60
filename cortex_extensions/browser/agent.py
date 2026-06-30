@@ -58,14 +58,14 @@ class SovereignBrowserAgent:
                     break
                 if cmd == "click":
                     cortex_id = action.get("cortex_id")
-                    await self.engine.click(int(cortex_id))  # type: ignore[reportArgumentType]
+                    await self.engine.click(int(cortex_id))
                 elif cmd == "type":
                     cortex_id = action.get("cortex_id")
                     text = action.get("text")
-                    await self.engine.type(int(cortex_id), text)  # type: ignore[reportArgumentType]
+                    await self.engine.type(int(cortex_id), text)
                 elif cmd == "goto":
                     url = action.get("url")
-                    await self.engine.goto(url)  # type: ignore[reportArgumentType]
+                    await self.engine.goto(url)
                 elif cmd == "wait":
                     wait_time_sec = action.get("seconds", 2)
                     await asyncio.sleep(wait_time_sec)

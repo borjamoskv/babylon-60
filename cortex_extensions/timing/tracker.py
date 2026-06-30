@@ -61,7 +61,7 @@ class TimingTracker:
         )
         self._conn.commit()
         logger.debug("Heartbeat: %s/%s [%s]", project, entity, cat)
-        return cursor.lastrowid  # type: ignore[reportReturnType]
+        return cursor.lastrowid
 
     def flush(self, gap_seconds: int | None = None) -> int:
         """Group unflushed heartbeats into continuous time entries.

@@ -200,7 +200,7 @@ class AgentExecutor:
         if router is not None:
             result = await router.execute_resilient(prompt)
             if result.is_ok():
-                content = result.value  # type: ignore
+                content = result.value
                 return {
                     "content": content,
                     "tokens": len(content.split()) * 2,  # Rough estimate

@@ -43,7 +43,7 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
 
         try:
             if attack == "conjectures":
-                from conjectures import run_all_conjectures  # type: ignore[reportMissingImports]
+                from conjectures import run_all_conjectures
 
                 results = run_all_conjectures()
                 lines = ["Hilbert-Ω Conjectures Report:\n"]
@@ -91,7 +91,7 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
             if attack == "prove":
                 if not problem:
                     return "❌ Specify a theorem name with 'problem' arg."
-                from hilbert_engine import attack_theorem  # type: ignore[reportMissingImports]
+                from hilbert_engine import attack_theorem
 
                 try:
                     from z3 import Ints

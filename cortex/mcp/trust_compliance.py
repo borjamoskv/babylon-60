@@ -61,27 +61,27 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         async with ctx.pool.acquire() as conn:
             # Total facts
             cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE deprecated_at IS NULL")
-            total_facts = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            total_facts = (await cursor.fetchone())[0]
 
             # Decisions count
             cursor = await conn.execute(
                 "SELECT COUNT(*) FROM facts WHERE fact_type = 'decision' AND deprecated_at IS NULL"
             )
-            decisions = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            decisions = (await cursor.fetchone())[0]
 
             # Total transactions
             cursor = await conn.execute("SELECT COUNT(*) FROM transactions")
-            total_tx = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            total_tx = (await cursor.fetchone())[0]
 
             # Merkle checkpoints
             cursor = await conn.execute("SELECT COUNT(*) FROM merkle_roots")
-            checkpoints = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            checkpoints = (await cursor.fetchone())[0]
 
             # Projects
             cursor = await conn.execute(
                 "SELECT COUNT(DISTINCT project) FROM facts WHERE deprecated_at IS NULL"
             )
-            projects = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            projects = (await cursor.fetchone())[0]
 
             # Agents (from tags)
             cursor = await conn.execute(
@@ -89,7 +89,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
                 "WHERE tags LIKE '%agent:%' AND deprecated_at IS NULL"
             )
             agent_rows = await cursor.fetchall()
-            agents = _extract_agents_from_rows(agent_rows)  # type: ignore[reportArgumentType]
+            agents = _extract_agents_from_rows(agent_rows)
 
             # Oldest and newest fact
             cursor = await conn.execute(
@@ -98,7 +98,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
             time_range = await cursor.fetchone()
 
         # Verify ledger integrity
-        ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
+        ledger = ImmutableLedger(ctx.pool)
         integrity = await ledger.audit_integrity_async()
 
         now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
@@ -116,7 +116,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
             f"  Logged Decisions:      {decisions}",
             f"  Active Projects:       {projects}",
             f"  Tracked Agents:        {len(agents)}",
-            f"  Coverage Period:       {time_range[0] or 'N/A'} → {time_range[1] or 'N/A'}",  # type: ignore[reportOptionalSubscript]
+            f"  Coverage Period:       {time_range[0] or 'N/A'} → {time_range[1] or 'N/A'}",
             "",
             "── 2. Cryptographic Integrity ──",
             f"  Transaction Ledger:    {total_tx} entries",
@@ -222,7 +222,7 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
             if error:
                 return error
 
-            tid, tproj, tcontent, ttype, tcreated, _ttags = target  # type: ignore[reportGeneralTypeIssues]
+            tid, tproj, tcontent, ttype, tcreated, _ttags = target
 
             # Find related decisions in the same project
             cursor = await conn.execute(
@@ -256,8 +256,8 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
         ]
 
         if predecessors:
-            lines.append(f"── Preceding Context ({len(predecessors)} entries) ──")  # type: ignore[reportArgumentType]
-            for p in reversed(predecessors[-10:]):  # type: ignore[reportIndexIssue]
+            lines.append(f"── Preceding Context ({len(predecessors)} entries) ──")
+            for p in reversed(predecessors[-10:]):
                 pid, pcontent, ptype, pcreated, _ptags = p
                 lines.append(f"  [{pcreated}] #{pid} ({ptype}): {pcontent[:120]}")
             lines.append("")
@@ -267,8 +267,8 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
         lines.append("")
 
         if successors:
-            lines.append(f"── Subsequent Impact ({len(successors)} entries) ──")  # type: ignore[reportArgumentType]
-            for s in successors[:5]:  # type: ignore[reportIndexIssue]
+            lines.append(f"── Subsequent Impact ({len(successors)} entries) ──")
+            for s in successors[:5]:
                 sid, scontent, stype, screated, _stags = s
                 lines.append(f"  [{screated}] #{sid} ({stype}): {scontent[:120]}")
 

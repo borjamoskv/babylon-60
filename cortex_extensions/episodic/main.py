@@ -224,7 +224,7 @@ class EpisodicMemory:
         async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
-        return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
+        return [self._row_to_episode(row) for row in rows]
 
     async def _fts_recall(self, search: str, project: str | None, limit: int) -> list[Episode]:
         """High-performance full-text search across episodes."""
@@ -248,7 +248,7 @@ class EpisodicMemory:
         async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
-        return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
+        return [self._row_to_episode(row) for row in rows]
 
     async def detect_patterns(
         self,
@@ -279,7 +279,7 @@ class EpisodicMemory:
             _extract_patterns,
             list(rows),  # pyright: ignore[reportArgumentType]
             min_occurrences,
-            limit,  # type: ignore[reportArgumentType]
+            limit,
         )
 
     async def count(self, project: str | None = None) -> int:
@@ -321,7 +321,7 @@ class EpisodicMemory:
         """
         async with self._conn.execute(sql, (session_id,)) as cursor:
             rows = await cursor.fetchall()
-        return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
+        return [self._row_to_episode(row) for row in rows]
 
 
 # ─── Pattern Detection (Advanced Algorithmic) ─────────────────────────

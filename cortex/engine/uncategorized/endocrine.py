@@ -30,7 +30,7 @@ class EndocrineRegistry:
     def __new__(cls) -> EndocrineRegistry:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._hormones = {  # type: ignore[reportAttributeAccessIssue]
+            cls._instance._hormones = {
                 HormoneType.CORTISOL: 0.1,
                 HormoneType.NEURAL_GROWTH: 0.5,
                 HormoneType.ADRENALINE: 0.0,
@@ -38,26 +38,26 @@ class EndocrineRegistry:
                 HormoneType.SEROTONIN: 0.5,
             }
             # Ω₂: Decay constants (per interaction/tick)
-            cls._instance._decay = {  # type: ignore[reportAttributeAccessIssue]
+            cls._instance._decay = {
                 HormoneType.CORTISOL: 0.005,
                 HormoneType.NEURAL_GROWTH: 0.001,
                 HormoneType.ADRENALINE: 0.2,
                 HormoneType.DOPAMINE: 0.01,
                 HormoneType.SEROTONIN: 0.0005,
             }
-            cls._instance._last_pulse = dict.fromkeys(HormoneType, 0.0)  # type: ignore[reportAttributeAccessIssue]
+            cls._instance._last_pulse = dict.fromkeys(HormoneType, 0.0)
         return cls._instance
 
     def get_level(self, hormone: HormoneType) -> float:
         self._apply_decay()
-        return self._hormones.get(hormone, 0.0)  # type: ignore[reportAttributeAccessIssue]
+        return self._hormones.get(hormone, 0.0)
 
     def pulse(self, hormone: HormoneType, delta: float, reason: str | None = None) -> float:
         """Adjust local hormonal levels (clamped 0.0-1.0)."""
-        current = self._hormones.get(hormone, 0.0)  # type: ignore[reportAttributeAccessIssue]
+        current = self._hormones.get(hormone, 0.0)
         new_val = max(0.0, min(1.0, current + delta))
-        self._hormones[hormone] = new_val  # type: ignore[reportAttributeAccessIssue]
-        self._last_pulse[hormone] = time.monotonic()  # type: ignore[reportAttributeAccessIssue]
+        self._hormones[hormone] = new_val
+        self._last_pulse[hormone] = time.monotonic()
 
         if abs(delta) > 0.05 or new_val > 0.8:
             logger.info(
@@ -78,7 +78,7 @@ class EndocrineRegistry:
     def sync_with_calcification(self, index: float) -> None:
         """Ω₅-H: Sync systemic Cortisol with project Calcification Index."""
         calc_stress = min(1.0, index / 100.0)
-        current = self._hormones.get(HormoneType.CORTISOL, 0.0)  # type: ignore[reportAttributeAccessIssue]
+        current = self._hormones.get(HormoneType.CORTISOL, 0.0)
         if calc_stress > current:
             self.pulse(
                 HormoneType.CORTISOL,
@@ -89,7 +89,7 @@ class EndocrineRegistry:
     def sync_with_free_energy(self, total_f: float) -> None:
         """Ω₅-F: Sync systemic Cortisol with Variational Free Energy."""
         f_stress = min(1.0, total_f / 10.0)
-        current = self._hormones.get(HormoneType.CORTISOL, 0.0)  # type: ignore[reportAttributeAccessIssue]
+        current = self._hormones.get(HormoneType.CORTISOL, 0.0)
         if f_stress > current:
             self.pulse(
                 HormoneType.CORTISOL,
@@ -104,23 +104,23 @@ class EndocrineRegistry:
         Returns count of hormones pruned.
         """
         count = 0
-        for h, val in self._hormones.items():  # type: ignore[reportAttributeAccessIssue]
+        for h, val in self._hormones.items():
             # If a hormone is very low and hasn't changed, 'zero' it
             if val < 0.01:
-                self._hormones[h] = 0.0  # type: ignore[reportAttributeAccessIssue]
+                self._hormones[h] = 0.0
                 count += 1
         return count
 
     def _apply_decay(self) -> None:
         """Applies entropic decay to all hormones (Ω₂)."""
-        for h, current in self._hormones.items():  # type: ignore[reportAttributeAccessIssue]
-            decay_rate = self._decay.get(h, 0.0)  # type: ignore[reportAttributeAccessIssue]
-            self._hormones[h] = max(0.0, current - decay_rate)  # type: ignore[reportAttributeAccessIssue]
+        for h, current in self._hormones.items():
+            decay_rate = self._decay.get(h, 0.0)
+            self._hormones[h] = max(0.0, current - decay_rate)
 
     @property
     def balance(self) -> dict[str, float]:
         """Returns current hormonal state for telemetry."""
-        return {h.name: round(v, 3) for h, v in self._hormones.items()}  # type: ignore[reportAttributeAccessIssue]
+        return {h.name: round(v, 3) for h, v in self._hormones.items()}
 
 
 ENDOCRINE = EndocrineRegistry()

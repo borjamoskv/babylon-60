@@ -207,7 +207,7 @@ def run_cli(
         print()
         for event in runner.run(
             user_id="moskv-1",
-            session_id=session.id,  # type: ignore[union-attr]
+            session_id=session.id,
             new_message=content,
         ):
             if event.is_final_response():

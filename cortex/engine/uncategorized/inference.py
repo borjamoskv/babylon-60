@@ -397,7 +397,7 @@ class InferenceEngine:
             # Record causal edges from source facts
             for source_id in d.source_fact_ids:
                 await graph.record_edge(
-                    new_fact_id,  # type: ignore[arg-type]
+                    new_fact_id,
                     parent_id=source_id,
                     edge_type=EDGE_DERIVED_FROM,
                     project=d.project,

@@ -315,7 +315,7 @@ def siege(db: str) -> None:
             )
         )
 
-        tasks = [vector.attack(engine, {}) for vector in COMPLIANCE_SIEGE_SWARM]  # type: ignore[type-error]
+        tasks = [vector.attack(engine, {}) for vector in COMPLIANCE_SIEGE_SWARM]
 
         import asyncio
 

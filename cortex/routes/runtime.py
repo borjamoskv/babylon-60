@@ -14,7 +14,7 @@ router = APIRouter(prefix="/v1/runtime", tags=["runtime"])
 @router.get("/health")
 async def get_health(request: Request) -> dict:
     """Retrieve runtime health report."""
-    return HealthReport(status="healthy", components={}, degraded_features=[], warnings=[])  # type: ignore[type-error]
+    return HealthReport(status="healthy", components={}, degraded_features=[], warnings=[])
 
 
 @router.get("/boot_recovery", response_model=RecoveryReport)
