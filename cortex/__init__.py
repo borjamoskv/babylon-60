@@ -167,6 +167,36 @@ class _CortexFinder:
             pass
         _ensure_compat_aliases()
 
+    def get_code(self, fullname):
+        target_name = _map_name(fullname)
+        try:
+            target_spec = importlib.util.find_spec(target_name)
+            if target_spec and hasattr(target_spec.loader, 'get_code'):
+                return target_spec.loader.get_code(target_name)
+        except Exception:
+            pass
+        return None
+
+    def get_source(self, fullname):
+        target_name = _map_name(fullname)
+        try:
+            target_spec = importlib.util.find_spec(target_name)
+            if target_spec and hasattr(target_spec.loader, 'get_source'):
+                return target_spec.loader.get_source(target_name)
+        except Exception:
+            pass
+        return None
+
+    def is_package(self, fullname):
+        target_name = _map_name(fullname)
+        try:
+            target_spec = importlib.util.find_spec(target_name)
+            if target_spec and hasattr(target_spec.loader, 'is_package'):
+                return target_spec.loader.is_package(target_name)
+        except Exception:
+            pass
+        return False
+
 
 # Bootstrap the top-level module proxy
 import babylon60 as babylon60  # noqa: E402

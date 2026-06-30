@@ -33,4 +33,4 @@ if __name__ == "__main__":
         signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(CLI_TIMEOUT_SECONDS)
 
-    cli()
+    cli(prog_name="cortex.cli")

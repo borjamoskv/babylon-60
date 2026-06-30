@@ -118,23 +118,26 @@ class ConnectionMixin:
             self._vec_available = await load_sqlite_vec_async(conn)
             await self._ensure_schema_ready(conn)
             if not getattr(self, "_memory_ready", False):
-                with getattr(self, "_thread_init_lock", None) or threading.Lock():
+                async with self._schema_lock:
                     if not getattr(self, "_memory_ready", False):
                         await self._init_memory_subsystem(self._db_path, conn)  # pyright: ignore[reportAttributeAccessIssue]
             return conn
 
     async def _ensure_schema_ready(self, conn: aiosqlite.Connection) -> None:
         """Bootstrap the base schema once per engine instance."""
-        if self._schema_ready:
+        if getattr(self, "_schema_ready", False):
             return
-        with getattr(self, "_thread_init_lock", None) or threading.Lock():
-            if self._schema_ready:
+            
+        async with self._schema_lock:
+            if getattr(self, "_schema_ready", False):
                 return
 
             # Physically authorize migrations
             if hasattr(conn._conn, "authorize_causal_writes"):
                 getattr(conn._conn, "authorize_causal_writes")()  # noqa: B009
             try:
+                # Use BEGIN IMMEDIATE to safely acquire write lock and utilize busy_timeout
+                await conn.execute("BEGIN IMMEDIATE")
                 await run_migrations_async(conn)
                 for k, v in get_init_meta():
                     await conn.execute(
