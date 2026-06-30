@@ -65,6 +65,43 @@ _ANERGY_PATTERNS: list[re.Pattern[str]] = [
 # HTML comment pattern for stripping
 _HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 
+# System-injected XML tags from transcripts
+_SYSTEM_XML_TAGS_RE = re.compile(
+    r"<(?:USER_REQUEST|/USER_REQUEST|ADDITIONAL_METADATA|/ADDITIONAL_METADATA"
+    r"|USER_SETTINGS_CHANGE|/USER_SETTINGS_CHANGE|SYSTEM_MESSAGE|/SYSTEM_MESSAGE"
+    r"|conversation_summaries|/conversation_summaries)[^>]*>",
+    re.IGNORECASE,
+)
+
+
+def _clean_transcript_prompt(text: str) -> str:
+    """Strip system-injected XML metadata from transcript user prompts."""
+    # Remove XML tags
+    cleaned = _SYSTEM_XML_TAGS_RE.sub("", text)
+    cleaned = _HTML_COMMENT_RE.sub("", cleaned)
+    # Remove lines that are pure metadata
+    lines = cleaned.split("\n")
+    filtered = []
+    skip_block = False
+    for line in lines:
+        stripped = line.strip()
+        # Skip metadata blocks
+        if stripped.startswith("The current local time is:"):
+            continue
+        if stripped.startswith("The user changed setting"):
+            continue
+        if stripped.startswith("# Conversation History"):
+            skip_block = True
+            continue
+        if skip_block and stripped.startswith("## Conversation "):
+            continue
+        if skip_block and not stripped:
+            skip_block = False
+            continue
+        if not skip_block and stripped:
+            filtered.append(line)
+    return "\n".join(filtered).strip()
+
 # Minimum thresholds
 _MIN_ENTROPY_THRESHOLD = 2.8
 _MIN_LINE_LENGTH = 12
