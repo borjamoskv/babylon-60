@@ -357,7 +357,7 @@ class MOSKV1DatasetCompiler:
         seed: int = 42,
     ) -> None:
         self.workspace = Path(workspace_path)
-        self.output_dir = Path(output_dir or Path.home() / ".cortex" / "training" / "datasets")
+        self.output_dir = Path(output_dir or Path.home() / ".babylon60" / "training" / "datasets")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.entries: list[DatasetEntry] = []
         self.seen_hashes: set[str] = set()

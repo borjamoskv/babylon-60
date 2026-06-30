@@ -139,7 +139,7 @@ class MOSKV1Core:
         self.ollama_host = ollama_host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
         self.max_context_facts = max_context_facts
         self.context_score_threshold = context_score_threshold
-        self._adapter_path = Path.home() / ".cortex" / "training" / "adapters"
+        self._adapter_path = Path.home() / ".babylon60" / "training" / "adapters"
         self._history: deque[ConversationTurn] = deque(maxlen=max_history * 2)
         self._sovereign_llm = None  # Lazy-loaded fallback
         

@@ -18,6 +18,7 @@ import json
 import logging
 import os
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -38,14 +39,14 @@ class TTTEngine:
         self.collector = TrajectoryCollector(episodic_memory)
         self.rewarder = RewardEngine(use_tests=True)
 
-        self.dataset_dir = Path.home() / ".cortex" / "training" / "datasets"
+        self.dataset_dir = Path.home() / ".babylon60" / "training" / "datasets"
         self.dataset_dir.mkdir(parents=True, exist_ok=True)
 
-        # We target the Qwen2.5 base model used by CORTEX
+        # We target the Qwen2.5 base model used by BABYLON-60
         self.base_model = os.getenv(
             "CORTEX_BASE_MODEL_PATH", "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
         )
-        self.adapter_path = Path.home() / ".cortex" / "training" / "adapters"
+        self.adapter_path = Path.home() / ".babylon60" / "training" / "adapters"
 
     async def run_nocturnal_consolidation(self, session_ids: list[str]) -> dict[str, Any]:
         """
@@ -103,52 +104,114 @@ class TTTEngine:
         }
 
     def _save_dataset(self, trajectories: list[Trajectory]) -> Path:
-        """Saves golden trajectories in ShareGPT format for MLX-LM."""
-        # ShareGPT format is optimal for instruction tuning
+        """Saves golden trajectories in ShareGPT/messages format for MLX-LM."""
+        # Format trajectories into JSON format
         formatted_json = self.collector.format_for_sft(trajectories, format_type="sharegpt")
-
-        timestamp = int(time.monotonic())
-        file_path = self.dataset_dir / f"golden_dataset_{timestamp}.jsonl"
-
-        # MLX-LM expects JSONL
         data = json.loads(formatted_json)
-        with open(file_path, "w", encoding="utf-8") as f:
-            for item in data:
-                f.write(json.dumps(item) + "\n")
 
-        # Also maintain a symlink to 'latest.jsonl'
-        latest_link = self.dataset_dir / "latest.jsonl"
-        if latest_link.exists():
-            latest_link.unlink()
-        latest_link.symlink_to(file_path)
+        # Map 'conversations' key to 'messages' for MLX-LM compatibility
+        mapped_entries = []
+        for entry in data:
+            if "conversations" in entry:
+                mapped_entries.append({"messages": entry["conversations"]})
+            else:
+                mapped_entries.append(entry)
 
-        return file_path
+        train_path = self.dataset_dir / "train.jsonl"
+        valid_path = self.dataset_dir / "valid.jsonl"
+        test_path = self.dataset_dir / "test.jsonl"
+
+        # Append golden trajectories incrementally to the train set
+        # This merges user corrections with static compiled knowledge
+        existing_lines = []
+        if train_path.exists():
+            try:
+                with open(train_path, encoding="utf-8") as f:
+                    existing_lines = [line.strip() for line in f if line.strip()]
+            except Exception as e:
+                logger.error("Failed to read existing train.jsonl: %s", e)
+
+        # Write combined dataset
+        try:
+            with open(train_path, "w", encoding="utf-8") as f:
+                # Keep existing lines
+                for line in existing_lines:
+                    f.write(line + "\n")
+                # Append new golden trajectories
+                for entry in mapped_entries:
+                    f.write(json.dumps(entry) + "\n")
+            logger.info("Injected %d golden trajectories into train.jsonl", len(mapped_entries))
+        except Exception as e:
+            logger.error("Failed to write to train.jsonl: %s", e)
+
+        # Ensure valid.jsonl and test.jsonl exist with at least 1 entry to satisfy MLX-LM
+        for path in [valid_path, test_path]:
+            if not path.exists() or path.stat().st_size == 0:
+                try:
+                    with open(path, "w", encoding="utf-8") as f:
+                        if mapped_entries:
+                            f.write(json.dumps(mapped_entries[0]) + "\n")
+                        elif existing_lines:
+                            f.write(existing_lines[0] + "\n")
+                        else:
+                            # Strict fallback dummy matching format
+                            dummy = {"messages": [{"role": "system", "content": "stub"}, {"role": "user", "content": "ping"}, {"role": "assistant", "content": "pong"}]}
+                            f.write(json.dumps(dummy) + "\n")
+                except Exception as e:
+                    logger.error("Failed to write split file %s: %s", path, e)
+
+        # Maintain a log of the nocturnal trajectories
+        timestamp = int(time.time())
+        log_file = self.dataset_dir / f"golden_dataset_{timestamp}.jsonl"
+        try:
+            with open(log_file, "w", encoding="utf-8") as f:
+                for entry in mapped_entries:
+                    f.write(json.dumps(entry) + "\n")
+        except Exception as e:
+            logger.error("Failed to save golden log: %s", e)
+
+        return train_path
 
     async def _trigger_mlx_lora(self) -> dict[str, Any]:
         """
-        Triggers mlx_lm.lora asynchronously.
-        This alters the neural weights in real-time on Apple Silicon.
+        Triggers mlx_lm.lora training asynchronously.
+        Alters neural weights using Apple Silicon Metal optimization.
         """
         logger.info("🧠 Triggering MLX LoRA Fine-Tuning (Apple Silicon Optimization)...")
 
         self.adapter_path.mkdir(parents=True, exist_ok=True)
 
+        # Optimized cmd arguments avoiding OOM/NaN and using updated subcommand syntax
         cmd = [
-            "python",
+            sys.executable,
             "-m",
-            "mlx_lm.lora",
+            "mlx_lm",
+            "lora",
             "--model",
             self.base_model,
+            "--train",
             "--data",
             str(self.dataset_dir),
             "--adapter-path",
             str(self.adapter_path),
+            "--fine-tune-type",
+            "lora",
+            "--optimizer",
+            "adamw",
+            "--mask-prompt",
+            "--num-layers",
+            "16",
             "--iters",
-            "100",
+            "50",  # Optimized iterations for nocturnal cycle
             "--batch-size",
-            "2",
-            "--lora-layers",
-            "8",
+            "1",   # Lower batch size to prevent OOM
+            "--grad-accumulation-steps",
+            "2",   # Virtual batch size = 2
+            "--val-batches",
+            "5",   # Speed up validation checks
+            "--max-seq-length",
+            "1280", # Avoid truncation
+            "--grad-checkpoint", # Enable memory optimizations
         ]
 
         try:

@@ -67,8 +67,8 @@ def cmd_train(
     """Execute MLX LoRA fine-tuning."""
     import subprocess
 
-    dataset_dir = Path.home() / ".cortex" / "training" / "datasets"
-    adapter_path = Path.home() / ".cortex" / "training" / "adapters"
+    dataset_dir = Path.home() / ".babylon60" / "training" / "datasets"
+    adapter_path = Path.home() / ".babylon60" / "training" / "adapters"
     adapter_path.mkdir(parents=True, exist_ok=True)
 
     # Check for train.jsonl (v2 split format) or moskv1_dataset.jsonl
@@ -135,7 +135,7 @@ def cmd_register() -> None:
     core = MOSKV1Core()
     modelfile = core.get_modelfile()
 
-    modelfile_path = Path.home() / ".cortex" / "training" / "adapters" / "Modelfile"
+    modelfile_path = Path.home() / ".babylon60" / "training" / "adapters" / "Modelfile"
     modelfile_path.parent.mkdir(parents=True, exist_ok=True)
     modelfile_path.write_text(modelfile, encoding="utf-8")
 
@@ -147,7 +147,7 @@ def cmd_register() -> None:
 
 def cmd_validate() -> None:
     """Validate dataset quality with detailed diagnostics."""
-    dataset_dir = Path.home() / ".cortex" / "training" / "datasets"
+    dataset_dir = Path.home() / ".babylon60" / "training" / "datasets"
     dataset_path = dataset_dir / "moskv1_dataset.jsonl"
     if not dataset_path.exists():
         print("❌ No compiled dataset found. Run 'compile' first.")
@@ -300,7 +300,7 @@ def cmd_validate() -> None:
         print("   ❌ Dataset quality is insufficient — review filter settings")
 
     # ─── Weights Verification ───
-    adapter_path = Path.home() / ".cortex" / "training" / "adapters"
+    adapter_path = Path.home() / ".babylon60" / "training" / "adapters"
     if (adapter_path / "adapters.safetensors").exists():
         print()
         print("═══ LoRA WEIGHTS VERIFICATION (C5-REAL) ═══")
@@ -325,7 +325,7 @@ def cmd_validate() -> None:
 
 def cmd_stats() -> None:
     """Show stats of the last compiled dataset."""
-    dataset_path = Path.home() / ".cortex" / "training" / "datasets" / "moskv1_dataset.jsonl"
+    dataset_path = Path.home() / ".babylon60" / "training" / "datasets" / "moskv1_dataset.jsonl"
     if not dataset_path.exists():
         print("❌ No compiled dataset found.")
         sys.exit(1)

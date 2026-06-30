@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import shutil
 import time
 from pathlib import Path
 from typing import Any
@@ -40,11 +41,14 @@ class AutonomousTrainingDaemon:
         self.base_model = base_model or self.ttt_engine.base_model
 
         # Directories
-        self.training_dir = Path.home() / ".cortex" / "training"
+        self.training_dir = Path.home() / ".babylon60" / "training"
         self.training_dir.mkdir(parents=True, exist_ok=True)
 
         self.consolidated_sessions_file = self.training_dir / "consolidated_sessions.json"
         self.verified_adapter_file = self.training_dir / "verified_adapter.json"
+        self.adapter_history_file = self.training_dir / "adapter_history.json"
+        self.archive_dir = self.training_dir / "adapters" / "archive"
+        self.archive_dir.mkdir(parents=True, exist_ok=True)
 
         # Background loop task
         self.is_running = False
@@ -84,31 +88,87 @@ class AutonomousTrainingDaemon:
             logger.error("Failed to save consolidated sessions: %s", e)
 
     def register_verified_adapter(self, adapter_path: Path, metrics: dict[str, Any]) -> None:
-        """Registers the verified adapter as the active runtime adapter."""
+        """Registers the verified adapter and archives it for rollback lineage."""
         try:
+            # 1. Read existing adapter history to determine next version
+            history = []
+            if self.adapter_history_file.exists():
+                try:
+                    with open(self.adapter_history_file, encoding="utf-8") as f:
+                        history = json.load(f)
+                except Exception as e:
+                    logger.error("Failed to read adapter history: %s", e)
+
+            next_version = len(history) + 1
+            archive_subdir = self.archive_dir / f"adapters_v{next_version}"
+            archive_subdir.mkdir(parents=True, exist_ok=True)
+
+            # 2. Copy current active adapter files to archive
+            active_weights = adapter_path / "adapters.safetensors"
+            active_config = adapter_path / "adapter_config.json"
+
+            if active_weights.exists():
+                shutil.copy2(active_weights, archive_subdir / "adapters.safetensors")
+            if active_config.exists():
+                shutil.copy2(active_config, archive_subdir / "adapter_config.json")
+
+            # 3. Log to lineage history
+            timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            entry = {
+                "version": next_version,
+                "archive_path": str(archive_subdir.resolve()),
+                "compiled_at": timestamp,
+                "base_model": self.base_model,
+                "performance_metrics": metrics,
+                "status": "verified",
+            }
+            history.append(entry)
+
+            with open(self.adapter_history_file, "w", encoding="utf-8") as f:
+                json.dump(history, f, indent=2)
+
+            # 4. Update the active verified registration file
             registry_data = {
+                "active_version": next_version,
                 "adapter_path": str(adapter_path.resolve()),
                 "base_model": self.base_model,
-                "compiled_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "compiled_at": timestamp,
                 "performance_metrics": metrics,
                 "status": "verified",
             }
             with open(self.verified_adapter_file, "w", encoding="utf-8") as f:
                 json.dump(registry_data, f, indent=2)
-            logger.info("🎉 Registered verified adapter at %s", adapter_path)
+
+            logger.info("🎉 Archived and registered verified adapter version v%d at %s", next_version, adapter_path)
         except Exception as e:
-            logger.error("Failed to register verified adapter: %s", e)
+            logger.error("Failed to register and archive verified adapter: %s", e)
 
     async def run_cycle(self) -> dict[str, Any]:
         """
         Executes a single cycle of the training daemon.
-        1. Fetch all session IDs.
-        2. Identify unconsolidated sessions.
-        3. Trigger TTTEngine nocturnal consolidation on them.
-        4. Verify output adapter structure and safety.
-        5. Register verified adapter.
+        1. Compile the static knowledge dataset (workflows, vault, directivas).
+        2. Fetch all session IDs.
+        3. Identify unconsolidated sessions.
+        4. Trigger TTTEngine nocturnal consolidation (merges dynamic + static).
+        5. Verify output adapter structure and safety.
+        6. Register & archive verified adapter.
         """
         logger.info("🌙 Running autonomous training cycle...")
+
+        # ─── Step 1: Pre-compilation ──────────────────────────────────
+        try:
+            from babylon60.extensions.training.moskv1_dataset_compiler import MOSKV1DatasetCompiler
+            # Resolve workspace path automatically (pointing to the base directory of babylon60)
+            workspace_path = Path(__file__).resolve().parents[3]
+            logger.info("🔧 Pre-compiling static dataset from workspace: %s", workspace_path)
+            
+            compiler = MOSKV1DatasetCompiler(min_exergy=0.45)
+            compiler.compile_full_dataset(workspace_path)
+            logger.info("✅ Pre-compilation complete.")
+        except Exception as ce:
+            logger.error("Failed pre-compiling static dataset: %s. Continuing with existing files.", ce)
+
+        # ─── Step 2: Session Consolidation ────────────────────────────
         all_sessions = await self.get_all_session_ids()
         consolidated = self.load_consolidated_sessions()
 
