@@ -147,6 +147,7 @@ class MOSKV1Core:
         self._mlx_model = None
         self._mlx_tokenizer = None
         self._mlx_base_model_path = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
+        self._mlx_loaded_mtime = 0.0
 
     async def warmup(self) -> bool:
         """Pre-warm model weights into unified memory asynchronously."""
@@ -155,8 +156,16 @@ class MOSKV1Core:
             logger.debug("No adapters found, skipping warmup.")
             return False
 
-        if self._mlx_model is not None:
+        current_mtime = adapter_file.stat().st_mtime
+        
+        # Check if the cache needs invalidation (hot reload weights)
+        if self._mlx_model is not None and current_mtime <= self._mlx_loaded_mtime:
             return True
+
+        if current_mtime > self._mlx_loaded_mtime:
+            logger.info("New adapter weights detected. Invaliding model cache for hot reload.")
+            self._mlx_model = None
+            self._mlx_tokenizer = None
 
         import asyncio
         from concurrent.futures import ThreadPoolExecutor
@@ -180,6 +189,7 @@ class MOSKV1Core:
             if model and tokenizer:
                 self._mlx_model = model
                 self._mlx_tokenizer = tokenizer
+                self._mlx_loaded_mtime = current_mtime
                 logger.info("Warmup complete. MOSKV-1 loaded in Metal memory.")
                 return True
         return False
@@ -627,6 +637,14 @@ class MOSKV1Core:
             return "[ERROR] MLX adapter weights not found. Run training first."
 
         try:
+            current_mtime = adapter_file.stat().st_mtime
+            
+            # Hot reload weights if file was modified after loading
+            if self._mlx_model is not None and current_mtime > self._mlx_loaded_mtime:
+                logger.info("Hot Reload: New adapter weights detected. Invaliding model cache.")
+                self._mlx_model = None
+                self._mlx_tokenizer = None
+
             import asyncio
             from concurrent.futures import ThreadPoolExecutor
 
@@ -663,6 +681,8 @@ class MOSKV1Core:
             loop = asyncio.get_running_loop()
             with ThreadPoolExecutor(max_workers=1) as pool:
                 response = await loop.run_in_executor(pool, _load_and_gen)
+                # Update mtime after successful run
+                self._mlx_loaded_mtime = current_mtime
                 return response
 
         except ImportError as e:
