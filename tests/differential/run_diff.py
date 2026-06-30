@@ -6,7 +6,7 @@ import json
 import shutil
 
 def run_cmd(cmd):
-    result = subprocess.run(cmd, shell=True, text=True, capture_output=True)
+    result = subprocess.run(cmd, shell=False, text=True, capture_output=True)
     if result.returncode != 0:
         print(f"Error executing {cmd}:")
         print(result.stdout)
