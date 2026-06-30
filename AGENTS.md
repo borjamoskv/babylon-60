@@ -118,6 +118,7 @@ All agents operating in this repository MUST self-identify by role before acting
 12. **Ultrathink (P0) Horizon:** The `UltraThink` cognitive mode MUST ONLY be invoked for Event Horizon P0 singularities where `epicenter_radius >= 3`. Enforcement and Exergy Yield authorization are strictly mathematically bounded by `babylon60/engine/core/ultrathink_physics.py`.
 13. **SQLite-Vec Integrity (VEC-0):** Las tablas virtuales `vec0` no soportan Foreign Keys. La sincronización DEBE hacerse insertando primero el metadato y mapeando inmediatamente vía `last_insert_rowid()`. Las dimensiones son inmutables: modelos diferentes (ej. text-1536 vs visual-768) EXIGEN tablas virtuales separadas (`cortex_embeddings_text`, `cortex_embeddings_visual`). Mantenimiento huérfano prohibido: borrados lógicos deben limpiar la tabla `vec0` manualmente si el trigger FTS/Cascade no aplica.
 14. **Límite Termodinámico de Aritmetización (Aaronson-Wigderson):** Las técnicas basadas en extensiones multilineales y simulación interactiva han colapsado en su frontera termodinámica (Algebrización). Resolver P vs NP o demostrar NEXP ⊄ P/poly exige estrictamente la síntesis de una primitiva matemática fundamentalmente nueva (ciega a extensiones de bajo grado).
+15. **Separación Frontend/Backend (FE/BE Boundaries - borjamoskv):** Cortex no diferencia explícitamente entre frontend y backend, tratando todas las interacciones (PageID, ejecución de código, comandos de terminal) como estructuras genéricas ParseToolArgs. La separación FE/BE debe ser definida y auto-impuesta por el agente a través de Skills (carga progresiva de contexto de conocimiento), Projects (confinamiento físico de directorios y scopes) y Mission Control (orquestación y coordinación de tareas cross-project).
 
 ### ❌ Anti-Patterns & Failure Signatures
 
@@ -137,6 +138,7 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | `NO` documenting a module that doesn't exist | HIGH | ✗ | Remove reference or create the module |
 | Conversational slop/padding in facts | MEDIUM | ✓ ExergyGuard | Remove apologies/decorative phrases (e.g. 'entendí', 'por supuesto') |
 | Axiom or sacred fact has low Shannon entropy (slop) | HIGH | ✓ LandauerGuard | Thermodynamically compress statements to dense invariants |
+| Implicit FE/BE Leakage (treating browser/DOM tools and backend logic under the same contextual scope without boundary separation - borjamoskv) | HIGH | ✗ | Segregate FE/BE contexts explicitly using distinct Skills, isolated Projects, or Mission Control limits. |
 
 ---
 
