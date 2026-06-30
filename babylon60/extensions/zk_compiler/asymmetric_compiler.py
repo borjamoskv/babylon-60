@@ -10,13 +10,26 @@ Rules:
 import ast
 import hashlib
 import time
-from typing import Any
+from typing import Dict, List, Optional
+from typing_extensions import TypedDict
 
 try:
     from babylon60.engine.causal.taint_engine import secure_state_commit
 except ImportError:
     # Fallback if executed outside of cortex runtime
     secure_state_commit = None
+
+class CompilerResult(TypedDict):
+    circuit_name: str
+    ast_hash: str
+    applied_invariants: List[str]
+    prover_time_reduction_expected: str
+    compilation_time_ms: float
+    status: str
+    optimized_source: str
+    cortex_taint: str
+    ledger_hash: Optional[str]
+    cortex_taint_error: Optional[str]
 
 class ZKInvariantTransformer(ast.NodeTransformer):
     """C5-REAL AST Rewriter for ZK Invariants"""
@@ -114,7 +127,7 @@ class AsymmetricZKCompiler:
         }
 
     
-    def compile_circuit(self, circuit_name: str, code_str: str) -> dict[str, Any]:
+    def compile_circuit(self, circuit_name: str, code_str: str) -> CompilerResult:
         """
         Compiles the Python-like circuit AST into ZK-optimal intermediate representation.
         """
@@ -133,14 +146,17 @@ class AsymmetricZKCompiler:
         # Calculate theoretical prover time reduction based on invariants applied
         reduction = max((self.cost_reductions[inv] for inv in applied), default=0.0)
         
-        compiler_result = {
+        compiler_result: CompilerResult = {
             "circuit_name": circuit_name,
             "ast_hash": ast_hash,
             "applied_invariants": applied,
             "prover_time_reduction_expected": f"{reduction * 100}%",
             "compilation_time_ms": (time.time() - start_t) * 1000,
             "status": "C5-REAL_OPTIMIZED",
-            "optimized_source": optimized_code
+            "optimized_source": optimized_code,
+            "cortex_taint": "",
+            "ledger_hash": None,
+            "cortex_taint_error": None
         }
         
         # Anclaje Criptográfico: Commit State si estamos en el entorno Cortex
