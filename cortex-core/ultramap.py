@@ -199,8 +199,8 @@ class UltramapSubstrate:
 
         target_int = int(hashlib.sha256(target_hash.encode()).hexdigest()[:16], 16)
         tx = (target_int % 1000) / 10.0
-        ty = ((target_int >> 4) % 1000) / 10.0
-        tz = ((target_int >> 8) % 1000) / 10.0
+        ty = ((target_int >> 16) % 1000) / 10.0
+        tz = ((target_int >> 32) % 1000) / 10.0
 
         distance = ((tx - x) ** 2 + (ty - y) ** 2 + (tz - z) ** 2) ** 0.5
         joules = distance * (1.0 / (current_entropy + 0.001))
