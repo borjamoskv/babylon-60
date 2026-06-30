@@ -206,18 +206,18 @@
   },
   "cerebras": {
     "base_url": "https://api.cerebras.ai/v1",
-    "default_model": "llama3.3-70b",
+    "default_model": "gpt-oss-120b",
     "env_key": "CEREBRAS_API_KEY",
     "context_window": 131072,
     "tier": "high",
     "cost_class": "free",
     "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
-      "code":      "llama3.3-70b",
-      "reasoning": "llama3.3-70b",
-      "creative":  "llama3.3-70b",
-      "architect": "llama3.3-70b",
-      "general":   "llama3.3-70b"
+      "code":      "gpt-oss-120b",
+      "reasoning": "gpt-oss-120b",
+      "creative":  "gpt-oss-120b",
+      "architect": "gpt-oss-120b",
+      "general":   "gpt-oss-120b"
     }
   },
   "together": {
