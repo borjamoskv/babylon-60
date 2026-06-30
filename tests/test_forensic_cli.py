@@ -177,15 +177,6 @@ def test_forensics_command_is_experimental_in_root_cli(monkeypatch) -> None:
     import babylon60.cli.common
     import babylon60.cli.forensics_cmds
 
-    print("--- DIAGNOSTICS START ---")
-    print("babylon60.cli.common module name in sys.modules:", getattr(sys.modules.get("babylon60.cli.common"), "__name__", None))
-    print("cortex.cli.common module name in sys.modules:", getattr(sys.modules.get("cortex.cli.common"), "__name__", None))
-    print("cli object ID from sys.modules['babylon60.cli.common'].cli:", id(sys.modules["babylon60.cli.common"].cli))
-    if "cortex.cli.common" in sys.modules:
-        print("cli object ID from sys.modules['cortex.cli.common'].cli:", id(sys.modules["cortex.cli.common"].cli))
-    print("cli object ID in forensics_cmds.cli:", id(babylon60.cli.forensics_cmds.cli))
-    print("--- DIAGNOSTICS END ---")
-
     if "forensics" in babylon60.cli.common.cli.commands:
         del babylon60.cli.common.cli.commands["forensics"]
 
@@ -195,12 +186,10 @@ def test_forensics_command_is_experimental_in_root_cli(monkeypatch) -> None:
     old_sys_module = sys.modules.get(name_to_restore)
 
     def safe_reload():
-        sys.modules[name_to_restore] = real_mod
-        try:
-            importlib.reload(real_mod)
-        finally:
-            if old_sys_module is not None:
-                sys.modules[name_to_restore] = old_sys_module
+        file_path = Path(real_mod.__file__)
+        code = file_path.read_text(encoding="utf-8")
+        # Re-execute the module file in its namespace
+        exec(code, real_mod.__dict__)
 
     monkeypatch.delenv("CORTEX_ENABLE_EXPERIMENTAL_CLI", raising=False)
     monkeypatch.delenv("MOSKV_ENABLE_EXPERIMENTAL_CLI", raising=False)
