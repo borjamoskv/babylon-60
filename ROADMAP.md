@@ -58,6 +58,16 @@
 
 ---
 
+## 🌌 v12.0 — Causal Singularity (Ouroboros Protocol)
+
+**Focus: Eradicating database locks via structural CRDTs and enabling deterministic multi-agent state fusion without causal drift.**
+
+- [x] **BFT CRDT Consensus** — Lock-free Swarm synchronization utilizing Append-Only Ledger and Vector Clocks.
+- [ ] **Causal FSM UI (Observability)** — Real-time byte-offset ledger watcher for deterministic DOM rendering.
+- [ ] **Thermodynamic Apoptosis** — O(1) bounded ledger snapshotting and continuous entropy pruning (Anergy destruction).
+
+---
+
 ## Pricing Strategy (Cloud Roadmap)
 
 | Tier | Price | Target | Constraints & Reality Level |
