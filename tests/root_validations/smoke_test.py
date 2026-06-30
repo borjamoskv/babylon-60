@@ -58,11 +58,12 @@ async def main():
 
         import sys
 
-        sys.path.insert(0, "~/10_PROJECTS/cortex-persist")
+        workspace_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        sys.path.insert(0, workspace_root)
         os.environ["PATH"] = (
-            f"~/10_PROJECTS/cortex-persist/tests/mock-bin:{os.environ.get('PATH', '')}"
+            f"{workspace_root}/tests/mock-bin:{os.environ.get('PATH', '')}"
         )
-        from babylon60.engine.cascade_router import CascadeRouter
+        from babylon60.engine.flow.cascade_router import CascadeRouter
 
         router = CascadeRouter()
         result = await router.route_task(
