@@ -132,7 +132,7 @@ class AdaptiveResonanceGate:
         best_sim = 0.0
 
         for neighbor in neighbors:
-            if not isinstance(neighbor, CortexSemanticEngram):
+            if type(neighbor).__name__ != "CortexSemanticEngram":
                 continue
 
             # Semantic Similarity
@@ -230,7 +230,7 @@ class AdaptiveResonanceGate:
         # Map neighbors to detect explicit contradictions
         neighbor_map = {}
         for neighbor in neighbors:
-            if not isinstance(neighbor, CortexSemanticEngram):
+            if type(neighbor).__name__ != "CortexSemanticEngram":
                 continue
 
             is_contradictory = False

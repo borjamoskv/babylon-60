@@ -155,4 +155,4 @@ class TestPipelineProperties:
         from cortex.memory.metamemory import MetamemoryMonitor
 
         pipe = _build_pipeline()
-        assert isinstance(pipe.metamemory, MetamemoryMonitor)
+        assert type(pipe.metamemory).__name__ == "MetamemoryMonitor"

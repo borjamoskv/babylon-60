@@ -8,7 +8,7 @@ from sse_starlette.sse import EventSourceResponse
 router = APIRouter(prefix="/observability/fsm", tags=["CausalUI"])
 
 # Ruta del Master Ledger Inmutable
-LEDGER_PATH = os.getenv("CORTEX_LEDGER_PATH", "cortex_state.aof")
+LEDGER_PATH = os.getenv("MOSKV_LEDGER_PATH", os.getenv("CORTEX_LEDGER_PATH", "cortex_state.aof"))
 
 async def ledger_byte_watcher(request: Request, poll_interval: float = 0.5):
     """

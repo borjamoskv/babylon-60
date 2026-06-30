@@ -9,8 +9,8 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 
 try:
     from fastapi.testclient import TestClient
-    from cortex.swarm.inference_proxy import app
-    from cortex.consensus.pki import trust_matrix
+    from babylon60.swarm.inference_proxy import app
+    from babylon60.consensus.pki import trust_matrix
 
     client = TestClient(app)
 except ImportError:

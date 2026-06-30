@@ -146,7 +146,9 @@ async def test_process_interaction_with_overflow(manager, mock_l1):
 async def test_process_interaction_with_overflow_clean():
     """Test interaction with overflow cleanly, using a fresh manager."""
     mgr = CortexMemoryManager(
-        l1=MagicMock(add_event=MagicMock(return_value=["overflowed_item"])),
+        l1=MagicMock(add_event=MagicMock(return_value=[
+            MemoryEvent(role="system", content="overflowed_item", token_count=50, session_id="sess")
+        ])),
         l2=MagicMock(),
         l3=AsyncMock(),
         encoder=AsyncMock(),
@@ -154,7 +156,7 @@ async def test_process_interaction_with_overflow_clean():
     )
 
     with patch(
-        "cortex.memory._manager_bg.compress_and_store", new_callable=AsyncMock
+        "babylon60.memory._manager_bg.compress_and_store", new_callable=AsyncMock
     ) as mock_compress:
         await mgr.process_interaction(
             role="user",
@@ -171,7 +173,7 @@ async def test_process_interaction_with_overflow_clean():
         mock_compress.assert_called_once()
         args = mock_compress.call_args[0]
         # args: (self, overflowed, session_id, tenant_id, project_id)
-        assert args[1] == ["overflowed_item"]
+        assert args[1][0].content == "overflowed_item"
         assert args[2] == "sess"
         assert args[3] == "t1"
 
@@ -290,7 +292,7 @@ async def test_store_resonance_deduplication(manager, mock_mem0_pipeline):
 async def test_assemble_context(manager, mock_l1):
     """Test assembling final LLM context from L1 and L2."""
     with patch(
-        "cortex.memory.memory_retrieval.retrieve_episodic_context", new_callable=AsyncMock
+        "babylon60.memory.memory_retrieval.retrieve_episodic_context", new_callable=AsyncMock
     ) as mock_retrieve:
         mock_retrieve.return_value = [{"content": "episodic 1"}]
 

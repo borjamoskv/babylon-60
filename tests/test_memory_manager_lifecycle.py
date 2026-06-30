@@ -121,7 +121,7 @@ async def test_store_rollback_resonance_failure(manager):
 async def test_assemble_context_isolation(manager, mock_l1):
     """Verify tenant isolation in context assembly."""
     with patch(
-        "cortex.memory.memory_retrieval.retrieve_episodic_context", new_callable=AsyncMock
+        "babylon60.memory.memory_retrieval.retrieve_episodic_context", new_callable=AsyncMock
     ) as mock_retrieve:
         mock_retrieve.return_value = []
 
