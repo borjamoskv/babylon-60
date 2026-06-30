@@ -12,6 +12,7 @@ Orchestrates the 7-step cryptographic transaction for autonomous agent writes:
 7. SAGA-7: Index & Side Effects (OP_GIT_SENTINEL)
 """
 
+import asyncio
 import logging
 from typing import Any
 
@@ -79,6 +80,95 @@ class SagaCoordinator:
                 )
                 logger.error(f"[SAGA] Aborted at SAGA-2.5: {e}")
                 raise ValueError(f"SAGA Aborted: {e}")
+
+        # SAGA-2.2: Semantic Deduplication (Similarity > 90% via sqlite-vec)
+        try:
+            cursor = await self.ledger._conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='fact_embeddings'"
+            )
+            has_embeddings = await cursor.fetchone()
+        except Exception:
+            has_embeddings = False
+
+        if has_embeddings:
+            try:
+                import json
+                import datetime
+                from babylon60.embeddings.local import LocalEmbedder
+
+                embedder = LocalEmbedder()
+                embedding = await asyncio.to_thread(embedder.embed, content)
+
+                query = """
+                    SELECT f.id, ve.distance
+                    FROM fact_embeddings AS ve
+                    JOIN facts AS f ON f.id = ve.fact_id
+                    WHERE f.tenant_id = ?
+                      AND f.is_tombstoned = 0
+                      AND f.is_quarantined = 0
+                      AND f.valid_until IS NULL
+                      AND ve.embedding MATCH ?
+                      AND k = 1
+                """
+                if isinstance(embedding, list) and len(embedding) > 0:
+                    if isinstance(embedding[0], list):
+                        query_embedding = embedding[0]
+                    else:
+                        query_embedding = embedding
+
+                    cursor = await self.ledger._conn.execute(
+                        query, (tenant_id, json.dumps(query_embedding))
+                    )
+                    row = await cursor.fetchone()
+                    if row:
+                        fact_id, distance = row
+                        score = 1.0 - (distance if distance is not None else 0.0)
+                        if score > 0.90:
+                            now_str = datetime.datetime.utcnow().isoformat() + "Z"
+
+                            # Retrieve existing metadata
+                            cursor = await self.ledger._conn.execute(
+                                "SELECT metadata FROM facts WHERE id = ?", (fact_id,)
+                            )
+                            meta_row = await cursor.fetchone()
+                            meta_dict = {}
+                            if meta_row and meta_row[0]:
+                                try:
+                                    meta_dict = json.loads(meta_row[0])
+                                except Exception:
+                                    meta_dict = {}
+
+                            meta_dict["last_accessed"] = now_str
+                            meta_dict["last_accessed_ts"] = datetime.datetime.utcnow().timestamp()
+
+                            # Execute update
+                            await self.ledger._conn.execute(
+                                "UPDATE facts SET metadata = ?, updated_at = ? WHERE id = ?",
+                                (json.dumps(meta_dict), now_str, fact_id)
+                            )
+                            await self.ledger._conn.commit()
+
+                            # Log rejection / duplicate state to Ledger
+                            await self.ledger.log_action(
+                                tenant_id,
+                                actor_role,
+                                actor_id,
+                                "WRITE_REJECTED",
+                                resource,
+                                status=f"Duplicate of #{fact_id} (Similarity: {score:.4f})"
+                            )
+
+                            logger.info(
+                                f"[SAGA] Deduplication: Aborting ingestion. "
+                                f"Semantically identical to #{fact_id} (Score: {score:.4f})"
+                            )
+                            raise ValueError(
+                                f"Duplicate fact rejected: Semantic similarity {score:.4f} > 0.90 with #{fact_id}"
+                            )
+            except ValueError:
+                raise
+            except Exception as e:
+                logger.warning(f"[SAGA] Semantic deduplication check bypassed due to error: {e}")
 
         # SAGA-3: Schema Validation
         payload = {"content": content, "metadata": metadata}
