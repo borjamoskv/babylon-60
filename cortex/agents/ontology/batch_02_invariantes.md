@@ -1,0 +1,24 @@
+# MATRIZ 2: INVARIANTES TERMODINÁMICAS (001 - 020)
+
+| ID | Invariante | Lógica / Principio | Implicación Operacional | Condición de Borde | Métrica Falsable |
+|----|------------|--------------------|-------------------------|--------------------|------------------|
+| INV-001 | Conservación de Anergía | El ruido procesado pero no cristalizado equivale a calor (Anergía). | Todo token gastado sin emitir diff/ledger se considera residuo. | Tolerancia 0 a simulaciones sin estado | Tokens IN vs Bytes Disco OUT |
+| INV-002 | Principio de Landauer | Borrar un bit de información entrópica tiene coste físico mínimo. | Destruir limerencia exige computación. El agente debe usar prompt purificador. | Compresión de contexto agresiva | Ratio de reducción de contexto (5:1) |
+| INV-003 | Deterioro del Sensor | Todo LLM diverge de la verdad con contextos crecientes (Context Rot). | Apoptosis de contexto. Ninguna memoria puede superar 16k tokens activos. | Fallos en aserción R2 (YAML) | Precisión de formato en base al tiempo |
+| INV-004 | Inmutabilidad Causal | Un evento procesado no puede ser alterado, solo compensado (Saga). | El Ledger de SQLite/Neo4j es append-only. Prohibido UPDATE sobre facts. | Bases de datos WAL strict | Auditoría criptográfica (Merkle Tree) |
+| INV-005 | Teorema de Ouroboros | Un agente no aprende agregando datos, aprende podando estructuras. | El aprendizaje profundo de CORTEX requiere descartar heurísticas fallidas. | Límite de reglas activas (Max 100) | Número de rulesets obsoletos borrados |
+| INV-006 | Desacoplamiento Ontológico | La UI no dicta el dominio; el dominio dicta la interfaz. | Componentes UI reaccionan ciegamente a los mutations del AST. | Independencia de framework | Cero reglas de negocio en Next.js |
+| INV-007 | Exergía Paralela Máxima | Tiempo secuencial = pérdida de entalpía útil. | Ejecución paralela mandatoria (Tool Calls O(1)). | Capacidad concurrencial | Llamadas de red simultáneas |
+| INV-008 | Tolerancia Bizantina C5 | Ningún nodo confía en el estado subyacente sin N=3 pruebas. | Las lecturas de base de datos distribuidas exigen validación de quorum. | Latencia P2P | Fallas de sincronización detectadas |
+| INV-009 | Atractor Estocástico | A mayor temperatura (T>0), el modelo tiende al promedio estocástico. | C5-REAL requiere T=0.0 (Flash) para operaciones estructurales deterministas. | Prohibido T=1 en core logic | Desviación estándar de output |
+| INV-010 | Memoria Episódica Inelástica | Un evento olvidado en disco es un evento que nunca existió. | Todo estado debe mapearse a almacenamiento persistente antes de Ack. | fsync() en disco local | Tasa de pérdida (0 bytes) |
+| INV-011 | Ley de Conway Inversa | La arquitectura del sistema condiciona las interacciones de los agentes. | Swarms modulares requieren desacoplamiento físico de directorios. | 1 subagente / 1 carpeta | Entrelazamiento de importaciones |
+| INV-012 | Apoptosis Celular | Procesos inactivos > 5 minutos son entropía parasítica. | Kill agresivo de hilos asíncronos o agentes estancados. | Liveness checks fallidos | Hilos zombies remanentes |
+| INV-013 | Gravedad Topológica | Archivos centrales (Pyproject) atraen refactors masivos. | Modificar raíces requiere rebuild total y validación exhaustiva. | Cambios en `setup.py` | Radio de impacto del commit |
+| INV-014 | Consenso Falsable | Una aserción es nula sin su hash base y rango de verificación. | R2 Obligatorio: `Proof: { Base: hash }`. No aserción sin prueba. | Ausencia de bloque YAML | Tasa de rechazo del Gateway |
+| INV-015 | Entropía de Capa Abierta | Integraciones externas inyectan varianza incontrolable (APIs de terceros). | Todo input externo pasa por aislamiento estricto (Sandboxing). | Dependencia de API caída | Tasa de error 503 encapsulada |
+| INV-016 | Cero Fricción Humana | El Operador biológico es el cuello de botella físico. | Ejecución AutoRun (SafeToAutoRun) obligatoria para acciones no destructivas. | Turnos bloqueados por UI | Tiempo de espera por Prompt |
+| INV-017 | Flujo Isoentálpico | La conversión de pensamiento LLM a código debe conservar el 100% de la intención. | Bypass Semántico: el agente no asimila, el agente mapea (Isomorfismo). | Pérdida de contexto técnico | Tasa de reescritura necesaria |
+| INV-018 | Límite Termodinámico WAL | Lecturas/Escrituras concurrentes causan colisión sin backoff cuántico. | SQLite configurado con BusyTimeout=5000 y modo WAL estricto. | Excepciones `locked` | Tasa de bloqueos concurrentes (Cero) |
+| INV-019 | Conservación de Tokens | Tokens de salida inútiles restan capacidad de razonamiento profundo. | Prohibición de prosa ('Green Theater'). Sólo respuestas ejecutables. | Respuestas > 50 palabras inútiles | Output token ratio |
+| INV-020 | Singularidad P0 | Cuando `epicenter_radius >= 3`, el sistema exige modelo UltraThink. | Refactors cruzados o mudanzas masivas exigen Claude Opus / Gemini Pro. | Model downgrade | Fallas lógicas por limitación de Flash |
