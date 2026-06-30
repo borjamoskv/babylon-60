@@ -168,9 +168,16 @@ def get_default_encrypter() -> CortexEncrypter:
     if _default_encrypter_instance is None:
         with _encrypter_lock:
             if _default_encrypter_instance is None:
-                from babylon60.crypto.keyring import get_master_key
+                from babylon60.crypto.keyring import get_master_key, get_zk_master_key
 
-                _default_encrypter_instance = CortexEncrypter(get_master_key())
+                # Prioritize ZK master key derivation from local Ed25519 identities
+                master_key = get_zk_master_key("borjamoskv")
+                if not master_key:
+                    master_key = get_zk_master_key("moskv-1")
+                if not master_key:
+                    master_key = get_master_key()
+
+                _default_encrypter_instance = CortexEncrypter(master_key)
     return _default_encrypter_instance
 
 

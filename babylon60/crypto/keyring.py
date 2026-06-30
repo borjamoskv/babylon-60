@@ -87,3 +87,31 @@ def generate_and_store_master_key() -> str:
         )
 
     return key_b64
+
+
+def get_zk_master_key(actor_id: str) -> bytes | None:
+    """Derive a Zero-Knowledge 32-byte master key from the actor's Ed25519 private key.
+
+    Signs a static challenge and hashes the signature to produce a deterministic key.
+    """
+    from babylon60.crypto.keys import KeyManager
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+
+    km = KeyManager()
+    priv_b64 = km.get_private_key_b64(actor_id)
+    if not priv_b64:
+        return None
+
+    try:
+        import hashlib
+        raw_priv = base64.b64decode(priv_b64)
+        private_key = ed25519.Ed25519PrivateKey.from_private_bytes(raw_priv)
+
+        challenge = b"cortex_zk_master_key_derivation_salt"
+        signature = private_key.sign(challenge)
+
+        return hashlib.sha256(signature).digest()
+    except Exception as e:  # noqa: BLE001
+        logger.error("Failed to derive ZK master key from Ed25519 private key: %s", e)
+        return None
+

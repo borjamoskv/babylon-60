@@ -1,5 +1,6 @@
 import pytest
 import base64
+from unittest.mock import patch
 from babylon60.crypto.keys import KeyManager, Signer, Verifier
 
 
@@ -81,3 +82,59 @@ def test_legacy_signing(km):
 
     is_valid = Verifier.verify_raw_content(content, public_key, signature)
     assert is_valid is True
+
+
+def test_zk_master_key_derivation(km, monkeypatch):
+    from babylon60.crypto.keyring import get_zk_master_key
+
+    actor_id = "test_zk_actor"
+    km.revoke_key(actor_id)
+
+    # 1. No key derived for non-existent actor
+    # Direct KeyManager override for test environment path
+    with patch("babylon60.crypto.keys.KeyManager", return_value=km):
+        assert get_zk_master_key(actor_id) is None
+
+        # 2. Generate and store key
+        km.generate_and_store_key(actor_id)
+
+        # 3. Derive master key
+        key1 = get_zk_master_key(actor_id)
+        assert key1 is not None
+        assert len(key1) == 32
+
+        # 4. Derivation is deterministic/reproducible
+        key2 = get_zk_master_key(actor_id)
+        assert key1 == key2
+
+        # 5. Revocation blocks key derivation
+        km.revoke_key(actor_id)
+        assert get_zk_master_key(actor_id) is None
+
+
+def test_zk_encryption_flow(km):
+    from babylon60.crypto.keyring import get_zk_master_key
+    from babylon60.crypto.aes import CortexEncrypter
+
+    actor_id = "test_zk_encrypt_actor"
+    km.revoke_key(actor_id)
+
+    with patch("babylon60.crypto.keys.KeyManager", return_value=km):
+        km.generate_and_store_key(actor_id)
+        zk_key = get_zk_master_key(actor_id)
+        assert zk_key is not None
+
+        # Initialize encrypter with derived ZK key
+        enc = CortexEncrypter(zk_key, strict_mode=True)
+        plaintext = "This is a C5-REAL zero-knowledge encrypted fact."
+
+        # Encrypt
+        encrypted = enc.encrypt_str(plaintext, tenant_id="test_tenant")
+        assert encrypted is not None
+        assert encrypted.startswith("v6_aesgcm:")
+        assert encrypted != plaintext
+
+        # Decrypt
+        decrypted = enc.decrypt_str(encrypted, tenant_id="test_tenant")
+        assert decrypted == plaintext
+
