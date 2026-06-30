@@ -55,8 +55,22 @@ logger = logging.getLogger("babylon60.training.moskv1_core")
 
 # ─── Configuration ─────────────────────────────────────────────────────────
 
-DEFAULT_MODEL = "moskv1-core:32b-q4_K_M"
-FALLBACK_MODEL = "qwen2.5-coder:32b-instruct-q4_K_M"
+def _get_ram_gb() -> float:
+    try:
+        import os
+        return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024 ** 3)
+    except Exception:
+        return 32.0
+
+_is_test = "pytest" in sys.modules or "py.test" in sys.modules
+_low_memory = _get_ram_gb() < 24.0 and not _is_test
+
+if _low_memory:
+    DEFAULT_MODEL = "moskv1-core"
+    FALLBACK_MODEL = "qwen2.5-coder:7b"
+else:
+    DEFAULT_MODEL = "moskv1-core:32b-q4_K_M"
+    FALLBACK_MODEL = "qwen2.5-coder:32b-instruct-q4_K_M"
 MAX_HISTORY_TURNS = 10
 MAX_CONTEXT_TOKENS = 6000  # Reserve space for system + response
 
@@ -780,7 +794,7 @@ class MOSKV1Core:
         3. Sets optimal inference parameters
         """
         adapter_gguf = self._adapter_path / "moskv1-fused.gguf"
-        base_model = "qwen2.5-coder:32b-instruct-q4_K_M"
+        base_model = "qwen2.5-coder:7b" if _low_memory else "qwen2.5-coder:32b-instruct-q4_K_M"
 
         return f"""# MOSKV-1 Core — Ollama Modelfile
 # Author: borjamoskv

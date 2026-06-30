@@ -6,6 +6,7 @@ Escudo termodinámico del Write-Path. Frena cualquier mutación
 que viole los invariantes demostrados en Z3.
 """
 import logging
+
 from babylon60.tools.z3_oracle import Z3OracleTool
 
 logger = logging.getLogger(__name__)

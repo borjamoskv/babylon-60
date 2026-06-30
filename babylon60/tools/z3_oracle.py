@@ -5,9 +5,9 @@ Vector Activo: Z3OracleTool
 Permite al agente enviar SMT-LIB2 para delegar cálculos estocásticos
 a resoluciones deterministas de Z3.
 """
+import logging
 import subprocess
 import tempfile
-import logging
 
 logger = logging.getLogger(__name__)
 
