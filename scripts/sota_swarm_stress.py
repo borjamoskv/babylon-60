@@ -36,7 +36,7 @@ async def run_stress_test():
     logger.info("Iniciando Pruebas SOTA Stress para Agentes Soberanos (C5-REAL)")
 
     config = LocalAgentConfig(
-        model="gemini-3.1-pro-high",
+        model="gemini-2.5-pro",
         system_instruction="Modo Evaluación de Estrés. Responde de forma asimétrica.",
         hooks=[
             radar_de_entropia_inicio,

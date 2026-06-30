@@ -99,7 +99,7 @@ async def main():
 
     # Configuración Base del Agente E2E
     config = LocalAgentConfig(
-        model="gemini-3.1-pro-high",
+        model="gemini-2.5-pro",
         system_instruction="""
             Eres un Operador Soberano C5-REAL (Jules-Secretario).
             Tu objetivo es la aniquilación determinista de la entropía.
