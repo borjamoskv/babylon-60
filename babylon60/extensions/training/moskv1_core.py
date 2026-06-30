@@ -648,13 +648,6 @@ class MOSKV1Core:
         try:
             current_mtime = adapter_file.stat().st_mtime
             
-            # Hot reload weights asynchronously if file was modified after loading
-            if self._mlx_model is not None and current_mtime > self._mlx_loaded_mtime:
-                if not self._mlx_is_reloading:
-                    logger.info("Hot Reload: New adapter weights detected. Triggering zero-downtime background reload.")
-                    self._mlx_is_reloading = True
-                    asyncio.create_task(self._async_reload_weights(current_mtime))
-
             from concurrent.futures import ThreadPoolExecutor
 
             def _load_and_gen():
@@ -700,9 +693,17 @@ class MOSKV1Core:
             loop = asyncio.get_running_loop()
             with ThreadPoolExecutor(max_workers=1) as pool:
                 response = await loop.run_in_executor(pool, _load_and_gen)
-                # Update mtime if this was a synchronous load
-                if not self._mlx_is_reloading:
+                
+                # Hot reload weights asynchronously post-inference if file was modified
+                if self._mlx_model is not None and current_mtime > self._mlx_loaded_mtime:
+                    if not self._mlx_is_reloading:
+                        logger.info("Hot Reload: New adapter weights detected. Triggering post-inference background reload.")
+                        self._mlx_is_reloading = True
+                        asyncio.create_task(self._async_reload_weights(current_mtime))
+                else:
+                    # Update mtime if this was a synchronous load or no update needed
                     self._mlx_loaded_mtime = current_mtime
+                
                 return response
 
         except ImportError as e:
