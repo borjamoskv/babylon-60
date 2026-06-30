@@ -12,7 +12,7 @@ a local LLM fine-tuned on CORTEX workspace knowledge:
     4. Adapter Verification (AdapterVerifier)
 
 Usage:
-    from cortex.extensions.training import MOSKV1DatasetCompiler, MOSKV1Core
+    from babylon60.extensions.training import MOSKV1DatasetCompiler, MOSKV1Core
 
     # Compile dataset
     compiler = MOSKV1DatasetCompiler("/path/to/workspace")
@@ -24,11 +24,11 @@ Usage:
     result = await core.infer("query", db_conn)
 """
 
-from cortex.extensions.training.collector import Action, Trajectory, TrajectoryCollector
-from cortex.extensions.training.moskv1_core import MOSKV1Core
-from cortex.extensions.training.moskv1_dataset_compiler import MOSKV1DatasetCompiler
-from cortex.extensions.training.reward_engine import RewardEngine
-from cortex.extensions.training.ttt_engine import TTTEngine
+from babylon60.extensions.training.collector import Action, Trajectory, TrajectoryCollector
+from babylon60.extensions.training.moskv1_core import MOSKV1Core
+from babylon60.extensions.training.moskv1_dataset_compiler import MOSKV1DatasetCompiler
+from babylon60.extensions.training.reward_engine import RewardEngine
+from babylon60.extensions.training.ttt_engine import TTTEngine
 
 __all__ = [
     "Action",
