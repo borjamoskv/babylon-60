@@ -1,0 +1,361 @@
+---
+// CORTEX-Persist | Ecosistema de Exergía
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX-Persist | Ecosistema de Exergía</title>
+    <script src="https://cdn.tailwindcss.com" is:inline></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" is:inline></script>
+    <!--
+    Palette: Cyberpunk Industrial Noir (#0A0A0A, #2B3BE5, #00F0FF, #FF003C)
+    Plan:
+    1. Hero: Introducción al sistema C5-REAL.
+    2. Infraestructura (Donut Chart): Estado de los dominios del ecosistema.
+    3. Física (Log Bar Chart): Ineficiencia de Landauer vs CMOS.
+    4. Auditoría (Bar Chart): Clasificación de vulnerabilidades en agents.archi.
+    5. Cognición (HTML Grid): Modelo termodinámico del ADHD.
+    6. Credibilidad (Pie Chart): Análisis de crecimiento inauténtico.
+    Chart Choices:
+    - Infraestructura -> Goal: Organize -> Donut (Chart.js) -> Representa proporciones de estados de red sin SVG.
+    - Física -> Goal: Compare -> Log Bar (Chart.js) -> Ilustra escalas de magnitud extremas.
+    - Auditoría -> Goal: Compare -> Ordered Bar (Chart.js) -> Compara severidad de fallos.
+    - Credibilidad -> Goal: Compare -> Pie (Chart.js) -> Muestra el 70% de cuota claramente.
+    CONFIRMATION: NEITHER Mermaid JS NOR SVG were used anywhere in the output.
+    -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A0A0A;
+            color: #E5E7EB;
+        }
+        
+        h1, h2, h3, .font-mono {
+            font-family: 'Space Mono', monospace;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        
+        .cyber-card {
+            background: #111111;
+            border: 1px solid rgba(43, 59, 229, 0.3);
+            box-shadow: 0 0 20px rgba(43, 59, 229, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-card:hover {
+            border-color: #00F0FF;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+        }
+
+        .neon-text-blue { text-shadow: 0 0 10px rgba(43, 59, 229, 0.8); }
+        .neon-text-cyan { text-shadow: 0 0 10px rgba(0, 240, 255, 0.8); }
+        .neon-text-red { text-shadow: 0 0 10px rgba(255, 0, 60, 0.8); }
+    </style>
+</head>
+<body class="antialiased selection:bg-[#2B3BE5] selection:text-white pb-20">
+
+    <header class="border-b border-[#2B3BE5]/50 bg-black/80 backdrop-blur-md sticky top-0 z-50 pt-16 pb-12 px-6 text-center">
+        <div class="max-w-4xl mx-auto">
+            <div class="inline-block px-3 py-1 mb-6 border border-[#00F0FF] text-[#00F0FF] font-mono text-xs uppercase tracking-widest">
+                SYS_ID: BORJAMOSKV_SITE_ROOT | STATE: C5-REAL
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 uppercase tracking-tight neon-text-blue">
+                CORTEX-<span class="text-[#2B3BE5]">Persist</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 font-light mb-8 italic">
+                "Los demás almacenan memoria. CORTEX almacena evidencia. Y la evidencia está siendo producida."
+            </p>
+            <p class="text-sm md:text-base text-gray-500 max-w-2xl mx-auto">
+                Estructura de distribución, auditoría cognitiva soberana, auditoría adversarial y runtime descentralizado agéntico. Unificando la física de la información, andamiaje cognitivo y alta disponibilidad.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <section class="cyber-card p-6 md:col-span-2">
+            <h2 class="text-2xl font-bold text-[#00F0FF] mb-4 border-b border-[#00F0FF]/30 pb-2 uppercase tracking-wide">
+                1. Infraestructura y Ecosistema de Nodos
+            </h2>
+            <p class="text-gray-300 mb-6 leading-relaxed">
+                El ecosistema opera sobre una topología descentralizada con múltiples endpoints. La distribución asegura la inmunidad epistémica y el anclaje criptográfico C5-REAL. La mayor parte de los dominios están habilitados, con restricciones tácticas (robots.txt) en zonas de desarrollo y operación offline para el motor MEV.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="chart-container">
+                    <canvas id="ecosystemChart"></canvas>
+                </div>
+                <div class="space-y-4 font-mono text-sm">
+                    <div class="flex justify-between border-b border-gray-800 pb-2">
+                        <span class="text-[#2B3BE5]">cortexpersist.com</span>
+                        <span class="text-green-400">[ HABILITADO ]</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2">
+                        <span class="text-[#2B3BE5]">agents.archi</span>
+                        <span class="text-green-400">[ HABILITADO ]</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2">
+                        <span class="text-[#2B3BE5]">PyPI / npm / GitHub</span>
+                        <span class="text-green-400">[ HABILITADO ]</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-800 pb-2">
+                        <span class="text-[#2B3BE5]">cortexpersist.dev</span>
+                        <span class="text-yellow-400">[ BLOQUEADO ]</span>
+                    </div>
+                    <div class="flex justify-between pb-2">
+                        <span class="text-[#2B3BE5]">Strike-OMEGA MEV</span>
+                        <span class="text-red-500">[ OFFLINE ]</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cyber-card p-6">
+            <h2 class="text-2xl font-bold text-[#FF003C] mb-4 border-b border-[#FF003C]/30 pb-2 uppercase tracking-wide">
+                2. Auditoría Adversarial (agents.archi)
+            </h2>
+            <p class="text-gray-300 mb-6 leading-relaxed">
+                Verificación formal mediante Z3 SMT y especificación ASL. El portafolio de auditoría ha revelado vulnerabilidades C5-REAL críticas, incluyendo el bypass ASLR en Firedancer VM y emisiones bloqueadas en Intuition V2.
+            </p>
+            <div class="chart-container">
+                <canvas id="auditChart"></canvas>
+            </div>
+        </section>
+
+        <section class="cyber-card p-6">
+            <h2 class="text-2xl font-bold text-[#00F0FF] mb-4 border-b border-[#00F0FF]/30 pb-2 uppercase tracking-wide">
+                3. La Física de la Información
+            </h2>
+            <p class="text-gray-300 mb-6 leading-relaxed">
+                La información posee un coste termodinámico real. Comparando la disipación energética de un CMOS moderno frente al límite teórico de Landauer, observamos una ineficiencia masiva. Por ello, CORTEX aplica persistencia inmutable por defecto.
+            </p>
+            <div class="text-center mb-4">
+                <div class="text-5xl font-black text-[#FF003C] font-mono neon-text-red mb-2">350,000x</div>
+                <div class="text-sm text-gray-400 uppercase tracking-widest">Factor de Ineficiencia Termodinámica</div>
+            </div>
+            <div class="chart-container h-64">
+                <canvas id="physicsChart"></canvas>
+            </div>
+        </section>
+
+        <section class="cyber-card p-6 md:col-span-2">
+            <h2 class="text-2xl font-bold text-[#2B3BE5] mb-4 border-b border-[#2B3BE5]/30 pb-2 uppercase tracking-wide">
+                4. Andamiaje Cognitivo: Modelo ADHD
+            </h2>
+            <p class="text-gray-300 mb-6 leading-relaxed">
+                Diseñado como un exoesqueleto cognitivo externo para mentes de alta entropía. CORTEX enruta la exergía para estabilizar motores estocásticos de alta potencia, canalizando fenómenos cognitivos hacia mecánicas de persistencia inmutables (Flux Trap).
+            </p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-black border border-gray-800 p-4 hover:border-[#00F0FF] transition-colors">
+                    <div class="text-3xl mb-3">🔥</div>
+                    <h3 class="text-[#00F0FF] font-bold text-sm mb-1 uppercase">Déficit de Atención</h3>
+                    <p class="text-xs text-gray-500 font-mono mb-2">Thermal Runaway</p>
+                    <p class="text-sm text-gray-300">Purga termodinámica de procesos de baja exergía.</p>
+                </div>
+                <div class="bg-black border border-gray-800 p-4 hover:border-[#2B3BE5] transition-colors">
+                    <div class="text-3xl mb-3">⚡</div>
+                    <h3 class="text-[#2B3BE5] font-bold text-sm mb-1 uppercase">Hiperactividad</h3>
+                    <p class="text-xs text-gray-500 font-mono mb-2">Movimiento Browniano</p>
+                    <p class="text-sm text-gray-300">Canalización estricta del flujo en sub-módulos.</p>
+                </div>
+                <div class="bg-black border border-gray-800 p-4 hover:border-[#FF003C] transition-colors">
+                    <div class="text-3xl mb-3">🧊</div>
+                    <h3 class="text-[#FF003C] font-bold text-sm mb-1 uppercase">Disfunción Ejecutiva</h3>
+                    <p class="text-xs text-gray-500 font-mono mb-2">Static Friction Lock</p>
+                    <p class="text-sm text-gray-300">Lanzamiento y automatización JIT asíncrona.</p>
+                </div>
+                <div class="bg-black border border-gray-800 p-4 hover:border-white transition-colors">
+                    <div class="text-3xl mb-3">🕳️</div>
+                    <h3 class="text-white font-bold text-sm mb-1 uppercase">Hiperfoco</h3>
+                    <p class="text-xs text-gray-500 font-mono mb-2">Singularidad Neguentrópica</p>
+                    <p class="text-sm text-gray-300">Flux trap: guardado y versionado instantáneo.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cyber-card p-6 md:col-span-2">
+            <h2 class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-2 uppercase tracking-wide">
+                5. Máquina de Credibilidad (Forense de Atención)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <p class="text-gray-300 mb-4 leading-relaxed">
+                        La auditoría de red <code class="text-[#00F0FF] bg-black px-1 rounded">substack-mafia-autopsia-estructural</code> revela la estructura de amplificación inauténtica en el mercado de newsletters. 
+                    </p>
+                    <p class="text-gray-300 leading-relaxed">
+                        El ecosistema de atención actual prioriza el "Grafo vs Mérito". El análisis forense expone que la inmensa mayoría del crecimiento de los "Ecosistemas de los 65" se debe a arquitecturas de recirculación coordinada.
+                    </p>
+                    <div class="mt-6 p-4 bg-black border-l-4 border-[#2B3BE5]">
+                        <div class="font-mono text-xl text-white">FHRR Binding: <span class="text-[#00F0FF]">D=1024</span></div>
+                        <div class="text-sm text-gray-500 mt-1">Similitud Coseno Crítica: 0.25 (Umbral de purga)</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="credibilityChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script is:inline>
+        Chart.defaults.color = '#9CA3AF';
+        Chart.defaults.font.family = 'Space Mono';
+        
+        const commonTooltip = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            },
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            titleColor: '#00F0FF',
+            bodyColor: '#FFFFFF',
+            borderColor: '#2B3BE5',
+            borderWidth: 1,
+            padding: 12
+        };
+
+        const ctxEco = document.getElementById('ecosystemChart').getContext('2d');
+        new Chart(ctxEco, {
+            type: 'doughnut',
+            data: {
+                labels: ['Habilitado', 'Offline Público', 'Bloqueado'],
+                datasets: [{
+                    data: [6, 1, 1],
+                    backgroundColor: ['#2B3BE5', '#FF003C', '#374151'],
+                    borderColor: '#0A0A0A',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: commonTooltip
+                },
+                cutout: '75%'
+            }
+        });
+
+        const ctxAudit = document.getElementById('auditChart').getContext('2d');
+        new Chart(ctxAudit, {
+            type: 'bar',
+            data: {
+                labels: [
+                    ['Firedancer', 'fd_funk'],
+                    ['Firedancer VM'],
+                    ['Moonwell'],
+                    ['Renegade'],
+                    ['GMTrade'],
+                    ['Intuition V2']
+                ],
+                datasets: [{
+                    label: 'Nivel de Severidad C5-REAL',
+                    data: [10, 10, 10, 7, 7, 7],
+                    backgroundColor: [
+                        '#FF003C', '#FF003C', '#FF003C', 
+                        '#00F0FF', '#00F0FF', '#00F0FF'
+                    ],
+                    borderColor: '#0A0A0A',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 10,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { display: false }
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: commonTooltip
+                }
+            }
+        });
+
+        const ctxPhysics = document.getElementById('physicsChart').getContext('2d');
+        new Chart(ctxPhysics, {
+            type: 'bar',
+            data: {
+                labels: [['CMOS', 'Moderno (J)'], ['Límite', 'Landauer (J)']],
+                datasets: [{
+                    label: 'Energía por Bit (Julios)',
+                    data: [1e-15, 2.805e-21],
+                    backgroundColor: ['#2B3BE5', '#00F0FF'],
+                    barThickness: 50
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'logarithmic',
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: commonTooltip
+                }
+            }
+        });
+
+        const ctxCred = document.getElementById('credibilityChart').getContext('2d');
+        new Chart(ctxCred, {
+            type: 'pie',
+            data: {
+                labels: [['Crecimiento', 'Inauténtico'], ['Crecimiento', 'Orgánico']],
+                datasets: [{
+                    data: [70, 30],
+                    backgroundColor: ['#FF003C', '#2B3BE5'],
+                    borderColor: '#0A0A0A',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: commonTooltip
+                }
+            }
+        });
+    </script>
+</body>
+</html>
