@@ -1,0 +1,6 @@
+name = "babylon60-boveda-ontologica"
+pages_build_output_dir = "boveda_ontologica"
+compatibility_date = "2026-06-30"
+
+[build]
+command = "echo 'Zero-Build. HTML Puro. Exergía Maximizada.'"
