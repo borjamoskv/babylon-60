@@ -142,6 +142,11 @@ class MOSKV1Core:
         self._adapter_path = Path.home() / ".cortex" / "training" / "adapters"
         self._history: deque[ConversationTurn] = deque(maxlen=max_history * 2)
         self._sovereign_llm = None  # Lazy-loaded fallback
+        
+        # MLX Native model cache
+        self._mlx_model = None
+        self._mlx_tokenizer = None
+        self._mlx_base_model_path = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
 
     def clear_history(self) -> None:
         """Reset conversation history."""
@@ -171,10 +176,10 @@ class MOSKV1Core:
         vault_entries: list[str] = []
 
         try:
-            from babylon60.embeddings.manager import get_embedding
+            from babylon60.embeddings import LocalEmbedder
             from babylon60.search.hybrid import hybrid_search
-
-            query_embedding = await get_embedding(query)
+            embedder = LocalEmbedder()
+            query_embedding = embedder.embed(query)
             results = await hybrid_search(
                 conn=db_conn,
                 query=query,
@@ -358,26 +363,34 @@ class MOSKV1Core:
         prompt_payload = self.assemble_prompt(user_query, context)
         messages = prompt_payload["messages"]
 
-        # Canal Paramétrico — Try Ollama first, then fallback
+        # Canal Paramétrico — Cascade fallback chain:
+        # Attempt 1: Native MLX-LM LoRA model (maximum local execution fidelity)
         response_text = ""
-        model_used = self.model_name
+        model_used = "mlx_native_lora"
         fallback_used = False
 
-        # Attempt 1: Ollama with MOSKV-1 model
-        response_text = await self._ollama_chat(messages, temperature)
+        logger.info("Attempting Native MLX-LM LoRA inference...")
+        response_text = await self._mlx_chat(messages)
 
-        # Attempt 2: Ollama with base model
+        # Attempt 2: Ollama with MOSKV-1 model
         if response_text.startswith("[ERROR]"):
-            logger.warning("MOSKV-1 model failed, trying base model")
+            logger.warning("Native MLX-LM failed, falling back to Ollama MOSKV-1 model: %s", response_text)
+            response_text = await self._ollama_chat(messages, temperature)
+            model_used = self.model_name
+            fallback_used = True
+
+        # Attempt 3: Ollama with base model
+        if response_text.startswith("[ERROR]"):
+            logger.warning("Ollama MOSKV-1 model failed, trying Ollama base model: %s", response_text)
             response_text = await self._ollama_chat(
                 messages, temperature, model_override=FALLBACK_MODEL
             )
             model_used = FALLBACK_MODEL
             fallback_used = True
 
-        # Attempt 3: SovereignLLM (CORTEX multi-provider chain)
+        # Attempt 4: SovereignLLM (CORTEX multi-provider chain)
         if response_text.startswith("[ERROR]"):
-            logger.warning("Ollama failed, falling back to SovereignLLM")
+            logger.warning("Ollama base model failed, falling back to SovereignLLM: %s", response_text)
             response_text = await self._sovereign_fallback(messages, temperature)
             model_used = "sovereign_llm"
             fallback_used = True
@@ -565,6 +578,63 @@ class MOSKV1Core:
         except Exception as e:
             logger.error("SovereignLLM fallback failed: %s", e)
             return f"[ERROR] All inference backends failed: {e}"
+
+    async def _mlx_chat(
+        self,
+        messages: list[dict[str, str]],
+        max_tokens: int = 2048,
+    ) -> str:
+        """Execute chat completion via native MLX-LM Metal inference with LoRA adapter."""
+        # Check if adapter exists
+        adapter_file = self._adapter_path / "adapters.safetensors"
+        if not adapter_file.exists():
+            return "[ERROR] MLX adapter weights not found. Run training first."
+
+        try:
+            import asyncio
+            from concurrent.futures import ThreadPoolExecutor
+
+            def _load_and_gen():
+                # Lazy-load MLX model and tokenizer
+                if self._mlx_model is None:
+                    from mlx_lm import load
+                    logger.info("Loading base model and LoRA adapter into MLX...")
+                    model, tokenizer = load(
+                        self._mlx_base_model_path,
+                        adapter_path=str(self._adapter_path)
+                    )
+                    self._mlx_model = model
+                    self._mlx_tokenizer = tokenizer
+                
+                # Apply chat template
+                from mlx_lm import generate
+                prompt = self._mlx_tokenizer.apply_chat_template(
+                    messages,
+                    tokenize=False,
+                    add_generation_prompt=True,
+                )
+                
+                logger.info("Executing native MLX generation...")
+                return generate(
+                    self._mlx_model,
+                    self._mlx_tokenizer,
+                    prompt=prompt,
+                    max_tokens=max_tokens,
+                )
+
+            # Run synchronous MLX loading and generation in a separate thread
+            # to avoid blocking the asyncio event loop.
+            loop = asyncio.get_running_loop()
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                response = await loop.run_in_executor(pool, _load_and_gen)
+                return response
+
+        except ImportError as e:
+            logger.warning("mlx_lm not available for native inference: %s", e)
+            return f"[ERROR] mlx_lm import failed: {e}"
+        except Exception as e:
+            logger.error("Native MLX inference failed: %s", e)
+            return f"[ERROR] MLX inference exception: {e}"
 
     # ─── Ollama Model Management ────────────────────────────────────────
 
