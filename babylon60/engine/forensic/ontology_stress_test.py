@@ -105,6 +105,7 @@ def run_stress_test(primitives_dir, report_out_path):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     # Use relative paths or env vars to avoid PII bleed in the repo
-    PRIMITIVES_DIR = "cortex/agents/primitives"
+    PRIMITIVES_DIR = "babylon60/agents/primitives"
     REPORT_OUT = "ontology_stress_report.md"
     run_stress_test(PRIMITIVES_DIR, REPORT_OUT)
+
