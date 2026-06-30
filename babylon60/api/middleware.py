@@ -443,8 +443,9 @@ class SovereignIsolationMiddleware(BaseHTTPMiddleware):
         # We skip public or unmetered 'free' plan if not required, but here we enforce it based on config.
         # Ensure we catch HTTPException to return a JSONResponse directly from the middleware.
         try:
-            from babylon60.api.tenant_guard import tenant_guard
             from fastapi import HTTPException
+
+            from babylon60.api.tenant_guard import tenant_guard
             # Free bypass for default or pwyw without strict enforcement on stripe
             if plan != "free" and plan != "pwyw":
                 tenant_guard.verify_request(tenant_id=tenant_id, plan_name=plan, ssu_cost=1)
@@ -512,12 +513,10 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
         return response
 
     async def _report_usage(self, api_key: str, request: Request):
-        """Asynchronously reports usage to Stripe via background task with secure DB lookup."""
+        """Asynchronously reports usage to Stripe via O(1) buffer."""
         try:
-            import stripe  # pyright: ignore[reportMissingImports]
-
             from babylon60.auth.manager import get_auth_manager
-            from babylon60.core import config
+            from babylon60.extensions.billing.metering import get_stripe_syncer
 
             auth_mgr = get_auth_manager()
             result = await auth_mgr.authenticate_async(api_key)
@@ -525,57 +524,8 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
                 logger.error("Stripe billing increment failed: API key invalid.")
                 return
 
-            pool = getattr(request.app.state, "pool", None)
-            if not pool:
-                logger.warning("Stripe billing increment failed: DB pool not available.")
-                return
-
-            stripe_subscription_item_id = None
-            async with pool.acquire() as conn:
-                async with conn.execute(
-                    "SELECT config FROM tenants WHERE id = ?", (result.tenant_id,)
-                ) as cursor:
-                    row = await cursor.fetchone()
-                    if row:
-                        try:
-                            config_data = json.loads(row[0])
-                            stripe_subscription_item_id = config_data.get(
-                                "stripe_subscription_item_id"
-                            )
-                        except Exception as e:  # noqa: BLE001
-                            logger.error("Failed to parse tenant config: %s", e)
-
-            # Fallback to mock item ID if in test/mock mode
-            if not stripe_subscription_item_id:
-                is_mock = not config.STRIPE_SECRET_KEY or config.STRIPE_SECRET_KEY.startswith(
-                    "sk_test_mock"
-                )
-
-                if is_mock:
-                    stripe_subscription_item_id = f"si_{api_key[-8:]}"
-                else:
-                    logger.error(
-                        "Stripe billing failed: No subscription item configured for tenant %s",
-                        result.tenant_id,
-                    )
-                    return
-
-            stripe.api_key = getattr(config, "STRIPE_SECRET_KEY", None)
-            if not stripe.api_key:
-                return
-
-            # Run synchronous stripe call in a thread pool to avoid blocking event loop
-            await asyncio.to_thread(
-                stripe.SubscriptionItem.create_usage_record,  # type: ignore
-                stripe_subscription_item_id,
-                quantity=1,
-                timestamp="now",
-                action="increment",
-            )
-            logger.info(
-                "Stripe usage reported for tenant %s (item %s)",
-                result.tenant_id,
-                stripe_subscription_item_id[:12],
-            )
+            # Push usage into O(1) async buffer
+            await get_stripe_syncer().queue_usage(api_key, result.tenant_id, ssu_cost=1)
+            
         except Exception as e:  # noqa: BLE001
             logger.error("Stripe billing increment failed for %s: %s", api_key[:12], e)

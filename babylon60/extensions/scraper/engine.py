@@ -87,6 +87,12 @@ class ScraperEngine:
 
         if result.status == "success":
             result.elapsed_ms = elapsed_ms
+            # Sanitize markdown to prevent prompt injection and exfiltration vectors
+            from babylon60.utils.search_sanitizer import SearchSanitizer
+
+            result.content = SearchSanitizer.sanitize_markdown(result.content)
+            result.content_hash = ScrapeResult.compute_hash(result.content)
+
             # Deduplication check
             if result.content_hash in self._seen_hashes:
                 LOG.info("♻️ [DEDUP] Content already seen: %s", request.url)
