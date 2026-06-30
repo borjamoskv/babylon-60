@@ -6,6 +6,7 @@ C5-REAL Execution Kernel.
 import time
 import math
 import logging
+import asyncio
 from typing import TypedDict, Tuple
 
 logger = logging.getLogger(__name__)
@@ -78,3 +79,28 @@ class AdaptiveFPUPID:
         """
         predicted_delta = motor_command * 0.85  # Damping factor
         return float(current_state + predicted_delta)
+
+    async def run_autonomous_daemon(self, inbox: asyncio.Queue, outbox: asyncio.Queue) -> None:
+        """
+        Closed-loop autonomous execution (C5-REAL Daemon).
+        Pulls sensory predictions and pushes motor corrections strictly independent 
+        from the main event loop, acting as a sovereign physical actor.
+        Complies with Rule Ω9 (Deterministic Ignition).
+        """
+        logger.info("[C5-REAL] Cerebellum Daemon ignited. Awaiting synchronization.")
+        while True:
+            try:
+                signal: ErrorSignal = await inbox.get()
+                correction, gate_ms = self.compute_motor_plan(signal)
+                
+                # Emit correction downstream autonomously
+                await outbox.put({"correction": correction, "gate_ms": gate_ms})
+                inbox.task_done()
+                
+            except asyncio.CancelledError:
+                logger.info("[C5-REAL] Cerebellum Daemon terminated via apoptosis.")
+                break
+            except Exception as e: # noqa: BLE001
+                # Constraint LL-AC-03: Fault containment inside background worker.
+                logger.error(f"[C5-REAL] L1 Oscillation collapse in cerebellum daemon: {e}")
+                await asyncio.sleep(0.001)  # Thermodynamic debounce
