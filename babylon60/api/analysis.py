@@ -83,7 +83,9 @@ async def forensic_audit_middleware(request: Request, call_next):
             if scheme.lower() == "bearer":
                 payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
                 user = payload.get("user", "sys_auditor")
-        except Exception:  # noqa: BLE001
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).debug("Token validation failed: %s", e)
             user = "invalid_token"
 
     log_audit_event(

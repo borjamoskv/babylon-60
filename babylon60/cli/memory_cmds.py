@@ -73,7 +73,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str)
                         encoding=serialization.Encoding.Raw,
                         format=serialization.PublicFormat.Raw
                     )).decode().rstrip("=")
-            except Exception:  # noqa: BLE001
+            except (ValueError, TypeError, KeyError, AttributeError):
                 pass
 
         except (ValueError, TypeError, OSError, KeyError) as e:
