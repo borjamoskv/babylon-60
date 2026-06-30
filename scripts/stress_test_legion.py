@@ -74,10 +74,10 @@ async def main():
         from babylon60.extensions.llm.provider import LLMProvider
         primary_provider = LLMProvider(provider=primary_provider_name, model=primary_model_name)
         fallback_providers = [
+            LLMProvider("cerebras"),
             LLMProvider("openrouter"),
             LLMProvider("deepseek"),
             LLMProvider("ollama"),
-            LLMProvider("lmstudio"),
         ]
         router = CortexLLMRouter(primary=primary_provider, fallbacks=fallback_providers)
     else:
