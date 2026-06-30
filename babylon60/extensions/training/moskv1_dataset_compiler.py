@@ -107,7 +107,7 @@ def _clean_transcript_prompt(text: str) -> str:
 _MIN_ENTROPY_THRESHOLD = 2.8
 _MIN_LINE_LENGTH = 12
 _MIN_OUTPUT_LENGTH = 100
-_MAX_OUTPUT_LENGTH = 4096
+_MAX_OUTPUT_LENGTH = 2000
 _MIN_INSTRUCTION_LENGTH = 15
 
 # ─── Instruction Templates (Diversity) ─────────────────────────────────────
@@ -381,12 +381,20 @@ class MOSKV1DatasetCompiler:
             return False
 
         # Length bounds
+        inst_len = len(entry.instruction.strip())
         output_len = len(entry.output.strip())
+        
         if output_len < _MIN_OUTPUT_LENGTH:
             self._filter_reason("output_too_short")
             return False
-        if len(entry.instruction.strip()) < _MIN_INSTRUCTION_LENGTH:
+        if inst_len < _MIN_INSTRUCTION_LENGTH:
             self._filter_reason("instruction_too_short")
+            return False
+        if inst_len > 1500:
+            self._filter_reason("instruction_too_long")
+            return False
+        if (inst_len + output_len) > 3000:
+            self._filter_reason("combined_length_exceeded")
             return False
 
         # Truncate oversized outputs

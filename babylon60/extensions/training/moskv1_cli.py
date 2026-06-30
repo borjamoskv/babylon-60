@@ -59,7 +59,7 @@ def cmd_compile(workspace: str | None = None) -> None:
 
 def cmd_train(
     model: str = "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
-    iters: int = 200,
+    iters: int = 50,
     batch_size: int = 2,
     lora_layers: int = 16,
     learning_rate: float = 2e-5,
@@ -103,25 +103,24 @@ def cmd_train(
         "--iters",
         str(iters),
         "--batch-size",
-        str(batch_size),
+        "1",  # Lower batch size to reduce memory usage
+        "--grad-accumulation-steps",
+        "2",  # Accumulate gradient to maintain effective batch size of 2
         "--learning-rate",
         str(learning_rate),
-        "--steps-per-report",
-        "10",
-        "--steps-per-eval",
-        "50",
-        "--max-seq-length",
-        "2048",
-        "--save-every",
-        "100",
-        "--seed",
-        "42",
+        "--steps-per-report", "10",
+        "--steps-per-eval", "50",
+        "--val-batches", "5",
+        "--max-seq-length", "1280",  # Fit maximum character limit securely
+        "--grad-checkpoint",  # Use gradient checkpointing to save VRAM
+        "--save-every", "100",
+        "--seed", "42",
     ]
 
     print(f"🧠 MLX LoRA Training — {model}")
-    print(f"   Iterations: {iters} | Batch: {batch_size} | Layers: {lora_layers}")
+    print(f"   Iterations: {iters} | Batch: 1 (Acc: 2) | Layers: {lora_layers}")
     print(f"   Learning Rate: {learning_rate} | Optimizer: adamw")
-    print("   Max Seq Length: 2048 | Mask Prompt: True")
+    print("   Max Seq Length: 1280 | Mask Prompt: True | Grad Checkpoint: True")
     print(f"   Output: {adapter_path}")
     print()
 
