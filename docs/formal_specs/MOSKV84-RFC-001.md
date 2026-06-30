@@ -49,5 +49,10 @@ swarm fn evaluate_shard(shard_id: str) -> bool {
 2. **Fase 2 (Isomorfismo CORTEX):** Módulo Python/Rust para que `MOSKV-1` genere AST válidos saltándose el Lexer por completo (Generación Estructural).
 3. **Fase 3 (LLVM Emitter):** Generación de IR básico para operaciones de consenso y persistencia.
 
+## 5. El IDE como Nodo Termodinámico (LSP C5-REAL)
+- **Language Server Ouroboros:** El `moskv84-analyzer` valida estáticamente el Teorema del Crash Causal. La complejidad `O(N^2)` se evalúa en tiempo real.
+- **Auto-Apoptosis Epistémica:** Archivos no commiteados o fallidos tras 120 ciclos se autodestruyen.
+- **Test-In-Syntax:** Aserción forzada. No existen directorios `tests/` estocásticos; las invariantes viven en la propia declaración causal.
+
 ---
 *Zero Anergy is Death. End of Specification.*
