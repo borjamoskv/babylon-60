@@ -33,6 +33,8 @@ async def semantic_search(
     project: str | None = None,
     as_of: str | None = None,
     confidence: str | None = None,
+    fact_type: str | None = None,
+    tags: list[str] | None = None,
 ) -> list[SearchResult]:
     """Perform semantic vector search using sqlite-vec or pgvector (PostgreSQL)."""
     if get_storage_mode() == StorageMode.POSTGRES:
@@ -60,6 +62,17 @@ async def semantic_search(
             param_idx += 1
         else:
             sql += " AND f.valid_until IS NULL AND f.is_tombstoned = FALSE"
+
+        if fact_type:
+            sql += f" AND f.fact_type = ${param_idx}"
+            params.append(fact_type)
+            param_idx += 1
+
+        if tags:
+            for tag in tags:
+                sql += f" AND f.tags ILIKE ${param_idx}"
+                params.append(f"%{tag}%")
+                param_idx += 1
 
         if confidence:
             sql += f" AND f.confidence >= ${param_idx}"
@@ -91,7 +104,7 @@ async def semantic_search(
     # Default SQLite-vec execution path
     embedding_json = json.dumps(query_embedding)
     sql, params = _build_semantic_query(
-        tenant_id, embedding_json, top_k, project, as_of, confidence
+        tenant_id, embedding_json, top_k, project, as_of, confidence, fact_type, tags
     )
 
     try:
@@ -115,6 +128,8 @@ def _build_semantic_query(
     project: str | None,
     as_of: str | None,
     confidence: str | None,
+    fact_type: str | None = None,
+    tags: list[str] | None = None,
 ) -> tuple[str, list]:
     """Internal helper to build semantic search SQL."""
     sql = """
@@ -141,6 +156,15 @@ def _build_semantic_query(
         params.extend(t_params)
     else:
         sql += _FILTER_ACTIVE
+
+    if fact_type:
+        sql += " AND f.fact_type = ?"
+        params.append(fact_type)
+
+    if tags:
+        for tag in tags:
+            sql += " AND json_extract(f.tags, '$') LIKE ?"
+            params.append(f"%{tag}%")
 
     if confidence:
         sql += " AND f.confidence >= ?"
