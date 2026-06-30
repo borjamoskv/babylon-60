@@ -170,12 +170,11 @@ def resolve_cli_tenant(tenant_id: str) -> str:
             tenant_id = env_tenant
         else:
             # 2. Config file
-            config_path = Path("/Users/borjafernandezangulo/10_PROJECTS/cortex-meta/active-context.json")
+            config_path = Path.home() / "10_PROJECTS/cortex-meta/active-context.json"
             if config_path.is_file():
                 try:
-                    with open(config_path, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                        tenant_id = data.get("tenant_id") or data.get("active_tenant") or "default"
+                    data = json.loads(config_path.read_text(encoding="utf-8"))
+                    tenant_id = data.get("tenant_id") or data.get("active_tenant") or "default"
                 except Exception:  # noqa: BLE001
                     tenant_id = "default"
 

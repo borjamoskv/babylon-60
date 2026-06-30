@@ -351,7 +351,7 @@ class LLMProvider(BaseProvider):
                 from babylon60.routes.notch_ws import notify_notch_halo
 
                 asyncio.create_task(notify_notch_halo(color, False))
-            except Exception:  # noqa: BLE001
+            except (ImportError, ValueError, RuntimeError, OSError):
                 pass
 
     def _parse_response_json(self, response: httpx.Response) -> dict[str, Any]:
@@ -416,7 +416,7 @@ class LLMProvider(BaseProvider):
             from babylon60.routes.notch_ws import notify_notch_halo
 
             asyncio.create_task(notify_notch_halo(color, True))
-        except Exception:  # noqa: BLE001
+        except (ImportError, ValueError, RuntimeError, OSError):
             pass
 
         try:
@@ -435,7 +435,7 @@ class LLMProvider(BaseProvider):
                 from babylon60.routes.notch_ws import notify_notch_halo
 
                 asyncio.create_task(notify_notch_halo(color, False))
-            except Exception:  # noqa: BLE001
+            except (ImportError, ValueError, RuntimeError, OSError):
                 pass
 
     def _resolve_model(self, intent: IntentProfile) -> str:
@@ -449,8 +449,8 @@ class LLMProvider(BaseProvider):
                         if (reg := json.load(f)).get("status") == "verified":
                             if adapter_path := reg.get("adapter_path"):
                                 return adapter_path
-                except Exception as exc:  # noqa: BLE001
-                    logger.warning("Suppressed exception: %s", exc)
+                except (OSError, IOError, json.JSONDecodeError) as exc:
+                    logger.debug("Failed to read verified_adapter.json: %s", exc)
         if self._intent_model_map:
             resolved = self._intent_model_map.get(intent, self._model)
             if resolved != self._model:
