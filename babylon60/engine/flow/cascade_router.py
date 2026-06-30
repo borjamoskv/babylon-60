@@ -28,7 +28,7 @@ def _get_local_ollama_models() -> list[str]:
         with urllib.request.urlopen(req, timeout=1.0) as response:
             data = json.loads(response.read().decode())
             return [m["name"] for m in data.get("models", [])]
-    except Exception:  # noqa: BLE001
+    except (urllib.error.URLError, json.JSONDecodeError, OSError, ValueError):
         return []
 
 
