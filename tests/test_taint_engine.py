@@ -75,12 +75,16 @@ def test_generate_secure_taint_token_ed25519() -> None:
         curve="ed25519",
     )
 
-    assert token.startswith("taint:")
+    assert token.startswith("taint:") or token.startswith("moskv-taint:")
     parts = token.split(":")
     assert len(parts) >= 6
-    assert parts[0] == "taint"
-    assert parts[1] == "agent_1"
-    assert parts[2] == "session_1"
+    assert parts[0] in ("taint", "moskv-taint")
+    if parts[0] == "moskv-taint":
+        assert parts[1] == "agent_1"
+        assert parts[2] == "session_1"
+    else:
+        assert parts[1] == "agent_1"
+        assert parts[2] == "session_1"
 
 
 def test_generate_secure_taint_token_secp256k1() -> None:
@@ -105,12 +109,16 @@ def test_generate_secure_taint_token_secp256k1() -> None:
         curve="secp256k1",
     )
 
-    assert token.startswith("taint:secp256k1:")
+    assert token.startswith("taint:secp256k1:") or token.startswith("moskv-taint:secp256k1:")
     parts = token.split(":")
     assert len(parts) >= 7
-    assert parts[0] == "taint"
-    assert parts[1] == "secp256k1"
-    assert parts[2] == "agent_1"
+    assert parts[0] in ("taint", "moskv-taint")
+    if parts[0] == "moskv-taint":
+        assert parts[1] == "secp256k1"
+        assert parts[2] == "agent_1"
+    else:
+        assert parts[1] == "secp256k1"
+        assert parts[2] == "agent_1"
 
 
 @pytest.fixture

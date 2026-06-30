@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from cortex.engine.core import store_validation as sv
+from babylon60.engine.core import store_validation as sv
 
 
 @pytest.mark.asyncio
@@ -20,9 +20,9 @@ async def test_taint_is_verified_after_bridge_mutation(monkeypatch: pytest.Monke
     monkeypatch.setattr(sv, "_enforce_thermodynamics", lambda *args, **kwargs: None)
     monkeypatch.setattr(sv, "_apply_exergy", lambda *args, **kwargs: None)
     monkeypatch.setattr(
-        "cortex.engine.flow.storage_guard.StorageGuard.validate", lambda **kwargs: None
+        "babylon60.engine.flow.storage_guard.StorageGuard.validate", lambda **kwargs: None
     )
-    monkeypatch.setattr("cortex.engine.core.store_validators.check_dedup", noop_async)
+    monkeypatch.setattr("babylon60.engine.core.store_validators.check_dedup", noop_async)
     monkeypatch.setattr(sv, "_apply_semantic_dedup", noop_async)
     monkeypatch.setattr(
         sv,
@@ -38,11 +38,11 @@ async def test_taint_is_verified_after_bridge_mutation(monkeypatch: pytest.Monke
 
     monkeypatch.setattr(sv, "_apply_bridge_guard", bridge_guard)
     monkeypatch.setattr(
-        "cortex.engine.core.fact_store_core.resolve_causality_async", resolve_causality
+        "babylon60.engine.core.fact_store_core.resolve_causality_async", resolve_causality
     )
-    monkeypatch.setattr("cortex.engine.meta.nemesis.NemesisProtocol.analyze_async", noop_async)
+    monkeypatch.setattr("babylon60.engine.meta.nemesis.NemesisProtocol.analyze_async", noop_async)
     monkeypatch.setattr(
-        "cortex.engine.flow.guard_integration_patch.enforce_store_guards", noop_async
+        "babylon60.engine.flow.guard_integration_patch.enforce_store_guards", noop_async
     )
 
     async def capture_taint(conn, content, fact_type, meta):
