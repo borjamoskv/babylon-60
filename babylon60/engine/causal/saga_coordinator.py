@@ -124,7 +124,7 @@ class SagaCoordinator:
                         fact_id, distance = row
                         score = 1.0 - (distance if distance is not None else 0.0)
                         if score > 0.90:
-                            now_str = datetime.datetime.utcnow().isoformat() + "Z"
+                            now_str = datetime.datetime.now(datetime.timezone.utc).isoformat() + "Z"
 
                             # Retrieve existing metadata
                             cursor = await self.ledger._conn.execute(
@@ -139,14 +139,15 @@ class SagaCoordinator:
                                     meta_dict = {}
 
                             meta_dict["last_accessed"] = now_str
-                            meta_dict["last_accessed_ts"] = datetime.datetime.utcnow().timestamp()
+                            meta_dict["last_accessed_ts"] = datetime.datetime.now(datetime.timezone.utc).timestamp()
 
                             # Execute update
-                            await self.ledger._conn.execute(
-                                "UPDATE facts SET metadata = ?, updated_at = ? WHERE id = ?",
-                                (json.dumps(meta_dict), now_str, fact_id)
-                            )
-                            await self.ledger._conn.commit()
+                            with causal_write(self.ledger._conn):
+                                await self.ledger._conn.execute(
+                                    "UPDATE facts SET metadata = ?, updated_at = ? WHERE id = ?",
+                                    (json.dumps(meta_dict), now_str, fact_id)
+                                )
+                                await self.ledger._conn.commit()
 
                             # Log rejection / duplicate state to Ledger
                             await self.ledger.log_action(

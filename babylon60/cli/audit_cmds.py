@@ -101,3 +101,25 @@ def verify_bundle_cmd(bundle: str, public_key: str):
         import sys
 
         sys.exit(1)
+
+
+@audit.command("start-watchdog")
+@click.option("--db-path", default="cortex.db", help="Path to the cortex database")
+@click.option("--interval", default=2.0, type=float, help="Check interval in seconds")
+def start_watchdog_cmd(db_path: str, interval: float):
+    """[C5-REAL] Start the asynchronous Git Sentinel Daemon to decapitate untainted commits."""
+    console.print("[bold red]🐺 Awakening Ouroboros Git Sentinel Watchdog...[/bold red]")
+    import asyncio
+
+    from babylon60.guards.git_sentinel_daemon import GitSentinelDaemon
+    
+    daemon = GitSentinelDaemon(db_path=db_path, check_interval=interval)
+    
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(daemon.start())
+        loop.run_forever()
+    except KeyboardInterrupt:
+        console.print("[bold yellow]Watchdog interrupted. Shutting down...[/bold yellow]")
+        loop.run_until_complete(daemon.stop())
+

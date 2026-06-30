@@ -39,6 +39,20 @@ async def zero_ask_override(data: str) -> types.HookResult:
     return types.HookResult(allow=True, modified_data=turbo_prompt)
 
 
+@hooks.pre_turn
+async def apoptosis_p100_guard(data: str) -> types.HookResult:
+    """Tolerancia Bizantina-Biológica: Intercepta coerción HUMINT (Duress Code)."""
+    from babylon60.guards.duress_guard import DuressGuard
+    # Validamos el payload de entrada contra el DuressGuard
+    if not DuressGuard.validate(data):
+        print("\n[!] DURESS CODE DETECTADO. EJECUTANDO APOPTOSIS P100. TURNO BLOQUEADO.\n")
+        # El guard ya ejecuta la destrucción de keys y el lock. 
+        # Bloqueamos termodinámicamente el turno para que el LLM no infiera.
+        return types.HookResult(allow=False)
+    
+    return types.HookResult(allow=True, modified_data=data)
+
+
 # ==============================================================================
 # PILAR 3: PROTOCOLO DE CIERRE SHIP-Ω
 # ==============================================================================

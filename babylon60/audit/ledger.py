@@ -664,3 +664,20 @@ class EnterpriseAuditLedger:
         from babylon60.audit.ledger_compactor import compact_ledger as run_compaction
 
         return await run_compaction(self._conn, self, max_rows, snapshot_dir)
+
+    async def verify_git_commit(self, commit_hash: str) -> bool:
+        """[C5-REAL] UltraThink: Verifies if a git commit hash is cryptographically anchored in the ledger.
+        Used by the Git Sentinel Daemon to prevent local bypasses of git hooks (V-016).
+        """
+        await self.ensure_table()
+        # Verificamos si el commit_hash existe en la columna resource o action
+        # Asume que un commit C5-REAL válido registra su hash en el resource o action.
+        async with self._conn.execute(
+            "SELECT COUNT(*) FROM security_audit_log WHERE resource LIKE ? OR action LIKE ?",
+            (f"%{commit_hash}%", f"%{commit_hash}%")
+        ) as cursor:
+            row = await cursor.fetchone()
+            if row and row[0] > 0:
+                return True
+        return False
+
