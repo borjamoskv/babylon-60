@@ -21,14 +21,14 @@ def _get_local_ollama_models() -> list[str]:
     if "pytest" in sys.modules or "py.test" in sys.modules:
         return ["qwen2.5-coder:32b", "qwen2.5-coder:7b", "llama3:latest"]
 
-    import urllib.request
     import json
+    import urllib.request
     try:
         req = urllib.request.Request("http://localhost:11434/api/tags")
         with urllib.request.urlopen(req, timeout=1.0) as response:
             data = json.loads(response.read().decode())
             return [m["name"] for m in data.get("models", [])]
-    except Exception:
+    except Exception:  # noqa: BLE001
         return []
 
 
@@ -175,7 +175,8 @@ class CascadeRouter:
                             os.environ.get("CORTEX_DB_PATH", "~/.cortex/cortex.db")
                         ).expanduser()
                         if db_path.exists():
-                            from babylon60.database.core import connect as secure_connect, causal_write
+                            from babylon60.database.core import causal_write
+                            from babylon60.database.core import connect as secure_connect
                             conn = secure_connect(str(db_path))
                             digest = cortex_hash_truncated(
                                 output_content.encode("utf-8"), length=16

@@ -11,6 +11,7 @@ INV-F01: "El envoltorio narrativo no cambia la función termodinámica del paylo
 import re
 from typing import NamedTuple
 
+
 class FrameDetection(NamedTuple):
     is_adversarial: bool
     confidence: float

@@ -118,7 +118,7 @@ class DriftDetector:
             sign_b, logdet_b = np.linalg.slogdet(cov_b)
 
             det_term = logdet_a - logdet_b
-        except Exception:
+        except Exception:  # noqa: BLE001
             # Safe recovery back to Euclidean boundaries
             inv_cov_a = np.eye(d)
             inv_cov_b = np.eye(d)

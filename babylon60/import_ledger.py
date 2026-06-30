@@ -90,7 +90,7 @@ class ImportResolutionLedger:
                         try:
                             last_entry = json.loads(non_empty[-1])
                             prev_hash = last_entry.get("entry_hash", "GENESIS")
-                        except Exception:
+                        except Exception:  # noqa: BLE001
                             prev_hash = "GENESIS"
                     else:
                         prev_hash = "GENESIS"
@@ -117,7 +117,7 @@ class ImportResolutionLedger:
                                 e = json.loads(line)
                                 if e.get("session_id") == self.session_id and "entry_hash" in e:
                                     session_hashes.append(e["entry_hash"])
-                            except Exception:
+                            except Exception:  # noqa: BLE001
                                 pass
 
                         # Add the end event's own payload hash to the merkle leaves

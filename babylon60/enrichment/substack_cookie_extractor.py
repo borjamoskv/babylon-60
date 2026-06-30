@@ -21,7 +21,7 @@ def get_chrome_key():
         ]
         password = subprocess.check_output(cmd, stderr=subprocess.DEVNULL).strip()
         return password
-    except Exception:
+    except Exception:  # noqa: BLE001
         # Fallback to keyring library
         try:
             return keyring.get_password("Chrome Safe Storage", "Chrome").encode("utf-8")

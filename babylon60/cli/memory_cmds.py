@@ -63,8 +63,9 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str)
             # Try to derive public key
             try:
                 import base64
-                from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
                 from cryptography.hazmat.primitives import serialization
+                from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
                 priv_bytes = base64.urlsafe_b64decode(priv_b64 + "=" * (-len(priv_b64) % 4))
                 if len(priv_bytes) == 32:
                     pk = Ed25519PrivateKey.from_private_bytes(priv_bytes)
@@ -72,7 +73,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str, project: str)
                         encoding=serialization.Encoding.Raw,
                         format=serialization.PublicFormat.Raw
                     )).decode().rstrip("=")
-            except Exception:
+            except Exception:  # noqa: BLE001
                 pass
 
         except (ValueError, TypeError, OSError, KeyError) as e:

@@ -2,12 +2,12 @@
 # federated_search.py — Hybrid Cross-Tenant Search Layer
 # Operator: borjamoskv | Kernel: MOSKV-1 APEX
 
-from dataclasses import dataclass
-from typing import List, Optional, Dict
-from enum import Enum
-import time
 import sqlite3
+import time
+from dataclasses import dataclass
+from enum import Enum
 from threading import Lock
+from typing import Optional
 
 
 class SearchBackend(Enum):
@@ -88,10 +88,10 @@ class QdrantAdapter:
 
     def search(
         self,
-        query_embedding: List[float],
-        tenant_filter: Optional[List[str]] = None,
+        query_embedding: list[float],
+        tenant_filter: Optional[list[str]] = None,
         limit: int = 20
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         if not self.circuit_breaker.allow_request():
             # Devuelve vacío si el Circuit Breaker está abierto para forzar el fallback
             return []
@@ -99,10 +99,10 @@ class QdrantAdapter:
         try:
             # Simulación de llamada de búsqueda en Qdrant
             # En producción: results = self.client.search(...)
-            results: List[SearchResult] = []
+            results: list[SearchResult] = []
             self.circuit_breaker.record_success()
             return results
-        except Exception:
+        except Exception:  # noqa: BLE001
             self.circuit_breaker.record_failure()
             return []
 
@@ -110,7 +110,7 @@ class QdrantAdapter:
         self,
         tenant_id: str,
         doc_id: str,
-        embedding: List[float],
+        embedding: list[float],
         text: str,
         source_hash: str
     ) -> bool:
@@ -122,7 +122,7 @@ class QdrantAdapter:
             # Simulación de inserción con idempotencia
             self.circuit_breaker.record_success()
             return True
-        except Exception:
+        except Exception:  # noqa: BLE001
             self.circuit_breaker.record_failure()
             return False
 
@@ -138,10 +138,10 @@ class SQLiteMergeSearch:
     def search(
         self,
         query: str,
-        tenant_filter: Optional[List[str]] = None,
+        tenant_filter: Optional[list[str]] = None,
         limit: int = 20
-    ) -> List[SearchResult]:
-        results: List[SearchResult] = []
+    ) -> list[SearchResult]:
+        results: list[SearchResult] = []
         targets = tenant_filter or list(self.db_paths.keys())
 
         for tenant_id in targets:
@@ -213,11 +213,11 @@ class FederatedSearchRouter:
     def search(
         self,
         query: str,
-        query_embedding: Optional[List[float]],
+        query_embedding: Optional[list[float]],
         tenant_count: int,
-        tenant_filter: Optional[List[str]] = None,
+        tenant_filter: Optional[list[str]] = None,
         limit: int = 20
-    ) -> tuple[List[SearchResult], SearchBackend]:
+    ) -> tuple[list[SearchResult], SearchBackend]:
         with self._lock:
             self._query_timestamps.append(time.monotonic())
 

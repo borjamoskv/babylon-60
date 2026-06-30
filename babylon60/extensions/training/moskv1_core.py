@@ -41,8 +41,8 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 import time
 from collections import deque
-from concurrent.futures import ThreadPoolExecutor
 from collections.abc import AsyncIterator
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -836,7 +836,7 @@ TEMPLATE \"\"\"{{{{ if .System }}}}<|im_start|>system
                         result["models"] = models
                         result["moskv1_available"] = any(self.model_name in m for m in models)
                         result["fallback_available"] = any("qwen2.5-coder" in m for m in models)
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
         return result

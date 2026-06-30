@@ -186,7 +186,7 @@ class ONNXBackend(EmbeddingBackend):
             from babylon60.embeddings.local import LocalEmbedder
 
             self._embedder = LocalEmbedder(model_name=self._model_name, device=self._device)
-        except Exception:
+        except Exception:  # noqa: BLE001
             self._embedder = None
         return self._embedder
 

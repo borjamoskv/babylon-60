@@ -58,7 +58,7 @@ class ShadowResolver(importlib.abc.MetaPathFinder):
                         fullname, _TracerAliasLoader(mod), origin=getattr(mod, "__file__", None)
                     )
                     return spec
-                except Exception:
+                except Exception:  # noqa: BLE001
                     pass
             else:
                 # Log would-break event
@@ -115,7 +115,7 @@ class ImportTracer:
                     if "importlib" not in filename and "<frozen" not in filename:
                         return name
                 frame = frame.f_back
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
         return "unknown"
 

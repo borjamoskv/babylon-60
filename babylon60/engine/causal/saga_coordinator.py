@@ -16,6 +16,7 @@ import logging
 from typing import Any
 
 from babylon60.audit.ledger import EnterpriseAuditLedger
+from babylon60.crypto.aes import get_default_encrypter
 from babylon60.database.core import causal_write
 from babylon60.engine.causal.schema_validator import L0L6SchemaValidator
 from babylon60.engine.causal.taint_engine import (
@@ -23,7 +24,6 @@ from babylon60.engine.causal.taint_engine import (
     enforce_taint_check,
     secure_state_commit,
 )
-from babylon60.crypto.aes import get_default_encrypter
 
 logger = logging.getLogger("babylon60.engine.causal.saga_coordinator")
 
@@ -67,7 +67,7 @@ class SagaCoordinator:
 
         # SAGA-2.5: BFT Quorum (Ouroboros)
         if "bft_signatures" in metadata:
-            from babylon60.consensus.bft_quorum import BFTQuorumGuard, BFTQuorumError
+            from babylon60.consensus.bft_quorum import BFTQuorumError, BFTQuorumGuard
             bft_sigs = metadata["bft_signatures"]
             known_peers = metadata.get("bft_known_peers", {})
             try:

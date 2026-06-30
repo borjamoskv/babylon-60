@@ -36,8 +36,8 @@ def parse_markdown_table(filepath):
 
 async def _log_compilation_to_ledger(yaml_path: str, sha256_hash: str) -> None:
     try:
-        from babylon60.database.core import connect_async_ctx
         from babylon60.audit.ledger import EnterpriseAuditLedger
+        from babylon60.database.core import connect_async_ctx
 
         db_path = "cortex_ledger.db"
         async with connect_async_ctx(db_path) as conn:

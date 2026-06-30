@@ -288,7 +288,7 @@ class LLMProvider(BaseProvider):
         except httpx.HTTPStatusError as e:
             try:
                 err_text = e.response.content.decode("utf-8", errors="replace")[:500]
-            except Exception:
+            except Exception:  # noqa: BLE001
                 err_text = "<unreadable_response>"
 
             logger.error(
@@ -328,7 +328,7 @@ class LLMProvider(BaseProvider):
             from babylon60.routes.notch_ws import notify_notch_halo
 
             asyncio.create_task(notify_notch_halo(color, True))
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
         try:
@@ -351,7 +351,7 @@ class LLMProvider(BaseProvider):
                 from babylon60.routes.notch_ws import notify_notch_halo
 
                 asyncio.create_task(notify_notch_halo(color, False))
-            except Exception:
+            except Exception:  # noqa: BLE001
                 pass
 
     def _parse_response_json(self, response: httpx.Response) -> dict[str, Any]:
@@ -416,7 +416,7 @@ class LLMProvider(BaseProvider):
             from babylon60.routes.notch_ws import notify_notch_halo
 
             asyncio.create_task(notify_notch_halo(color, True))
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
 
         try:
@@ -435,7 +435,7 @@ class LLMProvider(BaseProvider):
                 from babylon60.routes.notch_ws import notify_notch_halo
 
                 asyncio.create_task(notify_notch_halo(color, False))
-            except Exception:
+            except Exception:  # noqa: BLE001
                 pass
 
     def _resolve_model(self, intent: IntentProfile) -> str:

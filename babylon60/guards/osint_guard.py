@@ -119,7 +119,7 @@ class OSINTGuard:
                     decoded_url = urllib.parse.unquote(raw_text)
                     if decoded_url != raw_text:
                         layers.update(_extract_text_layers(decoded_url, depth + 1))
-                except Exception:
+                except Exception:  # noqa: BLE001
                     logger.debug("OSINT URL decode failure.")
 
             # Hex / Binary peel
@@ -131,7 +131,7 @@ class OSINTGuard:
                         decoded_hex = bytes.fromhex(hex_str).decode("utf-8", errors="ignore")
                         if decoded_hex and any(c.isalnum() for c in decoded_hex):
                             layers.update(_extract_text_layers(decoded_hex, depth + 1))
-                    except Exception:
+                    except Exception:  # noqa: BLE001
                         logger.debug("OSINT HEX decode failure.")
 
             # Base64 peel
@@ -145,7 +145,7 @@ class OSINTGuard:
                     decoded_b64 = base64.b64decode(b64_str).decode("utf-8", errors="ignore")
                     if decoded_b64 and any(c.isalnum() for c in decoded_b64):
                         layers.update(_extract_text_layers(decoded_b64, depth + 1))
-                except Exception:
+                except Exception:  # noqa: BLE001
                     logger.debug("OSINT B64 decode failure.")
 
             return layers

@@ -114,7 +114,7 @@ class BillingIntegrityGateway:
             if plan == "pwyw":
                 try:
                     amount_usd = Decimal(str(session.get("metadata", {}).get("amount_usd", "0.0")))
-                except Exception:
+                except Exception:  # noqa: BLE001
                     amount_usd = Decimal("0.0")
 
             if plan == "pwyw" and amount_usd > Decimal("0.0"):

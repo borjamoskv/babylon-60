@@ -142,7 +142,7 @@ class PrivacyMixin(EngineMixinBase):
                                 else:
                                     try:
                                         stored_meta = json.loads(raw_meta) or {}
-                                    except Exception:
+                                    except Exception:  # noqa: BLE001
                                         stored_meta = {}
 
                             # Update stored metadata

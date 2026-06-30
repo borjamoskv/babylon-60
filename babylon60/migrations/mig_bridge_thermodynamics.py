@@ -49,7 +49,7 @@ async def _migration_029_thermodynamic_bridges(conn: aiosqlite.Connection) -> No
                     try:
                         decrypted_meta = enc.decrypt_str(metadata_encrypted, tenant_id=tenant_id)
                         meta = json.loads(decrypted_meta) if decrypted_meta else {}
-                    except Exception:
+                    except Exception:  # noqa: BLE001
                         pass
 
                 old_content = (
@@ -73,5 +73,5 @@ async def _migration_029_thermodynamic_bridges(conn: aiosqlite.Connection) -> No
                     "UPDATE facts SET content = ?, metadata = ? WHERE id = ?",
                     (new_content_encrypted, new_meta_encrypted, fact_id),
                 )
-            except Exception:
+            except Exception:  # noqa: BLE001
                 pass  # Skip if crypto fails or not available

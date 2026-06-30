@@ -39,7 +39,7 @@ class MockQdrantIndex:
         ranked = []
         for item in self.store:
             # Simple dot product simulation
-            sim = sum(a * b for a, b in zip(item["vector"][:10], query_vector[:10]))
+            sim = sum(a * b for a, b in zip(item["vector"][:10], query_vector[:10], strict=False))
             ranked.append((sim, item))
         ranked.sort(key=lambda x: x[0], reverse=True)
         return [item[1] for item in ranked[:limit]]

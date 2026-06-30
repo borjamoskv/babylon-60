@@ -14,7 +14,7 @@ import hashlib
 import logging
 import re
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional
+from typing import TYPE_CHECKING, Any, Final, Optional
 
 # Import the router from the engine
 from babylon60.engine.causal.taint_engine import MHCAntigenRouter, canonicalize_content
@@ -40,7 +40,7 @@ class IHelpPurgeDaemon:
         from babylon60.routes.telemetry import BASE_MAFIA_NODES
 
         # Escape all regex characters in the nodes, and convert whitespace in nodes to \s+
-        escaped_nodes: List[str] = []
+        escaped_nodes: list[str] = []
         for node in BASE_MAFIA_NODES:
             escaped: str = re.escape(node)
             cleaned: str = re.sub(r"(\\ )|\s+", r"\\s+", escaped)
@@ -61,6 +61,7 @@ class IHelpPurgeDaemon:
         Garantiza que la identidad soberana del Daemon esté registrada en la tabla agents.
         """
         import sqlite3
+
         from babylon60.database.core import causal_write
 
         row: Optional[tuple[str]] = None
@@ -133,7 +134,7 @@ class IHelpPurgeDaemon:
             await conn.execute(query, params)
             await conn.commit()
 
-    async def phagocytize(self, payload: str, source_agent: str) -> Dict[str, Any]:
+    async def phagocytize(self, payload: str, source_agent: str) -> dict[str, Any]:
         """
         Activated when the MHC router presents a matching antigen.
         Calculates Exergy saved, drops the payload, and logs the execution.
@@ -216,7 +217,7 @@ class IHelpPurgeDaemon:
             await conn.close()
 
         # Emit to Master Ledger (C5-REAL Proof of Work)
-        audit_trail: Dict[str, Any] = {
+        audit_trail: dict[str, Any] = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "action": "PHAGOCYTOSIS",
             "antigen_type": "SUBSTACK_MAFIA_IHELP",
@@ -228,7 +229,7 @@ class IHelpPurgeDaemon:
 
         return audit_trail
 
-    async def scan_telemetry_targets(self) -> Dict[str, Any]:
+    async def scan_telemetry_targets(self) -> dict[str, Any]:
         """
         Executes concurrent checks of all Mafia domains in BASE_MAFIA_NODES.
         """
@@ -242,7 +243,7 @@ class IHelpPurgeDaemon:
         from babylon60.routes.telemetry import BASE_MAFIA_NODES
 
         # Filter out non-domains (e.g. names with spaces or no dots)
-        domains: List[str] = [
+        domains: list[str] = [
             node for node in BASE_MAFIA_NODES if "." in node and " " not in node
         ]
 

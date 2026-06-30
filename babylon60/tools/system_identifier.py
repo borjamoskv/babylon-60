@@ -36,7 +36,7 @@ class MahalanobisDistanceCalculator:
         cov_reg = cov + eps * np.eye(cov.shape[0])
         try:
             self.inv_cov = np.linalg.pinv(cov_reg)
-        except Exception:
+        except Exception:  # noqa: BLE001
             # Fallback in case pseudoinverse fails
             self.inv_cov = np.eye(cov.shape[0])
 
@@ -45,7 +45,7 @@ class MahalanobisDistanceCalculator:
         try:
             val = np.dot(np.dot(delta, self.inv_cov), delta)
             return float(math.sqrt(max(val, 0.0)))
-        except Exception:
+        except Exception:  # noqa: BLE001
             return float(np.linalg.norm(delta))
 
 

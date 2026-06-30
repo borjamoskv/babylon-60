@@ -2,13 +2,13 @@
 # entanglement.py — Cross-Agent Cryptographic Entanglement
 # Operator: borjamoskv | Kernel: MOSKV-1 APEX
 
-import hmac
 import hashlib
+import hmac
 import json
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Any
 from threading import Lock
+from typing import Any, Optional
 
 
 class MerkleNode:
@@ -107,25 +107,25 @@ class EntanglementRing:
         self.agent_ids = agent_ids
         
         # Locks por agente para eliminar el cuello de botella global
-        self._locks: Dict[str, Lock] = {aid: Lock() for aid in agent_ids}
+        self._locks: dict[str, Lock] = {aid: Lock() for aid in agent_ids}
         
         # Secretos de firma compartida simétrica por agente (sustituye firmas débiles)
-        self.agent_secrets: Dict[str, bytes] = {
-            aid: hashlib.sha256(f"secret:{aid}".encode("utf-8")).digest()
+        self.agent_secrets: dict[str, bytes] = {
+            aid: hashlib.sha256(f"secret:{aid}".encode()).digest()
             for aid in agent_ids
         }
         
         # Mapa de dependencia circular
-        self.entanglement_map: Dict[str, str] = {}
+        self.entanglement_map: dict[str, str] = {}
         for i, agent_id in enumerate(agent_ids):
             provider = agent_ids[(i - 1) % len(agent_ids)]
             self.entanglement_map[agent_id] = provider
 
         # Estado inicial (Génesis)
         genesis = hashlib.sha256(b"CORTEX_GENESIS_v8").hexdigest()
-        self.latest_hashes: Dict[str, str] = {aid: genesis for aid in agent_ids}
-        self.sequences: Dict[str, int] = {aid: 0 for aid in agent_ids}
-        self.chain: Dict[str, list[EntangledHash]] = {aid: [] for aid in agent_ids}
+        self.latest_hashes: dict[str, str] = {aid: genesis for aid in agent_ids}
+        self.sequences: dict[str, int] = {aid: 0 for aid in agent_ids}
+        self.chain: dict[str, list[EntangledHash]] = {aid: [] for aid in agent_ids}
 
     def hash_transaction(self, agent_id: str, payload: bytes) -> EntangledHash:
         """
@@ -151,7 +151,7 @@ class EntanglementRing:
             payload_hash = hashlib.sha256(payload).hexdigest()
 
             # Hashing con inyección de separador y firma HMAC para evitar falsificaciones
-            preimage = f"{own_prev}\x00{foreign_prev}\x00{payload_hash}".encode("utf-8")
+            preimage = f"{own_prev}\x00{foreign_prev}\x00{payload_hash}".encode()
             combined = hashlib.sha256(preimage).hexdigest()
 
             # Firmar el hash combinado con el secreto del agente para atestación externa
@@ -187,7 +187,7 @@ class EntanglementRing:
         secret = self.agent_secrets[agent_id]
 
         for entry in chain:
-            preimage = f"{entry.own_previous}\x00{entry.foreign_previous}\x00{entry.payload_hash}".encode("utf-8")
+            preimage = f"{entry.own_previous}\x00{entry.foreign_previous}\x00{entry.payload_hash}".encode()
             expected = hashlib.sha256(preimage).hexdigest()
 
             if expected != entry.combined_hash:
@@ -204,7 +204,7 @@ class EntanglementRing:
 
         return True
 
-    def verify_cross_consistency(self) -> Dict[str, bool]:
+    def verify_cross_consistency(self) -> dict[str, bool]:
         """
         Verifica que los foreign_previous de cada entrada coincidan exactamente
         con el hash que el agente vecino tenía registrado bajo la secuencia cruzada capturada.
@@ -251,7 +251,7 @@ class EntanglementRing:
             secret = self.agent_secrets[agent_id]
             
             for entry in correct_chain:
-                preimage = f"{entry.own_previous}\x00{entry.foreign_previous}\x00{entry.payload_hash}".encode("utf-8")
+                preimage = f"{entry.own_previous}\x00{entry.foreign_previous}\x00{entry.payload_hash}".encode()
                 expected = hashlib.sha256(preimage).hexdigest()
                 
                 if expected != entry.combined_hash or entry.own_previous != prev:

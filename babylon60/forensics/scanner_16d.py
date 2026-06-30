@@ -3,11 +3,10 @@
 # Operator: borjamoskv | Kernel: MOSKV-1 APEX
 
 import ast
-import subprocess
 import json
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 
 @dataclass
@@ -16,8 +15,8 @@ class DimensionScore:
     dimension: int
     name: str
     score: float           # 0.0 (catastrófico) - 1.0 (perfecto)
-    metrics: Dict[str, float] = field(default_factory=dict)
-    findings: List[str] = field(default_factory=list)
+    metrics: dict[str, float] = field(default_factory=dict)
+    findings: list[str] = field(default_factory=list)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -91,7 +90,7 @@ class DependencyEntropyScanner:
             findings=findings
         )
 
-    def _get_dependency_tree(self) -> Dict[str, List[str]]:
+    def _get_dependency_tree(self) -> dict[str, list[str]]:
         """Ejecuta pipdeptree para obtener el árbol completo."""
         try:
             result = subprocess.run(
@@ -111,7 +110,7 @@ class DependencyEntropyScanner:
             pass
         return {}
 
-    def _get_direct_deps(self) -> Set[str]:
+    def _get_direct_deps(self) -> set[str]:
         """Lee requirements.txt o pyproject.toml."""
         req_file = self.root / "requirements.txt"
         if req_file.exists():
@@ -124,7 +123,7 @@ class DependencyEntropyScanner:
             return deps
         return set()
 
-    def _get_actually_imported(self) -> Set[str]:
+    def _get_actually_imported(self) -> set[str]:
         """Escanea todos los .py para encontrar imports reales."""
         imported = set()
         for py_file in self.root.rglob("*.py"):
@@ -146,10 +145,10 @@ class DependencyEntropyScanner:
         return imported
 
     def _calculate_max_depth(
-        self, tree: Dict[str, List[str]]
+        self, tree: dict[str, list[str]]
     ) -> int:
         """DFS para encontrar la profundidad máxima del árbol."""
-        visited: Set[str] = set()
+        visited: set[str] = set()
 
         def _dfs(pkg: str, depth: int) -> int:
             if pkg in visited or pkg not in tree:
@@ -258,7 +257,7 @@ class StateFrictionScanner:
             findings=findings
         )
 
-    def _analyze_module(self, tree: ast.Module) -> Dict[str, int]:
+    def _analyze_module(self, tree: ast.Module) -> dict[str, int]:
         results = {
             "global_mutations": 0,
             "mutable_defaults": 0,
@@ -315,7 +314,7 @@ class CausalIsomorphismScanner:
     Green Theater: Código que PARECE proteger pero que nunca
     se ejecuta bajo condiciones reales. Ej:
       - `if obj is None: return` cuando obj nunca es None
-      - `try/except Exception: pass` (silencia todo)
+      - `try/except Exception:  # noqa: BLE001 pass` (silencia todo)
       - Dead branches (sin coverage)
     """
 
@@ -328,7 +327,7 @@ class CausalIsomorphismScanner:
         total_loc = 0
         green_theater_loc = 0
         dead_branches = 0
-        theater_patterns: List[str] = []
+        theater_patterns: list[str] = []
 
         for py_file in self.root.rglob("*.py"):
             try:
@@ -336,8 +335,8 @@ class CausalIsomorphismScanner:
                 lines = source.splitlines()
                 tree = ast.parse(source)
                 total_loc += len([
-                    l for l in lines
-                    if l.strip() and not l.strip().startswith("#")
+                    line for line in lines
+                    if line.strip() and not line.strip().startswith("#")
                 ])
             except (SyntaxError, UnicodeDecodeError):
                 continue

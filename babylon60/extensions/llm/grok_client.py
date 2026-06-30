@@ -12,7 +12,8 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, AsyncIterator, Iterator, Type, TypeVar
+from collections.abc import AsyncIterator, Iterator
+from typing import Any, TypeVar
 
 import openai
 from openai import AsyncOpenAI, OpenAI
@@ -215,7 +216,7 @@ class ResilientGrokClient:
         self,
         model: str,
         messages: list[dict[str, str]],
-        response_model: Type[T],
+        response_model: type[T],
         temperature: float = 0.1,
         max_tokens: int | None = None,
     ) -> T:
@@ -326,7 +327,7 @@ class ResilientGrokClient:
         self,
         model: str,
         messages: list[dict[str, str]],
-        response_model: Type[T],
+        response_model: type[T],
         temperature: float = 0.1,
         max_tokens: int | None = None,
     ) -> T:

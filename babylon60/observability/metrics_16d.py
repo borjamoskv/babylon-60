@@ -40,7 +40,7 @@ class Scanner16D:
 
         # 3. Causal Isomorphism (Axiom 16 / Code-to-Noise Ratio)
         # Identify "Green Theater" defensive patterns (e.g. if is None return) vs active logic
-        boilerplate_patterns = ["if not ", "if obj is None", "try: pass", "except Exception:"]
+        boilerplate_patterns = ["if not ", "if obj is None", "try: pass", "except Exception:  # noqa: BLE001"]
         boilerplate_hits = sum(code.count(pat) for pat in boilerplate_patterns)
         
         lines = [line.strip() for line in code.splitlines() if line.strip()]

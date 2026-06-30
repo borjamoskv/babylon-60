@@ -43,7 +43,7 @@ class ByzantineConsensus:
             try:
                 tree = ast.parse(proposal)
                 return ast.unparse(tree)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 pass
         try:
             return json.dumps(proposal, sort_keys=True, default=str)

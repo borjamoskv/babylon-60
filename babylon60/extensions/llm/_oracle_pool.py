@@ -27,11 +27,11 @@ import hashlib
 import logging
 import os
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from babylon60.extensions.llm._models import BaseProvider, IntentProfile
+    from babylon60.extensions.llm._models import BaseProvider
 
 logger = logging.getLogger("babylon60_extensions.llm.oracle_pool")
 
@@ -194,15 +194,15 @@ class OraclePool:
 
     def __init__(
         self,
-        primary: "BaseProvider",
-        fallbacks: list["BaseProvider"] | None = None,
+        primary: BaseProvider,
+        fallbacks: list[BaseProvider] | None = None,
         *,
         max_concurrency: int | None = None,
         emit_audit: bool = True,
     ) -> None:
         self._primary = primary
-        self._fallbacks: list["BaseProvider"] = fallbacks or []
-        self._all_nodes: list["BaseProvider"] = [primary] + self._fallbacks
+        self._fallbacks: list[BaseProvider] = fallbacks or []
+        self._all_nodes: list[BaseProvider] = [primary] + self._fallbacks
         self._health: dict[str, _NodeHealth] = {
             p.provider_name: _NodeHealth() for p in self._all_nodes
         }
@@ -374,7 +374,7 @@ class OraclePool:
             f"Nodes attempted: {[n.provider_name for n in nodes]}"
         )
 
-    def _ranked_nodes(self) -> list["BaseProvider"]:
+    def _ranked_nodes(self) -> list[BaseProvider]:
         """Return nodes ordered: healthy primary first, then healthy fallbacks."""
         healthy = [n for n in self._all_nodes if self._health[n.provider_name].is_healthy()]
         quarantined = [n for n in self._all_nodes if not self._health[n.provider_name].is_healthy()]

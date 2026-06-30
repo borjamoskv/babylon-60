@@ -118,7 +118,7 @@ class OpenAIChatCompletionsAdapter:
         data = {}
         try:
             data = r.json() if r.content else {}
-        except Exception:
+        except Exception:  # noqa: BLE001
             data = {}
         return r.status_code, data, latency_ms
 
@@ -164,7 +164,7 @@ class OpenAIChatCompletionsAdapter:
                 if delta:
                     chunks.append(delta)
                 tail_json = obj
-            except Exception:
+            except Exception:  # noqa: BLE001
                 continue
 
         t1 = time.perf_counter()
@@ -408,12 +408,12 @@ class BlackBoxHarness:
     def _extract_text_usage(self, data: dict[str, Any]) -> tuple[str, Optional[int]]:
         try:
             text = data["choices"][0]["message"]["content"]
-        except Exception:
+        except Exception:  # noqa: BLE001
             text = ""
         completion_tokens = None
         try:
             completion_tokens = int(data.get("usage", {}).get("completion_tokens"))
-        except Exception:
+        except Exception:  # noqa: BLE001
             completion_tokens = None
         return text, completion_tokens
 
@@ -450,7 +450,7 @@ class BlackBoxHarness:
                     try:
                         json.loads(text)
                         json_valid = True
-                    except Exception:
+                    except Exception:  # noqa: BLE001
                         json_valid = False
                         self.format_fail += 1
 

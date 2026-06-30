@@ -192,7 +192,8 @@ class MorphismVerifier:
         2. Composition preservation: F_morph(g . f) == F_morph(g) . F_morph(f)
         """
         # 1. Identity check
-        f_id = lambda x: x
+        def f_id(x):
+            return x
         F_f_id = F_morph(f_id)
         for x in domain_sample:
             try:
@@ -213,13 +214,15 @@ class MorphismVerifier:
         # 2. Composition check
         for g, f in morphisms_sample:
             # Compound morphism g . f
-            g_comp_f = lambda x, g_fn=g, f_fn=f: g_fn(f_fn(x))
+            def g_comp_f(x, g_fn=g, f_fn=f):
+                return g_fn(f_fn(x))
             F_g_comp_f = F_morph(g_comp_f)
 
             # Compound mapped morphisms F(g) . F(f)
             Fg = F_morph(g)
             Ff = F_morph(f)
-            Fg_comp_Ff = lambda x, Fg_fn=Fg, Ff_fn=Ff: Fg_fn(Ff_fn(x))
+            def Fg_comp_Ff(x, Fg_fn=Fg, Ff_fn=Ff):
+                return Fg_fn(Ff_fn(x))
 
             for x in domain_sample:
                 try:
