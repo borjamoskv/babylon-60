@@ -114,10 +114,10 @@ class CortexPipelineBridge:
     def _init_vsa(self) -> Any | None:
         """Initialize VSA-SDM adapter if available."""
         try:
-            from babylon60.context.vsa_adapter import VSAContextAdapter
+            from babylon60.memory.vsa import VSAPipelineBridge
 
-            adapter = VSAContextAdapter(agent_id="cortex-pipeline")
-            if adapter.is_available:
+            adapter = VSAPipelineBridge(agent_id="cortex-pipeline")
+            if adapter:
                 logger.info("[BRIDGE] VSA-SDM memory adapter initialized")
                 return adapter
             logger.debug("[BRIDGE] VSA engine not available - algebraic context disabled")
