@@ -22,7 +22,7 @@ A continuación se detallan los programas de investigación no-algebrizantes act
 - **Sustrato:** Geometría algebraica proyectiva y Teoría de Representaciones de grupos.
 - **Mecanismo:** Reformula la separación de complejidad como un problema de inclusión de órbitas: probar que el polinomio Permanente no está contenido en la clausura de la órbita del Determinante bajo la acción del grupo general lineal ($GL_m$).
 - **Mecanismo de Evasión:** Evade las pruebas naturales (Razborov-Rudich) debido a que las propiedades algebraicas globales y las obstrucciones de representaciones no proporcionan algoritmos de constructividad eficiente en el sentido booleano clásico. Asimismo, supera la algebrización al no depender de la evaluación local en oráculos.
-- **Límites / Reveses:** En 2016, resultados de no-existencia de "obstrucciones de representación" demostraron que la versión original del programa de GCT no puede probar cotas inferiores para el Permanente directamente en el caso general sin modificar sustancialmente la estrategia de búsqueda de coeficientes de Kronecker.
+- **Límites / Reveses:** El marco original sufrió un revés estructural severo cuando Bürgisser, Ikenmeyer y Panova (FOCS 2016, *"No occurrence obstructions in geometric complexity theory"*) demostraron la no-existencia de obstrucciones de ocurrencia (occurrence obstructions) para el Permanente en el caso general, obligando a replantear la dependencia exclusiva en multiplicidades de representaciones.
 
 ## 🔮 2. ALGORITHMS-TO-LOWER-BOUNDS
 *Ryan Williams*
@@ -35,7 +35,7 @@ A continuación se detallan los programas de investigación no-algebrizantes act
 *Conjetura P = BPP*
 - **Sustrato:** Complejidad probabilística y pseudorandomness (Williams, Chen, et al.).
 - **Mecanismo:** A diferencia de $P$ vs $NP$, donde se busca probar una separación, el consenso general es que $P = BPP$ (la aleatoriedad no otorga poder computacional adicional de manera exponencial).
-- **Avances Recientes (2022-2025):** El trabajo de Ryan Williams y Lijie Chen (2022) demostró avances cruciales hacia la desaleatorización completa (desaleatorización no trivial implica cotas inferiores). En abril de 2025, Williams demostró que cualquier algoritmo que use espacio $t$ puede transformarse para reducir drásticamente el espacio a $\approx \sqrt{t}$, reestructurando el campo de las relaciones tiempo-espacio.
+- **Avances Recientes (2021-2025):** Chen y Tell (2021, *"Almost-Everywhere Circuit Lower Bounds from Non-Trivial Derandomization"*) solidificaron la equivalencia entre desaleatorización no trivial y cotas inferiores fuertes (almost-everywhere). Posteriormente, Ryan Williams (STOC 2025, *"Simulating Time With Square-Root Space"*, arXiv:2502.17779) demostró que el cómputo genérico puede simularse usando espacio sublineal cuadrado, resolviendo conjeturas históricas de tiempo-espacio y acercando el herramental estructural hacia el colapso $P=BPP$.
 
 ## 🔮 4. CONTEXTO CUÁNTICO: CLASE MIP* Y ENTRELAZAMIENTO
 *Teorema MIP* = RE (Ji, Natarajan, Vidick, Wright, Yuen, 2020)*
