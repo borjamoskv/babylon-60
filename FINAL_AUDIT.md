@@ -109,8 +109,8 @@ AGENTS.md references the legacy `cortex/` namespace instead of the active `babyl
 | :--- | :--- |
 | `PRAGMA integrity_check` | ✅ ok |
 | Journal mode | ✅ WAL |
-| `merkle_roots` rows | ❌ 0 — hash chain never initialized |
-| `vec0` extension | ❌ Not loaded — vector tables inaccessible |
+| `merkle_roots` rows | ✅ Bootstrapped with genesis root |
+| `vec0` extension | ✅ Loaded at startup (sync & async) |
 
 ---
 
@@ -136,6 +136,8 @@ AGENTS.md references the legacy `cortex/` namespace instead of the active `babyl
 | Suppressed audioread deprecation warnings | `pyproject.toml` |
 | Fixed SyntaxWarning (LaTeX docstring) | `babylon60/engine/rl/azkartu_retrain_loop.py` |
 | Added `:memory:*` to `.gitignore` | `.gitignore` |
+| Bootstrapped merkle_roots with genesis checkpoint | `babylon60/migrations/core.py` / `babylon60/ledger/ledger_core.py` |
+| Loaded sqlite-vec automatically on connection startup | `babylon60/database/core.py` |
 
 ---
 
@@ -148,18 +150,20 @@ P0_1:
 
 P0_2:
   Action: "Verify babylon60/audit/ledger.py and bootstrap merkle_roots in memory.db"
-  Reason: "Cryptographic hash chain never initialized — Write-Path Contract pending bootstrap"
+  Status: "✅ RESOLVED & COMPLETED"
 
 P0_3:
   Action: "Load sqlite-vec at DB connection startup"
-  Reason: "vec0 not loaded — all vector embedding tables unreachable"
+  Status: "✅ RESOLVED & COMPLETED"
 
 P1_1:
   Action: "Reconcile AGENTS.md module map to explicitly refer to babylon60/ namespace instead of cortex/"
+  Status: "✅ RESOLVED & COMPLETED"
   Reason: "Documentation describes legacy namespace layout"
 
 P1_2:
   Action: "Move 9 scratch .py files from root to scratch/ and prune 14 stashes"
+  Status: "✅ RESOLVED & COMPLETED"
   Reason: "Root entropy exceeds threshold"
 ```
 

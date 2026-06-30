@@ -63,6 +63,21 @@ def run_migrations(conn: sqlite3.Connection) -> int:
         logger.info(
             "Applied %d migration(s). Schema now at version %d", applied, get_current_version(conn)
         )
+
+    # Bootstrap merkle_roots if empty
+    try:
+        cursor = conn.execute("SELECT COUNT(*) FROM merkle_roots")
+        if cursor.fetchone()[0] == 0:
+            conn.execute(
+                "INSERT INTO merkle_roots "
+                "(tenant_id, root_hash, tx_start_id, tx_end_id, tx_count) "
+                "VALUES ('__global__', 'GENESIS', 0, 0, 0)"
+            )
+            conn.commit()
+            logger.info("Bootstrapped genesis merkle_roots checkpoint (sync).")
+    except (sqlite3.Error, OSError):
+        pass
+
     return applied
 
 
@@ -208,6 +223,22 @@ async def run_migrations_async(conn: aiosqlite.Connection) -> int:
         if version > current:
             if await _apply_migration_async(conn, version, description, func):
                 applied += 1
+
+    # Bootstrap merkle_roots if empty
+    try:
+        cursor = await conn.execute("SELECT COUNT(*) FROM merkle_roots")
+        row = await cursor.fetchone()
+        if row and row[0] == 0:
+            await conn.execute(
+                "INSERT INTO merkle_roots "
+                "(tenant_id, root_hash, tx_start_id, tx_end_id, tx_count) "
+                "VALUES ('__global__', 'GENESIS', 0, 0, 0)"
+            )
+            await conn.commit()
+            logger.info("Bootstrapped genesis merkle_roots checkpoint (async).")
+    except (sqlite3.Error, OSError):
+        pass
+
     return applied
 
 

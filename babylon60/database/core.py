@@ -191,6 +191,7 @@ __all__ = [
     "connect_async",
     "connect_async_ctx",
     "connect_writer",
+    "load_sqlite_vec",
     "load_sqlite_vec_async",
     "CortexConnection",
     "causal_write",
@@ -308,6 +309,7 @@ def connect(
     if row_factory is not None:
         conn.row_factory = row_factory
     _apply_pragmas_sync(conn, read_only=read_only)
+    load_sqlite_vec(conn)
     return conn
 
 
@@ -345,6 +347,7 @@ def connect_writer(
         raise
 
     _apply_pragmas_sync(conn, writer_mode=True)
+    load_sqlite_vec(conn)
     return conn
 
 
@@ -382,6 +385,8 @@ async def connect_async(
         await apply_pragmas_async_readonly(conn)
     else:
         await apply_pragmas_async(conn)
+
+    await load_sqlite_vec_async(conn)
 
     conn._cortex_db_path = str(db_path)  # type: ignore[attr-defined] # pyright: ignore[reportAttributeAccessIssue] # Inject metadata for telemetry
     try:
@@ -466,5 +471,28 @@ async def load_sqlite_vec_async(conn: aiosqlite.Connection) -> bool:
                 await conn.enable_load_extension(False)
             except (AttributeError, OSError, sqlite3.Error):
                 logger.debug("sqlite-vec cleanup skipped for async connection")
+
+    return True
+
+
+def load_sqlite_vec(conn: sqlite3.Connection) -> bool:
+    """Load sqlite-vec into a sync connection when the runtime supports it."""
+    if sqlite_vec is None:
+        return False
+
+    extension_toggle_enabled = False
+    try:
+        conn.enable_load_extension(True)
+        extension_toggle_enabled = True
+        sqlite_vec.load(conn)
+    except (AttributeError, OSError, sqlite3.Error) as exc:
+        logger.debug("sqlite-vec not available for sync connection: %s", exc)
+        return False
+    finally:
+        if extension_toggle_enabled:
+            try:
+                conn.enable_load_extension(False)
+            except (AttributeError, OSError, sqlite3.Error):
+                logger.debug("sqlite-vec cleanup skipped for sync connection")
 
     return True

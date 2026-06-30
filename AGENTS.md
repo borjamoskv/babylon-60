@@ -23,9 +23,9 @@
 | :---: | :--- | :--- |
 | **[P0]** | **Treat Generative Output as Conjecture** — route ALL state mutations through deterministic guards before persistence | Always |
 | **[P0]** | **Never Bypass Guards** — do not circumvent the Write-Path Contract or downgrade validation errors | Always |
-| **[P0]** | **Verify Hash Continuity** — do not mutate `cortex/audit/ledger.py` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
+| **[P0]** | **Verify Hash Continuity** — do not mutate `babylon60/audit/ledger.py` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
 | **[P0]** | **Anti-Limerence (Kill Criteria)** — 1 Prompt → 1 Execution → Stop. No infinite generation loops. | All generative loops |
-| **[P0]** | **APEX-100 Compliance** — All agent operations MUST adhere strictly to the 100 Invariants and 100 Primitives defined in [`cortex/agents/primitives/APEX_CORE.md`](cortex/agents/primitives/APEX_CORE.md). | Every Swarm execution |
+| **[P0]** | **APEX-100 Compliance** — All agent operations MUST adhere strictly to the 100 Invariants and 100 Primitives defined in [`babylon60/agents/primitives/APEX_CORE.md`](babylon60/agents/primitives/APEX_CORE.md). | Every Swarm execution |
 | **[P2]** | **Enforce Axioms** — apply AX-041 to AX-047 (§2) in architectural decisions | Architecture work |
 
 ### Decision Gate §0
@@ -34,7 +34,7 @@
 First time reading this file?        → Read §1, §2, §3 in full. No action until done.
 About to write code?                 → Is it CRITICAL surface? → Read affected tests first.
 Debugging a failure?                 → Go to §3 (Failure Signatures) before touching state.
-Schema migration?                    → Review cortex/migrate.py. Check existing migrations/.
+Schema migration?                    → Review babylon60/migrate.py. Check existing migrations/.
 New session on this repo?            → Execute Multi-Session Handoff (§6.4) first.
 Writing sacred/axiom facts?          → Ensure thermodynamic compression (high Shannon Entropy) to pass LandauerGuard (Ω₄) check.
 Injecting knowledge to store?        → Purge conversational slop to pass ExergyGuard (Ω₁₃).
@@ -101,7 +101,7 @@ All agents operating in this repository MUST self-identify by role before acting
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
 10. **Aesthetic & Exergy Bounds:** Axioms and sacred facts MUST satisfy LandauerGuard (Ω₄) (high Shannon entropy, < 256 bytes). Knowledge facts MUST not contain low-exergy slop (ExergyGuard Ω₁₃).
 11. **Singularidad de Red (TODO EN CLOUDFLARE):** Prohibición absoluta de ecosistemas Vercel, `vercel.json` o dependencias `@vercel/*`. Todo despliegue front/edge DEBE apuntar exclusivamente a Cloudflare Pages/Workers (via `wrangler.toml` y `next-on-pages`). Cualquier intento de desvío generará un Aborto P0 por fractura termodinámica.
-12. **Ultrathink (P0) Horizon:** The `UltraThink` cognitive mode MUST ONLY be invoked for Event Horizon P0 singularities where `epicenter_radius >= 3`. Enforcement and Exergy Yield authorization are strictly mathematically bounded by `cortex/engine/core/ultrathink_physics.py`.
+12. **Ultrathink (P0) Horizon:** The `UltraThink` cognitive mode MUST ONLY be invoked for Event Horizon P0 singularities where `epicenter_radius >= 3`. Enforcement and Exergy Yield authorization are strictly mathematically bounded by `babylon60/engine/core/ultrathink_physics.py`.
 13. **SQLite-Vec Integrity (VEC-0):** Las tablas virtuales `vec0` no soportan Foreign Keys. La sincronización DEBE hacerse insertando primero el metadato y mapeando inmediatamente vía `last_insert_rowid()`. Las dimensiones son inmutables: modelos diferentes (ej. text-1536 vs visual-768) EXIGEN tablas virtuales separadas (`cortex_embeddings_text`, `cortex_embeddings_visual`). Mantenimiento huérfano prohibido: borrados lógicos deben limpiar la tabla `vec0` manualmente si el trigger FTS/Cascade no aplica.
 
 ### ❌ Anti-Patterns & Failure Signatures
@@ -117,7 +117,7 @@ When auditing code, these signals indicate a violation. The `Enforced` column in
 | Business logic in `cli/*_cmds.py` | HIGH | ✗ | Refactor to `services/` or `engine/` |
 | Ledger write with no prior guard call in call stack | CRITICAL | ✗ | Insert guard invocation before all writes |
 | Missing `CORTEX-TAINT` on any fact insert | CRITICAL | ✗ | Audit `engine/` — add taint to all write paths |
-| Schema change with no migration entry | CRITICAL | ✗ | Add migration in `cortex/migrations/`; review via `cortex/migrate.py` |
+| Schema change with no migration entry | CRITICAL | ✗ | Add migration in `babylon60/migrations/`; review via `babylon60/migrate.py` |
 | Plaintext secret in any metadata dict or JSON | **P0** | ✗ | Rotate immediately; encrypt at rest; audit exposure window |
 | `NO` documenting a module that doesn't exist | HIGH | ✗ | Remove reference or create the module |
 | Conversational slop/padding in facts | MEDIUM | ✓ ExergyGuard | Remove apologies/decorative phrases (e.g. 'entendí', 'por supuesto') |
@@ -131,7 +131,7 @@ All non-trivial state mutations MUST follow this unidirectional flow.
 
 > 🛑 **ABORT CONDITION:** If a proposal fails validation or lacks a valid `CORTEX-TAINT` signature, execute the compensating Saga sequence in reverse and abort immediately.
 >
-> **`CORTEX-TAINT` Format:** `taint:{agent_id}:{session_id}:{timestamp_iso8601}:{sha3_256_of_payload}` — A cryptographic attribution token on every fact insert. Generated by `cortex/engine/causal/taint_engine.py`. Absence = automatic SAGA-1 rejection.
+> **`CORTEX-TAINT` Format:** `taint:{agent_id}:{session_id}:{timestamp_iso8601}:{sha3_256_of_payload}` — A cryptographic attribution token on every fact insert. Generated by `babylon60/engine/causal/taint_engine.py`. Absence = automatic SAGA-1 rejection.
 
 ```text
 [Generative Proposal]
@@ -174,7 +174,7 @@ Transition rules: a fact may only advance forward. Any backward transition = Sag
 
 1. **Query Authorization:** All reads MUST be scoped to the caller's `tenant_id`. Cross-tenant reads are P0.
 2. **Taint Propagation:** Facts from a tainted source MUST carry the taint flag. Callers MUST NOT strip taint metadata.
-3. **Consistency Level:** Default = `READ_COMMITTED`. Reads on `cortex/audit/ledger.py` MUST use `SERIALIZABLE` isolation.
+3. **Consistency Level:** Default = `READ_COMMITTED`. Reads on `babylon60/audit/ledger.py` MUST use `SERIALIZABLE` isolation.
 4. **Cache Coherence:** Cached reads MUST be invalidated on any write to the same `tenant_id` scope.
 5. **No Inference from Reads:** Read results MUST NOT reconstruct facts not explicitly persisted. Speculation = epistemic containment breach.
 
@@ -294,10 +294,10 @@ Grouped by domain. Risk level governs the care required before modification.
 
 ```bash
 pip install -e ".[all]"
-pytest tests/ -v --cov=cortex
-ruff check cortex/
-pyright cortex/
-uvicorn cortex.api:app --reload  # optional: API server
+pytest tests/ -v --cov=babylon60
+ruff check babylon60/
+pyright babylon60/
+uvicorn babylon60.api:app --reload  # optional: API server
 ```
 
 **Core Env Vars:** `GEMINI_API_KEY`, `CORTEX_DB_PATH`, `CORTEX_LOG_LEVEL`, `CORTEX_ENCRYPTION_KEY`, `HF_TOKEN`, `STRIPE_SECRET_KEY`, `REDIS_URL`, `DATABASE_URL`.
@@ -379,8 +379,8 @@ Domain-specific agent rules without inflating this root file:
 
 | Path | Status | Scope |
 | :--- | :---: | :--- |
-| `cortex/engine/AGENTS.md` | ✅ Exists | Engine mutation rules (Annihilator/Crystallizer safety gates) |
-| `cortex/memory/AGENTS.md` | 📋 Planned | Memory surface constraints (tenant isolation, fact aging) |
-| `cortex/migrations/AGENTS.md` | 📋 Planned | Migration safety protocol |
+| `babylon60/engine/AGENTS.md` | ✅ Exists | Engine mutation rules (Annihilator/Crystallizer safety gates) |
+| `babylon60/memory/AGENTS.md` | 📋 Planned | Memory surface constraints (tenant isolation, fact aging) |
+| `babylon60/migrations/AGENTS.md` | 📋 Planned | Migration safety protocol |
 
 **Rule:** Root AGENTS.md always takes precedence. Sub-files **augment** — never contradict.

@@ -229,7 +229,10 @@ class LedgerAuditMixin:
                     (root_tenant_id, start, end),
                 )
             hashes = [r[0] for r in list(await c.fetchall())]
-            computed_root = MerkleTree(hashes).root_hash
+            if not hashes and stored_root == "GENESIS":
+                computed_root = "GENESIS"
+            else:
+                computed_root = MerkleTree(hashes).root_hash
             if computed_root != stored_root:
                 violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH"})
         return violations

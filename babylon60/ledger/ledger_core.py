@@ -84,55 +84,74 @@ class SovereignLedger(LedgerAuditMixin):
         return cast(sqlite3.Connection, self.db)
 
     def _ensure_schema_sync(self, conn: sqlite3.Connection):
-        conn.executescript("""
-            CREATE TABLE IF NOT EXISTS transactions (
-                id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                project     TEXT NOT NULL,
-                action      TEXT NOT NULL,
-                detail      TEXT,
-                prev_hash   TEXT NOT NULL,
-                hash        TEXT NOT NULL UNIQUE,
-                tenant_id   TEXT NOT NULL DEFAULT 'default',
-                timestamp   TEXT NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS merkle_roots (
-                id              INTEGER PRIMARY KEY AUTOINCREMENT,
-                tenant_id       TEXT NOT NULL DEFAULT '__global__',
-                root_hash       TEXT NOT NULL,
-                tx_start_id     INTEGER NOT NULL,
-                tx_end_id       INTEGER NOT NULL,
-                tx_count        INTEGER NOT NULL,
-                signature       TEXT,
-                created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-            );
-            CREATE TABLE IF NOT EXISTS integrity_checks (
-                id              INTEGER PRIMARY KEY AUTOINCREMENT,
-                check_type      TEXT NOT NULL,
-                status          TEXT NOT NULL,
-                details         TEXT,
-                started_at      TEXT NOT NULL,
-                completed_at    TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_tx_prev ON transactions(prev_hash);
-            CREATE INDEX IF NOT EXISTS idx_merkle_range ON merkle_roots(tx_start_id, tx_end_id);
-        """)
-        self._ensure_ledger_column(
-            conn,
-            "transactions",
-            "tenant_id",
-            "TEXT NOT NULL DEFAULT 'default'",
-        )
-        self._ensure_ledger_column(
-            conn,
-            "merkle_roots",
-            "tenant_id",
-            "TEXT NOT NULL DEFAULT '__global__'",
-        )
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_tx_tenant_id ON transactions(tenant_id, id)")
-        conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_merkle_tenant_range "
-            "ON merkle_roots(tenant_id, tx_start_id, tx_end_id)"
-        )
+        authorized = False
+        if hasattr(conn, "authorize_causal_writes"):
+            conn.authorize_causal_writes()
+            authorized = True
+
+        try:
+            conn.executescript("""
+                CREATE TABLE IF NOT EXISTS transactions (
+                    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    project     TEXT NOT NULL,
+                    action      TEXT NOT NULL,
+                    detail      TEXT,
+                    prev_hash   TEXT NOT NULL,
+                    hash        TEXT NOT NULL UNIQUE,
+                    tenant_id   TEXT NOT NULL DEFAULT 'default',
+                    timestamp   TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS merkle_roots (
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tenant_id       TEXT NOT NULL DEFAULT '__global__',
+                    root_hash       TEXT NOT NULL,
+                    tx_start_id     INTEGER NOT NULL,
+                    tx_end_id       INTEGER NOT NULL,
+                    tx_count        INTEGER NOT NULL,
+                    signature       TEXT,
+                    created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+                );
+                CREATE TABLE IF NOT EXISTS integrity_checks (
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    check_type      TEXT NOT NULL,
+                    status          TEXT NOT NULL,
+                    details         TEXT,
+                    started_at      TEXT NOT NULL,
+                    completed_at    TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_tx_prev ON transactions(prev_hash);
+                CREATE INDEX IF NOT EXISTS idx_merkle_range ON merkle_roots(tx_start_id, tx_end_id);
+            """)
+            self._ensure_ledger_column(
+                conn,
+                "transactions",
+                "tenant_id",
+                "TEXT NOT NULL DEFAULT 'default'",
+            )
+            self._ensure_ledger_column(
+                conn,
+                "merkle_roots",
+                "tenant_id",
+                "TEXT NOT NULL DEFAULT '__global__'",
+            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_tx_tenant_id ON transactions(tenant_id, id)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_merkle_tenant_range "
+                "ON merkle_roots(tenant_id, tx_start_id, tx_end_id)"
+            )
+
+            # Bootstrap merkle_roots if empty
+            cursor = conn.execute("SELECT COUNT(*) FROM merkle_roots")
+            if cursor.fetchone()[0] == 0:
+                conn.execute(
+                    "INSERT INTO merkle_roots "
+                    "(tenant_id, root_hash, tx_start_id, tx_end_id, tx_count) "
+                    "VALUES ('__global__', 'GENESIS', 0, 0, 0)"
+                )
+                conn.commit()
+        finally:
+            if authorized and hasattr(conn, "revoke_causal_writes"):
+                conn.revoke_causal_writes()
 
     @staticmethod
     def _ensure_ledger_column(

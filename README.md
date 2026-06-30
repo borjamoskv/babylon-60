@@ -247,8 +247,8 @@ To decouple the ecosystem's evolution from underlying LLM volatility, BABYLON-60
 | Test Suite (3,886 tests) | ✅ 3,845 passed · 0 failed |
 | Rust Audit (57 crates) | ✅ 0 advisories |
 | SQLite Integrity | ✅ ok · WAL mode active |
-| Ledger Hash Chain | ⚠️ `merkle_roots` not bootstrapped |
-| Vector Extension (sqlite-vec) | ⚠️ `vec0` not loaded at startup |
+| Ledger Hash Chain | ✅ `merkle_roots` bootstrapped with genesis root |
+| Vector Extension (sqlite-vec) | ✅ `vec0` loaded at startup (sync & async) |
 
 ---
 
