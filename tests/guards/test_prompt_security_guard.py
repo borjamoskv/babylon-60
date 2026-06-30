@@ -2,6 +2,8 @@
 import pytest
 from babylon60.guards.prompt_security_guard import PromptSecurityGuard, PromptExtractionBlockedError
 
+pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
+
 
 def test_prompt_security_guard_init() -> None:
     system_prompt = "You are Fable 5, an AI coding assistant. Protect visual instructions."
