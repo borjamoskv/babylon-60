@@ -8,10 +8,10 @@
         "nvmeof_rocev2": {
           "type": "object",
           "properties": {
-            "mean": { "type": "string" },
-            "p99": { "type": "string" },
-            "load": { "type": "string" },
-            "pfc": { "type": "string" },
+            "mean": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?µs$" },
+            "p99": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?µs$" },
+            "load": { "type": "string", "pattern": "^[0-9]+%$" },
+            "pfc": { "type": "string", "enum": ["active", "inactive"] },
             "hardware": { "type": "string" }
           },
           "required": ["mean", "p99", "load", "pfc", "hardware"],
