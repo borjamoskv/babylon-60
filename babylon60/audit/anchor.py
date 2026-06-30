@@ -6,8 +6,8 @@ import hashlib
 import sqlite3
 import subprocess
 from dataclasses import dataclass
-from typing import List, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Optional
 
 
 @dataclass
@@ -26,7 +26,7 @@ class MerkleTree:
     y expone la raíz para anclar externamente con prevención de colisiones.
     """
 
-    def __init__(self, tx_hashes: List[str]):
+    def __init__(self, tx_hashes: list[str]):
         if not tx_hashes:
             raise ValueError("Cannot build MerkleTree from empty hash list")
         self.leaves = [MerkleNode(hash_value=h) for h in tx_hashes]
@@ -35,10 +35,10 @@ class MerkleTree:
     @staticmethod
     def _hash_pair(left: str, right: str) -> str:
         # Usar \x00 como separador para anular colisiones por concatenación directa
-        combined = f"{left}\x00{right}".encode("utf-8")
+        combined = f"{left}\x00{right}".encode()
         return hashlib.sha256(combined).hexdigest()
 
-    def _build(self, nodes: List[MerkleNode]) -> MerkleNode:
+    def _build(self, nodes: list[MerkleNode]) -> MerkleNode:
         if len(nodes) == 1:
             return nodes[0]
         # Si es impar, duplicar el último nodo (estándar Bitcoin)
@@ -87,7 +87,7 @@ class AnchorService:
         self.db_path = db_path
         self.epoch_size = epoch_size
         self.current_epoch: int = self._initialize_db() + 1
-        self.pending_hashes: List[str] = self._load_pending_hashes()
+        self.pending_hashes: list[str] = self._load_pending_hashes()
 
     def _initialize_db(self) -> int:
         conn = sqlite3.connect(self.db_path)
@@ -117,7 +117,7 @@ class AnchorService:
         finally:
             conn.close()
 
-    def _load_pending_hashes(self) -> List[str]:
+    def _load_pending_hashes(self) -> list[str]:
         conn = sqlite3.connect(self.db_path)
         try:
             cur = conn.execute("SELECT tx_hash FROM pending_tx_hashes ORDER BY id ASC")
@@ -188,11 +188,11 @@ class AnchorService:
         """
         # TODO: Integración real con web3.py + L2 contract call
         placeholder_tx = hashlib.sha256(
-            f"anchor:{merkle_root}".encode("utf-8")
+            f"anchor:{merkle_root}".encode()
         ).hexdigest()
         return placeholder_tx
 
-    def verify_epoch(self, epoch_id: int, tx_hashes: List[str]) -> bool:
+    def verify_epoch(self, epoch_id: int, tx_hashes: list[str]) -> bool:
         """
         Verifica un epoch cruzando los hashes brutos con la raíz
         almacenada y contrastándola con el Git ledger inmutable (evita circularidad local).
@@ -228,7 +228,7 @@ class AnchorService:
             )
             if result.returncode == 0 and stored_root in result.stdout:
                 return True
-        except Exception:
+        except (subprocess.SubprocessError, OSError):
             # Fallback a advertencia si git no está disponible
             pass
             

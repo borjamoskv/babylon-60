@@ -156,7 +156,7 @@ class CortexConnection:
         """
         try:
             await self._conn.close()
-        except Exception:
+        except Exception:  # noqa: BLE001
             logger.debug("SQLiteAdapter.close: connection already closed or error")
 
     async def health_check(self) -> bool:
