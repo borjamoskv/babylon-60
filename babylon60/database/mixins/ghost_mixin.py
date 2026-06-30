@@ -10,10 +10,11 @@ from typing import TYPE_CHECKING, Any
 from babylon60.crypto.hash_registry import cortex_hash_truncated
 
 if TYPE_CHECKING:
-    from cortex.extensions.songlines.sensor import GhostTrace
+    from babylon60.extensions.songlines.sensor import GhostTrace
 
 import aiosqlite
-from cortex.engine.mixins.base import EngineMixinBase
+
+from babylon60.engine.mixins.base import EngineMixinBase
 
 __all__ = ["GhostMixin"]
 
