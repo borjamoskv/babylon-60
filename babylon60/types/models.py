@@ -1,7 +1,8 @@
 from __future__ import annotations
-from decimal import Decimal
-# [C5-REAL] Exergy-Maximized
 
+from decimal import Decimal
+
+# [C5-REAL] Exergy-Maximized
 from typing import Any, Literal, TypedDict
 
 from pydantic import BaseModel, Field, field_validator

@@ -297,6 +297,24 @@ class PostgresBackend:
             finally:
                 self._pool = None
 
+    async def get_conn(self) -> Any:
+        """Return the underlying connection pool."""
+        self._ensure_pool()
+        return self._pool
+
+    async def fetch_all(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
+        """Execute a query and return all rows as a list of dicts."""
+        return await self.execute(sql, params)
+
+    async def fetch_one(self, sql: str, params: tuple[Any, ...] = ()) -> dict[str, Any] | None:
+        """Execute a query and return the first row as a dict, or None."""
+        rows = await self.execute(sql, params)
+        return rows[0] if rows else None
+
+    async def commit(self) -> None:
+        """Commit the current transaction (no-op for asyncpg pool-based connections)."""
+        pass
+
     async def health_check(self) -> bool:
         """Verify PostgreSQL connectivity."""
         try:

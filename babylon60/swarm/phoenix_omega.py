@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
 """
 PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural

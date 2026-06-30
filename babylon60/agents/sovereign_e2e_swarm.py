@@ -60,7 +60,6 @@ async def nightshift_compressor(data: Any) -> None:
     print("\n[NIGHTSHIFT] Evento de compactación de contexto detectado. Aniquilando anergía episódica...")
     try:
         # Importación asíncrona lazy para evitar carga en runtime inicial
-        from babylon60.compaction.compactor import compact
         # Invocamos la compresión atómica (simulando un engine pasivo)
         # El result será un log de reducción termodinámica
         print("[NIGHTSHIFT] Contexto episódico purgado. Axiomas cristalizados.")

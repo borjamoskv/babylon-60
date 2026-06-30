@@ -1,10 +1,9 @@
 from __future__ import annotations
-from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
-
-
 import dataclasses
 from dataclasses import dataclass, field
+from decimal import Decimal
 
 from babylon60.core.paths import (
     AGENT_DIR,

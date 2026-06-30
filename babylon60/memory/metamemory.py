@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Metamemory: The Agent That Knows What It Knows.
 

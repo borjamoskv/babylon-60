@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
 # cortex/evolution/models.py
 """Sovereign Evolution Models (350/100 standard).

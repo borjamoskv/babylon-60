@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
 """
 Kinetic Notes Extractor - Endogenous Growth Engine

@@ -1,7 +1,7 @@
-from decimal import Decimal
 import statistics
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Any, Optional
 
 import numpy as np

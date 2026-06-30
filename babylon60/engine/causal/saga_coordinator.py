@@ -92,8 +92,9 @@ class SagaCoordinator:
 
         if has_embeddings:
             try:
-                import json
                 import datetime
+                import json
+
                 from babylon60.embeddings.local import LocalEmbedder
 
                 embedder = LocalEmbedder()

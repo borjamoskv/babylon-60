@@ -1,11 +1,11 @@
 from __future__ import annotations
-from decimal import Decimal
-# [C5-REAL] Exergy-Maximized
 
+# [C5-REAL] Exergy-Maximized
 import datetime
 import json
 import time
 from collections.abc import Mapping
+from decimal import Decimal
 from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash

@@ -1,5 +1,5 @@
-from decimal import Decimal
 import logging
+from decimal import Decimal
 
 from babylon60.agents.primitives.dispatcher import apex_dispatcher
 from babylon60.guards.landauer_guard import LandauerGuard

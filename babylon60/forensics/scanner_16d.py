@@ -1,12 +1,11 @@
-from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 # scanner_16d.py — Extended Dimensional Scanner (Dims 14-16)
 # Operator: borjamoskv | Kernel: MOSKV-1 APEX
-
 import ast
 import json
 import subprocess
 from dataclasses import dataclass, field
+from decimal import Decimal
 from pathlib import Path
 
 

@@ -10,10 +10,9 @@ Rules:
 import ast
 import hashlib
 import time
-from typing import Dict
 
-from .types import CompilerResult
 from .transformer import ZKInvariantTransformer
+from .types import CompilerResult
 
 try:
     from babylon60.engine.causal.taint_engine import secure_state_commit
@@ -23,7 +22,7 @@ except ImportError:
 
 class AsymmetricZKCompiler:
     def __init__(self) -> None:
-        self.cost_reductions: Dict[str, float] = {
+        self.cost_reductions: dict[str, float] = {
             "GKR": 0.60,
             "Nova": 0.50,
             "LogUp": 0.45,

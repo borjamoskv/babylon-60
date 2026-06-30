@@ -1,9 +1,9 @@
 from __future__ import annotations
-from decimal import Decimal
-# [C5-REAL] Exergy-Maximized
 
+# [C5-REAL] Exergy-Maximized
 import re
 from collections.abc import Callable
+from decimal import Decimal
 
 _NOISE_PREFIXES = ("MAILTV-1: ARCHIVE",)
 _STOP_WORDS = frozenset(

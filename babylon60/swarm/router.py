@@ -1,8 +1,8 @@
 from __future__ import annotations
-from decimal import Decimal
 
 import copy
 import json
+from decimal import Decimal
 
 from babylon60.crypto.hash_registry import cortex_hash
 from babylon60.swarm.graph_source import GraphSource

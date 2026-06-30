@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
 """Sovereign Growth Engine v1.0.0.
 

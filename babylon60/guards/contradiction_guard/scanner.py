@@ -1,10 +1,10 @@
 from __future__ import annotations
-from decimal import Decimal
-# [C5-REAL] Exergy-Maximized
 
+# [C5-REAL] Exergy-Maximized
 import logging
 from collections import defaultdict
 from collections.abc import Callable
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 

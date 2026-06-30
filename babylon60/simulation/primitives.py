@@ -1,6 +1,6 @@
-from decimal import Decimal
 # [C5-REAL] Exergy-Maximized
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Any
 
 

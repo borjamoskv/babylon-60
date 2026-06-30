@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Semantic Navigator (Grid Cell Architecture).
 

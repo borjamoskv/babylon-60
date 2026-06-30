@@ -87,10 +87,11 @@ class TenantRouter:
         if "local" not in self._connections:
             from babylon60.config import DB_PATH
             from babylon60.database.pool import CortexConnectionPool
+            from babylon60.storage.sqlite_adapter import SQLitePoolAdapter
 
             pool = CortexConnectionPool(str(DB_PATH))
             await pool.initialize()
-            self._connections["local"] = pool
+            self._connections["local"] = SQLitePoolAdapter(pool)
             logger.info("Local storage initialized at %s", DB_PATH)
 
         return self._connections["local"]

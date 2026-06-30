@@ -449,7 +449,7 @@ class LLMProvider(BaseProvider):
                         if (reg := json.load(f)).get("status") == "verified":
                             if adapter_path := reg.get("adapter_path"):
                                 return adapter_path
-                except (OSError, IOError, json.JSONDecodeError) as exc:
+                except (OSError, json.JSONDecodeError) as exc:
                     logger.debug("Failed to read verified_adapter.json: %s", exc)
         if self._intent_model_map:
             resolved = self._intent_model_map.get(intent, self._model)

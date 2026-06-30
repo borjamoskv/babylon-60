@@ -158,9 +158,10 @@ def _detect_agent_source() -> str:
 
 def resolve_cli_tenant(tenant_id: str) -> str:
     """Resolve the active tenant for CLI commands and set tenant_id_var context."""
-    import os
     import json
+    import os
     from pathlib import Path
+
     from babylon60.extensions.security.tenant import tenant_id_var
 
     if tenant_id == "default":

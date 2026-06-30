@@ -1,11 +1,10 @@
 from __future__ import annotations
-from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
-
-
 import logging
 import math
 import uuid
+from decimal import Decimal
 
 from babylon60.engine.forensic.slashing import SlashingEngine
 

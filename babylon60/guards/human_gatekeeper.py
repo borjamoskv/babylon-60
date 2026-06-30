@@ -1,9 +1,9 @@
 # C5-REAL | SOVEREIGN PRIMITIVE
+import logging
 import time
 from typing import Any
 
 from babylon60.crypto.hash_registry import cortex_hash
-import logging
 
 logger = logging.getLogger(__name__)
 

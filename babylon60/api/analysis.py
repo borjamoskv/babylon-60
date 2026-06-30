@@ -2,18 +2,19 @@
 # Autoría: Borja Moskv (borjamoskv)
 # Descargo: Exclusivo para el Teorema-Robinson-Moskv de CORTEX.
 
+import json
+import math
 import os
 import sqlite3
 import time
-import json
-import math
-from datetime import datetime, UTC
+from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, datetime
+
 import jwt
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from concurrent.futures import ThreadPoolExecutor
 
 # API Versioning and Metadata
 __version__ = "2.3.0"

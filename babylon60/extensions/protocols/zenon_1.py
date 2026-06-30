@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
 """
 ZENÓN-1: Formalización Algorítmica del Detector de Rendimiento Decreciente.

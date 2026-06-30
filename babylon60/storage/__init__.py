@@ -21,6 +21,9 @@ from typing import Protocol, runtime_checkable
 logger = logging.getLogger("babylon60.storage")
 
 
+from babylon60.storage.adapter import StorageAdapter
+
+
 class StorageMode(str, Enum):
     LOCAL = "local"
     TURSO = "turso"
@@ -28,7 +31,7 @@ class StorageMode(str, Enum):
 
 
 @runtime_checkable
-class StorageBackend(Protocol):
+class StorageBackend(StorageAdapter, Protocol):
     """Protocol for all storage backends.
 
     Any backend must implement these methods to be compatible

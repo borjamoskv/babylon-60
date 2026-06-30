@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 #!/usr/bin/env python3
 """
 BABYLON-60 / CORTEX: experimental_protocol.py

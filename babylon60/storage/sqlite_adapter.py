@@ -175,5 +175,118 @@ class CortexConnection:
         return f"<CortexConnection causal={self._causal_write_authorized} conn={self._conn!r}>"
 
 
+class SQLitePoolAdapter:
+    """Adapts CortexConnectionPool to the StorageAdapter protocol (MTK v2 Enforced).
+
+    Every query/mutation method acquires a connection from the pool,
+    executes the operation, and releases it back to the pool.
+    """
+
+    def __init__(self, pool: Any):
+        self._pool = pool
+
+    async def get_conn(self) -> Any:
+        """Return the underlying connection pool."""
+        return self._pool
+
+    async def execute(self, sql: str, params: tuple[Any, ...] = ()) -> Any:
+        """Execute a query and return a raw cursor.
+
+        Note: Cursor remains valid after connection release for simple commands,
+        but for full row fetching use fetch_all or fetch_one.
+        """
+        async with self._pool.acquire() as conn:
+            return await conn.execute(sql, params)
+
+    async def fetch_all(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:
+        """Execute a query and return all rows as a list of dicts."""
+        try:
+            async with self._pool.acquire() as conn:
+                async with conn.execute(sql, params) as cursor:
+                    rows = await cursor.fetchall()
+                    if cursor.description is None:
+                        return []
+                    columns = [d[0] for d in cursor.description]
+                    return [dict(zip(columns, row, strict=False)) for row in rows]
+        except Exception:  # noqa: BLE001
+            logger.exception("SQLitePoolAdapter.fetch_all failed: %.200s", sql)
+            raise
+
+    async def fetch_one(self, sql: str, params: tuple[Any, ...] = ()) -> dict[str, Any] | None:
+        """Execute a query and return the first row as a dict, or None."""
+        try:
+            async with self._pool.acquire() as conn:
+                async with conn.execute(sql, params) as cursor:
+                    row = await cursor.fetchone()
+                    if row is None or cursor.description is None:
+                        return None
+                    columns = [d[0] for d in cursor.description]
+                    return dict(zip(columns, row, strict=False))
+        except Exception:  # noqa: BLE001
+            logger.exception("SQLitePoolAdapter.fetch_one failed: %.200s", sql)
+            raise
+
+    async def execute_insert(self, sql: str, params: tuple[Any, ...] = ()) -> int:
+        """Execute an INSERT and return lastrowid."""
+        from babylon60.database.core import causal_write
+
+        try:
+            async with self._pool.acquire() as conn:
+                with causal_write(conn):
+                    async with conn.execute(sql, params) as cursor:
+                        rowid = cursor.lastrowid or 0
+                        await conn.commit()
+                        return rowid
+        except Exception:  # noqa: BLE001
+            logger.exception("SQLitePoolAdapter.execute_insert failed: %.200s", sql)
+            raise
+
+    async def executemany(self, sql: str, params_list: list[tuple[Any, ...]]) -> None:
+        """Execute batch parameters within a transaction block."""
+        from babylon60.database.core import causal_write
+
+        if not params_list:
+            return
+        try:
+            async with self._pool.acquire() as conn:
+                with causal_write(conn):
+                    await conn.executemany(sql, params_list)
+                    await conn.commit()
+        except Exception:  # noqa: BLE001
+            logger.exception("SQLitePoolAdapter.executemany failed: %.200s", sql)
+            raise
+
+    async def executescript(self, script: str) -> None:
+        """Execute multi-statement SQL script."""
+        from babylon60.database.core import causal_write
+
+        try:
+            async with self._pool.acquire() as conn:
+                with causal_write(conn):
+                    await conn.executescript(script)
+                    await conn.commit()
+        except Exception:  # noqa: BLE001
+            logger.exception("SQLitePoolAdapter.executescript failed")
+            raise
+
+    async def commit(self) -> None:
+        """Commit active transactions (no-op at pool level)."""
+        pass
+
+    async def close(self) -> None:
+        """Close connection pool."""
+        await self._pool.close()
+
+    async def health_check(self) -> bool:
+        """Verify database connection pool health."""
+        try:
+            async with self._pool.acquire() as conn:
+                async with conn.execute("SELECT 1") as cursor:
+                    row = await cursor.fetchone()
+                    return row is not None
+        except Exception:  # noqa: BLE001
+            return False
+
+
 # MTK v2 Alias for structural compatibility during transition
 SQLiteAdapter = CortexConnection

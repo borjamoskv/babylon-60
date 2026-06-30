@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from decimal import Decimal
+
 # [C5-REAL] Exergy-Maximized
 """TrustService - Sovereign Audit, Compliance & Cryptographic Integrity (Ω₃).
 

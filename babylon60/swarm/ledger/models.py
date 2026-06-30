@@ -1,7 +1,7 @@
-from decimal import Decimal
 import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from decimal import Decimal
 
 from babylon60.crypto.hash_registry import cortex_hash
 
