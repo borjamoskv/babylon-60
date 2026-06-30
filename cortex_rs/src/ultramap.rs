@@ -136,8 +136,8 @@ impl UltramapSubstrate {
         }
 
         let tx = (target_int % 1000) as f64 / 10.0;
-        let ty = ((target_int >> 4) % 1000) as f64 / 10.0;
-        let tz = ((target_int >> 8) % 1000) as f64 / 10.0;
+        let ty = ((target_int >> 16) % 1000) as f64 / 10.0;
+        let tz = ((target_int >> 32) % 1000) as f64 / 10.0;
 
         let distance = ((tx - x).powi(2) + (ty - y).powi(2) + (tz - z).powi(2)).sqrt();
         let joules = distance * (1.0 / (current_entropy + 0.001));
