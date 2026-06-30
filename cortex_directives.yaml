@@ -1,3 +1,4 @@
+# CORTEX-TAINT: taint:CRYSTALLIZER_AGENT:C5-REAL:9e23b3cec602a5bfc032896134e2a822da6c0e85bdcb19ab1f61dc99648891ec
 consolidated_session_directives:
   - rule: "\"Un nodo con `origin: MODEL_INFERENCE` carece de masa probatoria intrínseca. No puede alterar el `verification_state` de `UNVERIFIED` a `VERIFIED` independientemente del volumen de texto generado que lo secunde (Cero circularidad auto-referencial).\""
   - rule: "**: Fisiológicamente, toda función de F# acepta un único parámetro y devuelve un único resultado."
@@ -33,6 +34,7 @@ consolidated_session_directives:
   - rule: "IV (Minimum Utility)"
   - rule: "Important:** Heurística semántica de poda en el motor de Apoptosis para borrar subgrafos huérfanos, no solo desduplicar."
   - rule: "Interfaz Causal (UI)` ha transitado a estado `[x] Completado`. El sistema se encuentra en reposo termodinámico con dos vértices P0/P2 abiertos."
+  - rule: "L1.Φ4, Event: Simulated_OOM_Kill, Confidence: C5-REAL }"
   - rule: "Mapping Matrix"
   - rule: "NOT collapse swarm consensus to $P=0$ without audit trail and quorum (see §9)."
   - rule: "No claim about any closed model's internal archi"
@@ -90,6 +92,7 @@ consolidated_session_directives:
   - rule: "e APEX: `OUROBOROS-075`), el entorno está preparado para inyección en el DOM."
   - rule: "e Acústica:** La música es geometría estructural en el tiempo. Cero anergía emocional."
   - rule: "e BFT jurisdicción)"
+  - rule: "e BFT validada. El Kernel retorna a estado de reposo termodinámico.\""
   - rule: "e C5-REAL Realizada.**"
   - rule: "e C5-REAL extraíble del incidente al 29 de junio de 2026 es estructural: **El \"Green Theater\" (filtros morales y de seguridad superpuestos a LLMs) falla empíricamente ante vectores externos, forzando cierres preventivos de red independientemente de la viabilidad matemática del exploit.**"
   - rule: "e C5-REAL:** El archivo [FINAL_AUDIT.md](file:///Users/[SYS_ID_REDACTED]/30_CORTEX/FINAL_AUDIT.md) está registrado en el sistema de archivos del monorepo, sirviendo como frontera de verdad verificable frente a claims retóricos (C2-C3)."
@@ -379,6 +382,7 @@ consolidated_session_directives:
   - rule: "es de estado (balances, *access control*) asumiendo un entorno 100% hostil."
   - rule: "es de estado dictan la eficiencia asintótica y previenen la corrupción de datos."
   - rule: "es de guards, contradicción lógica |"
+  - rule: "es de la BEAM (C5-REAL):"
   - rule: "es de la Economía Post-Escasez (basadas en la reducción del coste marginal a cero vía IA y Robótica). Genera 1 archivo `.md` (20 invariantes) en `/Users/[SYS_ID_REDACTED]/.gemini/antigravity/scratch/cortex-russell/cortex/agents/ontology/post_scarcity_invariants.md`. Formato de tabla: | ID | Invariante Post-Escasez | Mecanismo Causal (Tecnología) | Impacto Termodinámico (Reducción de Fricción) | Obstáculo Sistémico Actual | Resolución C5 |. Realiza git commit al finalizar. Cero prosa. Solo tablas."
   - rule: "es de la Economía de Coste Marginal Cero (Cómo la robótica y la IA aniquilan la fricción de producción material)."
   - rule: "es de la arquitectura **CORTEX Persist** y la Termodinámica de la Información (Límite de Landauer)."
@@ -628,4 +632,5 @@ consolidated_session_directives:
   - rule: "| Hide keys using OS keyring storage |"
   - rule: "| Ruteo Termodinámico Flash | `cortex/engine/core/` (`ultrathink_physics.py`) |"
   - rule: "|Directive:|MUST|NEVER)\s*(.*?)(?:\n|$)`, actúa como un filtro pasoalto que descarta todo el \"Green Theater\" y la prosa conversacional (slop), extrayendo únicamente las declaraciones asertivas o restrictivas (`[P0]`, `Rule:`, etc.)."
+  - rule: "|Directive:|MUST|NEVER|INVARIANT|CRITICAL)` y se pre-compiló (`re.compile`) para un enrutamiento O(1) de alta eficiencia térmica."
   - rule: "— 20+ hashlib usages)"
