@@ -669,12 +669,18 @@ class MOSKV1Core:
                 )
                 
                 logger.info("Executing native MLX generation...")
-                return generate(
+                raw_response = generate(
                     self._mlx_model,
                     self._mlx_tokenizer,
                     prompt=prompt,
                     max_tokens=max_tokens,
                 )
+                # Purge raw special token leakage if any
+                cleaned_response = raw_response
+                for stop_token in ["<|im_end|>", "<|im_start|>", "<|endoftext|>"]:
+                    if stop_token in cleaned_response:
+                        cleaned_response = cleaned_response.split(stop_token)[0]
+                return cleaned_response.strip()
 
             # Run synchronous MLX loading and generation in a separate thread
             # to avoid blocking the asyncio event loop.
