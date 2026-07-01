@@ -61,7 +61,7 @@ void main() {
   // Industrial Noir Palette
   vec3 baseColor = vec3(0.02, 0.02, 0.02); // #050505 approximate
   vec3 kintsugiColor = vec3(0.96, 0.62, 0.04); // #F59E0B
-  vec3 cobaltColor = vec3(0.17, 0.23, 0.90); // #2B3BE5
+  vec3 emeraldColor = vec3(0.06, 0.73, 0.51); // #10B981
   
   // Kintsugi fracture lines
   float fracture = smoothstep(0.48, 0.5, flow) - smoothstep(0.5, 0.52, flow);
@@ -73,7 +73,7 @@ void main() {
   // Combine
   vec3 color = baseColor;
   color += kintsugiColor * fracture * 1.5; 
-  color += cobaltColor * aura;
+  color += emeraldColor * aura;
   
   // Vignette
   float dist = distance(uv, vec2(0.5));
