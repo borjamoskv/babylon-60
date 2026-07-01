@@ -44,7 +44,7 @@ jobs:
           output-file: dist/sbom.spdx.json
 
       - name: Attest SBOM
-        uses: actions/attest-sbom@v1
+        uses: actions/attest-sbom@v4
         with:
           subject-path: 'dist/*.whl'
           sbom-path: 'dist/sbom.spdx.json'
