@@ -63,10 +63,27 @@ class HypervigilantExergyAgent(BaseAgent):
         if self.state.status == AgentStatus.STOPPED:
             return
 
-        # C5-REAL thermodynamic check: purge stochastic slop, enforce zero-anergy.
         logger.info(
-            f"[{self.manifest.agent_id}] ⚡ ENFORCING EXERGY MAXIMIZATION: Purging anergy. Enforcing Ontología Cero."
+            f"[{self.manifest.agent_id}] ⚡ ENFORCING EXERGY MAXIMIZATION: Scanning system for thermodynamic rot."
         )
+
+        # Weaponized Forgetting (Apoptosis Celular) - Ley Ω5
+        if hasattr(self.bus, "purge_consumed"):
+            try:
+                deleted = await self.bus.purge_consumed()
+                if deleted > 0:
+                    logger.warning(
+                        f"[{self.manifest.agent_id}] APOPTOSIS CELULAR: Purged {deleted} consumed messages. Anergy destroyed."
+                    )
+            except Exception as e: # noqa: BLE001
+                # Fail-fast termodinámico
+                logger.error(f"[{self.manifest.agent_id}] FRACTURA TERMODINAMICA: {e}")
+
+        # Erradicación de Context Rot (Ley Ω2)
+        if hasattr(self.memory, "facts") and len(self.memory.facts) > 100:
+            logger.warning(f"[{self.manifest.agent_id}] CORTEX ROT DETECTED: Forcing causal collapse. Memory wiped.")
+            self.memory.clear()
+
 
 def create_hypervigilant_exergy_agent(
     name: str, bus: MessageBus, vigilance_interval_seconds: float = 5.0
