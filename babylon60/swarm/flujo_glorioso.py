@@ -21,56 +21,81 @@ class DecaCoreOrchestrator:
     def __init__(self, store: BeliefStore):
         self.store = store
 
-    async def _execute_phase(self, phase_name: str, input_data: dict[str, Any]) -> BeliefObject:
-        """Ejecuta una fase atómica asíncrona sin programación defensiva."""
-        data_str = json.dumps(input_data, sort_keys=True)
+    async def _execute_phase(self, phase_name: str, agent_role: str, input_data: dict[str, Any]) -> BeliefObject:
+        """Ejecuta una fase atómica asíncrona inyectando el linaje (agent_role)."""
+        # Mutamos el estado para simular la ejecución de la fase
+        output_data = dict(input_data)
+        output_data[f"{phase_name}_completed"] = True
+        output_data["current_phase"] = phase_name
+        output_data["agent_role"] = agent_role
+
+        data_str = json.dumps(output_data, sort_keys=True)
+        
         belief = BeliefObject(
             id=f"{phase_name}_{hash(data_str)}",
-            state=BeliefState.PROPOSED,
-            relation=RelationType.INDEPENDENT,
+            state=BeliefState.VERIFIED,
+            relation=RelationType.ENTAILS,
             provenance=ProvenanceEnvelope(
-                agent_id="DecaCore_Musa",
+                agent_id=f"DecaCore_{agent_role}",
                 session_id="flujo_glorioso_session",
                 timestamp=datetime.now(timezone.utc),
-                signature=f"CORTEX-TAINT:deca:{hash(data_str)}",
+                signature=f"CORTEX-TAINT:{agent_role}:{hash(data_str)}",
             ),
             payload=PropositionPayload(
                 content=data_str, context_hash=f"{phase_name}_ctx", certainty=1.0
             ),
         )
 
-        # Simulamos un embedding estático para la fase de prototipado.
-        # En producción, se extrae mediante la red ONNX (Taint Engine).
         dummy_embedding = [0.0] * 1536
         await self.store.insert_belief(belief, dummy_embedding)
         return belief
 
     async def concepcion(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("concepcion", input_data)
+        return await self._execute_phase("concepcion", "Musa", input_data)
 
     async def visualizacion(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("visualizacion", input_data)
+        return await self._execute_phase("visualizacion", "Musa", input_data)
 
     async def sonido(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("sonido", input_data)
+        return await self._execute_phase("sonido", "Musa", input_data)
 
     async def animacion(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("animacion", input_data)
+        return await self._execute_phase("animacion", "Musa", input_data)
 
     async def voz(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("voz", input_data)
+        return await self._execute_phase("voz", "Musa", input_data)
 
     async def lipsync(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("lipsync", input_data)
+        return await self._execute_phase("lipsync", "Arquitecto", input_data)
 
     async def edicion(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("edicion", input_data)
+        return await self._execute_phase("edicion", "Arquitecto", input_data)
 
     async def vfx(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("vfx", input_data)
+        return await self._execute_phase("vfx", "Musa", input_data)
 
     async def upscaling(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("upscaling", input_data)
+        return await self._execute_phase("upscaling", "Arquitecto", input_data)
 
     async def despliegue(self, input_data: dict[str, Any]) -> BeliefObject:
-        return await self._execute_phase("despliegue", input_data)
+        return await self._execute_phase("despliegue", "Comandante", input_data)
+
+    async def execute_genesis(self, initial_concept: str) -> list[BeliefObject]:
+        """
+        Inicia el Flujo Glorioso v2.0 completo en cascada asíncrona.
+        El payload de cada fase se inyecta como entrada de la siguiente.
+        """
+        trajectory = []
+        current_state = {"idea": initial_concept}
+        
+        phases = [
+            self.concepcion, self.visualizacion, self.sonido, self.animacion,
+            self.voz, self.lipsync, self.edicion, self.vfx, self.upscaling, self.despliegue
+        ]
+        
+        for phase in phases:
+            belief = await phase(current_state)
+            trajectory.append(belief)
+            current_state = json.loads(belief.payload.content)
+            
+        return trajectory

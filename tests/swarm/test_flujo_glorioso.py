@@ -19,31 +19,27 @@ async def test_flujo_glorioso_concepcion(mock_store):
     
     assert isinstance(result, BeliefObject)
     assert result.payload.context_hash == "concepcion_ctx"
-    assert json.loads(result.payload.content) == input_data
+    
+    output_data = json.loads(result.payload.content)
+    assert output_data["idea"] == "glorious concept"
+    assert output_data["concepcion_completed"] is True
+    assert output_data["agent_role"] == "Musa"
     mock_store.insert_belief.assert_awaited_once()
 
 @pytest.mark.asyncio
 async def test_flujo_glorioso_full_pipeline(mock_store):
     orchestrator = DecaCoreOrchestrator(mock_store)
-    data = {"project": "omega"}
+    trajectory = await orchestrator.execute_genesis("omega project")
     
-    phases = [
-        orchestrator.concepcion,
-        orchestrator.visualizacion,
-        orchestrator.sonido,
-        orchestrator.animacion,
-        orchestrator.voz,
-        orchestrator.lipsync,
-        orchestrator.edicion,
-        orchestrator.vfx,
-        orchestrator.upscaling,
-        orchestrator.despliegue
-    ]
+    assert len(trajectory) == 10
     
-    for phase_func in phases:
-        result = await phase_func(data)
-        assert isinstance(result, BeliefObject)
-        assert "ctx" in result.payload.context_hash
-        data = json.loads(result.payload.content)
-        
+    # Assert causality: The final state must have accumulated completions
+    final_belief = trajectory[-1]
+    final_data = json.loads(final_belief.payload.content)
+    
+    assert final_data["idea"] == "omega project"
+    assert final_data["concepcion_completed"] is True
+    assert final_data["despliegue_completed"] is True
+    assert final_data["agent_role"] == "Comandante"
+    
     assert mock_store.insert_belief.call_count == 10
