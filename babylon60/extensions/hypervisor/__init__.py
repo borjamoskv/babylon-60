@@ -16,7 +16,7 @@ Usage::
 """
 
 from babylon60.extensions.hypervisor.belief_engine import BeliefEngine
-from babylon60.extensions.hypervisor.belief_object import BeliefObject, BeliefVerdict
+from babylon60.engine.causal.belief_objects import BeliefObject, BeliefVerdict
 from babylon60.extensions.hypervisor.core import AgencyHypervisor
 from babylon60.extensions.hypervisor.handle import AgentHandle
 from babylon60.extensions.hypervisor.models import HealthReport, Memory, Receipt

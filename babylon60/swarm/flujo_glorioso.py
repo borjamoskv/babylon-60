@@ -7,9 +7,8 @@ from babylon60.embeddings.local import LocalEmbedder
 from babylon60.engine.causal.belief_objects import (
     BeliefObject,
     BeliefState,
-    PropositionPayload,
     ProvenanceEnvelope,
-    RelationType,
+    BeliefRelations,
 )
 
 
@@ -32,24 +31,32 @@ class DecaCoreOrchestrator:
         output_data["agent_role"] = agent_role
 
         data_str = json.dumps(output_data, sort_keys=True)
+        embedding = self.embedder.embed(data_str)
         
         belief = BeliefObject(
-            id=f"{phase_name}_{hash(data_str)}",
-            state=BeliefState.VERIFIED,
-            relation=RelationType.ENTAILS,
+            belief_id=f"{phase_name}_{hash(data_str)}",
+            proposition=data_str,
+            semantic_embedding=embedding,
+            state=BeliefState.ACTIVE,
+            confidence_score=1.0,
+            variance=0.0,
+            decay_rate=0.0,
             provenance=ProvenanceEnvelope(
-                agent_id=f"DecaCore_{agent_role}",
-                session_id="flujo_glorioso_session",
-                timestamp=datetime.now(timezone.utc),
+                source_hash=f"{phase_name}_ctx",
+                source_type="agent",
+                tenant_id="SYSTEM",
+                signer_id=f"DecaCore_{agent_role}",
                 signature=f"CORTEX-TAINT:{agent_role}:{hash(data_str)}",
+                created_at=datetime.now(timezone.utc).isoformat(),
+                was_generated_by="flujo_glorioso_session"
             ),
-            payload=PropositionPayload(
-                content=data_str, context_hash=f"{phase_name}_ctx", certainty=1.0
-            ),
+            relations=BeliefRelations(
+                entails=[],
+                discards=[]
+            )
         )
 
-        embedding = self.embedder.embed(data_str)
-        await self.store.insert_belief(belief, embedding)
+        await self.store.insert_belief(belief)
         return belief
 
     async def concepcion(self, input_data: dict[str, Any]) -> BeliefObject:

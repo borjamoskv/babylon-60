@@ -14,19 +14,28 @@ class BeliefStore:
         self.db = db
 
     async def initialize_schema(self) -> None:
+        # We drop the old table if it doesn't match the new strict schema,
+        # but to be safe, we'll assume we're using a fresh DB or :memory:.
         # VEC-0 Invariant: No Foreign Keys in vec0. Dimensions immutable.
+        await self.db.execute("DROP TABLE IF EXISTS belief_objects")
+        
         await self.db.execute("""
             CREATE TABLE IF NOT EXISTS belief_objects (
-                id TEXT PRIMARY KEY,
+                belief_id TEXT PRIMARY KEY,
+                proposition TEXT NOT NULL,
                 state TEXT NOT NULL,
-                relation TEXT NOT NULL,
-                agent_id TEXT NOT NULL,
-                session_id TEXT NOT NULL,
-                timestamp TEXT NOT NULL,
+                confidence_score REAL NOT NULL,
+                variance REAL NOT NULL,
+                decay_rate REAL NOT NULL,
+                source_hash TEXT NOT NULL,
+                source_type TEXT NOT NULL,
+                tenant_id TEXT NOT NULL,
+                signer_id TEXT NOT NULL,
                 signature TEXT NOT NULL,
-                content TEXT NOT NULL,
-                context_hash TEXT NOT NULL,
-                certainty REAL NOT NULL
+                created_at TEXT NOT NULL,
+                was_generated_by TEXT NOT NULL,
+                relations_entails TEXT NOT NULL,
+                relations_discards TEXT NOT NULL
             )
         """)
 
@@ -44,7 +53,7 @@ class BeliefStore:
             )
         """)
 
-    async def insert_belief(self, belief: BeliefObject, embedding: list[float]) -> int:
+    async def insert_belief(self, belief: BeliefObject) -> int:
         """
         Inserts a belief object and its embedding.
         Enforces Write-Path Contract (CORTEX-TAINT signature must be present).
@@ -57,35 +66,41 @@ class BeliefStore:
         cursor = await self.db.execute(
             """
             INSERT INTO belief_objects (
-                id, state, relation, agent_id, session_id, timestamp, 
-                signature, content, context_hash, certainty
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                belief_id, proposition, state, confidence_score, variance, decay_rate,
+                source_hash, source_type, tenant_id, signer_id, signature, created_at,
+                was_generated_by, relations_entails, relations_discards
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                belief.id,
+                belief.belief_id,
+                belief.proposition,
                 belief.state.value,
-                belief.relation.value,
-                belief.provenance.agent_id,
-                belief.provenance.session_id,
-                belief.provenance.timestamp.isoformat(),
+                belief.confidence_score,
+                belief.variance,
+                belief.decay_rate,
+                belief.provenance.source_hash,
+                belief.provenance.source_type,
+                belief.provenance.tenant_id,
+                belief.provenance.signer_id,
                 belief.provenance.signature,
-                belief.payload.content,
-                belief.payload.context_hash,
-                belief.payload.certainty,
+                belief.provenance.created_at,
+                belief.provenance.was_generated_by,
+                json.dumps(belief.relations.entails),
+                json.dumps(belief.relations.discards),
             ),
         )
 
         rowid = cursor.lastrowid
 
         # Step 2: Insert into vec0 table with matching rowid based on dimension length
-        table_name = "cortex_embeddings_text" if len(embedding) == 1536 else "cortex_embeddings_local"
+        table_name = "cortex_embeddings_text" if len(belief.semantic_embedding) == 1536 else "cortex_embeddings_local"
         
         await self.db.execute(
             f"""
             INSERT INTO {table_name} (rowid, embedding)
             VALUES (?, ?)
             """,
-            (rowid, json.dumps(embedding)),
+            (rowid, json.dumps(belief.semantic_embedding)),
         )
 
         return rowid

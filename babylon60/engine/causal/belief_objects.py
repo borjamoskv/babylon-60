@@ -5,7 +5,7 @@ Strictly implements the RFC-CORTEX-NATIVE-AI specification.
 """
 
 import enum
-from typing import Literal
+from typing import Literal, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -47,3 +47,22 @@ class BeliefObject(BaseModel):
     decay_rate: float = Field(..., description="Logarithmic epistemic fading")
     provenance: ProvenanceEnvelope
     relations: BeliefRelations
+
+
+class VerdictAction(str, enum.Enum):
+    """Actions the CognitiveHandoff can take on a belief."""
+    ACCEPT = "accept"
+    QUARANTINE = "quarantine"
+    REVISE = "revise"
+    SKIP = "skip"
+    ESCALATE = "escalate"
+
+
+class BeliefVerdict(BaseModel):
+    """Result of the CognitiveHandoff processing a belief."""
+    action: VerdictAction
+    model: str = "unknown"
+    contradictions: Tuple[str, ...] = Field(default_factory=tuple)
+    revised_belief: Optional[BeliefObject] = None
+    cost_tokens: int = 0
+    reason: str = ""

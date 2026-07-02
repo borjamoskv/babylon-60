@@ -93,7 +93,7 @@ class SagaCoordinator:
                 "SELECT name FROM sqlite_master WHERE type='table' AND name='fact_embeddings'"
             )
             has_embeddings = await cursor.fetchone()
-        except Exception:
+        except sqlite3.Error:
             has_embeddings = False
 
         if has_embeddings:
@@ -142,7 +142,7 @@ class SagaCoordinator:
                             if meta_row and meta_row[0]:
                                 try:
                                     meta_dict = json.loads(meta_row[0])
-                                except Exception:
+                                except (json.JSONDecodeError, TypeError):
                                     meta_dict = {}
 
                             meta_dict["last_accessed"] = now_str
