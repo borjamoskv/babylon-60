@@ -39,11 +39,11 @@ async def trigger_genesis(
             "phases_completed": len(trajectory),
             "trajectory": [
                 {
-                    "id": b.id,
+                    "id": b.belief_id,
                     "state": b.state.value,
-                    "agent_id": b.provenance.agent_id,
-                    "timestamp": b.provenance.timestamp.isoformat(),
-                    "content": b.payload.content,
+                    "agent_id": b.provenance.signer_id,
+                    "timestamp": b.provenance.created_at,
+                    "content": b.proposition,
                 }
                 for b in trajectory
             ]

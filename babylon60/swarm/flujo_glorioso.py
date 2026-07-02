@@ -98,13 +98,14 @@ class DecaCoreOrchestrator:
         current_state = {"idea": initial_concept}
         
         phases = [
-            self.concepcion, self.visualizacion, self.sonido, self.animacion,
-            self.voz, self.lipsync, self.edicion, self.vfx, self.upscaling, self.despliegue
+            "concepcion", "visualizacion", "sonido", "animacion",
+            "voz", "lipsync", "edicion", "vfx", "upscaling", "despliegue"
         ]
         
-        for phase in phases:
-            belief = await phase(current_state)
+        for phase_name in phases:
+            method = getattr(self, phase_name)
+            belief = await method(current_state)
             trajectory.append(belief)
-            current_state = json.loads(belief.payload.content)
+            current_state = json.loads(belief.proposition)
             
         return trajectory

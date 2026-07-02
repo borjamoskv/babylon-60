@@ -25,9 +25,9 @@ async def test_flujo_glorioso_concepcion(mock_store, mock_embedder):
     result = await orchestrator.concepcion(input_data)
     
     assert isinstance(result, BeliefObject)
-    assert result.payload.context_hash == "concepcion_ctx"
+    assert result.provenance.source_hash == "concepcion_ctx"
     
-    output_data = json.loads(result.payload.content)
+    output_data = json.loads(result.proposition)
     assert output_data["idea"] == "glorious concept"
     assert output_data["concepcion_completed"] is True
     assert output_data["agent_role"] == "Musa"
@@ -43,7 +43,7 @@ async def test_flujo_glorioso_full_pipeline(mock_store, mock_embedder):
     
     # Assert causality: The final state must have accumulated completions
     final_belief = trajectory[-1]
-    final_data = json.loads(final_belief.payload.content)
+    final_data = json.loads(final_belief.proposition)
     
     assert final_data["idea"] == "omega project"
     assert final_data["concepcion_completed"] is True
