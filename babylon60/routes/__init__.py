@@ -34,6 +34,7 @@ _ROUTE_MODULES_ALL = {
     "trust",
     "taas",
     "ultramap",
+    "haas",
 }
 
 _API_ROUTE_SPECS_ALL: tuple[tuple[str, str], ...] = (
@@ -61,6 +62,7 @@ _API_ROUTE_SPECS_ALL: tuple[tuple[str, str], ...] = (
     ("taas", "router"),
     ("benchmark", "router"),
     ("ultramap", "router"),
+    ("haas", "router"),
 )
 
 from babylon60.core import config

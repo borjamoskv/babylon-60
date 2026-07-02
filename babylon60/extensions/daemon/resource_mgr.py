@@ -199,7 +199,7 @@ class ResourceMgrMixin:
             try:
                 watch_paths = file_config.get(
                     "watch_paths",
-                    [str(CORTEX_DIR), str(Path.home() / ".agent")],
+                    [str(CORTEX_DIR), str(Path.home() / ".agent"), str(Path.home() / "10_PROJECTS"), str(Path.home() / "20_VAULT")],
                 )
                 watch_patterns = file_config.get(
                     "watch_patterns",
@@ -212,6 +212,20 @@ class ResourceMgrMixin:
                     hot_state=self.hot_state,
                 )
                 logger.info("👁️  WatchdogHub ENABLED (%d paths)", len(watch_paths))
+                
+                # 4.1 Autonomous Ignition Daemon (Zero-Prompt Capability)
+                try:
+                    from babylon60.extensions.daemon.autonomous_ignition import AutonomousIgnitionDaemon
+                    self.autonomous_ignition_daemon = AutonomousIgnitionDaemon(
+                        engine=self._shared_engine,
+                        event_bus=self._event_bus,
+                        workspace_root=str(Path.home() / "10_PROJECTS")
+                    )
+                    logger.info("🧬 AutonomousIgnitionDaemon ENABLED")
+                except Exception as e:
+                    logger.warning("Failed to init AutonomousIgnitionDaemon: %s", e)
+                    self.autonomous_ignition_daemon = None
+
             except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init WatchdogHub: %s", e)
 

@@ -232,6 +232,14 @@ class EventLoopMixin:
                 tasks.append(
                     asyncio.create_task(self.sovereignty_runtime.auth_gateway.ensure_table())
                 )
+                
+        if getattr(self, "autonomous_ignition_daemon", None):
+            tasks.append(
+                asyncio.create_task(
+                    self.autonomous_ignition_daemon.start(), name="AutonomousIgnition"
+                )
+            )
+
         tasks.append(asyncio.create_task(self._run_health_loop_async(), name="HealthMonitor"))
         async_count = len(tasks)
         thread_count = len(self._threads)
@@ -285,6 +293,8 @@ class EventLoopMixin:
             self.zero_prompting_daemon.stop()  # type: ignore[union-attr]
         if getattr(self, "epistemic_breaker_daemon", None):
             self.epistemic_breaker_daemon.stop()  # type: ignore[union-attr]
+        if getattr(self, "autonomous_ignition_daemon", None):
+            await self.autonomous_ignition_daemon.stop() # type: ignore[union-attr]
         if getattr(self, "sovereignty_runtime", None):
             await self.sovereignty_runtime.stop()
 

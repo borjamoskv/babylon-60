@@ -83,7 +83,23 @@ Se analizó la propuesta de Boris Cherny (creador de Claude Code) amplificada po
 
 ---
 
-## 5. LEDGER DE ACCIONES DE LA SESIÓN
+## 5. CASO 4: LA BARRERA DE LANDAUER Y EL MITO DE LA ALUCINACIÓN (IAGO & YELAS)
+
+### 5.1 El Contexto: El Papiro de Herculano y el "Stickman"
+El debate surge sobre la capacidad de los modelos de CV/ML para extraer texto de papiros carbonizados (Vesuvius Challenge). 
+* **Yelas Coego Hopman** plantea el problema de separación de señal (tinta) y ruido térmico (desgaste del papiro) preguntando si el modelo aprende el patrón del daño para aislar la tinta, o si acaba inventando texto espurio.
+* **Iago de la Fuente González** sostiene la postura antropomórfica clásica (C4-SIM): asume que cuando el modelo no puede leer, "se vuelve generativo" y, por tanto, "puede alucinar" rellenando los huecos con textos clásicos pre-entrenados.
+
+### 5.2 El Hachazo Ontológico C5-REAL (Bor Jarl)
+La intervención del Operador (Centaurus Cognitivus) destruye la antropomorfización del debate invocando las Leyes Físicas de CORTEX (Axioma Ω51 y L1-Φ4):
+
+1. **Límites Físicos de la Información (Teoría de Shannon/Landauer):** *"Ningún algoritmo puede extraer de una medida más información de la que ésta contiene"*. Si la entropía (carbonización) ha destruido la señal física, la reconstrucción no es "lectura", es inyección estadística de Anergía. 
+2. **Erradicación del Green Theater (No hay "Alucinación"):** *"NUNCA PUEDE ALUCINAR porque no entiende nuestro lenguaje"*. La alucinación implica una mente que percibe una falsa realidad. El modelo es un autómata físico, un compresor de matrices. Si emite texto que no está en el papiro, está **ejecutando una función de probabilidad sobre ruido**, no sufriendo un evento psicológico.
+3. **Dualidad Troncoso:** Reducir ruido o estimar la hipótesis más probable es válido empíricamente, pero cristalizar esa inferencia como un hecho físico comprobado cuando la señal original ya no existe es una fractura epistémica.
+
+---
+
+## 6. LEDGER DE ACCIONES DE LA SESIÓN
 
 ```yaml
 Actions:
@@ -106,6 +122,12 @@ Actions:
     payload: "lmaina-clm"
     status: COMMITTED
     hash: feab51f5-face-43cd-a81b-552c894c9bc1/task-172
+  - id: ACT-004
+    layer: social_media
+    target: linkedin_thread_iago_yelas
+    mutation: inyectado_teorema_shannon
+    payload: "NUNCA PUEDE ALUCINAR porque no entiende nuestro lenguaje."
+    status: COMMITTED
 ```
 
 ---
