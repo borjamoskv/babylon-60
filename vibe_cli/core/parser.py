@@ -15,24 +15,17 @@ class CodeParser:
         except SyntaxError:
             return result
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ClassDef):
-                result["classes"].append(node.name)
-
-            elif isinstance(node, ast.FunctionDef):
-                result["functions"].append(node.name)
-
-            elif isinstance(node, ast.AsyncFunctionDef):
-                result["functions"].append(node.name)
-
-            elif isinstance(node, ast.Import):
-                for alias in node.names:
-                    result["imports"].append(alias.name)
-
-            elif isinstance(node, ast.ImportFrom):
-                module = node.module or ""
-                result["imports"].append(module)
-
+        all_nodes = list(ast.walk(tree))
+        result["classes"] = [n.name for n in all_nodes if isinstance(n, ast.ClassDef)]
+        result["functions"] = [n.name for n in all_nodes if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        
+        import_nodes = [n for n in all_nodes if isinstance(n, ast.Import)]
+        import_from_nodes = [n for n in all_nodes if isinstance(n, ast.ImportFrom)]
+        
+        imports = [a.name for n in import_nodes for a in n.names]
+        imports.extend(n.module or "" for n in import_from_nodes)
+        
+        result["imports"] = imports
         return result
 
     def parse_js(self, code: str):

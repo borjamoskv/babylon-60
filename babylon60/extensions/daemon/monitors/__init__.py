@@ -57,28 +57,28 @@ __all__ = [
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "AutoImmuneMonitor": ("cortex_extensions.daemon.monitors.auto_immune", "AutoImmuneMonitor"),
-    "CertMonitor": ("cortex_extensions.daemon.monitors.cert", "CertMonitor"),
-    "CloudSyncMonitor": ("cortex_extensions.daemon.monitors.cloud", "CloudSyncMonitor"),
-    "CompactionMonitor": ("cortex_extensions.daemon.monitors.compaction", "CompactionMonitor"),
-    "DiskMonitor": ("cortex_extensions.daemon.monitors.disk", "DiskMonitor"),
-    "EngineHealthCheck": ("cortex_extensions.daemon.monitors.engine", "EngineHealthCheck"),
-    "EvaluationMonitor": ("cortex_extensions.daemon.monitors.evaluation", "EvaluationMonitor"),
-    "GhostWatcher": ("cortex_extensions.daemon.monitors.ghosts", "GhostWatcher"),
-    "MemorySyncer": ("cortex_extensions.daemon.monitors.memory", "MemorySyncer"),
-    "NeuralIntentMonitor": ("cortex_extensions.daemon.monitors.neural", "NeuralIntentMonitor"),
-    "PerceptionMonitor": ("cortex_extensions.daemon.monitors.perception", "PerceptionMonitor"),
-    "SecurityMonitor": ("cortex_extensions.daemon.monitors.security", "SecurityMonitor"),
-    "SignalMonitor": ("cortex_extensions.daemon.monitors.signals", "SignalMonitor"),
-    "SiteMonitor": ("cortex_extensions.daemon.monitors.network", "SiteMonitor"),
-    "TombstoneMonitor": ("cortex_extensions.daemon.monitors.tombstone", "TombstoneMonitor"),
-    "TrendsMonitor": ("cortex_extensions.daemon.monitors.trends", "TrendsMonitor"),
+    "AutoImmuneMonitor": ("babylon60.extensions.daemon.monitors.auto_immune", "AutoImmuneMonitor"),
+    "CertMonitor": ("babylon60.extensions.daemon.monitors.cert", "CertMonitor"),
+    "CloudSyncMonitor": ("babylon60.extensions.daemon.monitors.cloud", "CloudSyncMonitor"),
+    "CompactionMonitor": ("babylon60.extensions.daemon.monitors.compaction", "CompactionMonitor"),
+    "DiskMonitor": ("babylon60.extensions.daemon.monitors.disk", "DiskMonitor"),
+    "EngineHealthCheck": ("babylon60.extensions.daemon.monitors.engine", "EngineHealthCheck"),
+    "EvaluationMonitor": ("babylon60.extensions.daemon.monitors.evaluation", "EvaluationMonitor"),
+    "GhostWatcher": ("babylon60.extensions.daemon.monitors.ghosts", "GhostWatcher"),
+    "MemorySyncer": ("babylon60.extensions.daemon.monitors.memory", "MemorySyncer"),
+    "NeuralIntentMonitor": ("babylon60.extensions.daemon.monitors.neural", "NeuralIntentMonitor"),
+    "PerceptionMonitor": ("babylon60.extensions.daemon.monitors.perception", "PerceptionMonitor"),
+    "SecurityMonitor": ("babylon60.extensions.daemon.monitors.security", "SecurityMonitor"),
+    "SignalMonitor": ("babylon60.extensions.daemon.monitors.signals", "SignalMonitor"),
+    "SiteMonitor": ("babylon60.extensions.daemon.monitors.network", "SiteMonitor"),
+    "TombstoneMonitor": ("babylon60.extensions.daemon.monitors.tombstone", "TombstoneMonitor"),
+    "TrendsMonitor": ("babylon60.extensions.daemon.monitors.trends", "TrendsMonitor"),
     "UnifiedMejoraloMonitor": (
-        "cortex_extensions.daemon.monitors.mejoralo",
+        "babylon60.extensions.daemon.monitors.mejoralo",
         "UnifiedMejoraloMonitor",
     ),
-    "WorkflowMonitor": ("cortex_extensions.daemon.monitors.workflow", "WorkflowMonitor"),
-    "EpistemicMonitor": ("cortex_extensions.daemon.monitors.epistemic", "EpistemicMonitor"),
+    "WorkflowMonitor": ("babylon60.extensions.daemon.monitors.workflow", "WorkflowMonitor"),
+    "EpistemicMonitor": ("babylon60.extensions.daemon.monitors.epistemic", "EpistemicMonitor"),
 }
 
 
@@ -97,4 +97,4 @@ def __getattr__(name: str) -> object:
         value = getattr(module, attr_name)
         globals()[name] = value
         return value
-    raise AttributeError(f"module 'cortex_extensions.daemon.monitors' has no attribute {name!r}")
+    raise AttributeError(f"module 'babylon60.extensions.daemon.monitors' has no attribute {name!r}")

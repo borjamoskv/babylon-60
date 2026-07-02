@@ -86,35 +86,35 @@ __all__ = [
 # Lazy-load map: attribute name → (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # core
-    "MoskvDaemon": ("cortex_extensions.daemon.core", "MoskvDaemon"),
+    "MoskvDaemon": ("babylon60.extensions.daemon.core", "MoskvDaemon"),
     # models
-    "BUNDLE_ID": ("cortex_extensions.daemon.models", "BUNDLE_ID"),
-    "DEFAULT_COOLDOWN": ("cortex_extensions.daemon.models", "DEFAULT_COOLDOWN"),
-    "DEFAULT_INTERVAL": ("cortex_extensions.daemon.models", "DEFAULT_INTERVAL"),
-    "DEFAULT_MEMORY_STALE_HOURS": ("cortex_extensions.daemon.models", "DEFAULT_MEMORY_STALE_HOURS"),
-    "DEFAULT_STALE_HOURS": ("cortex_extensions.daemon.models", "DEFAULT_STALE_HOURS"),
-    "STATUS_FILE": ("cortex_extensions.daemon.models", "STATUS_FILE"),
-    "CertAlert": ("cortex_extensions.daemon.models", "CertAlert"),
-    "DaemonStatus": ("cortex_extensions.daemon.models", "DaemonStatus"),
-    "DiskAlert": ("cortex_extensions.daemon.models", "DiskAlert"),
-    "EngineHealthAlert": ("cortex_extensions.daemon.models", "EngineHealthAlert"),
-    "EntropyAlert": ("cortex_extensions.daemon.models", "EntropyAlert"),
-    "GhostAlert": ("cortex_extensions.daemon.models", "GhostAlert"),
-    "MejoraloAlert": ("cortex_extensions.daemon.models", "MejoraloAlert"),
-    "MemoryAlert": ("cortex_extensions.daemon.models", "MemoryAlert"),
-    "PerceptionAlert": ("cortex_extensions.daemon.models", "PerceptionAlert"),
-    "SiteStatus": ("cortex_extensions.daemon.models", "SiteStatus"),
+    "BUNDLE_ID": ("babylon60.extensions.daemon.models", "BUNDLE_ID"),
+    "DEFAULT_COOLDOWN": ("babylon60.extensions.daemon.models", "DEFAULT_COOLDOWN"),
+    "DEFAULT_INTERVAL": ("babylon60.extensions.daemon.models", "DEFAULT_INTERVAL"),
+    "DEFAULT_MEMORY_STALE_HOURS": ("babylon60.extensions.daemon.models", "DEFAULT_MEMORY_STALE_HOURS"),
+    "DEFAULT_STALE_HOURS": ("babylon60.extensions.daemon.models", "DEFAULT_STALE_HOURS"),
+    "STATUS_FILE": ("babylon60.extensions.daemon.models", "STATUS_FILE"),
+    "CertAlert": ("babylon60.extensions.daemon.models", "CertAlert"),
+    "DaemonStatus": ("babylon60.extensions.daemon.models", "DaemonStatus"),
+    "DiskAlert": ("babylon60.extensions.daemon.models", "DiskAlert"),
+    "EngineHealthAlert": ("babylon60.extensions.daemon.models", "EngineHealthAlert"),
+    "EntropyAlert": ("babylon60.extensions.daemon.models", "EntropyAlert"),
+    "GhostAlert": ("babylon60.extensions.daemon.models", "GhostAlert"),
+    "MejoraloAlert": ("babylon60.extensions.daemon.models", "MejoraloAlert"),
+    "MemoryAlert": ("babylon60.extensions.daemon.models", "MemoryAlert"),
+    "PerceptionAlert": ("babylon60.extensions.daemon.models", "PerceptionAlert"),
+    "SiteStatus": ("babylon60.extensions.daemon.models", "SiteStatus"),
     # monitors
-    "CertMonitor": ("cortex_extensions.daemon.monitors", "CertMonitor"),
-    "DiskMonitor": ("cortex_extensions.daemon.monitors", "DiskMonitor"),
-    "EngineHealthCheck": ("cortex_extensions.daemon.monitors", "EngineHealthCheck"),
-    "EntropyMonitor": ("cortex_extensions.daemon.monitors", "EntropyMonitor"),
-    "GhostWatcher": ("cortex_extensions.daemon.monitors", "GhostWatcher"),
-    "MemorySyncer": ("cortex_extensions.daemon.monitors", "MemorySyncer"),
-    "PerceptionMonitor": ("cortex_extensions.daemon.monitors", "PerceptionMonitor"),
-    "SiteMonitor": ("cortex_extensions.daemon.monitors", "SiteMonitor"),
+    "CertMonitor": ("babylon60.extensions.daemon.monitors", "CertMonitor"),
+    "DiskMonitor": ("babylon60.extensions.daemon.monitors", "DiskMonitor"),
+    "EngineHealthCheck": ("babylon60.extensions.daemon.monitors", "EngineHealthCheck"),
+    "EntropyMonitor": ("babylon60.extensions.daemon.monitors", "EntropyMonitor"),
+    "GhostWatcher": ("babylon60.extensions.daemon.monitors", "GhostWatcher"),
+    "MemorySyncer": ("babylon60.extensions.daemon.monitors", "MemorySyncer"),
+    "PerceptionMonitor": ("babylon60.extensions.daemon.monitors", "PerceptionMonitor"),
+    "SiteMonitor": ("babylon60.extensions.daemon.monitors", "SiteMonitor"),
     # notifier
-    "Notifier": ("cortex_extensions.daemon.notifier", "Notifier"),
+    "Notifier": ("babylon60.extensions.daemon.notifier", "Notifier"),
 }
 
 
@@ -127,4 +127,4 @@ def __getattr__(name: str) -> object:
         # Cache on module dict for O(1) subsequent access
         globals()[name] = value
         return value
-    raise AttributeError(f"module 'cortex_extensions.daemon' has no attribute {name!r}")
+    raise AttributeError(f"module 'babylon60.extensions.daemon' has no attribute {name!r}")
