@@ -201,6 +201,11 @@ def swarm_up(db):
 
         supervisor.register(omega_prime)
 
+        from babylon60.agents.hypervigilant_exergy import create_hypervigilant_exergy_agent
+        hypervigilant_daemon = create_hypervigilant_exergy_agent("hypervigilant-daemon", bus)
+        supervisor.register(hypervigilant_daemon)
+
+        await supervisor.start_agent("hypervigilant-daemon")
         await supervisor.start_agent("omega-prime")
 
         console.print(
@@ -241,6 +246,7 @@ def swarm_up(db):
 
         finally:
             await supervisor.stop_agent("omega-prime")
+            await supervisor.stop_agent("hypervigilant-daemon")
             await asyncio.sleep(0.5)
             await bus.close()
 
