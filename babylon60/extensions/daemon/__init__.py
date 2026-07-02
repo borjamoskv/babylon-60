@@ -128,3 +128,9 @@ def __getattr__(name: str) -> object:
         globals()[name] = value
         return value
     raise AttributeError(f"module 'babylon60.extensions.daemon' has no attribute {name!r}")
+
+
+def __dir__() -> list[str]:
+    """Expose lazy-loaded symbols to dir() function calls."""
+    return sorted(list(globals().keys()) + list(_LAZY_IMPORTS.keys()))
+
