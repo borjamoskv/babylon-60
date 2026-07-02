@@ -257,7 +257,7 @@ class CortexLLMRouter:
         if not primary_valid:
             # Primary was skipped, not a fast reject
             pass
-        elif res_error and ("Fast-Reject" in res_error or "429" in res_error):
+        elif res_error and ("Fast-Reject" in res_error or "429" in res_error or "503" in res_error):
             is_fast_reject = True
 
         valid_fallbacks = []
@@ -367,6 +367,11 @@ class CortexLLMRouter:
             if exc.response.status_code == 429:
                 logger.warning(
                     "🚀 [HYPERSONIC JUMP] Provider %s hit 429. Skipping immediately...",
+                    provider.provider_name,
+                )
+            elif exc.response.status_code == 503:
+                logger.warning(
+                    "🚀 [HYPERSONIC JUMP] Provider %s hit 503 (Capacity Exhausted). Skipping immediately...",
                     provider.provider_name,
                 )
             elif exc.response.status_code == 401:

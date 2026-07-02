@@ -152,6 +152,7 @@ async def resilient_call(
                 401,
                 403,
                 429,
+                503,
             ):
                 logger.error(
                     "LLM Call [FATAL/FAIL-FAST] -> Provider: %s | Status: %d | Latency: %.2fs",
