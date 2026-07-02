@@ -34,8 +34,10 @@ class SchemaTrait:
             err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
             raise RuntimeError(err)
 
-        conn = sqlite3.connect(
-            self._db_path,  # pyright: ignore[reportAttributeAccessIssue]
+        from babylon60.database.core import connect as database_connect
+
+        conn = database_connect(
+            str(self._db_path),  # pyright: ignore[reportArgumentType]
             check_same_thread=False,
             timeout=5.0,  # opening-policy: O(1) fail-fast
         )

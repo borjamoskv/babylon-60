@@ -125,14 +125,15 @@ class SovereignScheduler:
 
     @contextmanager
     def _conn(self):
-        from babylon60.database.core import connect
+        from babylon60.database.core import connect, causal_write
 
         conn = connect(str(self._db_path), check_same_thread=False)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode=WAL")
         try:
-            yield conn
-            conn.commit()
+            with causal_write(conn):
+                yield conn
+                conn.commit()
         except BaseException:
             conn.rollback()
             raise
