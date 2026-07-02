@@ -1,44 +1,49 @@
 # [C5-REAL] Exergy-Maximized
 """
 Belief Objects Schemas for CORTEX causal engine.
+Strictly implements the RFC-CORTEX-NATIVE-AI specification.
 """
 
 import enum
-from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
 
 class BeliefState(str, enum.Enum):
-    PROPOSED = "PROPOSED"
-    VERIFIED = "VERIFIED"
-    REJECTED = "REJECTED"
-    SUSPENDED = "SUSPENDED"
-
-
-class RelationType(str, enum.Enum):
-    ENTAILS = "ENTAILS"
-    CONTRADICTS = "CONTRADICTS"
-    SUPPORTS = "SUPPORTS"
-    INDEPENDENT = "INDEPENDENT"
+    """Lifecycle state of a belief in the cognitive layer."""
+    ACTIVE = "ACTIVE"
+    CONTESTED = "CONTESTED"
+    SUBSUMED = "SUBSUMED"
+    DISCARDED = "DISCARDED"
+    ORPHANED = "ORPHANED"
 
 
 class ProvenanceEnvelope(BaseModel):
-    agent_id: str
-    session_id: str
-    timestamp: datetime
+    """Immutable record of who/what contributed to a belief's existence."""
+    source_hash: str
+    source_type: Literal["agent", "tool", "human"]
+    tenant_id: str
+    signer_id: str
     signature: str = Field(..., description="CORTEX-TAINT signature")
+    created_at: str = Field(..., description="UUIDv7 embedded chronos")
+    was_generated_by: str = Field(..., description="PROV-AGENT episode ID")
 
 
-class PropositionPayload(BaseModel):
-    content: str
-    context_hash: str
-    certainty: float = Field(..., ge=0.0, le=1.0)
+class BeliefRelations(BaseModel):
+    """Semantic CRDT mapping for pre-conditions and refutations."""
+    entails: list[str] = Field(default_factory=list, description="Pre-conditions (BO IDs)")
+    discards: list[str] = Field(default_factory=list, description="Refuted claims (BO IDs)")
 
 
 class BeliefObject(BaseModel):
-    id: str
+    """Immutable cognitive unit - the atom of the Belief Layer."""
+    belief_id: str = Field(..., description="UUIDv7")
+    proposition: str
+    semantic_embedding: list[float] = Field(..., description="L2 vector projection")
     state: BeliefState
-    relation: RelationType
+    confidence_score: float = Field(..., description="P(H|E) scalar value")
+    variance: float = Field(..., description="Ignorance quantification")
+    decay_rate: float = Field(..., description="Logarithmic epistemic fading")
     provenance: ProvenanceEnvelope
-    payload: PropositionPayload
+    relations: BeliefRelations

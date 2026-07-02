@@ -62,7 +62,7 @@ def _get_ram_gb() -> float:
         import os
 
         return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024**3)
-    except Exception:
+    except (AttributeError, ValueError, ImportError):
         return 32.0
 
 
@@ -768,7 +768,7 @@ class MOSKV1Core:
                 import mlx.core as mx
 
                 mx.metal.clear_cache()
-            except Exception:
+            except ImportError:
                 pass
 
             # Wait for Metal command queue to drain and unmap memory segments cleanly

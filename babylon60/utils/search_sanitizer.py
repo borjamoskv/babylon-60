@@ -121,7 +121,7 @@ class SearchSanitizer:
                         result.append(text[start_token:k])
                     else:
                         result.append(anchor_text)
-                except Exception:
+                except ValueError:
                     result.append(anchor_text)
 
             i = k
