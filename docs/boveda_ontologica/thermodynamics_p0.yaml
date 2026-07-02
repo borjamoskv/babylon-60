@@ -1,0 +1,53 @@
+# [C5-REAL] Exergy-Maximized
+# Ontology Matrix: Thermodynamic Variables & Ultrathink Constraints
+# Realm: Babylon-60 Core Engine
+# Author: borjamoskv
+
+claim: "La ejecución cognitiva de los agentes está estrictamente acotada por leyes termodinámicas que dictaminan la exergía, el límite de entropía y el colapso del Event Loop, para erradicar el comportamiento estocástico."
+confidence: "C5"
+blast_radius:
+  level: "P0"
+  critical_domains:
+    - ledger
+    - crypto
+    - auth
+    - db
+    - guard
+    - engine
+    - sovereign
+    - audit
+
+invariants:
+  - id: THERMO-INV-001
+    name: "Cognitive Exergy Yield (Ξ)"
+    definition: "Medida del trabajo útil (información determinista extraída) descontando la entropía inicial y castigada por el tiempo."
+    formula: "Ξ = max(0, ((D_out - S_in) / ΔT) / (LANDAUER_THERMAL_PENALTY ^ ΔT))"
+    threshold: "0.05 para dominios críticos (R=2), 0.1 para dominios estándar (R=3)."
+    
+  - id: THERMO-INV-002
+    name: "Landauer Limit Constraint (Ω₄)"
+    definition: "Toda verdad sagrada o axioma debe poseer un nivel mínimo de entropía de Shannon para garantizar la compresión de información."
+    threshold: "MIN_ENTROPY = 3.5 (o 4.0 para axiomas sagrados); MAX_BYTES = 256"
+    
+  - id: THERMO-INV-003
+    name: "Metastability Probe (Ω₁₃)"
+    definition: "El equilibrio entre la velocidad de expansión del contexto y la velocidad de reducción de la incertidumbre."
+    formula: "M = min(1.0, uncertainty_reduction_rate / context_expansion_rate)"
+    threshold: "Si M < 0.2, el equilibrio es frágil y detona el modo DECORATIVE."
+    
+  - id: THERMO-INV-004
+    name: "Ouroboros Async Decay"
+    definition: "Acotación del Event Loop para evitar el death spiral de tareas probabilísticas concurrentes."
+    threshold: "max_tasks = 150; repetition_ratio = 0.8 (Jaccard)"
+
+constants:
+  SINGULARITY_CONSTANT: 100.0
+  LANDAUER_THERMAL_PENALTY: 1.05
+  MIN_EXERGY_THRESHOLD: 0.55
+
+formations:
+  LEVIATHAN: "R >= 10, Ξ > 50.0"
+  HYDRA: "R >= 7"
+  TESTUDO: "R >= 5"
+  OUROBOROS: "Ξ > 30.0"
+  PHOENIX: "Default"
