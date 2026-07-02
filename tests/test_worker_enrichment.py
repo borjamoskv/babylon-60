@@ -159,7 +159,7 @@ class TestMarkFailure:
         assert row["last_error"] == "Test error"
         # next_attempt_at should be ~5 minutes from now
         next_dt = datetime.fromisoformat(row["next_attempt_at"])
-        assert next_dt > datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) + timedelta(
+        assert next_dt > datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(
             minutes=4
         )
         await conn.close()
@@ -292,7 +292,7 @@ class TestProcessBatch:
 
         db_path = str(tmp_path / "retry.db")
         past = (
-            datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - timedelta(minutes=10)
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(minutes=10)
         ).isoformat()
         async with _aio.connect(db_path) as conn:
             conn.row_factory = _aio.Row

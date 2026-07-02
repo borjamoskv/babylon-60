@@ -35,18 +35,14 @@ class PrefixSlot:
     provider_name: str  # Physical provider where the prefix resides (e.g. 'gemini', 'anthropic')
     model_name: str  # Physical model (e.g. 'gemini-1.5-pro')
     created_at: str = field(
-        default_factory=lambda: datetime.fromtimestamp(
-            time.monotonic(), tz=timezone.utc
-        ).isoformat()
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
     hits: int = 0  # agents that reused this slot
 
     @property
     def cache_key(self) -> str:
         """Tenant-scoped cache key. NEVER expose cross-tenant."""
-        return hashlib.sha256(
-            f"{self.tenant_id}:{self.mission_id}:{self.prefix_hash}".encode()
-        ).hexdigest()
+        return cortex_hash(f"{self.tenant_id}:{self.mission_id}:{self.prefix_hash}")
 
 
 class KVPrefixRegistry:

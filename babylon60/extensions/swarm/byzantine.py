@@ -61,14 +61,26 @@ class ByzantineConsensus:
         return await asyncio.to_thread(self._hash_proposal, proposal)
 
     async def _batch_hash_proposals(self, proposals: dict[str, Any]) -> dict[str, str]:
-        """Hash all proposals concurrently (O(1) thread dispatch vs O(n))."""
-        tasks = {
-            nid: asyncio.to_thread(self._hash_proposal, prop)
-            for nid, prop in proposals.items()
-            if nid in self.nodes
-        }
-        results = await asyncio.gather(*tasks.values())
-        return dict(zip(tasks.keys(), results, strict=False))
+        """Hash all proposals concurrently, utilizing threads only for large payloads to conserve exergy."""
+        results: dict[str, str] = {}
+        large_tasks: dict[str, asyncio.Future[str]] = {}
+
+        for nid, prop in proposals.items():
+            if nid not in self.nodes:
+                continue
+
+            prop_str = str(prop)
+            if len(prop_str) > 10_000:
+                large_tasks[nid] = asyncio.to_thread(self._hash_proposal, prop)
+            else:
+                results[nid] = self._hash_proposal(prop)
+
+        if large_tasks:
+            large_results = await asyncio.gather(*large_tasks.values())
+            for nid, res in zip(large_tasks.keys(), large_results, strict=False):
+                results[nid] = res
+
+        return results
 
     async def execute_consensus(
         self, proposals: dict[str, T], node_ids: list[str] | None = None
