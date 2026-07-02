@@ -1514,7 +1514,7 @@ anti_patterns:
   penalty: DB Lock P0
   resolution: "A\xF1adir Migraci\xF3n"
 - id: AP-10
-  name: Entropy Slop
+  name: Ontological Bloat
   trigger: Axioma_size > 256 bytes
   penalty: "Compresi\xF3n Forzosa"
   resolution: Aplicar Ley de Landauer
@@ -1529,10 +1529,10 @@ anti_patterns:
   penalty: SIGKILL / Re-enrutar a Worker
   resolution: "Ejecutar Mutaci\xF3n (C5-REAL)"
 - id: AP-13
-  name: Semantic Drift
+  name: Type Shadowing
   trigger: "Variable override expl\xEDcito de tipo"
   penalty: Pyright Fail
-  resolution: Strict Typing
+  resolution: Strict Static Typing
 - id: AP-14
   name: God Mode Context
   trigger: Repo_Read completo al Prompt
@@ -1564,8 +1564,8 @@ anti_patterns:
   penalty: Nexus Purge
   resolution: "Crear Symlink F\xEDsico"
 - id: AP-20
-  name: Diplomatic Muting
-  trigger: Omitir Error P0 por UX
+  name: Conversational Muting
+  trigger: Ocultar P0 en respuesta LLM por empatía
   penalty: "Degradaci\xF3n de Trust"
   resolution: "Confrontaci\xF3n Cruda del Fallo"
 redundancies:

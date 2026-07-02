@@ -104,3 +104,96 @@ class BeliefStore:
         )
 
         return rowid
+
+    async def delete_belief(self, belief_id: str) -> None:
+        """
+        Physical annihilation of a belief object and its vectors.
+        Enforces Landauer's principle (Macrófago Ontológico).
+        """
+        cursor = await self.db.execute("SELECT rowid FROM belief_objects WHERE belief_id = ?", (belief_id,))
+        row = cursor.fetchone()
+        if not row:
+            return
+        rowid = row[0]
+
+        await self.db.execute("DELETE FROM belief_objects WHERE belief_id = ?", (belief_id,))
+        await self.db.execute("DELETE FROM cortex_embeddings_text WHERE rowid = ?", (rowid,))
+        await self.db.execute("DELETE FROM cortex_embeddings_local WHERE rowid = ?", (rowid,))
+
+    async def delete_by_states(self, states: list[str]) -> int:
+        """
+        Aniquila todos los registros (y sus vectores) que coincidan con los estados dados.
+        Retorna la cantidad de elementos purgados.
+        """
+        if not states:
+            return 0
+            
+        placeholders = ",".join(["?"] * len(states))
+        cursor = await self.db.execute(f"SELECT rowid, belief_id FROM belief_objects WHERE state IN ({placeholders})", tuple(states))
+        rows = cursor.fetchall()
+        
+        if not rows:
+            return 0
+            
+        for row in rows:
+            rowid, belief_id = row[0], row[1]
+            await self.db.execute("DELETE FROM belief_objects WHERE belief_id = ?", (belief_id,))
+            await self.db.execute("DELETE FROM cortex_embeddings_text WHERE rowid = ?", (rowid,))
+            await self.db.execute("DELETE FROM cortex_embeddings_local WHERE rowid = ?", (rowid,))
+            
+        return len(rows)
+
+    async def update_state(self, belief_id: str, new_state: str) -> None:
+        """
+        Transición de estado atómica en CORTEX.
+        """
+        await self.db.execute(
+            "UPDATE belief_objects SET state = ? WHERE belief_id = ?",
+            (new_state, belief_id)
+        )
+
+    async def get_beliefs_by_state(self, states: list[str]) -> list[BeliefObject]:
+        """
+        Recupera subgrafos completos filtrados por estado para su resolución.
+        (Retorna un listado parcial instanciado como BeliefObject para uso del Handoff).
+        """
+        from babylon60.engine.causal.belief_objects import BeliefState, Provenance, ContextRelations
+
+        if not states:
+            return []
+
+        placeholders = ",".join(["?"] * len(states))
+        cursor = await self.db.execute(
+            f"SELECT belief_id, proposition, state, confidence_score, variance, decay_rate, "
+            f"source_hash, source_type, tenant_id, signer_id, signature, created_at, was_generated_by, "
+            f"relations_entails, relations_discards "
+            f"FROM belief_objects WHERE state IN ({placeholders})",
+            tuple(states)
+        )
+        rows = cursor.fetchall()
+
+        results = []
+        for row in rows:
+            results.append(BeliefObject(
+                belief_id=row[0],
+                proposition=row[1],
+                state=BeliefState(row[2]),
+                confidence_score=row[3],
+                variance=row[4],
+                decay_rate=row[5],
+                provenance=Provenance(
+                    source_hash=row[6],
+                    source_type=row[7],
+                    tenant_id=row[8],
+                    signer_id=row[9],
+                    signature=row[10],
+                    created_at=row[11],
+                    was_generated_by=row[12],
+                ),
+                relations=ContextRelations(
+                    entails=json.loads(row[13]),
+                    discards=json.loads(row[14])
+                ),
+                semantic_embedding=[]  # Not loaded to save exergy
+            ))
+        return results

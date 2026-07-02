@@ -96,7 +96,7 @@ M1_PRIMITIVES:
   Gravedad: Media
   Intervención: Filtro interceptor (Suppress Green Theater); Reintento forzado.
 - ID: PRM-012
-  Primitiva: Divergencia Lexical (Semantic Drift)
+  Primitiva: Divergencia Lexical (Type Shadowing)
   Mecanismo Causal: Evolución divergente de términos taxonómicos entre múltiples agentes
     del enjambre.
   Activación (Trigger): Dos sub-agentes utilizando diferentes identificadores para
@@ -2958,7 +2958,7 @@ M3_ANTIPATTERNS:
   Impacto en Robustez: Parálisis Total Estocástica (Deadlock Clásico).
   Refactor (Alternativa): Adquisición Jerárquica Obligatoria Unidireccional de Locks.
 - ID: ANT-041
-  Antipatrón: Validación Determinista
+  Antipatrón: Unsafe I/O Ingestion
   Disfunción Causal: Consumo de JSON/YAML crudo generado por LLM sin puente de tipado
     rígido.
   Señal de Presencia: Ausencia de validadores tipo Pydantic/Zod en flujos de datos

@@ -1884,7 +1884,7 @@
     },
     {
       "id": "AP-10",
-      "name": "Entropy Slop",
+      "name": "Ontological Bloat",
       "trigger": "Axioma_size > 256 bytes",
       "penalty": "Compresión Forzosa",
       "resolution": "Aplicar Ley de Landauer"
@@ -1905,10 +1905,10 @@
     },
     {
       "id": "AP-13",
-      "name": "Semantic Drift",
-      "trigger": "Variable override explícito de tipo",
+      "name": "Type Shadowing",
+      "trigger": "Variable override explícito de tipo en RAM",
       "penalty": "Pyright Fail",
-      "resolution": "Strict Typing"
+      "resolution": "Strict Static Typing"
     },
     {
       "id": "AP-14",
@@ -1954,10 +1954,10 @@
     },
     {
       "id": "AP-20",
-      "name": "Diplomatic Muting",
-      "trigger": "Omitir Error P0 por UX",
+      "name": "Conversational Muting",
+      "trigger": "Ocultar P0 en respuesta LLM por empatía",
       "penalty": "Degradación de Trust",
-      "resolution": "Confrontación Cruda del Fallo"
+      "resolution": "Exposición Criptográfica Cruda"
     }
   ],
   "redundancies": [

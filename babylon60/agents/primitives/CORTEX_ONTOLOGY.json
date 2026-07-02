@@ -112,7 +112,7 @@
         },
         {
             "ID": "PRM-012",
-            "Primitiva": "Divergencia Lexical (Semantic Drift)",
+            "Primitiva": "Divergencia Lexical (Type Shadowing)",
             "Mecanismo Causal": "Evolución divergente de términos taxonómicos entre múltiples agentes del enjambre.",
             "Activación (Trigger)": "Dos sub-agentes utilizando diferentes identificadores para la misma entidad C5.",
             "Sensor (Síntoma)": "Falla de aserción semántica (Mismatching keys en JSON/YAML).",
@@ -3026,7 +3026,7 @@
         },
         {
             "ID": "ANT-041",
-            "Antipatrón": "Ausencia de Validación Determinista",
+            "Antipatrón": "Ausencia de Unsafe I/O Ingestion",
             "Disfunción Causal": "Consumo de JSON/YAML crudo generado por LLM sin puente de tipado rígido.",
             "Señal de Presencia": "Ausencia de validadores tipo Pydantic/Zod en flujos de datos estructurados.",
             "Impacto en Robustez": "Crítico (Datos corruptos y alucinaciones inyectadas).",
