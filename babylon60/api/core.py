@@ -382,6 +382,11 @@ from babylon60.routes import llm_proxy
 
 app.include_router(llm_proxy.router)
 
+# Flujo Glorioso v2 Orchestrator
+from babylon60.routes import flujo_glorioso_api
+
+app.include_router(flujo_glorioso_api.router)
+
 # Extensions and third-party integrations
 
 # KAPSO Extension

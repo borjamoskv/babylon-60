@@ -54,26 +54,26 @@ __all__ = [
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "LedgerEvent": ("cortex.ledger.models", "LedgerEvent"),
-    "LedgerOriginSignature": ("cortex.ledger.models", "LedgerOriginSignature"),
-    "SemanticStatus": ("cortex.ledger.models", "SemanticStatus"),
-    "LedgerStore": ("cortex.ledger.store", "LedgerStore"),
-    "LedgerWriter": ("cortex.ledger.writer", "LedgerWriter"),
-    "LedgerVerifier": ("cortex.ledger.verifier", "LedgerVerifier"),
-    "EnrichmentQueue": ("cortex.ledger.queue", "EnrichmentQueue"),
-    "OriginKeyRecord": ("cortex.ledger.origin", "OriginKeyRecord"),
-    "OriginKeyRegistry": ("cortex.ledger.origin", "OriginKeyRegistry"),
-    "OriginSignatureError": ("cortex.ledger.origin", "OriginSignatureError"),
-    "OriginSignaturePolicy": ("cortex.ledger.origin", "OriginSignaturePolicy"),
-    "origin_payload_hash": ("cortex.ledger.origin", "origin_payload_hash"),
-    "sign_event_origin": ("cortex.ledger.origin", "sign_event_origin"),
-    "verify_event_origin": ("cortex.ledger.origin", "verify_event_origin"),
-    "ReplayAdmissionError": ("cortex.ledger.replay", "ReplayAdmissionError"),
-    "ReplayAdmissionPolicy": ("cortex.ledger.replay", "ReplayAdmissionPolicy"),
-    "ReplayAdmissionResult": ("cortex.ledger.replay", "ReplayAdmissionResult"),
-    "replay_request_hash": ("cortex.ledger.replay", "replay_request_hash"),
+    "LedgerEvent": ("babylon60.ledger.models", "LedgerEvent"),
+    "LedgerOriginSignature": ("babylon60.ledger.models", "LedgerOriginSignature"),
+    "SemanticStatus": ("babylon60.ledger.models", "SemanticStatus"),
+    "LedgerStore": ("babylon60.ledger.store", "LedgerStore"),
+    "LedgerWriter": ("babylon60.ledger.writer", "LedgerWriter"),
+    "LedgerVerifier": ("babylon60.ledger.verifier", "LedgerVerifier"),
+    "EnrichmentQueue": ("babylon60.ledger.queue", "EnrichmentQueue"),
+    "OriginKeyRecord": ("babylon60.ledger.origin", "OriginKeyRecord"),
+    "OriginKeyRegistry": ("babylon60.ledger.origin", "OriginKeyRegistry"),
+    "OriginSignatureError": ("babylon60.ledger.origin", "OriginSignatureError"),
+    "OriginSignaturePolicy": ("babylon60.ledger.origin", "OriginSignaturePolicy"),
+    "origin_payload_hash": ("babylon60.ledger.origin", "origin_payload_hash"),
+    "sign_event_origin": ("babylon60.ledger.origin", "sign_event_origin"),
+    "verify_event_origin": ("babylon60.ledger.origin", "verify_event_origin"),
+    "ReplayAdmissionError": ("babylon60.ledger.replay", "ReplayAdmissionError"),
+    "ReplayAdmissionPolicy": ("babylon60.ledger.replay", "ReplayAdmissionPolicy"),
+    "ReplayAdmissionResult": ("babylon60.ledger.replay", "ReplayAdmissionResult"),
+    "replay_request_hash": ("babylon60.ledger.replay", "replay_request_hash"),
     "validate_batch_import_manifest": (
-        "cortex.ledger.replay",
+        "babylon60.ledger.replay",
         "validate_batch_import_manifest",
     ),
 }
@@ -81,7 +81,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
 
 def __getattr__(name: str):
     if name in {"SovereignLedger", "ImmutableLedger"}:
-        module = importlib.import_module("cortex.ledger.ledger_core")
+        module = importlib.import_module("babylon60.ledger.ledger_core")
         ledger_cls = module.SovereignLedger
         globals()["SovereignLedger"] = ledger_cls
         globals()["ImmutableLedger"] = ledger_cls
@@ -92,7 +92,7 @@ def __getattr__(name: str):
         value = getattr(module, attr_name)
         globals()[name] = value
         return value
-    raise AttributeError(f"module 'cortex.ledger' has no attribute {name!r}")
+    raise AttributeError(f"module 'babylon60.ledger' has no attribute {name!r}")
 
 
 def __dir__() -> list[str]:

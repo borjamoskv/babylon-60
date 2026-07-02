@@ -330,12 +330,11 @@ class CentauroEngine:
         mission_hash = cortex_hash(f"{mission}:{formation}".encode())
 
         # --- Thermal Heat-Sink (Multiplexing) ---
-        mission_hash_str = str(mission_hash)
-        if mission_hash_str in self._active_missions:
+        if mission_hash in self._active_missions:
             logger.info(
-                "🔥 [HEAT-SINK] Joining existing swarm for mission hash: %s...", mission_hash_str
+                "🔥 [HEAT-SINK] Joining existing swarm for mission hash: %s...", mission_hash
             )
-            return await self._active_missions[mission_hash_str]
+            return await self._active_missions[mission_hash]
 
         loop = asyncio.get_running_loop()
         mission_future: asyncio.Future[CentauroMissionResult] = loop.create_future()
@@ -416,4 +415,4 @@ class CentauroEngine:
                 mission_future.set_exception(e)
             raise
         finally:
-            self._active_missions.pop(str(mission_hash), None)
+            self._active_missions.pop(mission_hash, None)

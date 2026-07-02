@@ -14,11 +14,42 @@ interface CausalNode {
 function App() {
   const [nodes, setNodes] = useState<Map<string, CausalNode>>(new Map());
   const [status, setStatus] = useState<string>("DISCONNECTED");
+  
+  // Flujo Glorioso States
+  const [idea, setIdea] = useState<string>("");
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   
   const logContainerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const { text: logText, appendToken } = useStreamingEngine(logContainerRef, sentinelRef);
+
+  const triggerGenesis = async () => {
+    if (!idea) return;
+    setIsGenerating(true);
+    appendToken(`\n[GENESIS] Inyectando vector entrópico: "${idea}"...\n`);
+    
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/flujo-glorioso/genesis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initial_idea: idea })
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        appendToken(`[GENESIS] Colapso Termodinámico completado. ${data.phases_completed} Fases generadas.\n`);
+      } else {
+        appendToken(`[ERROR] ${data.detail || "Fallo en la mutación causal"}\n`);
+      }
+    } catch (err) {
+      appendToken(`[FATAL ERROR] Pérdida de comunicación con el motor C5-REAL.\n`);
+    } finally {
+      setIsGenerating(false);
+      setIdea("");
+    }
+  };
 
   useEffect(() => {
     setStatus("CONNECTING...");
@@ -114,6 +145,42 @@ function App() {
             {logText || "Waiting for events..."}
             <div ref={sentinelRef} />
           </div>
+        </div>
+
+        <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <div className="metric-label">Génesis Causal (Flujo v2)</div>
+          <input 
+            type="text" 
+            placeholder="Introduce la Idea Primigenia..." 
+            value={idea}
+            onChange={(e) => setIdea(e.target.value)}
+            style={{
+              background: "#020202",
+              border: "1px solid var(--border-color)",
+              color: "var(--text-primary)",
+              padding: "0.5rem",
+              borderRadius: "4px",
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.8rem",
+            }}
+          />
+          <button 
+            onClick={triggerGenesis}
+            disabled={isGenerating || !idea}
+            style={{
+              background: "var(--accent-cyan)",
+              color: "#0A0A0A",
+              border: "none",
+              padding: "0.5rem",
+              borderRadius: "4px",
+              cursor: isGenerating || !idea ? "not-allowed" : "pointer",
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              fontSize: "0.8rem"
+            }}
+          >
+            {isGenerating ? "Inyectando Entropía..." : "Ejecutar Génesis"}
+          </button>
         </div>
 
         <div style={{ marginTop: "auto", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
