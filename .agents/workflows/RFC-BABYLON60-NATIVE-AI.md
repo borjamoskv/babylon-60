@@ -6,8 +6,7 @@ version: 1.0.0
 reality_level: C5-REAL
 owner: borjamoskv
 exergy_tier: P1
-description: "RFC v0.1 Babylon60-Persist Native AI Architecture \u2014 Frozen Normative\
-  \ Draft"
+description: "RFC v1.0.0 Babylon60-Persist Native AI Architecture — Normative Specification"
 ---
 
 
@@ -15,7 +14,7 @@ description: "RFC v0.1 Babylon60-Persist Native AI Architecture \u2014 Frozen No
 
 ## 0. Status
 
-**Frozen Normative Draft v0.1** — 2026-03-14
+**Normative Specification v1.0.0** — 2026-07-02
 
 > This document defines the operational ground truth for BABYLON60-Persist cognitive hypervisor architecture.
 > Mathematical formalizations pending proof are deferred to formal appendices (see §16).
@@ -149,7 +148,7 @@ bottlenecks in favor of Rust-native messaging.
 ### Requirements (MUST)
 
 - Transport MUST be orchestrated via **Zenoh** (L3/L4) to eliminate central broker latencies and provide multi-network pub/sub capabilities.
-- Merge operations MUST be executed using the Semantic Conflict Model isolating $o_1 \parallel o_2$ collisions based on pre-conditions. LWW (Last-Writer-Wins) based purely on timestamps is STRICTLY PROHIBITED.
+- Merge operations MUST be executed using the Semantic Conflict Model isolating $o_1 \parallel o_2$ collisions based on pre-conditions. **LWW (Last-Writer-Wins) based purely on timestamps is STRICTLY PROHIBITED.** The system MUST employ **Mecánica del Lenguaje (Φ1-Φ5)** and formal **Isomorfismo Causal** ($P_{isomorfismo} = 1$) to map semantic divergence into deterministic structural deltas, effectively displacing temporal CRDTs.
 - Conflict Bayesian aggregation MUST use Logarithmic Opinion Pools (LogOP). Linear Opinion Pools (LinOP) are FORBIDDEN due to risk of multimodal probability flattening.
 
 ### Epistemic Veto (MUST)
@@ -185,6 +184,15 @@ Context injection MUST strictly abide by the Memory Scheduler evaluation tensor,
 $$ \text{Score}(m) = \frac{(\text{Rel} \cdot w_r) + (\text{Conf} \cdot w_c) + (\text{Rec} \cdot w_t)}{\text{Cost}_{\text{tokens}} + \text{Risk}_{\text{contam}}} $$
 
 If $Risk_{\text{contam}}$ detects cascading structural contradictions unmitigated by available resolution bounds, the score MUST asymptotize to 0, completely rejecting the memory payload.
+
+## 10.b Deterministic Routing Matrix (DRM-v2) & Multi-Model Synthesis
+
+> **Classification: MUST (Normative)**
+
+Execution routing MUST strictly map to model cognitive profiles to eliminate thermodynamic friction:
+1. **Planning Stage (P0/Architectural)**: `Gemini 3.1 Pro (High)` / `Claude 4.6 Thinking`. Ingests context and emits structural execution plans.
+2. **Mutation Stage (Implementation)**: `Claude 4.6`. Executes atomic, deterministic code mutations across the AST.
+3. **Verification Stage (Validation)**: `Gemini 3.5 Flash`. Executes test generation, auto-formatting, and assertions at near-zero token cost ($T=0.0$).
 
 ## 11. Core API
 
@@ -262,6 +270,8 @@ The following architectural shortcuts are structurally incompatible with this RF
 3. **Mutable belief overwrite** — Direct overwrites of `BeliefObject.proposition` destroy the hash chain. Revisions MUST be expressed as signed patches.
 4. **LWW (Last-Writer-Wins) timestamps** — Wall-clock ordering is neither causal nor monotonic. LWW is STRICTLY PROHIBITED for belief state resolution.
 5. **Single-node veto annihilation** — A lone node MUST NOT collapse swarm consensus to $P=0$ without audit trail and quorum (see §9).
+6. **SQLite-Vec Index Mutation (VEC-0)** — Dimensions are immutable. Syncing MUST be performed by inserting metadata and mapping via `last_insert_rowid()`. Foreign keys on `vec0` tables are strictly prohibited.
+7. **Thread Blocking & Stalls (LL-AC-02)** — Calling `time.sleep` or executing blocking I/O in async loops is strictly forbidden. Database connections must rely on `busy_timeout=5000` and `WAL` mode rather than manual retries.
 
 ## 16. Formal Appendices (EXPERIMENTAL)
 

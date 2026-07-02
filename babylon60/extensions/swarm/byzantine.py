@@ -131,22 +131,21 @@ class ByzantineConsensus:
             ratio, self.tolerance_threshold, rel_tol=1e-9
         ):
             # Consensus achieved
-            await self._update_reputations(winning_hash, proposals)
+            await self._update_reputations(winning_hash, node_hashes)
             return hash_to_proposal[winning_hash]
 
         # Consensus failed (Shattered Trust)
         return None
 
-    async def _update_reputations(self, winning_hash: str, proposals: dict[str, T]) -> None:
+    async def _update_reputations(self, winning_hash: str, node_hashes: dict[str, str]) -> None:
         """
         Zero-trust reputation slashing. Nodes that hallucinated or Byzantine-lied
         lose reputation. Nodes that proposed the truth gain.
         """
-        for node_id, proposal in proposals.items():
+        for node_id, proposal_hash in node_hashes.items():
             if node_id not in self.nodes:
                 continue
 
-            proposal_hash = await self._get_proposal_hash(proposal)
             if proposal_hash == winning_hash:
                 # Reward
                 self.nodes[node_id].reputation = min(1.0, self.nodes[node_id].reputation * 1.05)
