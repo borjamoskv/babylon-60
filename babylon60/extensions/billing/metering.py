@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+from decimal import Decimal
 
 from babylon60.extensions.billing.gateway import StripeBillingGateway
 from babylon60.extensions.billing.models import BillingEvent, FailureType
@@ -129,11 +130,11 @@ class CausalMetering:
             (
                 event.event_id,
                 event.agent_id,
-                event.ssu_units,
-                event.cost_usd,
+                float(event.ssu_units) if event.ssu_units is not None else 0.0,
+                float(event.cost_usd) if event.cost_usd is not None else 0.0,
                 event.causal_link,
-                event.reproducibility_score,
-                event.exploitability_index,
+                float(event.reproducibility_score) if event.reproducibility_score is not None else 1.0,
+                float(event.exploitability_index) if event.exploitability_index is not None else 0.0,
                 event.failure_type.value if event.failure_type else None,
                 1 if event.revenue_quarantined else 0,
                 event.timestamp,
@@ -171,14 +172,15 @@ class CausalMetering:
                 except (ValueError, TypeError, OSError, KeyError):
                     pass
 
+            from decimal import Decimal
             events.append(
                 BillingEvent(
                     agent_id=r["agent_id"],
-                    ssu_units=r["ssu_units"],
-                    cost_usd=r["cost_usd"],
+                    ssu_units=Decimal(str(r["ssu_units"])),
+                    cost_usd=Decimal(str(r["cost_usd"])),
                     causal_link=r["causal_link"],
-                    reproducibility_score=r["reproducibility_score"],
-                    exploitability_index=r["exploitability_index"],
+                    reproducibility_score=Decimal(str(r["reproducibility_score"])),
+                    exploitability_index=Decimal(str(r["exploitability_index"])),
                     failure_type=failure_type,
                     revenue_quarantined=bool(r["revenue_quarantined"]),
                     event_id=r["event_id"],

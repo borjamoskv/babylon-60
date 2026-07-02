@@ -97,17 +97,17 @@ def test_ledger_origin_signatures_materialize_on_demand() -> None:
     with _temporarily_reset_modules(package_name, models_module, origin_module, replay_module):
         module = importlib.import_module(package_name)
 
-        assert origin_module not in sys.modules
-        assert replay_module not in sys.modules
+        assert "babylon60.ledger.origin" not in sys.modules
+        assert "babylon60.ledger.replay" not in sys.modules
         assert module.LedgerEvent.__name__ == "LedgerEvent"
-        assert models_module in sys.modules
-        assert origin_module not in sys.modules
-        assert replay_module not in sys.modules
+        assert "babylon60.ledger.models" in sys.modules
+        assert "babylon60.ledger.origin" not in sys.modules
+        assert "babylon60.ledger.replay" not in sys.modules
         assert module.OriginKeyRegistry.__name__ == "OriginKeyRegistry"
-        assert origin_module in sys.modules
-        assert replay_module not in sys.modules
+        assert "babylon60.ledger.origin" in sys.modules
+        assert "babylon60.ledger.replay" not in sys.modules
         assert module.ReplayAdmissionPolicy.__name__ == "ReplayAdmissionPolicy"
-        assert replay_module in sys.modules
+        assert "babylon60.ledger.replay" in sys.modules
 
 
 def test_browser_package_import_is_lazy_without_playwright() -> None:
@@ -353,10 +353,10 @@ def test_ledger_public_exports_materialize_on_demand() -> None:
         module = importlib.import_module(package_name)
 
         assert module.LedgerEvent.__name__ == "LedgerEvent"
-        assert models_module in sys.modules
-        assert core_module not in sys.modules
+        assert "babylon60.ledger.models" in sys.modules
+        assert "babylon60.ledger.ledger_core" not in sys.modules
         assert module.ImmutableLedger is module.SovereignLedger
-        assert core_module in sys.modules
+        assert "babylon60.ledger.ledger_core" in sys.modules
 
 
 def test_graph_package_import_is_lazy_without_aiosqlite() -> None:

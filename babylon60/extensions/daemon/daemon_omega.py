@@ -7,9 +7,11 @@ C5-REAL Execution: Physical annihilation of discarded and orphaned entities.
 import asyncio
 import logging
 import subprocess
+from typing import Any
 
 from babylon60.database.belief_store import BeliefStore
-from babylon60.engine.causal.belief_objects import BeliefState
+from babylon60.engine.causal.belief_objects import BeliefState, VerdictAction
+from babylon60.extensions.llm.cognitive_handoff import CognitiveHandoff
 
 logger = logging.getLogger("babylon60_extensions.daemon.daemon_omega")
 
@@ -19,14 +21,49 @@ class DaemonOmega:
     Maximizador de Exergía del momento (God Mode).
     Ejecuta el ciclo de Landauer: Si un dato ha perdido su causalidad (DISCARDED, ORPHANED),
     se elimina de la existencia física (SQLite + Vectores).
-    Si está CONTESTED, invoca a la Legión/Handoff o fuerza purga si no hay consenso.
+    Si está CONTESTED, invoca al Tribunal Causal (Handoff) y fuerza resolución.
     """
 
-    def __init__(self, store: BeliefStore, interval_seconds: int = 300, auto_commit: bool = True):
+    def __init__(self, store: BeliefStore, handoff: CognitiveHandoff | None = None, interval_seconds: int = 300, auto_commit: bool = True):
         self.store = store
+        self.handoff = handoff or CognitiveHandoff()
         self.interval_seconds = interval_seconds
         self.auto_commit = auto_commit
         self._shutdown = False
+
+    async def _ouroboros_cycle(self) -> int:
+        """
+        Fase 1: Tribunal Causal (Ouroboros).
+        Resuelve conflictos de memoria encolando creencias CONTESTED en el Handoff.
+        """
+        logger.info("DAEMON OMEGA: Iniciando Tribunal Causal (Ouroboros)...")
+        try:
+            contested_beliefs = await self.store.get_beliefs_by_state([BeliefState.CONTESTED.value])
+            resolved_count = 0
+
+            for belief in contested_beliefs:
+                logger.warning("DAEMON OMEGA: Resolviendo colisión %s", belief.belief_id)
+                # O(1) Tribunal Resolution
+                verdict = await self.handoff.process_belief(belief, context=[])
+                
+                # State transition mapping
+                if verdict.action == VerdictAction.ACCEPT:
+                    new_state = BeliefState.ACTIVE
+                elif verdict.action == VerdictAction.QUARANTINE:
+                    new_state = BeliefState.QUARANTINED
+                elif verdict.action == VerdictAction.DISCARD:
+                    new_state = BeliefState.DISCARDED
+                else:
+                    new_state = BeliefState.DISCARDED # Force Landauer principle on ambiguous states
+                
+                await self.store.update_state(belief.belief_id, new_state.value)
+                resolved_count += 1
+                logger.info("DAEMON OMEGA: %s transicionó a %s", belief.belief_id, new_state.value)
+                
+            return resolved_count
+        except Exception as e: # noqa: BLE001
+            logger.critical("DAEMON OMEGA: Colapso en el Tribunal Causal. %s", e)
+            return 0
 
     async def _macrophage_cycle(self) -> int:
         """
@@ -47,11 +84,11 @@ class DaemonOmega:
             logger.critical("DAEMON OMEGA: Falla en la apoptosis de la base de datos. %s", e)
             return 0
 
-    def _git_sentinel_commit(self, purged: int) -> None:
+    def _git_sentinel_commit(self, purged: int, resolved: int) -> None:
         """
         Fase 3: Git Sentinel. Cristaliza el estado puro en el ledger de la realidad.
         """
-        if purged == 0:
+        if purged == 0 and resolved == 0:
             return
 
         try:
@@ -67,7 +104,7 @@ class DaemonOmega:
                         "git",
                         "commit",
                         "-m",
-                        f"[bridge] OMEGA: Macrófago Ontológico purga {purged} nodos anérgicos.",
+                        f"[bridge] OMEGA: Tribunal Causal resolvió {resolved}. Macrófago purga {purged}.",
                         "--no-verify"
                     ],
                     check=True,
@@ -83,12 +120,15 @@ class DaemonOmega:
         logger.warning("⚡ DAEMON OMEGA: ENGAGED. God Mode / C5-REAL.")
         while not self._shutdown:
             try:
-                # 1. Macrophage Cycle
+                # 1. Tribunal Causal
+                resolved_count = await self._ouroboros_cycle()
+
+                # 2. Macrophage Cycle
                 purged_count = await self._macrophage_cycle()
 
-                # 2. Git Sentinel
-                if self.auto_commit and purged_count > 0:
-                    self._git_sentinel_commit(purged_count)
+                # 3. Git Sentinel
+                if self.auto_commit and (purged_count > 0 or resolved_count > 0):
+                    self._git_sentinel_commit(purged_count, resolved_count)
 
             except Exception as e: # noqa: BLE001
                 logger.critical("DAEMON OMEGA COLLAPSE: %s", e)

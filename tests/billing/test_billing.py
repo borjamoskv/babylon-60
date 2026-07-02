@@ -13,6 +13,7 @@ import pytest
 
 import sys
 from pathlib import Path
+from decimal import Decimal
 
 from babylon60.core import config
 from babylon60.extensions.billing.models import BillingEvent, FailureType, StripeInvoice
@@ -34,21 +35,22 @@ def tmp_db():
 
 def test_billing_event_serialization():
     """BillingEvent should serialize and deserialize correctly."""
+    from decimal import Decimal
     event = BillingEvent(
         agent_id="test-agent",
-        ssu_units=12.5,
-        cost_usd=0.125,
+        ssu_units=Decimal("12.5"),
+        cost_usd=Decimal("0.125"),
         causal_link="hash123",
-        reproducibility_score=0.95,
-        exploitability_index=0.1,
+        reproducibility_score=Decimal("0.95"),
+        exploitability_index=Decimal("0.1"),
         failure_type=FailureType.F1,
         meta={"execution_id": "exec_456"},
     )
 
     data = event.to_dict()
     assert data["agent_id"] == "test-agent"
-    assert data["ssu_units"] == 12.5
-    assert data["cost_usd"] == 0.125
+    assert data["ssu_units"] == "12.5"
+    assert data["cost_usd"] == "0.125"
     assert data["failure_type"] == "F1"
     assert data["meta"] == {"execution_id": "exec_456"}
     assert data["revenue_quarantined"] is False
@@ -56,8 +58,8 @@ def test_billing_event_serialization():
     restored = BillingEvent.from_dict(data)
     assert restored.event_id == event.event_id
     assert restored.agent_id == "test-agent"
-    assert restored.ssu_units == 12.5
-    assert restored.cost_usd == 0.125
+    assert restored.ssu_units == Decimal("12.5")
+    assert restored.cost_usd == Decimal("0.125")
     assert restored.failure_type == FailureType.F1
     assert restored.meta == {"execution_id": "exec_456"}
 
@@ -164,11 +166,12 @@ def test_record_and_quarantine_flow(tmp_db, monkeypatch):
     gateway = StripeBillingGateway()
     metering = CausalMetering(db_path=tmp_db, gateway=gateway)
 
+    from decimal import Decimal
     # 1. Standard billing event (F1)
     ev1 = BillingEvent(
         agent_id="agent-alice",
-        ssu_units=10.0,
-        cost_usd=0.10,
+        ssu_units=Decimal("10.0"),
+        cost_usd=Decimal("0.10"),
         causal_link="link1",
         failure_type=FailureType.F1,
     )
@@ -178,8 +181,8 @@ def test_record_and_quarantine_flow(tmp_db, monkeypatch):
     # 2. Induced failure event (F2) -> should trigger quarantine flag
     ev2 = BillingEvent(
         agent_id="agent-bob",
-        ssu_units=20.0,
-        cost_usd=0.40,
+        ssu_units=Decimal("20.0"),
+        cost_usd=Decimal("0.40"),
         causal_link="link2",
         failure_type=FailureType.F2,
     )
@@ -194,8 +197,8 @@ def test_record_and_quarantine_flow(tmp_db, monkeypatch):
     bob_events = metering.get_billing_events("agent-bob")
     assert len(bob_events) == 1
     assert bob_events[0].revenue_quarantined is True
-    assert bob_events[0].ssu_units == 20.0
-    assert bob_events[0].cost_usd == 0.40
+    assert bob_events[0].ssu_units == Decimal("20.0")
+    assert bob_events[0].cost_usd == Decimal("0.40")
     assert bob_events[0].failure_type == FailureType.F2
 
     metering.close()

@@ -103,7 +103,9 @@ class _CortexCompat(types.ModuleType):
         try:
             mod = importlib.import_module(target_pkg)
             if hasattr(mod, name):
-                return getattr(mod, name)
+                val = getattr(mod, name)
+                _ensure_compat_aliases()
+                return val
         except Exception:
             pass
 
